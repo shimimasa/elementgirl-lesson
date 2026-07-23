@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ひょうじテスト</title>
+<style>
+  html, body { margin: 0; }
+  body {
+    background: #1e3a8a;            /* わざと濃い青。真っ白なら「HTMLすら描けていない」 */
+    color: #fff;
+    font-family: "Yu Gothic UI", "Meiryo", sans-serif;
+    padding: 20px;
+    line-height: 1.7;
+  }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  .box { background: rgba(255,255,255,.12); border: 2px solid #fff; border-radius: 12px; padding: 14px 16px; margin: 14px 0; }
+  .big { font-size: 20px; font-weight: bold; }
+  .q { color: #ffe28a; }
+  canvas { background: #ffffff; border: 3px solid #ffe28a; border-radius: 10px; display: block; margin-top: 8px; }
+  #info { font-size: 15px; white-space: pre-wrap; word-break: break-all; }
+  code { background: rgba(0,0,0,.3); padding: 1px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<script>
+/* エラーを画面に赤字表示（ES5） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;bottom:0;right:0;z-index:99999;background:#7f1d1d;color:#fff;font:14px/1.6 monospace;padding:12px;white-space:pre-wrap;max-height:40%;overflow:auto';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + ' @' + (e && e.lineno ? e.lineno : '?'));
+  });
+})();
+</script>
+
+<h1>ひょうじテスト</h1>
+<div class="big">① この青い画面とこの文字が見えていますか？</div>
+
+<div class="box">
+  <div class="q">② 下の白い枠の中に「赤い四角・青い丸・みどりの字」が見えますか？</div>
+  <canvas id="cv" width="360" height="150"></canvas>
+  <div id="cvmsg">canvas: 判定中…</div>
+</div>
+
+<div class="box">
+  <div class="q">③ この機械の情報（そのまま写真で送ってください）</div>
+  <div id="info">読み取り中…</div>
+</div>
+
+<script>
+/* --- canvas 描画テスト（基本APIのみ） --- */
+(function () {
+  var msg = document.getElementById('cv');
+  var out = document.getElementById('cvmsg');
+  try {
+    var ctx = document.getElementById('cv').getContext('2d');
+    if (!ctx) { out.textContent = 'canvas: getContext が null（描画不可）'; return; }
+    ctx.fillStyle = '#e11d2b'; ctx.fillRect(20, 30, 90, 90);          // 赤い四角
+    ctx.fillStyle = '#1d6fe1'; ctx.beginPath(); ctx.arc(200, 75, 45, 0, Math.PI * 2); ctx.fill(); // 青い丸
+    ctx.fillStyle = '#16a34a'; ctx.font = 'bold 26px sans-serif'; ctx.fillText('canvas OK', 130, 140); // 緑の字
+    out.textContent = 'canvas: 描画コードは最後まで実行できました（見た目が真っ白なら描画バグ確定）';
+  } catch (e) {
+    out.textContent = 'canvas: 例外 → ' + e;
+  }
+})();
+
+/* --- 機械・ブラウザ情報 --- */
+(function () {
+  var ua = navigator.userAgent || '';
+  var m = ua.match(/(Edg|Chrome|Firefox|Version)\/([0-9.]+)/g);
+  var lines = [];
+  lines.push('ブラウザ判定: ' + (m ? m.join('  ') : '不明'));
+  lines.push('画面: ' + window.innerWidth + ' x ' + window.innerHeight + '  DPR: ' + (window.devicePixelRatio || 1));
+  lines.push('roundRect対応: ' + (window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype.roundRect ? 'あり' : 'なし(古い)'));
+  lines.push('UA: ' + ua);
+  document.getElementById('info').textContent = lines.join('\n');
+})();
+</script>
+</body>
+</html>
