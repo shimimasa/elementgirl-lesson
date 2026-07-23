@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>月よみ堂 きろくシート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1b2245; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .85; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 3mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 2.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.5mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.55; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.5mm 2mm; font-size: 9.5pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .missionArea { display: flex; gap: 4mm; align-items: flex-start; }
+  .missionArea .diagram { flex-shrink: 0; }
+  .mtable { width: 100%; border-collapse: collapse; }
+  .mtable th, .mtable td {
+    border: .4mm solid #222; padding: 1.2mm 1.5mm;
+    font-size: 9pt; text-align: center; vertical-align: middle;
+  }
+  .mtable th { background: #eee; font-size: 8.5pt; }
+  .mtable .mname { font-size: 10pt; font-weight: 700; white-space: nowrap; }
+  .mtable .micon { font-size: 12pt; }
+  .posNums { font-size: 11pt; letter-spacing: .45em; white-space: nowrap; }
+  .moonBlank {
+    width: 13mm; height: 13mm; border: .45mm solid #222; border-radius: 50%;
+    display: inline-block; vertical-align: middle;
+  }
+  .hitMiss { font-size: 9pt; white-space: nowrap; }
+
+  .fillLine { display: inline-block; width: 26mm; border-bottom: .5mm solid #222; height: 5mm; }
+
+  .tonightBox { display: flex; gap: 5mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2.5mm 3mm; }
+  .bigMoonBlank { width: 24mm; height: 24mm; border: .5mm solid #222; border-radius: 50%; flex-shrink: 0; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 2mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 3.5mm; }
+  .tSec h2 {
+    font-size: 11pt; margin: 0 0 1.5mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9.5pt; line-height: 1.55; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1.2mm 2mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。背景は白なのでインクにやさしい設計です。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくシート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌙 <ruby>月<rt>つき</rt></ruby>よみ<ruby>堂<rt>どう</rt></ruby>　みならい<ruby>月<rt>つき</rt></ruby>よみ きろくシート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      <ruby>月<rt>つき</rt></ruby>の<ruby>形<rt>かたち</rt></ruby>が かわって<ruby>見<rt>み</rt></ruby>えるのは どうして？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> ☁️ くもが <ruby>月<rt>つき</rt></ruby>を かくしているから</div>
+        <div class="voteOpt"><span class="vnum">②</span> 🌗 <ruby>月<rt>つき</rt></ruby>そのものの <ruby>形<rt>かたち</rt></ruby>が かわっているから</div>
+        <div class="voteOpt"><span class="vnum">③</span> 👀 <ruby>月<rt>つき</rt></ruby>の <ruby>見<rt>み</rt></ruby>えかたが かわっているから</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．ミッションきろく</span>
+    <div class="secBody">
+      <div class="missionArea">
+        <div class="diagram">
+          <!-- 画面とおなじ ①〜⑧の水晶盤ミニ図 -->
+          <svg width="64mm" height="58mm" viewBox="0 0 128 116">
+            <!-- 太陽と光 -->
+            <circle cx="9" cy="58" r="7" fill="none" stroke="#222" stroke-width="1.2"/>
+            <g stroke="#222" stroke-width="0.8">
+              <line x1="12" y1="47" x2="18" y2="44"/><line x1="17" y1="58" x2="23" y2="58"/><line x1="12" y1="69" x2="18" y2="72"/>
+            </g>
+            <text x="2" y="76" font-size="6.5" text-anchor="start">たいよう</text>
+            <!-- 軌道 -->
+            <circle cx="74" cy="58" r="33" fill="none" stroke="#222" stroke-width="0.7" stroke-dasharray="3 3"/>
+            <!-- 地球 -->
+            <circle cx="74" cy="58" r="8" fill="none" stroke="#222" stroke-width="1.2"/>
+            <ellipse cx="71" cy="55" rx="3" ry="2" fill="#bbb"/>
+            <ellipse cx="77" cy="61" rx="2.5" ry="1.7" fill="#bbb"/>
+            <text x="74" y="73" font-size="6.5" text-anchor="middle">ちきゅう</text>
+            <!-- ①〜⑧（画面と同じならび：①太陽がわ→下まわり） -->
+            <g font-size="8.5" text-anchor="middle" dominant-baseline="middle">
+              <text x="30"  y="58">①</text>
+              <text x="43"  y="89">②</text>
+              <text x="74"  y="102">③</text>
+              <text x="105" y="89">④</text>
+              <text x="118" y="58">⑤</text>
+              <text x="105" y="27">⑥</text>
+              <text x="74"  y="14">⑦</text>
+              <text x="43"  y="27">⑧</text>
+            </g>
+          </svg>
+        </div>
+        <table class="mtable">
+          <tr>
+            <th>お客さまの<br>おねがい</th>
+            <th>よそう：<ruby>月<rt>つき</rt></ruby>はどこ？<br>（ばんごうに〇）</th>
+            <th>けっか：<ruby>見<rt>み</rt></ruby>えた<ruby>形<rt>かたち</rt></ruby>を<br>ぬろう</th>
+            <th>よそうは？</th>
+          </tr>
+          <tr>
+            <td><span class="micon">🐇</span><br><span class="mname"><ruby>満月<rt>まんげつ</rt></ruby></span></td>
+            <td class="posNums">①②③④⑤⑥⑦⑧</td>
+            <td><span class="moonBlank"></span></td>
+            <td class="hitMiss">あたり ・ おしい</td>
+          </tr>
+          <tr>
+            <td><span class="micon">🌠</span><br><span class="mname"><ruby>新月<rt>しんげつ</rt></ruby></span></td>
+            <td class="posNums">①②③④⑤⑥⑦⑧</td>
+            <td><span class="moonBlank"></span></td>
+            <td class="hitMiss">あたり ・ おしい</td>
+          </tr>
+          <tr>
+            <td><span class="micon">🐭</span><br><span class="mname"><ruby>半月<rt>はんげつ</rt></ruby></span></td>
+            <td class="posNums">①②③④⑤⑥⑦⑧</td>
+            <td><span class="moonBlank"></span></td>
+            <td class="hitMiss">あたり ・ おしい</td>
+          </tr>
+          <tr>
+            <td><span class="micon">🧚</span><br><span class="mname"><ruby>三日月<rt>みかづき</rt></ruby></span></td>
+            <td class="posNums">①②③④⑤⑥⑦⑧</td>
+            <td><span class="moonBlank"></span></td>
+            <td class="hitMiss">あたり ・ おしい</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．はかせチャレンジ</span>
+    <div class="secBody">
+      <ruby>満月<rt>まんげつ</rt></ruby>の つぎの<ruby>日<rt>ひ</rt></ruby>から、<ruby>月<rt>つき</rt></ruby>は どうなる？　<b>そう思うものに 〇</b><br>
+      　Ａ．すこしずつ ほそくなる　／　Ｂ．もっと ふくらんでいく　／　Ｃ．<ruby>日<rt>ひ</rt></ruby>によって バラバラにかわる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      <ruby>月<rt>つき</rt></ruby>の<ruby>形<rt>かたち</rt></ruby>が かわって<ruby>見<rt>み</rt></ruby>えるのは、<ruby>月<rt>つき</rt></ruby>と<ruby>太陽<rt>たいよう</rt></ruby>の（<span class="fillLine"></span>）が かわるから。<br>
+      <ruby>満月<rt>まんげつ</rt></ruby>から つぎの<ruby>満月<rt>まんげつ</rt></ruby>までは、やく（<span class="fillLine" style="width:16mm"></span>）か<ruby>月<rt>げつ</rt></ruby>。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．さいごのミッション：こんやの<ruby>月<rt>つき</rt></ruby></span>
+    <div class="secBody">
+      <div class="tonightBox">
+        <span class="bigMoonBlank"></span>
+        <div>
+          こんや、そらを<ruby>見上<rt>みあ</rt></ruby>げて ほんものの<ruby>月<rt>つき</rt></ruby>を スケッチしよう！<br>
+          <ruby>見<rt>み</rt></ruby>た<ruby>時<rt>じ</rt></ruby>こく（　　　）<ruby>時<rt>じ</rt></ruby>ごろ　／　<ruby>月<rt>つき</rt></ruby>の<ruby>名前<rt>なまえ</rt></ruby>（　　　　　　　）<br>
+          ☐ くもりや<ruby>雨<rt>あめ</rt></ruby>で<ruby>見<rt>み</rt></ruby>えなかったよ →（また こんど チャレンジ！ それも りっぱな かんさつ）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい<ruby>月<rt>つき</rt></ruby>よみ、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】月よみ堂 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4〜6（学力幅あり・協力型）／ 使うもの：「月よみ堂_じゅぎょう画面.html」・プロジェクタ・このシート（1ページ目を人数分）</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCで「月よみ堂_じゅぎょう画面.html」をダブルクリックで開き、月がドラッグで動くか確認（ネット接続は不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11キーで全画面</b>にしておく／音が出るか確認（音が出なくても授業は成立します。右下の「せんせい用」🔊で消音も可）</li>
+      <li>☐ このシートの1ページ目を人数分印刷、えんぴつ準備</li>
+      <li>☐ 部屋を少し暗くできると画面がきれいに見えます</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜5分</td><td>オープニング → よそうタイム</td><td>シート１に〇。「どれだと思う？」で挙手。<b>ここでは答えを言わない</b>（最後に画面が種明かしします）</td></tr>
+      <tr><td class="min">5〜10分</td><td>れんしゅう（月を1周）</td><td>代表の子が月をぐるっと1周。全員は「そらの窓」の形の変化に注目。「何か気づいた？」</td></tr>
+      <tr><td class="min">10〜32分</td><td>ミッション×4（満月→新月→半月→三日月）</td><td>毎回このリズム：<b>①シートに予想の番号に〇 → ②代表が操作（毎回交代）→ ③「これでどう？」で判定 → ④結果をシートに記入</b>。見ている子は「もっと下！」と声で参加</td></tr>
+      <tr><td class="min">32〜38分</td><td>はかせチャレンジ（時間を進める）</td><td>シート３に〇 → 「▶じかんをすすめる」で確認。29.5日＝約1か月をおさえる</td></tr>
+      <tr><td class="min">38〜43分</td><td>まとめ画面</td><td>「？？？」をタッチして答え合わせ → シート４を記入。<b>今夜の本物の月</b>が表示されるので、シート５（家での観察）につなげる</td></tr>
+      <tr><td class="min">43〜45分</td><td>じゆうモード（時間があれば）</td><td>子ども同士で「◯◯の形にしてみて」とクイズの出し合い</td></tr>
+    </table>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      ミッションの位置：<b>満月＝⑤／新月＝①／半月＝③か⑦／三日月＝②か⑧</b>（半月・三日月は2か所とも正解。画面もどちらも正解にします）<br>
+      はかせチャレンジ＝<b>Ａ（すこしずつほそくなる）</b>／まとめ＝月と太陽の「<b>いち（位置）</b>」・満月から満月まで「<b>約1</b>」か月<br>
+      よそうタイムの答え＝<b>③</b>（月自身はいつも丸いボール。見え方が変わる）
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント（安心して参加できるように）</h2>
+    <ul>
+      <li>予想がはずれたら：<b>「実験は1回で当たらなくていい。データがひとつ増えた！」</b>と扱う（画面のルナも責めません）</li>
+      <li>操作の代表は毎回交代。操作しない子には「応援係」「シート記録係」「気づいたこと発表係」の役割を</li>
+      <li>読みが苦手な子がいたら、ルナのセリフは先生が声に出して読む（セリフは全てふりがな付き・短文です）</li>
+      <li>マウスが苦手な子には<b>キーボードの←→キー</b>でも月を動かせます</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>早く終わった子・もっと知りたい子へ（高い天井）</h2>
+    <ul>
+      <li>じゆうモードで「<b>26日めの月</b>はどんな形？」「<b>夕方に見える三日月</b>はどっち側が光る？」と出題</li>
+      <li>「新月のとき、月はどこにいた？ 消えた？」→ 見えないだけで、そこに『いる』ことを画面で再確認</li>
+      <li>発展の問い：「月がいつも同じ形に見える星があったら、その星と太陽はどんな動きをしている？」</li>
+      <li>次回への布石：シート５の観察結果を集めて「クラスの月カレンダー」を作ると、29.5日の周期が実感できます</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ひだまり探偵社 じけんメモ（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #5a3c1e; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 2.4mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.5mm 2mm; font-size: 9pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  /* 記号ずかん */
+  .zukan { width: 100%; border-collapse: collapse; }
+  .zukan td {
+    border: .35mm solid #444; text-align: center; vertical-align: middle;
+    padding: .8mm .5mm; font-size: 8pt; line-height: 1.25; width: 20%;
+  }
+  .zukan svg { display: block; margin: 0 auto .4mm; }
+
+  .mtable { width: 100%; border-collapse: collapse; }
+  .mtable th, .mtable td {
+    border: .4mm solid #222; padding: 1.2mm 1.8mm;
+    font-size: 9.5pt; text-align: left; vertical-align: middle; line-height: 1.5;
+  }
+  .mtable th { background: #eee; text-align: center; font-size: 8.5pt; }
+  .mtable .mname { font-size: 9.5pt; font-weight: 700; white-space: nowrap; text-align: center; }
+  .mtable .micon { font-size: 11pt; }
+  .banchi {
+    display: inline-block; width: 13mm; height: 5.5mm;
+    border: .45mm solid #222; border-radius: 1.5mm; vertical-align: middle;
+  }
+
+  .fillLine { display: inline-block; width: 26mm; border-bottom: .5mm solid #222; height: 5mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .kigoBox {
+    width: 14mm; height: 12mm; border: .4mm solid #222; border-radius: 1.5mm; flex-shrink: 0;
+  }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用じけんメモ ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🔍 ひだまり<ruby>探偵社<rt>たんていしゃ</rt></ruby> じけんメモ</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      <ruby>地図<rt>ちず</rt></ruby>に <ruby>絵<rt>え</rt></ruby>じゃなくて <ruby>記号<rt>きごう</rt></ruby>が かいてあるのは なぜ？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 📦 ちいさくても たくさん かけて、だれが<ruby>見<rt>み</rt></ruby>ても わかるから</div>
+        <div class="voteOpt"><span class="vnum">②</span> 😮‍💨 <ruby>絵<rt>え</rt></ruby>を かくのが めんどうだから</div>
+        <div class="voteOpt"><span class="vnum">③</span> 🕵️ ひみつの あんごうに するため</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．たんていの<ruby>記号<rt>きごう</rt></ruby>ずかん</span>
+    <div class="secBody">
+      <table class="zukan">
+        <tr>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><g stroke="#2a6a2a" stroke-width="2.6" stroke-linecap="round"><line x1="13" y1="6" x2="13" y2="16"/><line x1="19" y1="6" x2="19" y2="16"/><line x1="25" y1="15" x2="25" y2="25"/><line x1="31" y1="15" x2="31" y2="25"/></g></svg><ruby>田<rt>た</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><path d="M10 8 L16 22 L22 8 M24 12 L29 25 L34 12" stroke="#6a5a1a" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg><ruby>畑<rt>はたけ</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><circle cx="18" cy="19" r="7" fill="#b06630"/><circle cx="29" cy="13" r="5.5" fill="#b06630"/><line x1="18" y1="12" x2="18" y2="6" stroke="#6a4a20" stroke-width="2"/></svg><ruby>果樹園<rt>かじゅえん</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><path d="M15 5 L23 21 L7 21 Z" fill="#2f6a3a"/><line x1="15" y1="21" x2="15" y2="27" stroke="#2f6a3a" stroke-width="2.4"/><path d="M31 9 L38 23 L24 23 Z" fill="#2f6a3a"/><line x1="31" y1="23" x2="31" y2="28" stroke="#2f6a3a" stroke-width="2.4"/></svg><ruby>森林<rt>しんりん</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><g stroke="#222" stroke-width="2.6" stroke-linecap="round"><line x1="10" y1="7" x2="34" y2="7"/><line x1="12" y1="12" x2="32" y2="12"/><line x1="15" y1="7" x2="15" y2="27"/><line x1="29" y1="7" x2="29" y2="27"/></g></svg><ruby>神社<rt>じんじゃ</rt></ruby></td>
+        </tr>
+        <tr>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><text x="22" y="17" font-size="24" text-anchor="middle" dominant-baseline="middle" font-family="serif" font-weight="bold">卍</text></svg><ruby>寺<rt>てら</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><circle cx="22" cy="16" r="13" fill="none" stroke="#222" stroke-width="2"/><text x="22" y="17.5" font-size="15" text-anchor="middle" dominant-baseline="middle" font-weight="bold">〒</text></svg><ruby>郵便局<rt>ゆうびんきょく</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><g stroke="#222" stroke-width="2.6" stroke-linecap="round" fill="none"><line x1="22" y1="4" x2="22" y2="18"/><line x1="14" y1="10" x2="30" y2="10"/><line x1="22" y1="18" x2="13" y2="28"/><line x1="22" y1="18" x2="31" y2="28"/></g></svg><ruby>病院<rt>びょういん</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><text x="22" y="17" font-size="22" text-anchor="middle" dominant-baseline="middle" font-family="serif" font-weight="bold">文</text></svg><ruby>学校<rt>がっこう</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><path d="M8 11 L22 7 L36 11 L36 24 L22 20 L8 24 Z" fill="none" stroke="#222" stroke-width="2"/><line x1="22" y1="7" x2="22" y2="20" stroke="#222" stroke-width="2"/></svg><ruby>図書館<rt>としょかん</rt></ruby></td>
+        </tr>
+        <tr>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><circle cx="22" cy="16" r="12" fill="none" stroke="#222" stroke-width="2.2"/><circle cx="22" cy="16" r="5.5" fill="none" stroke="#222" stroke-width="2.2"/></svg><ruby>市役所<rt>しやくしょ</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><g stroke="#222" stroke-width="3" stroke-linecap="round"><line x1="12" y1="6" x2="32" y2="26"/><line x1="32" y1="6" x2="12" y2="26"/></g></svg><ruby>交番<rt>こうばん</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><g stroke="#222" stroke-width="2.6" stroke-linecap="round" fill="none"><line x1="22" y1="28" x2="22" y2="14"/><path d="M12 5 Q12 15 22 14"/><path d="M32 5 Q32 15 22 14"/></g></svg><ruby>消防署<rt>しょうぼうしょ</rt></ruby></td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><rect x="9" y="9" width="26" height="13" fill="#222"/><text x="22" y="16.5" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-weight="bold">駅</text></svg><ruby>駅<rt>えき</rt></ruby>（せんろ）</td>
+          <td><svg width="11mm" height="8mm" viewBox="0 0 44 32"><circle cx="22" cy="12" r="9" fill="#4a8a4a"/><line x1="22" y1="20" x2="22" y2="28" stroke="#6a4a28" stroke-width="3.2"/></svg><ruby>一本木<rt>いっぽんぎ</rt></ruby>の<ruby>広場<rt>ひろば</rt></ruby></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．じけんきろく</span>
+    <div class="secBody">
+      <table class="mtable">
+        <tr>
+          <th style="width:34mm">いらい</th>
+          <th>よそう：<ruby>答<rt>こた</rt></ruby>えの ばんち（「い3」のように かく）</th>
+          <th style="width:46mm">けっか</th>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🐈</span> にげた ネコ</td>
+          <td>ばんち（<span class="banchi"></span>）だと<ruby>思<rt>おも</rt></ruby>う</td>
+          <td>ばんち（<span class="banchi"></span>）　あたり ・ おしい</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">💌</span> まいごの<ruby>手紙<rt>てがみ</rt></ruby></td>
+          <td>ばんち（<span class="banchi"></span>）だと<ruby>思<rt>おも</rt></ruby>う</td>
+          <td>ばんち（<span class="banchi"></span>）　あたり ・ おしい</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🎁</span> おばあちゃんの たから</td>
+          <td>ばんち（<span class="banchi"></span>）だと<ruby>思<rt>おも</rt></ruby>う</td>
+          <td>ばんち（<span class="banchi"></span>）　あたり ・ おしい</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🎩</span> <ruby>怪盗<rt>かいとう</rt></ruby>ホシカゲ</td>
+          <td>ばんち（<span class="banchi"></span>）だと<ruby>思<rt>おも</rt></ruby>う</td>
+          <td>ばんち（<span class="banchi"></span>）　あたり ・ おしい</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．はかせチャレンジ（<ruby>八方位<rt>はちほうい</rt></ruby>）</span>
+    <div class="secBody">
+      <ruby>駅<rt>えき</rt></ruby>から<ruby>見<rt>み</rt></ruby>て、どの<ruby>方位<rt>ほうい</rt></ruby>？　ことばのヒント →　<b>北・北東・東・南東・南・南西・西・北西</b><br>
+      ① <ruby>消防署<rt>しょうぼうしょ</rt></ruby>（<span class="fillLine" style="width:16mm"></span>）
+      ② <ruby>果樹園<rt>かじゅえん</rt></ruby>（<span class="fillLine" style="width:16mm"></span>）
+      ③ <ruby>図書館<rt>としょかん</rt></ruby>（<span class="fillLine" style="width:16mm"></span>）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① <ruby>地図<rt>ちず</rt></ruby>の<ruby>記号<rt>きごう</rt></ruby>は、ちいさくても（<span class="fillLine"></span>）わかる くふう。<br>
+      ② <ruby>地図<rt>ちず</rt></ruby>の<ruby>上<rt>うえ</rt></ruby>は、ふつう（<span class="fillLine" style="width:14mm"></span>）。<br>
+      ③ 「い4」みたいに よこと たてで ばしょを あらわす よみ<ruby>方<rt>かた</rt></ruby>を（<span class="fillLine" style="width:20mm"></span>）という。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．おうちミッション：ほんものの<ruby>地図<rt>ちず</rt></ruby>で</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <div>
+          <ruby>教科書<rt>きょうかしょ</rt></ruby>や <ruby>地図帳<rt>ちずちょう</rt></ruby>で、きょうの<ruby>記号<rt>きごう</rt></ruby>を <b>3つ</b> さがして、<ruby>右<rt>みぎ</rt></ruby>の わくに かこう！<br>
+          ☐ 3つ ぜんぶ <ruby>見<rt>み</rt></ruby>つけた！（りっぱな <ruby>探偵<rt>たんてい</rt></ruby>だ！）
+        </div>
+        <span class="kigoBox"></span><span class="kigoBox"></span><span class="kigoBox"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい<ruby>探偵<rt>たんてい</rt></ruby>、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ひだまり探偵社 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4〜6（小4社会「地図の見方」・学力幅あり・協力型）／ 使うもの：「ひだまり探偵社_じゅぎょう画面.html」・プロジェクタ・このメモ（1ページ目を人数分）</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、地図をクリックすると赤いわくが付いて場所の名前が出るか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_cat</b> などで途中再開（m_cat／m_letter／m_treasure／m_thief／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（最後に画面が種明かし）</td></tr>
+      <tr><td class="min">4〜11分</td><td>町たんけん（記号を6こ調べる）</td><td>代表交代でタッチ。シート２の「記号ずかん」と見くらべ。「あ1」などの番地も声に出して読む</td></tr>
+      <tr><td class="min">11〜31分</td><td>依頼×4（ネコ→手紙→たから→怪盗）</td><td>毎回このリズム：<b>①シートに番地で予想 → ②代表がタッチ → ③「🔍ここだ！」で判定 → ④結果を記入</b>。難易度は記号1つ→方位→手がかり2つ→3つと階段状</td></tr>
+      <tr><td class="min">31〜38分</td><td>はかせチャレンジ（八方位・全3問）</td><td>シート４に書いてから、代表が方位じしんをタッチ。青わく＝駅、金わく＝目標</td></tr>
+      <tr><td class="min">38〜43分</td><td>まとめ画面</td><td>「？？？」タッチで答え合わせ → シート５を記入</td></tr>
+      <tr><td class="min">43〜45分</td><td>おうちミッション予告・じゆうモード</td><td>教科書・地図帳で記号さがし（シート６）を予告。時間があれば問題の出し合い</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 時間が足りない時は「はかせチャレンジ」を1問だけにして右下「つぎ▶」でスキップOK（まとめは削らない）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>①</b>／🐈＝<b>う1（森林）</b>／💌＝<b>え1（郵便局）</b>／🎁＝<b>い2（一本木の広場）</b>／🎩＝<b>あ3（図書館）</b>／
+      はかせ＝①<b>東</b> ②<b>北</b> ③<b>北西</b>／まとめ＝①<b>だれが見ても</b> ②<b>北</b> ③<b>さくいん</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>記号の正確さについて（本物につながります）</h2>
+    <ul>
+      <li>田・畑・果樹園・針葉樹林・神社・寺・郵便局・病院・学校（文）・図書館・市役所・交番（×）・消防署（さすまた）は<b>国土地理院の正式な地図記号に準拠</b>。テスト・地図帳にそのまま接続します</li>
+      <li>「駅」の表現と「一本木の広場」だけは物語用の演出です（駅は実際にはJR線の白黒線上の太線）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント（安心して参加できるように）</h2>
+    <ul>
+      <li>まちがえても<b>「捜査は続行！手がかりがひとつ増えた」</b>。ミミのヒントがどの手がかりを見落としたか教えてくれます</li>
+      <li>代表は毎回交代。見ている子は「手がかり読み上げ係」「番地コール係」「メモ係」に。読みが苦手な子にはミミのセリフを先生が音読（全文ふりがな付き）</li>
+      <li>八方位が難しい子には「まず東西南北の4つだけ」でOK。斜めは「北と東のあいだ→北東」と分解する</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードで子ども同士の出題：「◎から北東にあるのは？」「⛩は何番地？」— 出題する側が一番力がつきます</li>
+      <li>本物の地図帳の「さくいん」で同じ遊びを：「自分たちの県は何番地？」— 今日の③がそのまま使えます</li>
+      <li>散歩や外出の機会があれば「本物の消防署・交番・神社」を見つけて記号と結びつけると定着します</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

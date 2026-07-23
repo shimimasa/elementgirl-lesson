@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ちそう発掘隊 — 大地のつくり たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f4ecda 0%, #ecdfc6 60%, #e2d2b4 100%);
+    color: #4a3520;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #a05a1a; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8a7050; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ecdfc6; border: 2px solid #c4a878;
+    font-size: clamp(16px, 1.8vw, 26px); color: #c4a878;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2a93b);
+    border-color: #d9a520; color: #7a4d00;
+    box-shadow: 0 0 14px rgba(217, 165, 32, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #c8e4f2 0%, #e8ddc2 100%);
+    border: 3px solid #b8935a;
+    box-shadow: inset 0 0 40px rgba(140, 100, 50, .15), 0 4px 18px rgba(90, 60, 30, .25);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #7a5c34; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #a05a1a; color: #fdf6ea; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(110, 60, 15, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(90, 60, 30, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #d8a05a; cursor: pointer;
+    background: linear-gradient(180deg, #c07a30, #a05e1e); color: #fff;
+    box-shadow: 0 3px 0 #6e3e10; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.time { background: linear-gradient(180deg, #6a5aa8, #4a3d8a); border-color: #9a8ad0; box-shadow: 0 3px 0 #2e2560; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #8a6a3a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(90, 60, 30, .3), inset 0 0 24px rgba(90, 60, 30, .18);
+    flex-shrink: 0; background: #f2ead8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #8a7050;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #96530f; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffdf8; border: 2px solid #e0cba0; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #8a7050; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #453320;
+    border: 1.5px solid #ecdcbc;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #96530f; background: #fbeccb; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fdf9ee, #f4e8cc); color: #4a3520;
+    border: 2px solid #a05a1a; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #a05a1a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #c07a30, #a05e1e); color: #fff;
+    box-shadow: 0 3px 0 #6e3e10, 0 5px 12px rgba(90, 55, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #6e3e10; }
+  .btn.sub {
+    background: #ecdfc6; color: #6e4e28; box-shadow: 0 3px 0 #c4a878;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #453320; box-shadow: 0 3px 0 #d4bf94; font-weight: 400; border: 1.5px solid #ecdcbc; }
+  .btn.choice.picked { background: #fbeccb; outline: 3px solid #c07a30; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(50, 35, 15, .8); backdrop-filter: blur(3px);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fdf9ee, #f2e6cc);
+    border: 3px solid #b8935a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(35, 22, 8, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #a05a1a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #a05a1a; }
+  .panel .sub { color: #8a7050; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #453320; border: 1.5px solid #ecdcbc; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8a7050; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #453320; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ecdcbc; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #c07a30; background: #fdf3dd; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #c07a30; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #c07a30;
+    color: #a05a1a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #8a7050;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ecdfc6; color: #6e4e28;
+    border: 1px solid #c4a878; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #e2d2b4; }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="logo">⛏ ちそう<ruby>発掘隊<rt>はっくつたい</rt></ruby><small>— <ruby>大地<rt>だいち</rt></ruby>のつくり たいけん —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_tsubu" title="つぶ">★</div>
+    <div class="badge" id="bd_m_kasanaru" title="かさなる">★</div>
+    <div class="badge" id="bd_m_kaseki" title="かせき">★</div>
+    <div class="badge" id="bd_m_yomu" title="じゅんばん">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">🌊 うみの じっけん<ruby>場<rt>じょう</rt></ruby> 〜よこから<ruby>見<rt>み</rt></ruby>たところ〜</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 つぶのむしめがね 〜つぶの<ruby>大<rt>おお</rt></ruby>きさが<ruby>見<rt>み</rt></ruby>える〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(90,60,30,.18)"/>
+            <!-- からだ（まるいモグラ） -->
+            <ellipse cx="60" cy="78" rx="34" ry="38" fill="#6a5648"/>
+            <ellipse cx="60" cy="90" rx="22" ry="22" fill="#a8927e"/>
+            <!-- 大きなてのひら（シャベル） -->
+            <ellipse cx="26" cy="88" rx="11" ry="14" fill="#e8b8a0" transform="rotate(-18 26 88)"/>
+            <ellipse cx="94" cy="88" rx="11" ry="14" fill="#e8b8a0" transform="rotate(18 94 88)"/>
+            <path d="M20 82 l-4 -4 M24 78 l-3 -5 M29 76 l-1 -6" stroke="#c08a70" stroke-width="2" stroke-linecap="round"/>
+            <path d="M100 82 l4 -4 M96 78 l3 -5 M91 76 l1 -6" stroke="#c08a70" stroke-width="2" stroke-linecap="round"/>
+            <!-- はな -->
+            <ellipse cx="60" cy="62" rx="8" ry="6.5" fill="#e88aa0"/>
+            <!-- め＋まるメガネ -->
+            <g class="eyes">
+              <circle cx="46" cy="52" r="3" fill="#2c2015"/>
+              <circle cx="74" cy="52" r="3" fill="#2c2015"/>
+            </g>
+            <circle cx="46" cy="52" r="8.5" fill="none" stroke="#c9a227" stroke-width="2.2"/>
+            <circle cx="74" cy="52" r="8.5" fill="none" stroke="#c9a227" stroke-width="2.2"/>
+            <line x1="54.5" y1="52" x2="65.5" y2="52" stroke="#c9a227" stroke-width="2.2"/>
+            <!-- ひげ -->
+            <path d="M38 62 h-14 M39 67 h-12 M82 62 h14 M81 67 h12" stroke="#b8a08c" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M52 70 Q60 75 68 70" stroke="#4a3a2c" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- ヘルメット＋ライト -->
+            <path d="M30 44 Q60 14 90 44 Z" fill="#e8c53a"/>
+            <ellipse cx="60" cy="44" rx="31" ry="7" fill="#d4af22"/>
+            <circle cx="60" cy="26" r="6.5" fill="#fff8dc" stroke="#c9a227" stroke-width="2"/>
+            <circle cx="60" cy="26" r="2.6" fill="#ffe9a8"/>
+          </svg>
+          <div class="catname">ちそうはかせ モグ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">⛏ はっくつミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ちそう発掘隊 — 大地のつくり・地層（小6理科・協力型・1ファイル）
+   れき・すな・どろが水の底に粒の大きさで分かれて積もる→層が重なる
+   →下ほど古い→化石が過去を教える→火山灰は角ばった粒（空から降った）
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+const W = {
+  chiso: ruby('地層', 'ちそう'),
+  tsubu: 'つぶ',
+  reki: 'れき',
+  suna: 'すな',
+  doro: 'どろ',
+  umi: ruby('海', 'うみ'),
+  kawa: ruby('川', 'かわ'),
+  kaseki: ruby('化石', 'かせき'),
+  kazanbai: ruby('火山灰', 'かざんばい'),
+  funka: ruby('噴火', 'ふんか'),
+  soko: ruby('底', 'そこ'),
+  furui: ruby('古', 'ふる') + 'い',
+  kako: ruby('河口', 'かこう'),
+};
+
+// ---------- 素材の色（うみ→がけで統一） ----------
+const MAT = {
+  reki: { col: '#b09468', name: 'れきの層', kana: '2mmより大きい 小石' },
+  suna: { col: '#d9c48a', name: 'すなの層', kana: 'ザラザラの つぶ' },
+  doro: { col: '#b8a488', name: 'どろの層', kana: 'とても細かい つぶ' },
+  kazanbai: { col: '#a8a4a0', name: '火山灰の層', kana: 'かくばった つぶ' },
+};
+
+// ---------- がけの層（上①→下⑥） ----------
+const LAYERS = [
+  { no: 1, type: 'doro' },
+  { no: 2, type: 'suna', fossil: 'ammo' },
+  { no: 3, type: 'kazanbai' },
+  { no: 4, type: 'doro', fossil: 'ha' },
+  { no: 5, type: 'suna', fossil: 'kai' },
+  { no: 6, type: 'reki' },
+];
+const FOSSILS = {
+  kai: { name: '貝の化石', kana: 'かい', x: 560 },
+  ha: { name: '木の葉の化石', kana: 'このは', x: 380 },
+  ammo: { name: 'アンモナイトの化石', kana: 'あんもないと', x: 680 },
+};
+const CLIFF_TOP = 185, LAYER_H = 64;   // がけ論理座標
+const layerY = i => CLIFF_TOP + i * LAYER_H;
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  view: 'sea',          // sea / cliff
+  particles2: [],       // 沈む土のつぶ
+  repeats: 0,           // 積もった回数 0..3
+  fillProg: 0,          // いま流している層の進み 0..1
+  flowing: false,
+  drain: 0,             // なん万年トランジション 0..1
+  yearT: 0,
+  selLayer: -1,
+  dug: new Set(),
+  scopeMode: 'mix',
+  tapEnabled: false,
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sFlow = () => { tone(300, 0, 0.25, 'sine', 0.05); tone(360, 0.1, 0.25, 'sine', 0.05); };
+const sDig = () => { tone(200 + Math.random() * 50, 0, 0.09, 'square', 0.05); };
+const sMagic = () => [392, 523, 659, 880, 1174].forEach((f, i) => tone(f, i * 0.12, 0.5, 'sine', 0.07));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- うみのじっけん場 ----------
+// 海底の高さ（xに応じて深くなる）
+const seabedY = x => lerp(430, 560, clamp((x - 180) / 780, 0, 1));
+// たいせきゾーン：れき=河口ちかく／すな=中／どろ=おき
+const ZONES = [
+  { type: 'reki', x0: 190, x1: 420 },
+  { type: 'suna', x0: 420, x1: 670 },
+  { type: 'doro', x0: 670, x1: 940 },
+];
+const zoneOf = x => x < 420 ? 0 : x < 670 ? 1 : 2;
+
+function drawSea(t, dt, X, Y, sc) {
+  const drain = S.drain;
+  // そら
+  gctx.fillStyle = '#c8e4f2';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 240 * sc);
+  gctx.fillStyle = 'rgba(255,240,180,.9)';
+  gctx.beginPath(); gctx.arc(X(920), Y(60), 24 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = 'rgba(255,255,255,.8)';
+  [[300, 60, 34], [340, 52, 26], [700, 90, 30]].forEach(([cx, cy, cr]) => {
+    gctx.beginPath(); gctx.arc(X(cx), Y(cy), cr * sc, 0, TAU); gctx.fill();
+  });
+
+  // ひだりの陸と川（ながれる水シリーズからの接続）
+  gctx.fillStyle = '#8fb573';
+  gctx.beginPath();
+  gctx.moveTo(X(0), Y(640)); gctx.lineTo(X(0), Y(100));
+  gctx.quadraticCurveTo(X(130), Y(140), X(175), Y(255));
+  gctx.lineTo(X(190), Y(640));
+  gctx.closePath(); gctx.fill();
+  // 川
+  gctx.strokeStyle = '#6ab0d8'; gctx.lineWidth = 17 * sc; gctx.lineCap = 'round';
+  gctx.beginPath();
+  gctx.moveTo(X(30), Y(120));
+  gctx.quadraticCurveTo(X(110), Y(180), X(158), Y(265));
+  gctx.stroke();
+  // スイ隊長のカメオ（第7弾のカワウソ）
+  gctx.fillStyle = '#8a6a48';
+  gctx.beginPath(); gctx.arc(X(75), Y(215), 9 * sc, 0, TAU); gctx.fill();
+  gctx.beginPath(); gctx.arc(X(68), Y(208), 3 * sc, 0, TAU); gctx.fill();
+  gctx.beginPath(); gctx.arc(X(82), Y(208), 3 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = '#cfa87a';
+  gctx.beginPath(); gctx.ellipse(X(75), Y(218), 5 * sc, 4 * sc, 0, 0, TAU); gctx.fill();
+
+  // 海の水（drainで引いていく）
+  const waterTop = lerp(255, 620, drain);
+  if (drain < 0.98) {
+    const wg = gctx.createLinearGradient(0, Y(waterTop), 0, Y(600));
+    wg.addColorStop(0, 'rgba(120,190,225,.85)');
+    wg.addColorStop(1, 'rgba(60,130,180,.9)');
+    gctx.fillStyle = wg;
+    gctx.beginPath();
+    gctx.moveTo(X(160), Y(waterTop));
+    for (let x = 160; x <= 1000; x += 20) {
+      gctx.lineTo(X(x), Y(waterTop + Math.sin(t * 2 + x * 0.03) * 3));
+    }
+    gctx.lineTo(X(1000), Y(640)); gctx.lineTo(X(160), Y(640));
+    gctx.closePath(); gctx.fill();
+  }
+
+  // 海底
+  gctx.fillStyle = '#c8b088';
+  gctx.beginPath();
+  gctx.moveTo(X(160), Y(430));
+  for (let x = 160; x <= 1000; x += 20) gctx.lineTo(X(x), Y(seabedY(x)));
+  gctx.lineTo(X(1000), Y(640)); gctx.lineTo(X(160), Y(640));
+  gctx.closePath(); gctx.fill();
+
+  // 積もった層（くりかえしごとに 3ゾーン）
+  for (let r = 0; r < S.repeats + (S.flowing ? 1 : 0); r++) {
+    const prog = r < S.repeats ? 1 : S.fillProg;
+    ZONES.forEach((z, zi) => {
+      const hgt = 15 * prog * (1 - zi * 0.08);
+      const shade = 1 - r * 0.13;
+      gctx.fillStyle = shadeCol(MAT[z.type].col, shade);
+      gctx.beginPath();
+      const yb = x => seabedY(x) - r * 14;
+      gctx.moveTo(X(z.x0), Y(yb(z.x0)));
+      for (let x = z.x0; x <= z.x1; x += 15) gctx.lineTo(X(x), Y(yb(x) - hgt));
+      gctx.lineTo(X(z.x1), Y(yb(z.x1)));
+      for (let x = z.x1; x >= z.x0; x -= 15) gctx.lineTo(X(x), Y(yb(x)));
+      gctx.closePath(); gctx.fill();
+    });
+  }
+
+  // 沈むつぶ
+  S.particles2.forEach(p => {
+    gctx.fillStyle = p.col;
+    gctx.beginPath(); gctx.arc(X(p.x), Y(p.y), p.r * sc, 0, TAU); gctx.fill();
+  });
+
+  // ゾーンラベル
+  if (S.repeats > 0 || S.fillProg > 0.4) {
+    gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.font = `700 ${Math.max(12, 20 * sc)}px sans-serif`;
+    gctx.fillStyle = '#5a4520';
+    gctx.fillText('れき', X(300), Y(608));
+    gctx.fillText('すな', X(545), Y(618));
+    gctx.fillText('どろ', X(800), Y(628));
+  }
+  gctx.textAlign = 'center';
+  gctx.font = `${Math.max(11, 17 * sc)}px sans-serif`;
+  gctx.fillStyle = '#4a6a8a';
+  gctx.fillText('河口ちかく', X(255), Y(280));
+  gctx.fillText('おき（ふかい）', X(840), Y(280));
+
+  // なん万年カウンター
+  if (S.anim.draining) {
+    gctx.fillStyle = 'rgba(74,61,138,.92)';
+    const tx = S.yearT < 1.2 ? 'なん百年…' : S.yearT < 2.4 ? 'なん千年…' : 'なん万年……！';
+    gctx.font = `700 ${Math.max(20, 36 * sc)}px sans-serif`;
+    const tw = gctx.measureText(tx).width;
+    gctx.beginPath();
+    gctx.roundRect(X(500) - tw / 2 - 16, Y(120) - 30 * sc, tw + 32, 60 * sc, 14);
+    gctx.fill();
+    gctx.fillStyle = '#fff';
+    gctx.fillText(tx, X(500), Y(120));
+  }
+}
+function shadeCol(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = clamp(Math.round(((n >> 16) & 255) * f), 0, 255);
+  const g = clamp(Math.round(((n >> 8) & 255) * f), 0, 255);
+  const b = clamp(Math.round((n & 255) * f), 0, 255);
+  return `rgb(${r},${g},${b})`;
+}
+
+// ---------- がけ ----------
+const CLIFF_X0 = 150, CLIFF_X1 = 850;
+function drawCliff(t, dt, X, Y, sc) {
+  // そら
+  gctx.fillStyle = '#c8e4f2';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 185 * sc);
+  gctx.fillStyle = 'rgba(255,240,180,.9)';
+  gctx.beginPath(); gctx.arc(X(910), Y(55), 24 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = 'rgba(255,255,255,.85)';
+  [[250, 70, 30], [290, 62, 24], [620, 50, 28]].forEach(([cx, cy, cr]) => {
+    gctx.beginPath(); gctx.arc(X(cx), Y(cy), cr * sc, 0, TAU); gctx.fill();
+  });
+  // とり
+  gctx.strokeStyle = '#5a6a7a'; gctx.lineWidth = 2 * sc;
+  [[420, 80], [460, 95]].forEach(([bx, by]) => {
+    gctx.beginPath();
+    gctx.arc(X(bx) - 6 * sc, Y(by), 6 * sc, -Math.PI * 0.9, -Math.PI * 0.1);
+    gctx.arc(X(bx) + 6 * sc, Y(by), 6 * sc, -Math.PI * 0.9, -Math.PI * 0.1);
+    gctx.stroke();
+  });
+
+  // がけの上の草はら
+  gctx.fillStyle = '#8fb573';
+  gctx.fillRect(X(0), Y(168), 1000 * sc, 22 * sc);
+  gctx.strokeStyle = '#6a9a52'; gctx.lineWidth = 2 * sc;
+  for (let x = 20; x < 1000; x += 42) {
+    gctx.beginPath();
+    gctx.moveTo(X(x), Y(184)); gctx.lineTo(X(x - 4), Y(168));
+    gctx.moveTo(X(x + 5), Y(184)); gctx.lineTo(X(x + 9), Y(170));
+    gctx.stroke();
+  }
+
+  // 層
+  LAYERS.forEach((L, i) => {
+    const y0 = layerY(i), y1 = layerY(i + 1);
+    gctx.fillStyle = MAT[L.type].col;
+    gctx.beginPath();
+    gctx.moveTo(X(CLIFF_X0), Y(y0 + Math.sin(i * 3) * 3));
+    for (let x = CLIFF_X0; x <= CLIFF_X1; x += 30) gctx.lineTo(X(x), Y(y0 + Math.sin(x * 0.02 + i * 3) * 4));
+    gctx.lineTo(X(CLIFF_X1), Y(y1));
+    for (let x = CLIFF_X1; x >= CLIFF_X0; x -= 30) gctx.lineTo(X(x), Y(y1 + Math.sin(x * 0.02 + i * 3 + 3) * 4));
+    gctx.closePath(); gctx.fill();
+    // テクスチャ
+    if (L.type === 'reki') {
+      gctx.fillStyle = 'rgba(90,70,45,.4)';
+      for (let k = 0; k < 26; k++) {
+        const px = CLIFF_X0 + 25 + ((k * 137) % (CLIFF_X1 - CLIFF_X0 - 50));
+        const py = y0 + 12 + ((k * 71) % (LAYER_H - 24));
+        gctx.beginPath(); gctx.ellipse(X(px), Y(py), (5 + k % 4) * sc, (4 + k % 3) * sc, k, 0, TAU); gctx.fill();
+      }
+    } else if (L.type === 'suna') {
+      gctx.fillStyle = 'rgba(120,95,50,.35)';
+      for (let k = 0; k < 60; k++) {
+        const px = CLIFF_X0 + 15 + ((k * 83) % (CLIFF_X1 - CLIFF_X0 - 30));
+        const py = y0 + 8 + ((k * 47) % (LAYER_H - 16));
+        gctx.beginPath(); gctx.arc(X(px), Y(py), 1.6 * sc, 0, TAU); gctx.fill();
+      }
+    } else if (L.type === 'kazanbai') {
+      gctx.fillStyle = 'rgba(70,68,66,.45)';
+      for (let k = 0; k < 30; k++) {
+        const px = CLIFF_X0 + 20 + ((k * 113) % (CLIFF_X1 - CLIFF_X0 - 40));
+        const py = y0 + 10 + ((k * 59) % (LAYER_H - 20));
+        gctx.save(); gctx.translate(X(px), Y(py)); gctx.rotate(k);
+        gctx.beginPath();
+        gctx.moveTo(0, -3 * sc); gctx.lineTo(2.6 * sc, 2 * sc); gctx.lineTo(-2.6 * sc, 2 * sc);
+        gctx.closePath(); gctx.fill();
+        gctx.restore();
+      }
+    }
+  });
+
+  // 化石
+  for (const fid in FOSSILS) {
+    const F = FOSSILS[fid];
+    const li = LAYERS.findIndex(L => L.fossil === fid);
+    const fy = layerY(li) + LAYER_H / 2;
+    const dug = S.dug.has(fid);
+    gctx.save();
+    gctx.translate(X(F.x), Y(fy));
+    if (!dug) {
+      // うまっている：もりあがり＋キラリ
+      gctx.fillStyle = 'rgba(255,255,255,.25)';
+      gctx.beginPath(); gctx.ellipse(0, 0, 16 * sc, 11 * sc, 0, 0, TAU); gctx.fill();
+      if (S.phase === 'dig') {
+        gctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 5 + F.x);
+        gctx.fillStyle = '#fff';
+        gctx.font = `${16 * sc}px sans-serif`;
+        gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+        gctx.fillText('✦', 0, 0);
+        gctx.globalAlpha = 1;
+      }
+    } else {
+      // ほり出したあと：くぼみ＋化石
+      gctx.fillStyle = 'rgba(60,45,25,.35)';
+      gctx.beginPath(); gctx.ellipse(0, 0, 18 * sc, 13 * sc, 0, 0, TAU); gctx.fill();
+      drawFossil(gctx, fid, 0, 0, 12 * sc);
+    }
+    gctx.restore();
+  }
+
+  // ①〜⑥
+  gctx.font = `700 ${Math.max(16, 27 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  LAYERS.forEach((L, i) => {
+    gctx.fillStyle = '#6e4e28';
+    gctx.fillText('①②③④⑤⑥'[i], X(118), Y(layerY(i) + LAYER_H / 2));
+  });
+
+  // 選択リング
+  if (S.selLayer >= 0) {
+    const y0 = layerY(S.selLayer);
+    gctx.strokeStyle = `rgba(216,110,40,${0.6 + 0.35 * Math.sin(t * 5)})`;
+    gctx.lineWidth = 4;
+    gctx.setLineDash([10, 7]);
+    gctx.strokeRect(X(CLIFF_X0) - 4, Y(y0) + 3, (CLIFF_X1 - CLIFF_X0) * sc + 8, LAYER_H * sc - 6);
+    gctx.setLineDash([]);
+  }
+
+  // がけの前の地面＋発掘どうぐ
+  gctx.fillStyle = '#d8c8a4';
+  gctx.fillRect(X(0), Y(layerY(6)), 1000 * sc, 80 * sc);
+  gctx.fillStyle = '#8a6a3a';
+  gctx.fillRect(X(890), Y(560), 8 * sc, 34 * sc);
+  gctx.fillStyle = '#b0b8c0';
+  gctx.beginPath();
+  gctx.moveTo(X(884), Y(556)); gctx.lineTo(X(904), Y(556)); gctx.lineTo(X(894), Y(576));
+  gctx.closePath(); gctx.fill();
+  gctx.strokeStyle = '#a05a1a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.arc(X(940), Y(585), 14 * sc, Math.PI, TAU); gctx.stroke();
+}
+function drawFossil(ctx, fid, x, y, R) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = '#f4ead0'; ctx.fillStyle = '#f4ead0';
+  ctx.lineWidth = Math.max(1.5, R * 0.14);
+  if (fid === 'kai') {
+    ctx.beginPath(); ctx.arc(0, R * 0.4, R, Math.PI, TAU); ctx.stroke();
+    for (let k = 0; k <= 4; k++) {
+      const a = Math.PI * (1.15 + 0.175 * k);
+      ctx.beginPath();
+      ctx.moveTo(0, R * 0.4);
+      ctx.lineTo(Math.cos(a) * R, R * 0.4 + Math.sin(a) * R);
+      ctx.stroke();
+    }
+  } else if (fid === 'ha') {
+    ctx.beginPath();
+    ctx.ellipse(0, 0, R * 0.55, R, 0.4, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-R * 0.35, R * 0.8); ctx.lineTo(R * 0.35, -R * 0.8); ctx.stroke();
+  } else if (fid === 'ammo') {
+    ctx.beginPath();
+    for (let a = 0; a < TAU * 2.4; a += 0.25) {
+      const rr = R * 0.14 * a;
+      const px = Math.cos(a) * rr * 0.42, py = Math.sin(a) * rr * 0.42;
+      a === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.view === 'sea') drawSea(t, dt, X, Y, sc);
+  else drawCliff(t, dt, X, Y, sc);
+}
+
+// ---------- つぶのむしめがね ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+  const mode = S.scopeMode;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f6efdd'); grd.addColorStop(1, '#e0d2b4');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const roundStone = (x, y, r, col) => {
+    sctx.fillStyle = col; sctx.strokeStyle = shadeCol(col, 0.65); sctx.lineWidth = 1.6;
+    sctx.beginPath(); sctx.ellipse(x, y, r, r * 0.85, 0.3, 0, TAU); sctx.fill(); sctx.stroke();
+  };
+  const jaggedStone = (x, y, r, col, seed) => {
+    sctx.fillStyle = col; sctx.strokeStyle = shadeCol(col, 0.6); sctx.lineWidth = 1.6;
+    sctx.beginPath();
+    for (let i = 0; i <= 7; i++) {
+      const a = i / 7 * TAU;
+      const rr = r * (0.65 + 0.35 * Math.abs(Math.sin(seed * 7 + i * 2.3)));
+      const px = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr;
+      i === 0 ? sctx.moveTo(px, py) : sctx.lineTo(px, py);
+    }
+    sctx.closePath(); sctx.fill(); sctx.stroke();
+  };
+
+  const hash = (i, s) => {
+    const v = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  if (mode === 'mix') {
+    roundStone(R * 0.6, R * 0.75, R * 0.22, MAT.reki.col);
+    roundStone(R * 1.3, R * 0.9, R * 0.09, MAT.suna.col);
+    roundStone(R * 1.15, R * 0.65, R * 0.08, MAT.suna.col);
+    for (let i = 0; i < 26; i++) {
+      sctx.fillStyle = MAT.doro.col;
+      sctx.beginPath();
+      sctx.arc(R * 0.45 + hash(i, 1) * R * 1.1, R * 1.05 + hash(i, 2) * R * 0.5, 2.2, 0, TAU);
+      sctx.fill();
+    }
+    label('まざった 土');
+  } else if (mode === 'reki') {
+    roundStone(R * 0.7, R * 0.85, R * 0.26, MAT.reki.col);
+    roundStone(R * 1.3, R * 0.95, R * 0.2, shadeCol(MAT.reki.col, 0.9));
+    roundStone(R * 0.98, R * 1.32, R * 0.22, shadeCol(MAT.reki.col, 1.05));
+    label('れき：大きくて丸い');
+  } else if (mode === 'suna') {
+    for (let i = 0; i < 40; i++) {
+      roundStone(R * 0.4 + hash(i, 3) * R * 1.2, R * 0.4 + hash(i, 4) * R * 1.2, R * 0.05, i % 3 ? MAT.suna.col : shadeCol(MAT.suna.col, 0.85));
+    }
+    label('すな：小さな つぶ');
+  } else if (mode === 'doro') {
+    for (let i = 0; i < 130; i++) {
+      sctx.fillStyle = i % 4 ? MAT.doro.col : shadeCol(MAT.doro.col, 0.85);
+      sctx.beginPath();
+      sctx.arc(R * 0.3 + hash(i, 5) * R * 1.4, R * 0.3 + hash(i, 6) * R * 1.4, 1.6, 0, TAU);
+      sctx.fill();
+    }
+    label('どろ：とても細かい');
+  } else if (mode === 'kazanbai') {
+    for (let i = 0; i < 14; i++) {
+      jaggedStone(R * 0.45 + hash(i, 7) * R * 1.1, R * 0.45 + hash(i, 8) * R * 1.1, R * 0.1, '#9a9694', i);
+    }
+    label('かくばってる！');
+  } else if (mode === 'kai' || mode === 'ha' || mode === 'ammo') {
+    sctx.fillStyle = '#8a7a5e';
+    sctx.beginPath(); sctx.ellipse(R, R, R * 0.66, R * 0.55, 0.15, 0, TAU); sctx.fill();
+    drawFossil(sctx, mode, R, R * 0.98, R * 0.34);
+    label(FOSSILS[mode].name.replace(/<[^>]+>/g, ''));
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#6e4e28';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#c07a30', '#e8c53a', '#8fb573', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  // 土のつぶ（うみビュー）
+  if (S.flowing) {
+    if (Math.random() < dt * 30) {
+      const kind = Math.random();
+      const p = kind < 0.34
+        ? { type: 0, r: 4.5, col: MAT.reki.col, vy: 120, drag: 3.2 }
+        : kind < 0.67
+          ? { type: 1, r: 2.8, col: MAT.suna.col, vy: 55, drag: 1.2 }
+          : { type: 2, r: 1.8, col: MAT.doro.col, vy: 22, drag: 0.25 };
+      p.x = 175 + Math.random() * 20; p.y = 270 + Math.random() * 20;
+      p.vx = 90 + Math.random() * 60;
+      S.particles2.push(p);
+    }
+    S.fillProg = clamp(S.fillProg + dt / 4.5, 0, 1);
+    if (S.fillProg >= 1) {
+      S.flowing = false;
+      S.repeats++;
+      S.particles2 = [];
+      const step = STEPS[FLOW[S.stepIndex]];
+      if (step.onLayerDone) step.onLayerDone();
+    }
+  }
+  S.particles2 = S.particles2.filter(p => p.y < seabedY(p.x) - S.repeats * 14 - 4);
+  S.particles2.forEach(p => {
+    p.x += p.vx * dt;
+    p.vx = Math.max(p.type === 2 ? 55 : 8, p.vx - p.drag * dt * 60);
+    p.y += p.vy * dt;
+  });
+
+  // なん万年トランジション
+  if (S.anim.draining) {
+    S.yearT += dt;
+    S.drain = clamp((S.yearT - 0.6) / 3, 0, 1);
+    if (S.yearT > 4.2) {
+      S.anim.draining = false;
+      S.view = 'cliff';
+      burst(window.innerWidth / 2, window.innerHeight / 2, 90);
+      const step = STEPS[FLOW[S.stepIndex]];
+      if (step.onCliff) step.onCliff();
+    }
+  }
+
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+// ---------- タッチ（がけの層・化石） ----------
+stageCv.addEventListener('pointerdown', ev => {
+  ac();
+  if (!S.tapEnabled || S.view !== 'cliff') return;
+  const r = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(r.width, r.height);
+  const mx = (ev.clientX - r.left - ox) / sc, my = (ev.clientY - r.top - oy) / sc;
+  if (mx < CLIFF_X0 - 30 || mx > CLIFF_X1 + 30) return;
+  const li = Math.floor((my - CLIFF_TOP) / LAYER_H);
+  if (li < 0 || li > 5) return;
+
+  // 化石さがし中：ちかくをタップしたらほり出す
+  if (S.phase === 'dig') {
+    for (const fid in FOSSILS) {
+      if (S.dug.has(fid)) continue;
+      const F = FOSSILS[fid];
+      const fli = LAYERS.findIndex(L => L.fossil === fid);
+      const fy = layerY(fli) + LAYER_H / 2;
+      if (Math.abs(mx - F.x) < 55 && Math.abs(my - fy) < 45) {
+        S.dug.add(fid);
+        sDig(); sDig();
+        S.scopeMode = fid;
+        burst(ev.clientX, ev.clientY, 40);
+        $('stateName').innerHTML = `⛏ ${FOSSILS[fid].name}を ほり出した！`;
+        STEPS[FLOW[S.stepIndex]].onDig && STEPS[FLOW[S.stepIndex]].onDig(fid);
+        return;
+      }
+    }
+  }
+
+  // 層をえらぶ
+  S.selLayer = li;
+  sTap();
+  const L = LAYERS[li];
+  S.scopeMode = L.type;
+  $('stateName').innerHTML = `${'①②③④⑤⑥'[li]} ${MAT[L.type].name}`;
+  const step = STEPS[FLOW[S.stepIndex]];
+  if (step.onLayerTap) step.onLayerTap(li, L);
+});
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.onclick = () => { ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  if (S.view === 'sea') {
+    $('locChip').textContent = 'いまここ：うみの じっけん場';
+    $('stageTitle').innerHTML = `🌊 うみの じっけん${ruby('場', 'じょう')} 〜よこから${ruby('見', 'み')}たところ〜`;
+  } else {
+    $('locChip').textContent = 'いまここ：がけ（なん万年後）';
+    $('stageTitle').innerHTML = `⛰ がけの ${ruby('断面', 'だんめん')} 〜タッチで しらべられるよ〜`;
+  }
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_tsubu', 'm_kasanaru', 'm_kaseki', 'm_yomu', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = {}; S.flowing = false; S.particles2 = [];
+  S.tapEnabled = false; S.selLayer = -1;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { view: 'sea', scopeMode: 'mix', repeats: 0, fillProg: 0, drain: 0, yearT: 0, dug: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">⛏🪨🌊🐚⛰</div>
+        <h1>ちそう${ruby('発掘隊', 'はっくつたい')}</h1>
+        <div class="sub">〜 ${ruby('大地', 'だいち')}の${ruby('日記', 'にっき')}を よみとく、みならい${ruby('隊員', 'たいいん')} ぼしゅう${ruby('中', 'ちゅう')} 〜</div>
+        <p class="talk">ほっほっほ、よく来たのう。わしは ${ruby('地層', 'ちそう')}はかせの <b>モグ</b>じゃ。<br>
+        わしら モグラ${ruby('一族', 'いちぞく')}は ${ruby('何百年', 'なんびゃくねん')}も ${ruby('地面', 'じめん')}の${ruby('下', 'した')}を ほってきた。じつはな——${ruby('地面', 'じめん')}の${ruby('下', 'した')}には、${ruby('大地', 'だいち')}の <b>${ruby('日記', 'にっき')}</b>が ねむっておるんじゃ。<br>
+        しま${ruby('模様', 'もよう')}の ${ruby('地層', 'ちそう')}——あれが よめると、${ruby('何万年', 'なんまんねん')}も${ruby('前', 'まえ')}の ことが わかる。きょうは その よみ${ruby('方', 'かた')}を さずけよう！</p>
+        <button class="btn" id="startBtn">${ruby('発掘隊', 'はっくつたい')}に ${ruby('入隊', 'にゅうたい')}する！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>⛰ よそうタイム</h2>
+        <p class="talk">がけや ${ruby('道路工事', 'どうろこうじ')}の あとで ${ruby('見', 'み')}かける、${ruby('地面', 'じめん')}の <b>しま${ruby('模様', 'もよう')}（${W.chiso}）</b>。<br>あの しまは、<b>どうやって できた</b>と ${ruby('思', 'おも')}う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🖌</span><b>①</b> だれかが ぬったり けずったり した</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌊</span><b>②</b> ${ruby('水', 'みず')}の${W.soko}に ${ruby('土', 'つち')}が つもって できた</div>
+          <div class="vcard" data-v="2"><span class="vicon">☀️</span><b>③</b> ${ruby('地面', 'じめん')}が かわいて ひびわれた</div>
+        </div>
+        <div class="sub">思うものに タッチ（いくつでも）。はっくつノート（シート）にも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめに いこう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); c.classList.toggle('picked');
+          const v = +c.dataset.v;
+          S.votePicked.has(v) ? S.votePicked.delete(v) : S.votePicked.add(v);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：つぶで分かれる ---
+  m_tsubu: {
+    enter() {
+      Object.assign(S, { view: 'sea', scopeMode: 'mix', repeats: 0, fillProg: 0, drain: 0, yearT: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🌊', `ここは ${W.kawa}が ${W.umi}に そそぐ ばしょ。${W.kawa}は <b>れき・すな・どろ</b>の まざった${ruby('土', 'つち')}を はこんでくる（むしめがねを${ruby('見', 'み')}て！）`);
+      say(`まざった${ruby('土', 'つち')}が ${W.umi}に ながれこむと——いちばん <b>とおくの おき</b>まで はこばれるのは どれじゃと${ruby('思', 'おも')}う？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ れき（大きい）', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ すな（中くらい）', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ どろ（細かい）', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`それじゃあ ${ruby('実験', 'じっけん')}じゃ！ <b>🪣ボタン</b>で ${ruby('土', 'つち')}を ながして、どこに しずむか よーく${ruby('見', 'み')}るんじゃぞ。`);
+      S.phase = 'flow';
+      setControls([{ label: '🪣 土を ながす', cb: () => { if (!S.flowing) { S.flowing = true; S.fillProg = 0; sFlow(); } } }]);
+      setButtons([]);
+    },
+    onLayerDone() {
+      if (S.phase !== 'flow') return;
+      S.phase = 'done';
+      setControls([]);
+      sYes(); scopeBurst(); award('m_tsubu');
+      say(`✨ ${ruby('見', 'み')}事に 3つに 分かれた！ こたえは <b>Ｃ どろ</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>${ruby('大', 'おお')}きくて${ruby('重', 'おも')}い <b>れき</b>は ${W.kako}の ちかくに すぐ しずむ。${ruby('細', 'こま')}かい <b>どろ</b>は かるいから、おきまで ながされて ゆっくり しずむ。<b>${W.tsubu}の${ruby('大', 'おお')}きさで 分かれて つもる</b>んじゃ！`);
+      setButtons([{ label: 'つぎへ（層のまほう）', cb: nextStep }]);
+    },
+  },
+
+  // --- M2：層が重なる→なん万年→がけ ---
+  m_kasanaru: {
+    enter() {
+      Object.assign(S, { view: 'sea', scopeMode: 'mix', repeats: 1, fillProg: 0, drain: 0, yearT: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🕰', `${ruby('何十年', 'なんじゅうねん')}か たつと、${ruby('大雨', 'おおあめ')}などで <b>また ${ruby('土', 'つち')}が ながれてくる</b>。さて どうなる？`);
+      say(`つぎに ながれてきた ${ruby('土', 'つち')}は、${ruby('前', 'まえ')}に つもった${ruby('層', 'そう')}の どこに つもると${ruby('思', 'おも')}う？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ 前の層の 上に かさなる', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 前の層の 下に もぐりこむ', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ まざって 1つになる', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`ためして みるんじゃ！ <b>🪣ボタン</b>を おして、${ruby('時', 'とき')}を すすめよう。`);
+      S.phase = 'flow';
+      setControls([{ label: '🪣 なん十年後…また土が ながれる', cb: () => { if (!S.flowing) { S.flowing = true; S.fillProg = 0; sFlow(); } } }]);
+      setButtons([]);
+    },
+    onLayerDone() {
+      if (S.phase !== 'flow') return;
+      if (S.repeats < 3) {
+        say(`${ruby('前', 'まえ')}の${ruby('層', 'そう')}の <b>${ruby('上', 'うえ')}</b>に かさなったのう！ もういちど ${ruby('時', 'とき')}を すすめて みるかの。`);
+        setControls([{ label: '🪣 さらに なん十年後…', cb: () => { if (!S.flowing) { S.flowing = true; S.fillProg = 0; sFlow(); } } }]);
+      } else {
+        S.phase = 'ready';
+        sYes();
+        say(`しまもようが できてきた！ こたえは <b>Ａ ${ruby('上', 'うえ')}に かさなる</b>。つまり——<b>${ruby('下', 'した')}の${ruby('層', 'そう')}ほど ${W.furui}</b>んじゃ。<br>では いよいよ、わしの とっておきの まほう。<b>⏩なん${ruby('万年', 'まんねん')}</b> すすめてみるぞ……！`);
+        setControls([{ label: '⏩ なん万年 すすめる！', cls: 'time', cb: () => {
+          S.anim.draining = true; S.yearT = 0;
+          sMagic();
+          say(`${ruby('海', 'うみ')}が ひいて、${ruby('大地', 'だいち')}が もちあがって……！`);
+          setControls([]);
+        } }]);
+      }
+    },
+    onCliff() {
+      S.phase = 'done';
+      updateLoc();
+      sFanfare(); award('m_kasanaru');
+      say(`⛰ ${ruby('見', 'み')}よ！ ${W.umi}の${W.soko}に つもった${ruby('層', 'そう')}が、なん${ruby('万年', 'まんねん')}も たって <b>がけ</b>と なって あらわれた！ これが <b>${W.chiso}</b>じゃ！<br><br>💡 <b>たいせつポイント</b><br>${W.chiso}は ${ruby('水', 'みず')}の${W.soko}で ${ruby('長', 'なが')}い${ruby('年月', 'ねんげつ')}を かけて できる。しまの 1${ruby('本', 'ぽん')}1${ruby('本', 'ぽん')}が、むかしの「つもった${ruby('日', 'ひ')}」の きろく なんじゃ。`);
+      setButtons([{ label: 'がけを 発掘しよう！', cb: nextStep }]);
+    },
+  },
+
+  // --- M3：化石のなぞ ---
+  m_kaseki: {
+    enter() {
+      Object.assign(S, { view: 'cliff', scopeMode: 'suna', drain: 1 });
+      updateLoc();
+      S.tapEnabled = true;
+      S.phase = 'dig';
+      S.dug = new Set();
+      setWish('⛏', `がけの${ruby('中', 'なか')}に、なにかが うまっておる（✦が ひかっとる）。<b>3つ ほり出して</b> みるんじゃ！`);
+      say(`がけの ひかっている ところを <b>タッチして ほり出す</b>んじゃ！ なにが 出てくるかのう……`);
+      setButtons([]);
+    },
+    onDig(fid) {
+      if (S.dug.size >= 3) {
+        S.phase = 'quiz';
+        sYes();
+        say(`${ruby('貝', 'かい')}・${ruby('木', 'き')}の${ruby('葉', 'は')}・アンモナイト……これらは ${ruby('大昔', 'おおむかし')}の${ruby('生', 'い')}き${ruby('物', 'もの')}の あとかた、<b>${W.kaseki}</b>じゃ。<br>ここで ${ruby('問題', 'もんだい')}！ ${ruby('山', 'やま')}の がけから <b>${ruby('貝', 'かい')}の${W.kaseki}</b>が ${ruby('出', 'で')}た。ということは、ここは ${ruby('大昔', 'おおむかし')}……？ シートに 〇！`);
+        setButtons([
+          { label: 'Ａ 海だった', cls: 'choice', cb: el => this.answer(0) },
+          { label: 'Ｂ ずっと 山だった', cls: 'choice', cb: el => this.answer(1) },
+          { label: 'Ｃ さばくだった', cls: 'choice', cb: el => this.answer(2) },
+        ]);
+      } else {
+        say(`おお、${ruby('見', 'み')}つけたか！ のこりは あと <b>${3 - S.dug.size}つ</b>じゃ。ひかる ところを さがして タッチ！`);
+      }
+    },
+    answer(n) {
+      S.phase = 'done'; S.tapEnabled = false;
+      sYes(); scopeBurst(); award('m_kaseki');
+      const re = n === 0 ? 'せいかい！' : 'じつは——';
+      say(`${re} こたえは <b>Ａ ${ruby('海', 'うみ')}だった</b>！<br><br>💡 <b>たいせつポイント</b><br>${ruby('貝', 'かい')}は ${ruby('海', 'うみ')}に すむ${ruby('生', 'い')}き${ruby('物', 'もの')}。その${W.kaseki}が ${ruby('山', 'やま')}から ${ruby('出', 'で')}るのは、<b>この${ruby('地層', 'ちそう')}が ${ruby('海', 'うみ')}の${W.soko}で できたから</b>じゃ。${W.kaseki}は「むかし ここが どんな ばしょだったか」を おしえてくれる、${ruby('大地', 'だいち')}の${ruby('日記', 'にっき')}の <b>しゃしん</b>なんじゃよ。`);
+      setButtons([{ label: 'つぎへ（じゅんばんのなぞ）', cb: nextStep }]);
+    },
+  },
+
+  // --- M4：下ほど古い ---
+  m_yomu: {
+    enter() {
+      Object.assign(S, { view: 'cliff', scopeMode: 'reki', drain: 1, dug: new Set(['kai', 'ha', 'ammo']) });
+      updateLoc();
+      S.tapEnabled = true;
+      S.phase = 'oldest';
+      setWish('🕰', `①〜⑥の${ruby('層', 'そう')}のうち、<b>いちばん ${W.furui}</b>のは どれじゃ？ ${ruby('層', 'そう')}の かさなり${ruby('方', 'かた')}を ${ruby('思', 'おも')}い${ruby('出', 'だ')}すのじゃ。`);
+      say(`シートに ${ruby('番号', 'ばんごう')}で よそうを かいたら、がけの <b>その${ruby('層', 'そう')}を タッチ</b>して こたえるんじゃ！`);
+      setButtons([]);
+    },
+    onLayerTap(li, L) {
+      if (S.phase === 'oldest') {
+        if (li === 5) {
+          sYes(); burst(window.innerWidth * 0.35, window.innerHeight * 0.7, 50);
+          S.phase = 'newest';
+          say(`せいかい！ いちばん${ruby('下', 'した')}の <b>⑥</b>が いちばん ${W.furui}。${ruby('土', 'つち')}は ${ruby('上', 'うえ')}へ${ruby('上', 'うえ')}へと かさなるからのう。<br>では ぎゃくに——<b>いちばん ${ruby('新', 'あたら')}しい</b>${ruby('層', 'そう')}は？ タッチ！`);
+        } else {
+          sHmm();
+          say(`${'①②③④⑤⑥'[li]}かの？ ${ruby('思', 'おも')}い${ruby('出', 'だ')}すんじゃ——${ruby('土', 'つち')}は ${ruby('前', 'まえ')}の${ruby('層', 'そう')}の <b>${ruby('上', 'うえ')}</b>に つもったろう？ ということは、${ruby('古', 'ふる')}い${ruby('層', 'そう')}は どこに おいやられる？`);
+        }
+      } else if (S.phase === 'newest') {
+        if (li === 0) {
+          S.phase = 'done'; S.tapEnabled = false;
+          sYes(); scopeBurst(); award('m_yomu');
+          say(`✨ その${ruby('通', 'とお')}り！ いちばん${ruby('上', 'うえ')}の <b>①</b>が いちばん ${ruby('新', 'あたら')}しい！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.chiso}は <b>${ruby('下', 'した')}から ${ruby('順', 'じゅん')}に</b> できていく。だから ${ruby('下', 'した')}ほど ${W.furui}、${ruby('上', 'うえ')}ほど ${ruby('新', 'あたら')}しい。${W.chiso}を ${ruby('下', 'した')}から よめば、${ruby('大地', 'だいち')}の${ruby('歴史', 'れきし')}が ${ruby('順番', 'じゅんばん')}に わかるんじゃ！`);
+          setButtons([{ label: 'さいごの なぞへ！', cb: nextStep }]);
+        } else {
+          sHmm();
+          say(`おっと、${ruby('新', 'あたら')}しいのは さいごに つもった${ruby('層', 'そう')}——つまり いちばん <b>${ruby('上', 'うえ')}</b>じゃよ。`);
+        }
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：火山灰の層 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { view: 'cliff', scopeMode: 'suna', drain: 1, dug: new Set(['kai', 'ha', 'ammo']), selLayer: 2 });
+      updateLoc();
+      S.phase = 'ask';
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>じゃ！<br>③の${ruby('層', 'そう')}だけ、${ruby('色', 'いろ')}が はいいろで ようすが ちがう。この${ruby('層', 'そう')}の ${ruby('正体', 'しょうたい')}は なんじゃと${ruby('思', 'おも')}う？ シートに 〇！`);
+      setButtons([
+        { label: `Ａ ${ruby('火山', 'かざん')}の はい（火山灰）`, cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 海の すなの 一種', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ コンクリート', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      S.pick = n;
+      say(`ふむ。それでは ${ruby('決定的', 'けっていてき')}な しょうこを ${ruby('見', 'み')}せよう。<b>🔍ボタン</b>で ③の${ruby('層', 'そう')}の ${W.tsubu}を ${ruby('拡大', 'かくだい')}じゃ！`);
+      setControls([{ label: '🔍 ③の層の つぶを しらべる', cb: () => this.reveal() }]);
+      setButtons([]);
+    },
+    reveal() {
+      S.phase = 'done';
+      S.scopeMode = 'kazanbai';
+      setControls([]);
+      const hit = S.pick === 0 ? 'よそう どおり！' : 'おどろいたかの！';
+      sYes(); scopeBurst(); award('hakase');
+      say(`${ruby('見', 'み')}よ、${W.tsubu}が <b>かくばっておる</b>！ こたえは <b>Ａ ${W.kazanbai}</b>じゃ。${hit}<br><br>💡 <b>たいせつポイント</b><br>${ruby('川', 'かわ')}を ${ruby('旅', 'たび')}した すなの${W.tsubu}は、ころがって <b>${ruby('丸', 'まる')}く</b>なる（${ruby('前', 'まえ')}の${ruby('授業', 'じゅぎょう')}の ${ruby('石', 'いし')}と おなじ！）。じゃが この${W.tsubu}は <b>かくばったまま</b>——つまり ${ruby('水', 'みず')}を ${ruby('通', 'とお')}らず、<b>${ruby('空', 'そら')}から ふってきた</b>。${ruby('大昔', 'おおむかし')}、ちかくで ${ruby('火山', 'かざん')}の <b>${W.funka}</b>が あった しょうこ なんじゃ！`);
+      setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      showOverlay(`
+        <h2>⭐ みならい ちそう${ruby('発掘隊', 'はっくつたい')} にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.chiso}は（<span class="blankWord" data-a="水">？？？</span>）の${W.soko}に、${W.tsubu}の${ruby('大', 'おお')}きさで 分かれた${ruby('土', 'つち')}が つもって できる。<br>
+        ② ${ruby('下', 'した')}の${ruby('層', 'そう')}ほど（<span class="blankWord" data-a="古い">？？？</span>）。<br>
+        ③ ${ruby('山', 'やま')}のがけから ${ruby('貝', 'かい')}の${W.kaseki}が ${ruby('出', 'で')}たら、そこは${ruby('大昔', 'おおむかし')}（<span class="blankWord" data-a="海">？？？</span>）だった。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>②「${ruby('水', 'みず')}の${W.soko}に ${ruby('土', 'つち')}が つもって できた」</b>でした！ しまもようは、なん${ruby('万年', 'まんねん')}ぶんの「つもった きろく」だったんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>${ruby('近', 'ちか')}くの がけ・${ruby('切', 'き')}り${ruby('通', 'どお')}し・${ruby('工事現場', 'こうじげんば')}の あとで、<b>しま${ruby('模様', 'もよう')}</b>を さがしてみよう。${ruby('見', 'み')}つけたら「${ruby('下', 'した')}ほど ${ruby('古', 'ふる')}い」を ${ruby('思', 'おも')}い${ruby('出', 'だ')}してね。まえの${ruby('授業', 'じゅぎょう')}の「${ruby('丸', 'まる')}い${ruby('石', 'いし')}」も セットで さがすと はかせ${ruby('級', 'きゅう')}！<br>
+        🚨 やくそく：がけには ${ruby('近', 'ちか')}よらない・のぼらない。${ruby('工事現場', 'こうじげんば')}に ${ruby('入', 'はい')}らない。${ruby('大人', 'おとな')}と いっしょに、はなれた ところから ${ruby('見', 'み')}るだけ。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#3a8a3a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { view: 'cliff', drain: 1, dug: new Set(['kai', 'ha', 'ammo']) });
+      updateLoc();
+      S.tapEnabled = true; S.phase = 'free';
+      say(`<b>じゆうモード</b>じゃ！ がけの${ruby('層', 'そう')}や ${W.kaseki}を タッチして しらべながら、${ruby('友', 'とも')}だちと クイズを ${ruby('出', 'だ')}しあうのじゃ。<br>れい：「④と⑤、${ruby('古', 'ふる')}いのは どっち？」「${W.kazanbai}の ${W.tsubu}の ${ruby('形', 'かたち')}は？」`);
+      setButtons([
+        { label: '🌊 うみの じっけん場に もどる', cls: 'sub', cb: () => {
+          Object.assign(S, { view: 'sea', drain: 0, repeats: 0, fillProg: 0, scopeMode: 'mix' });
+          updateLoc(); sTap();
+          setControls([{ label: '🪣 土を ながす', cb: () => { if (!S.flowing) { S.flowing = true; S.fillProg = 0; sFlow(); } } }]);
+        } },
+        { label: '⛰ がけに もどる', cls: 'sub', cb: () => {
+          Object.assign(S, { view: 'cliff', drain: 1 });
+          updateLoc(); sTap(); setControls([]);
+        } },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    onLayerDone() { S.repeats = Math.min(S.repeats, 3); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kaseki などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

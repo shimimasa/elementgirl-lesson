@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>星めぐりの塔 — 星の動き たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #0a0e24 0%, #131a3d 60%, #1a2150 100%);
+    color: #f2efff;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- 背景の星 ---------- */
+  #starsLayer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .bgstar {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: .85; } }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #ffe9a8; text-shadow: 0 0 14px rgba(255, 214, 107, .55);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #bdc4f5; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #1c2450; border: 2px solid #3a437a;
+    font-size: clamp(16px, 1.8vw, 26px); color: #444d86;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2a93b);
+    border-color: #ffd66b; color: #7a4d00;
+    box-shadow: 0 0 16px rgba(255, 214, 107, .8);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #1a2150 0%, #10152f 70%, #0a0e24 100%);
+    border: 2px solid #3a437a;
+    box-shadow: inset 0 0 60px rgba(120, 140, 255, .12), 0 4px 24px rgba(0,0,0,.4);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #aab3ff; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #timeChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #ffd66b; color: #5a3c00; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 0 14px rgba(255, 214, 107, .5);
+  }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #zoomWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #c9a44a; overflow: hidden;
+    box-shadow: 0 0 24px rgba(255, 220, 140, .28), inset 0 0 30px rgba(0,0,0,.5);
+    flex-shrink: 0;
+  }
+  #zoom { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #zoomCaption {
+    text-align: center; color: #bdc4f5;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #ffe9a8; text-shadow: 0 0 12px rgba(255, 214, 107, .4);
+    min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #1b2245d9; border: 1px solid #3a437a; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #bdc4f5; }
+  .cat { width: 100%; animation: floaty 4s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .cat .tail { transform-origin: 22px 92px; animation: sway 3.2s ease-in-out infinite; }
+  @keyframes sway { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(14deg); } }
+  .cat .eyes { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.12); } }
+
+  #bubble {
+    flex: 1; background: #fdfbf4; color: #33304a;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fdfbf4;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #7a4d00; background: #ffefc2; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fff8e3, #ffefc2); color: #5a4300;
+    border: 2px dashed #d9a520; border-radius: 14px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #a8760a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ffd66b, #f2a93b); color: #3a2a00;
+    box-shadow: 0 3px 0 #b97e17, 0 6px 14px rgba(0,0,0,.35);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #b97e17; }
+  .btn.sub {
+    background: #2a3468; color: #cfd6ff; box-shadow: 0 3px 0 #171d3f;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fdfbf4; color: #33304a; box-shadow: 0 3px 0 #b5b0d0; font-weight: 400; }
+  .btn.choice.picked { background: #ffefc2; outline: 3px solid #f2a93b; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(7, 9, 24, .9); backdrop-filter: blur(3px);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #1b2249, #141a3d);
+    border: 2px solid #3a437a; border-radius: 26px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 0 60px rgba(120, 140, 255, .18);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(30px, 5vw, 58px);
+    color: #ffe9a8; text-shadow: 0 0 24px rgba(255, 214, 107, .6);
+    letter-spacing: .06em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #ffe9a8; }
+  .panel .sub { color: #bdc4f5; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fdfbf4; color: #33304a; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8f96c8; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .35em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fdfbf4; color: #33304a; border-radius: 16px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid transparent; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #f2a93b; background: #fff4d6; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #f2a93b; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #ffd66b;
+    color: #ffd66b; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .35; transition: opacity .2s; font-size: 12px; color: #8f96c8;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #1c2450; color: #cfd6ff;
+    border: 1px solid #3a437a; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #2a3468; }
+</style>
+</head>
+<body>
+<div id="starsLayer"></div>
+
+<header>
+  <div id="logo">🌌 <ruby>星<rt>ほし</rt></ruby>めぐりの<ruby>塔<rt>とう</rt></ruby><small>— <ruby>星<rt>ほし</rt></ruby>の<ruby>動<rt>うご</rt></ruby>き たいけん —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_bright" title="あかるさ">★</div>
+    <div class="badge" id="bd_m_triangle" title="夏の大三角">★</div>
+    <div class="badge" id="bd_m_cassio" title="カシオペヤ">★</div>
+    <div class="badge" id="bd_m_rotate" title="星の回転">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">✦ よぞらビュー</div>
+    <div id="timeChip">⏰ よる8<ruby>時<rt>じ</rt></ruby></div>
+  </section>
+
+  <aside id="side">
+    <div id="zoomWrap">
+      <canvas id="zoom"></canvas>
+    </div>
+    <div id="zoomCaption">🔭 <ruby>星<rt>ほし</rt></ruby>のむしめがね 〜タッチした<ruby>星<rt>ほし</rt></ruby>を<ruby>拡大<rt>かくだい</rt></ruby>〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="cat" viewBox="0 0 120 132" aria-hidden="true">
+            <path class="tail" d="M20 106 C 0 100, 2 72, 22 80" fill="none" stroke="#232433" stroke-width="10" stroke-linecap="round"/>
+            <ellipse cx="60" cy="102" rx="34" ry="26" fill="#232433"/>
+            <ellipse cx="46" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <ellipse cx="74" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <path d="M36 44 L29 14 L54 30 Z" fill="#232433"/>
+            <path d="M84 44 L91 14 L66 30 Z" fill="#232433"/>
+            <path d="M38 39 L34 21 L49 31 Z" fill="#6b5aa0"/>
+            <path d="M82 39 L86 21 L71 31 Z" fill="#6b5aa0"/>
+            <circle cx="60" cy="60" r="30" fill="#232433"/>
+            <g class="eyes">
+              <ellipse cx="49" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <ellipse cx="71" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <circle cx="49" cy="62" r="2.7" fill="#1b1c26"/>
+              <circle cx="71" cy="62" r="2.7" fill="#1b1c26"/>
+            </g>
+            <path d="M57 68 l3 3 l3 -3 z" fill="#f0a0b0"/>
+            <path d="M55 74 Q60 78 65 74" stroke="#8f93b8" fill="none" stroke-width="2" stroke-linecap="round"/>
+            <path d="M28 62 h14 M29 69 h13 M78 62 h14 M78 69 h13" stroke="#8f93b8" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="60" cy="90" r="5" fill="#ffd66b"/>
+            <path d="M58 4 L76 34 Q60 27 44 34 Z" fill="#4a3d8f"/>
+            <ellipse cx="60" cy="35" rx="27" ry="7" fill="#5a4aa8"/>
+            <circle cx="57" cy="12" r="3.6" fill="#ffd66b"/>
+          </svg>
+          <div class="catname">てんしゅ ルナ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">✉ お客さまの おねがいカード</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   星めぐりの塔 — 星の動き体験（小4理科・協力型・1ファイル）
+   明るさ・色／星座／星は動くが並び方は変わらない／北の空は北極星中心
+   星は1時間に約15度動く → 3時間で45度（①〜⑧の1マスぶん）
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const deg = d => d * Math.PI / 180;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+const W = {
+  hoshi: ruby('星', 'ほし'),
+  ugoki: ruby('動', 'うご') + 'き',
+  seiza: ruby('星座', 'せいざ'),
+  hokkyokusei: ruby('北極星', 'ほっきょくせい'),
+  hokuto: ruby('北斗七星', 'ほくとしちせい'),
+  natsu: ruby('夏', 'なつ'),
+  daisankaku: ruby('大三角', 'だいさんかく'),
+  itto: '1' + ruby('等星', 'とうせい'),
+  kita: ruby('北', 'きた'),
+  minami: ruby('南', 'みなみ'),
+  higashi: ruby('東', 'ひがし'),
+  nishi: ruby('西', 'にし'),
+};
+
+// ---------- 星のデータ（教える用の模式配置） ----------
+// 色: bw=青白 w=白 o=だいだい r=赤
+const COLS = { bw: '#cfe0ff', w: '#fff6e0', o: '#ffcf9a', r: '#ff9a8a' };
+const colName = { bw: '青白い', w: '白っぽい', o: 'だいだい色', r: '赤い' };
+
+// 南の空（夏・よる8時ごろ）論理1000×700 地平線y=620
+const SOUTH = [
+  { x: 430, y: 150, tier: 1, col: 'bw', name: 'ベガ', kana: 'べが', extra: '（おりひめ星）', brightest: true },
+  { x: 590, y: 115, tier: 1, col: 'w', name: 'デネブ', kana: 'でねぶ' },
+  { x: 540, y: 330, tier: 1, col: 'w', name: 'アルタイル', kana: 'あるたいる', extra: '（ひこぼし星）' },
+  { x: 300, y: 520, tier: 1, col: 'r', name: 'アンタレス', kana: 'あんたれす', red: true },
+  // さそり座のまわりの星（2〜3等）
+  { x: 262, y: 480, tier: 2, col: 'w' }, { x: 250, y: 555, tier: 2, col: 'w' },
+  { x: 290, y: 590, tier: 3, col: 'w' }, { x: 340, y: 600, tier: 3, col: 'o' },
+  // はくちょう座（デネブのまわり）
+  { x: 640, y: 170, tier: 2, col: 'w' }, { x: 555, y: 185, tier: 2, col: 'w' }, { x: 690, y: 130, tier: 3, col: 'bw' },
+  // そのほかの星（3等）
+  { x: 130, y: 200, tier: 3, col: 'w' }, { x: 200, y: 320, tier: 3, col: 'w' },
+  { x: 700, y: 320, tier: 3, col: 'w' }, { x: 790, y: 200, tier: 3, col: 'o' },
+  { x: 840, y: 420, tier: 3, col: 'w' }, { x: 120, y: 450, tier: 3, col: 'bw' },
+  { x: 480, y: 470, tier: 3, col: 'w' }, { x: 640, y: 520, tier: 3, col: 'w' },
+  { x: 900, y: 120, tier: 3, col: 'w' }, { x: 360, y: 250, tier: 3, col: 'w' },
+];
+const TRI = [0, 1, 2];   // ベガ・デネブ・アルタイル
+const TRI_EDGES = [[0, 1], [1, 2], [2, 0]];
+
+// 北の空 論理1000×700 北極星を中心に回る
+const POLARIS = { x: 500, y: 280 };
+const NORTH = [
+  { x: 500, y: 280, tier: 2, col: 'w', name: '北極星', kana: 'ほっきょくせい', group: 'pol' },
+  // カシオペヤ座（W）中心は北極星の右（③の位置）
+  { x: 662, y: 250, tier: 2, col: 'w', group: 'cas' },
+  { x: 688, y: 288, tier: 2, col: 'w', group: 'cas' },
+  { x: 715, y: 258, tier: 3, col: 'w', group: 'cas' },
+  { x: 742, y: 295, tier: 2, col: 'w', group: 'cas' },
+  { x: 768, y: 262, tier: 3, col: 'o', group: 'cas' },
+  // 北斗七星（ひしゃく）左がわ（⑦のあたり）
+  { x: 205, y: 385, tier: 2, col: 'w', group: 'dip' },
+  { x: 252, y: 362, tier: 2, col: 'w', group: 'dip' },
+  { x: 300, y: 352, tier: 2, col: 'w', group: 'dip' },
+  { x: 348, y: 345, tier: 2, col: 'w', group: 'dip' },
+  { x: 402, y: 355, tier: 2, col: 'w', group: 'dip' },
+  { x: 398, y: 412, tier: 3, col: 'w', group: 'dip' },
+  { x: 342, y: 408, tier: 2, col: 'w', group: 'dip' },
+  // そのほか
+  { x: 550, y: 120, tier: 3, col: 'w' }, { x: 780, y: 420, tier: 3, col: 'w' },
+  { x: 150, y: 180, tier: 3, col: 'w' }, { x: 620, y: 480, tier: 3, col: 'bw' },
+  { x: 380, y: 170, tier: 3, col: 'w' }, { x: 850, y: 180, tier: 3, col: 'o' },
+];
+const CAS = [1, 2, 3, 4, 5];
+const CAS_EDGES = [[1, 2], [2, 3], [3, 4], [4, 5]];
+const DIP = [6, 7, 8, 9, 10, 11, 12];
+const DIP_EDGES = [[6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 9]];
+
+// ①〜⑧の位置マーク（時計まわりに①=上）
+const DIAL_R = 215;
+const DIAL = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
+const dialAngle = i => 90 - i * 45;   // ①=90°(上) ②=45° ③=0°(右) …数学角・yは上むき
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  view: 'south',        // south / north
+  rotN: 0,              // 北の空の回転（度・反時計まわり）
+  rotS: 0,              // 南の空の動き（度）
+  timeH: 20,            // よる8時
+  sel: null,            // えらんだ星 {list, idx}
+  collected: new Set(),
+  tapEnabled: false,
+  linesTri: false, linesCas: false, linesDip: false,
+  showDial: false,
+  anim: null,           // {prop, from, to, dur, t, cb}
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+};
+const stars = () => S.view === 'south' ? SOUTH : NORTH;
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sPick = () => tone(1046, 0, 0.12, 'sine', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), zoomCv = $('zoom'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), zctx = zoomCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+(function makeBgStars() {
+  const layer = $('starsLayer');
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('span');
+    s.className = 'bgstar';
+    const size = 1 + Math.random() * 2.2;
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;animation-delay:${Math.random() * 3}s;`;
+    layer.appendChild(s);
+  }
+})();
+
+// ---------- 座標変換 ----------
+const PAD_T = 56, PAD_B = 10, PAD_X = 12;
+const MAPW = 1000, MAPH = 700;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+// 星の現在位置（論理座標）：回転を反映
+function starPos(list, st) {
+  if (list === NORTH) {
+    const a = deg(S.rotN);
+    const dx = st.x - POLARIS.x, dy = st.y - POLARIS.y;
+    // 反時計まわり（見た目）＝ y下向き座標では -a 回転
+    return {
+      x: POLARIS.x + dx * Math.cos(a) + dy * Math.sin(a),
+      y: POLARIS.y - dx * Math.sin(a) + dy * Math.cos(a),
+    };
+  }
+  // 南の空：はるか下の点を中心に回す→左（東）から右（西）へ弧をえがく
+  // （3時間＝45°を、大三角が画面内に残る見かけの角度に縮めて表現）
+  const C = { x: 500, y: 2600 };
+  const a = deg(S.rotS) * 0.2;
+  const dx = st.x - C.x, dy = st.y - C.y;
+  return {
+    x: C.x + dx * Math.cos(a) - dy * Math.sin(a),
+    y: C.y + dx * Math.sin(a) + dy * Math.cos(a),
+  };
+}
+
+// ---------- 星空の描画 ----------
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  const list = stars();
+
+  // 地平線と山なみ
+  const horizonY = Y(625);
+  gctx.fillStyle = '#191537';
+  gctx.beginPath();
+  gctx.moveTo(0, h);
+  gctx.lineTo(0, horizonY + 14);
+  gctx.quadraticCurveTo(w * 0.2, horizonY - 26, w * 0.42, horizonY + 4);
+  gctx.quadraticCurveTo(w * 0.62, horizonY + 24, w * 0.8, horizonY - 10);
+  gctx.quadraticCurveTo(w * 0.92, horizonY - 26, w, horizonY + 6);
+  gctx.lineTo(w, h);
+  gctx.closePath(); gctx.fill();
+  // 月よみ堂の塔（シリーズのつながり）
+  gctx.fillStyle = '#191537';
+  gctx.fillRect(w * 0.86, horizonY - 44, w * 0.045, 46);
+  gctx.beginPath();
+  gctx.moveTo(w * 0.851, horizonY - 44); gctx.lineTo(w * 0.8825, horizonY - 66); gctx.lineTo(w * 0.914, horizonY - 44);
+  gctx.closePath(); gctx.fill();
+  gctx.fillStyle = `rgba(255,214,107,${0.75 + 0.25 * Math.sin(t * 2.2)})`;
+  gctx.fillRect(w * 0.872, horizonY - 30, w * 0.018, 9);
+
+  // 方角ラベル
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillStyle = '#ffe9a8';
+  gctx.font = `700 ${Math.max(20, 40 * sc)}px sans-serif`;
+  gctx.fillText(S.view === 'south' ? '南' : '北', w / 2, h - 24);
+  gctx.font = `700 ${Math.max(13, 24 * sc)}px sans-serif`;
+  gctx.fillStyle = '#aab3ff';
+  if (S.view === 'south') { gctx.fillText('東', 30, h - 24); gctx.fillText('西', w - 30, h - 24); }
+  else { gctx.fillText('西', 30, h - 24); gctx.fillText('東', w - 30, h - 24); }
+
+  // ①〜⑧の位置マーク（北の空・M4用）
+  if (S.view === 'north' && S.showDial) {
+    gctx.font = `${Math.max(16, 30 * sc)}px sans-serif`;
+    for (let i = 0; i < 8; i++) {
+      const a = deg(dialAngle(i));
+      const px = X(POLARIS.x + Math.cos(a) * DIAL_R), py = Y(POLARIS.y - Math.sin(a) * DIAL_R);
+      gctx.globalAlpha = 0.85;
+      gctx.fillStyle = '#ffe9a8';
+      gctx.fillText(DIAL[i], px, py);
+    }
+    gctx.globalAlpha = 1;
+    // 回転の中心じるし
+    gctx.strokeStyle = 'rgba(255,233,168,.35)';
+    gctx.lineWidth = 1.5; gctx.setLineDash([5, 7]);
+    gctx.beginPath(); gctx.arc(X(POLARIS.x), Y(POLARIS.y), DIAL_R * sc, 0, TAU); gctx.stroke();
+    gctx.setLineDash([]);
+  }
+
+  // 星座の線
+  const drawEdges = (edges, on) => {
+    if (!on) return;
+    gctx.strokeStyle = 'rgba(255,214,107,.75)';
+    gctx.lineWidth = 2.5;
+    edges.forEach(([a, b]) => {
+      if (S.phase === 'collect' && !(S.collected.has(a) && S.collected.has(b))) return;
+      const pa = starPos(list, list[a]), pb = starPos(list, list[b]);
+      gctx.beginPath();
+      gctx.moveTo(X(pa.x), Y(pa.y)); gctx.lineTo(X(pb.x), Y(pb.y));
+      gctx.stroke();
+    });
+  };
+  if (S.view === 'south') drawEdges(TRI_EDGES, S.linesTri);
+  else { drawEdges(CAS_EDGES, S.linesCas); drawEdges(DIP_EDGES, S.linesDip); }
+
+  // 星
+  list.forEach((st, i) => {
+    const p = starPos(list, st);
+    const px = X(p.x), py = Y(p.y);
+    if (py > horizonY + 6) return;   // 地平線の下
+    const base = st.tier === 1 ? 7 : st.tier === 2 ? 4.5 : 2.8;
+    const r = base * Math.max(sc, 0.5) * (st.brightest ? 1.25 : 1);
+    const tw = 0.7 + 0.3 * Math.sin(t * (2 + i * 0.7) + i);
+    gctx.save();
+    gctx.globalAlpha = tw;
+    gctx.shadowColor = COLS[st.col]; gctx.shadowBlur = r * 2.2;
+    gctx.fillStyle = COLS[st.col];
+    gctx.beginPath(); gctx.arc(px, py, r, 0, TAU); gctx.fill();
+    // 1等星は十字のかがやき
+    if (st.tier === 1) {
+      gctx.strokeStyle = COLS[st.col]; gctx.lineWidth = 1.2;
+      gctx.beginPath();
+      gctx.moveTo(px - r * 2.4, py); gctx.lineTo(px + r * 2.4, py);
+      gctx.moveTo(px, py - r * 2.4); gctx.lineTo(px, py + r * 2.4);
+      gctx.stroke();
+    }
+    gctx.restore();
+    // あつめた星のしるし
+    if (S.collected.has(i) && ((S.view === 'south' && TRI.includes(i)) || (S.view === 'north' && CAS.includes(i)))) {
+      gctx.strokeStyle = '#ffd66b'; gctx.lineWidth = 2;
+      gctx.beginPath(); gctx.arc(px, py, r + 6, 0, TAU); gctx.stroke();
+    }
+    // 名前ラベル（線がひかれたあと）
+    if (st.name && ((S.view === 'south' && S.linesTri && TRI.includes(i)) || (i === 0 && S.view === 'north'))) {
+      gctx.fillStyle = '#ffe9a8';
+      gctx.font = `700 ${Math.max(13, 24 * sc)}px sans-serif`;
+      gctx.fillText(st.name, px, py - r - 16);
+    }
+  });
+
+  // えらんだ星のわく
+  if (S.sel && S.sel.list === S.view) {
+    const st = list[S.sel.idx];
+    const p = starPos(list, st);
+    gctx.strokeStyle = '#7ee787';
+    gctx.lineWidth = 2.5;
+    gctx.setLineDash([6, 5]);
+    gctx.lineDashOffset = -t * 20 % 11;
+    gctx.beginPath(); gctx.arc(X(p.x), Y(p.y), 16, 0, TAU); gctx.stroke();
+    gctx.setLineDash([]);
+  }
+}
+
+// ---------- 星のむしめがね ----------
+function drawZoom(t) {
+  const { w, h, dpr } = fitCanvas(zoomCv);
+  zctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  zctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+  let grd = zctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#141a3d'); grd.addColorStop(1, '#0a0e24');
+  zctx.fillStyle = grd; zctx.fillRect(0, 0, w, h);
+
+  if (!S.sel || S.sel.list !== S.view) {
+    zctx.fillStyle = '#8f96c8';
+    zctx.font = `${R * 0.115}px sans-serif`;
+    zctx.textAlign = 'center'; zctx.textBaseline = 'middle';
+    zctx.fillText('星を タッチしてみて', R, R);
+    return;
+  }
+  const st = stars()[S.sel.idx];
+  const r = (st.tier === 1 ? R * 0.3 : st.tier === 2 ? R * 0.2 : R * 0.13) * (st.brightest ? 1.2 : 1);
+  const tw = 0.85 + 0.15 * Math.sin(t * 3);
+  zctx.save();
+  zctx.globalAlpha = tw;
+  zctx.shadowColor = COLS[st.col]; zctx.shadowBlur = r * 1.5;
+  zctx.fillStyle = COLS[st.col];
+  zctx.beginPath(); zctx.arc(R, R * 0.82, r, 0, TAU); zctx.fill();
+  zctx.strokeStyle = COLS[st.col]; zctx.lineWidth = 2;
+  zctx.beginPath();
+  zctx.moveTo(R - r * 2, R * 0.82); zctx.lineTo(R + r * 2, R * 0.82);
+  zctx.moveTo(R, R * 0.82 - r * 2); zctx.lineTo(R, R * 0.82 + r * 2);
+  zctx.stroke();
+  zctx.restore();
+  zctx.fillStyle = '#ffe9a8';
+  zctx.font = `700 ${R * 0.13}px sans-serif`;
+  zctx.textAlign = 'center';
+  zctx.fillText(st.name || 'なまえのない星', R, h - R * 0.42);
+  zctx.fillStyle = '#bdc4f5';
+  zctx.font = `${R * 0.1}px sans-serif`;
+  zctx.fillText(`${st.tier}等星・${colName[st.col]}`, R, h - R * 0.24);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: Math.random() < 0.6 ? '#ffd66b' : (Math.random() < 0.5 ? '#fff' : '#b9a8ff'),
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  // アニメーション（時間送り）
+  if (S.anim) {
+    const a = S.anim;
+    a.t += dt;
+    const p = clamp(a.t / a.dur, 0, 1);
+    const eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    S[a.prop] = a.from + (a.to - a.from) * eased;
+    S.timeH = 20 + 3 * p;
+    updateTime();
+    if (p >= 1) { const cb = a.cb; S.anim = null; if (cb) cb(); }
+  }
+  drawStage(t);
+  drawZoom(t);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+function updateTime() {
+  const hh = Math.floor(S.timeH);
+  $('timeChip').innerHTML = `⏰ よる${hh - 12}<ruby>時<rt>じ</rt></ruby>${S.timeH - hh > 0.5 ? 'はん' : ''}`;
+}
+
+// ---------- タッチ ----------
+stageCv.addEventListener('pointerdown', ev => {
+  ac();
+  if (!S.tapEnabled) return;
+  const r = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(r.width, r.height);
+  const mx = (ev.clientX - r.left - ox) / sc, my = (ev.clientY - r.top - oy) / sc;
+  const list = stars();
+  let best = -1, bestD = 45;   // 論理45px以内
+  list.forEach((st, i) => {
+    const p = starPos(list, st);
+    const d = Math.hypot(p.x - mx, p.y - my);
+    if (d < bestD) { bestD = d; best = i; }
+  });
+  if (best < 0) return;
+  S.sel = { list: S.view, idx: best };
+  sPick();
+  const st = list[best];
+  $('stateName').innerHTML = st.name
+    ? `${st.name}${st.extra || ''}・${st.tier}${ruby('等星', 'とうせい')}`
+    : `なまえのない${ruby('小', 'ちい')}さな${W.hoshi}（${st.tier}${ruby('等星', 'とうせい')}）`;
+  const step = STEPS[FLOW[S.stepIndex]];
+  if (step.onTap) step.onTap(best, st);
+});
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+function setView(v) { S.view = v; S.sel = null; $('stateName').innerHTML = ''; }
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_bright', 'm_triangle', 'm_cassio', 'm_rotate', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = null; S.collected = new Set();
+  S.tapEnabled = false; S.showDial = false;
+  S.rotN = 0; S.rotS = 0; S.timeH = 20; updateTime();
+  hideOverlay(); hideWish();
+  STEPS[FLOW[S.stepIndex]].enter();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      setView('south'); S.linesTri = false;
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌌🔭⭐🌠🌙</div>
+        <h1>${ruby('星', 'ほし')}めぐりの${ruby('塔', 'とう')}</h1>
+        <div class="sub">〜 ${W.hoshi}の ひみつを めぐる、みならい${ruby('星', 'ほし')}よみ ぼしゅう${ruby('中', 'ちゅう')} 〜</div>
+        <p class="talk">おかえり！ ${ruby('月', 'つき')}よみ${ruby('堂', 'どう')}の ルナだよ。<br>
+        こんやは とくべつ。おみせの おくじょうに ある <b>${ruby('星', 'ほし')}めぐりの${ruby('塔', 'とう')}</b>に しょうたいするね。<br>
+        ここの まほうの ${ruby('望遠鏡', 'ぼうえんきょう')}は、${W.hoshi}を さわって しらべられるの。<br>
+        こんやも お${ruby('客', 'きゃく')}さまの おねがいを かなえながら——<b>${W.hoshi}の ひみつ</b>を いっしょに めぐろう！</p>
+        <button class="btn" id="startBtn">${ruby('塔', 'とう')}に のぼる</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。星はタッチ（クリック）でしらべられます。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      setView('south');
+      showOverlay(`
+        <h2>⭐ よそうタイム</h2>
+        <p class="talk">よるの あいだ、そらの ${W.hoshi}は どうなっていると ${ruby('思', 'おも')}う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">📌</span><b>①</b> ずっと おなじ ばしょに ある</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌠</span><b>②</b> みんなで そろって ${ruby('動', 'うご')}く（ならび${ruby('方', 'かた')}は そのまま）</div>
+          <div class="vcard" data-v="2"><span class="vicon">🎆</span><b>③</b> バラバラに ${ruby('動', 'うご')}いて、ならび${ruby('方', 'かた')}も かわる</div>
+        </div>
+        <div class="sub">思うものに タッチ（いくつでも）。かんさつノート（シート）にも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめに いこう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); c.classList.toggle('picked');
+          const v = +c.dataset.v;
+          S.votePicked.has(v) ? S.votePicked.delete(v) : S.votePicked.add(v);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：明るさと色 ---
+  m_bright: {
+    enter() {
+      setView('south'); S.linesTri = false;
+      S.tapEnabled = true; S.phase = 'brightest';
+      setWish('🧚', `${ruby('星', 'ほし')}の ようせいから：「${ruby('南', 'みなみ')}の そらで <b>いちばん ${ruby('明', 'あか')}るい ${W.hoshi}</b>に あいたいの。さがして タッチして！」`);
+      say(`${ruby('南', 'みなみ')}の そらだよ。${W.hoshi}を タッチすると、むしめがねに ${ruby('拡大', 'かくだい')}されるよ。<br>まずは <b>いちばん ${ruby('明', 'あか')}るい ${W.hoshi}</b>を さがそう！ みんなで 「あれじゃない？」と ${ruby('声', 'こえ')}を かけてね。`);
+      setButtons([]);
+    },
+    onTap(i, st) {
+      if (S.phase === 'brightest') {
+        if (st.brightest) {
+          sYes(); stageBurst();
+          S.phase = 'red';
+          say(`せいかい！ <b>ベガ</b>——たなばたの <b>おりひめ${ruby('星', 'ぼし')}</b>だよ。${ruby('夏', 'なつ')}の そらで いちばん ${ruby('明', 'あか')}るい。<br>では つぎ！ こんどは <b>${ruby('赤', 'あか')}っぽい ${ruby('色', 'いろ')}の ${W.hoshi}</b>を さがして タッチ！ ひくい ところも 見てみて。`);
+          setWish('🧚', `「ありがとう！ もうひとつ——<b>${ruby('赤', 'あか')}い ${W.hoshi}</b>も いるって きいたの。さがして！」`);
+        } else if (st.tier === 1) {
+          sHmm();
+          say(`おしい！ その${W.hoshi}も ${W.itto}で とても ${ruby('明', 'あか')}るい。でも……<b>もっと ${ruby('明', 'あか')}るい ${W.hoshi}</b>が あるよ。むしめがねで くらべてみて！`);
+        } else {
+          sHmm();
+          say(`それは ${st.tier}${ruby('等星', 'とうせい')}。もっと <b>${ruby('大', 'おお')}きく かがやいている</b> ${W.hoshi}を さがしてみよう！`);
+        }
+      } else if (S.phase === 'red') {
+        if (st.red) {
+          S.phase = 'done'; S.tapEnabled = false;
+          sYes(); stageBurst(); award('m_bright');
+          say(`✨ みつけた！ <b>アンタレス</b>、さそり${ruby('座', 'ざ')}の ${ruby('赤', 'あか')}い ${W.itto}！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.hoshi}には <b>${ruby('明', 'あか')}るさの ちがい</b>（1${ruby('等星', 'とうせい')}・2${ruby('等星', 'とうせい')}…）と、<b>${ruby('色', 'いろ')}の ちがい</b>（${ruby('青白', 'あおじろ')}い〜${ruby('赤', 'あか')}い）が あるんだ。`);
+          setButtons([{ label: 'つぎの おねがいへ', cb: nextStep }]);
+        } else {
+          sHmm();
+          say(`その${W.hoshi}は ${colName[st.col]}${ruby('色', 'いろ')}。さがすのは <b>${ruby('赤', 'あか')}い</b> ${W.hoshi}！ むしめがねの ${ruby('色', 'いろ')}を ヒントにね。`);
+        }
+      }
+    },
+  },
+
+  // --- M2：夏の大三角 ---
+  m_triangle: {
+    enter() {
+      setView('south'); S.linesTri = true; S.phase = 'collect'; S.collected = new Set();
+      S.tapEnabled = true;
+      setWish('🎋', `おりひめと ひこぼしから：「わたしたちの ${W.hoshi}と、はくちょうの <b>デネブ</b>を つないで、<b>${W.natsu}の${W.daisankaku}</b>を かがやかせて！」`);
+      say(`${ruby('星', 'ほし')}を 3つ つないで <b>${W.natsu}の${W.daisankaku}</b>を つくろう！<br><b>ベガ（おりひめ${ruby('星', 'ぼし')}）・アルタイル（ひこぼし${ruby('星', 'ぼし')}）・デネブ</b>の 3つを さがして タッチ！ まよったら タッチして ${ruby('名前', 'なまえ')}を たしかめてね。`);
+      setButtons([]);
+    },
+    onTap(i, st) {
+      if (S.phase !== 'collect') return;
+      if (TRI.includes(i)) {
+        if (!S.collected.has(i)) { S.collected.add(i); sPick(); }
+        if (S.collected.size >= 3) {
+          S.phase = 'done'; S.tapEnabled = false;
+          sYes(); stageBurst(); award('m_triangle');
+          say(`✨ ${W.natsu}の${W.daisankaku}、かんせい！ ✨<br><br>💡 <b>たいせつポイント</b><br>3つは それぞれ べつの ${W.seiza}の ${W.hoshi}（こと${ruby('座', 'ざ')}・わし${ruby('座', 'ざ')}・はくちょう${ruby('座', 'ざ')}）。${W.hoshi}の あつまりを かたちに 見立てて ${ruby('名前', 'なまえ')}を つけたものが <b>${W.seiza}</b>だよ。`);
+          setButtons([{ label: `つぎは ${W.kita}の そらへ！`, cb: nextStep }]);
+        } else {
+          say(`いいね！ <b>${st.name}</b>を ゲット。あと ${3 - S.collected.size}つ！`);
+        }
+      }
+    },
+  },
+
+  // --- M3：カシオペヤ座 ---
+  m_cassio: {
+    enter() {
+      setView('north'); S.linesCas = true; S.linesDip = false; S.phase = 'collect'; S.collected = new Set();
+      S.tapEnabled = true;
+      setWish('👑', `${ruby('女王', 'じょおう')}さまから：「${W.kita}の そらに、わたしの <b>${ruby('王座', 'おうざ')}（Ｗの かたち）</b>を えがいて ほしいの。5つの ${W.hoshi}よ。」`);
+      say(`くるっと ${ruby('回', 'まわ')}って、こんどは <b>${W.kita}の そら</b>！<br>まんなかへんに いるのが <b>${W.hokkyokusei}</b>。その ${ruby('右', 'みぎ')}の ほうに、<b>Ｗの かたちに ならんだ 5つの ${W.hoshi}</b>が ある。じゅんばんに タッチして つないでみて！`);
+      setButtons([]);
+    },
+    onTap(i, st) {
+      if (S.phase !== 'collect') return;
+      if (CAS.includes(i)) {
+        if (!S.collected.has(i)) { S.collected.add(i); sPick(); }
+        if (S.collected.size >= 5) {
+          S.phase = 'done'; S.tapEnabled = false;
+          sYes(); stageBurst(); award('m_cassio');
+          say(`✨ Ｗが かがやいた！ これが <b>カシオペヤ${ruby('座', 'ざ')}</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>カシオペヤ${ruby('座', 'ざ')}は ${W.kita}の そらの ${ruby('目印', 'めじるし')}。ひだりの ほうには、ひしゃくの かたちの <b>${W.hokuto}</b>も 見えるよ（線を つけておくね）。`);
+          S.linesDip = true;
+          setButtons([{ label: 'つぎの おねがいへ', cb: nextStep }]);
+        } else {
+          say(`その ちょうし！ あと ${5 - S.collected.size}つで Ｗに なるよ。`);
+        }
+      } else if (i === 0) {
+        say(`それは <b>${W.hokkyokusei}</b>！ だいじな ${W.hoshi}だけど、${ruby('女王', 'じょおう')}さまの Ｗは その ${ruby('右', 'みぎ')}の ほうだよ。`);
+      }
+    },
+  },
+
+  // --- M4：星は回る（時間送り） ---
+  m_rotate: {
+    enter() {
+      setView('north'); S.linesCas = true; S.linesDip = true; S.showDial = true;
+      S.phase = 'predict'; S.pick = -1;
+      setWish('🌙', `ルナの かんさつミッション：「いま <b>よる8${ruby('時', 'じ')}</b>。カシオペヤ${ruby('座', 'ざ')}は <b>③</b>。よる11${ruby('時', 'じ')}には どこに いるかな？」`);
+      say(`①〜⑧の ${ruby('目盛', 'めも')}りを つけたよ。3${ruby('時間', 'じかん')}${ruby('後', 'ご')}、カシオペヤ${ruby('座', 'ざ')}は どこへ？ シートに 〇＆ボタンで えらんでね！`);
+      setButtons([
+        { label: 'Ａ ②へ うごく', cls: 'choice', cb: el => this.pick2(1, el) },
+        { label: 'Ｂ ③のまま うごかない', cls: 'choice', cb: el => this.pick2(2, el) },
+        { label: 'Ｃ ④へ うごく', cls: 'choice', cb: el => this.pick2(3, el) },
+      ]);
+    },
+    pick2(n, el) {
+      S.pick = n;
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`「${['', '② へ', '③ のまま', '④ へ'][n]}」だね。それじゃあ、まほうで <b>じかんを すすめる</b>よ……そらに ちゅうもく！`);
+      setButtons([{ label: '▶ よる11時まで すすめる！', cb: () => {
+        S.phase = 'anim';
+        S.anim = { prop: 'rotN', from: 0, to: 45, dur: 6, t: 0, cb: () => this.reveal() };
+        setButtons([]);
+      } }]);
+    },
+    reveal() {
+      S.phase = 'done';
+      const hit = S.pick === 1 ? 'よそう どおり！ すごい！' : 'じっけんで わかったね！';
+      sYes(); stageBurst(); award('m_rotate');
+      say(`こたえは <b>②</b>！ ${hit}<br><br>💡 <b>たいせつポイント</b><br>${W.kita}の そらの ${W.hoshi}は、<b>${W.hokkyokusei}を ${ruby('中心', 'ちゅうしん')}に ゆっくり ${ruby('回', 'まわ')}る</b>（1${ruby('時間', 'じかん')}に やく15${ruby('度', 'ど')}）。${W.hokuto}も いっしょに ${ruby('回', 'まわ')}ったね。でも——<b>Ｗの かたち（ならび${ruby('方', 'かた')}）は そのまま</b>！ そして ${W.hokkyokusei}は ほとんど ${ruby('動', 'うご')}かない。`);
+      setButtons([{ label: 'さいごの チャレンジへ', cb: nextStep }]);
+    },
+  },
+
+  // --- はかせチャレンジ：南の空の動き ---
+  hakase: {
+    enter() {
+      setView('south'); S.linesTri = true; S.rotS = 0;
+      S.phase = 'ask'; S.pick = -1;
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${ruby('南', 'みなみ')}の そらに もどるよ。<br>${ruby('南', 'みなみ')}の そらの ${W.hoshi}は、${ruby('時間', 'じかん')}が たつと <b>どう ${ruby('動', 'うご')}く</b>？ シートに 〇！`);
+      setButtons([
+        { label: `Ａ ${W.higashi}から ${W.nishi}へ うごく`, cls: 'choice', cb: el => this.pick2(0, el) },
+        { label: 'Ｂ うごかない', cls: 'choice', cb: el => this.pick2(1, el) },
+        { label: 'Ｃ バラバラに とびちる', cls: 'choice', cb: el => this.pick2(2, el) },
+      ]);
+    },
+    pick2(n, el) {
+      S.pick = n;
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`よし、たしかめよう！ ${W.natsu}の${W.daisankaku}の <b>かたち</b>にも ちゅうもくしてね。`);
+      setButtons([{ label: '▶ よる11時まで すすめる！', cb: () => {
+        S.phase = 'anim';
+        S.anim = { prop: 'rotS', from: 0, to: 45, dur: 6, t: 0, cb: () => this.reveal() };
+        setButtons([]);
+      } }]);
+    },
+    reveal() {
+      S.phase = 'done';
+      const hit = S.pick === 0 ? 'よそう どおり！' : 'じっけんで わかったね！';
+      sYes(); stageBurst(); award('hakase');
+      say(`こたえは <b>Ａ</b>！ ${hit} ${ruby('南', 'みなみ')}の そらの ${W.hoshi}は、${W.higashi}から のぼって ${W.minami}の ${ruby('高', 'たか')}いところを とおり、${W.nishi}へ しずんでいく——<b>おひさまと おなじ むき</b>だね。<br>そして ${W.natsu}の${W.daisankaku}の <b>かたちは そのまま</b>だった！<br><span style="font-size:.85em">ちなみに、${ruby('朝', 'あさ')}になると ${W.hoshi}が きえるのは、おひさまの ${ruby('光', 'ひかり')}で 見えなくなるだけ。${W.hoshi}は ひるまも そこに いるんだよ。</span>`);
+      setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      setView('south'); S.linesTri = true;
+      showOverlay(`
+        <h2>⭐ みならい${ruby('星', 'ほし')}よみ にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">こんやの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.hoshi}には（<span class="blankWord" data-a="明るさ">？？？</span>）や ${ruby('色', 'いろ')}の ちがいが ある。<br>
+        ② ${W.hoshi}は ${ruby('時間', 'じかん')}が たつと ${ruby('動', 'うご')}く。でも（<span class="blankWord" data-a="ならび方">？？？</span>）は かわらない。<br>
+        ③ ${W.kita}の そらの ${W.hoshi}は（<span class="blankWord" data-a="北極星">？？？</span>）を ${ruby('中心', 'ちゅうしん')}に ${ruby('回', 'まわ')}る。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>②「みんなで そろって ${ruby('動', 'うご')}く（ならび${ruby('方', 'かた')}は そのまま）」</b>でした！</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>こんや、${W.kita}の そらを ${ruby('見上', 'みあ')}げて、<b>カシオペヤ${ruby('座', 'ざ')}（Ｗ）</b>か <b>${W.hokuto}（ひしゃく）</b>を さがしてみよう。かんさつノートの さいごのコーナーに かいてね。${ruby('時間', 'じかん')}を あけて 2${ruby('回', 'かい')} 見ると、${ruby('動', 'うご')}いたことも わかるよ！</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(stageBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#7ee787'; sYes(); stageBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      S.tapEnabled = true; S.linesTri = true; S.linesCas = true; S.linesDip = true;
+      say(`<b>じゆうモード</b>！ ${W.kita}と ${ruby('南', 'みなみ')}を きりかえて、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「${ruby('赤', 'あか')}い ${W.hoshi}は どれ？」「3${ruby('時間', 'じかん')}で ${ruby('何度', 'なんど')} ${ruby('回', 'まわ')}る？（こたえ：45${ruby('度', 'ど')}）」`);
+      setButtons([
+        { label: '🧭 北の そら', cls: 'sub', cb: () => { setView('north'); S.showDial = true; sTap(); } },
+        { label: '🧭 南の そら', cls: 'sub', cb: () => { setView('south'); sTap(); } },
+        { label: '▶ 3時間 すすめる', cls: 'sub', cb: () => {
+          if (S.anim) return;
+          const prop = S.view === 'north' ? 'rotN' : 'rotS';
+          S.anim = { prop, from: S[prop], to: S[prop] + 45, dur: 5, t: 0, cb: null };
+          S.timeH = 20; sTap();
+        } },
+        { label: '↺ よる8時に もどす', cls: 'sub', cb: () => { S.anim = null; S.rotN = 0; S.rotS = 0; S.timeH = 20; updateTime(); sTap(); } },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_cassio などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+updateTime();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

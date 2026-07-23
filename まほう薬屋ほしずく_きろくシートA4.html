@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>まほう薬屋ほしずく きろくシート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1b2245; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .85; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 3mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 2.6mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.5mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.5mm 2mm; font-size: 9.5pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .mtable { width: 100%; border-collapse: collapse; }
+  .mtable th, .mtable td {
+    border: .4mm solid #222; padding: 1.2mm 1.8mm;
+    font-size: 9.5pt; text-align: left; vertical-align: middle; line-height: 1.5;
+  }
+  .mtable th { background: #eee; text-align: center; font-size: 8.5pt; }
+  .mtable .mname { font-size: 9.5pt; font-weight: 700; white-space: nowrap; text-align: center; }
+  .mtable .micon { font-size: 12pt; }
+  .ansLine { display: inline-block; width: 14mm; border-bottom: .5mm solid #222; height: 4.5mm; }
+  .sketchBox {
+    width: 20mm; height: 17mm; border: .45mm solid #222; border-radius: 2mm;
+    display: inline-block; vertical-align: middle;
+  }
+
+  .fillLine { display: inline-block; width: 24mm; border-bottom: .5mm solid #222; height: 5mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2.5mm 3mm; }
+  .homeBox .cup { font-size: 26pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 2mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくシート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🧪 まほう<ruby>薬屋<rt>くすりや</rt></ruby>ほしずく きろくシート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      水にとけて <ruby>見<rt>み</rt></ruby>えなくなった <ruby>塩<rt>しお</rt></ruby>は どうなった？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 💨 きえて なくなった</div>
+        <div class="voteOpt"><span class="vnum">②</span> 🫥 <ruby>見<rt>み</rt></ruby>えない つぶになって <ruby>水<rt>みず</rt></ruby>の<ruby>中<rt>なか</rt></ruby>にいる</div>
+        <div class="voteOpt"><span class="vnum">③</span> ⬇️ フラスコの そこに しずんでいる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．ミッションきろく</span>
+    <div class="secBody">
+      <table class="mtable">
+        <tr>
+          <th style="width:22mm">おねがい</th>
+          <th>よそう（〇や かずを かこう）</th>
+          <th style="width:52mm">けっか</th>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🌟</span><br>きらきら<br>（<ruby>重<rt>おも</rt></ruby>さ）</td>
+          <td><ruby>水<rt>みず</rt></ruby>100gに <ruby>塩<rt>しお</rt></ruby>10gを とかすと ぜんぶで……<br><b>（ 100g ・ 105g ・ 110g ）に〇</b></td>
+          <td>はかりは（<span class="ansLine"></span>）g だった</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🫧</span><br>まんぷく<br>（かぎり）</td>
+          <td><ruby>水<rt>みず</rt></ruby>100gに <ruby>塩<rt>しお</rt></ruby>は<br>（<span class="ansLine"></span>）さじまで とけると思う</td>
+          <td>（<span class="ansLine"></span>）さじまで とけた</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🔥</span><br>ほかほか<br>（<ruby>温度<rt>おんど</rt></ruby>）</td>
+          <td>とけのこりを とかすには？<br><b>（ あたためる ・ かきまぜる ・ <ruby>水<rt>みず</rt></ruby>をふやす ）に〇</b></td>
+          <td>あたためたら…<br><ruby>塩<rt>しお</rt></ruby>（ とけた ・ とけない ）<br>ミョウバン（ とけた ・ とけない ）</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">💎</span><br>ほうせき<br>（ひやす）</td>
+          <td>あつあつの ミョウバンポーションを ひやすと？<br><b>（ <ruby>何<rt>なに</rt></ruby>もおきない ・ つぶが<ruby>出<rt>で</rt></ruby>てくる ・ <ruby>水<rt>みず</rt></ruby>がへる ）に〇</b></td>
+          <td>見えたものを かこう → <span class="sketchBox"></span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．はかせチャレンジ</span>
+    <div class="secBody">
+      とけた つぶは フラスコの どこに いる？　<b>そう思うものに 〇</b><br>
+      　Ａ．そこのほうに たまる　／　Ｂ．<ruby>上<rt>うえ</rt></ruby>のほうに あつまる　／　Ｃ．ぜんたいに <ruby>広<rt>ひろ</rt></ruby>がる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① とけて<ruby>見<rt>み</rt></ruby>えなくなっても、つぶは（<span class="fillLine"></span>）。だから <ruby>重<rt>おも</rt></ruby>さも かわらない。<br>
+      ② とける<ruby>量<rt>りょう</rt></ruby>には（<span class="fillLine" style="width:18mm"></span>）が ある。<br>
+      ③ あたためた ときの とけ<ruby>方<rt>かた</rt></ruby>は（<span class="fillLine" style="width:18mm"></span>）に よって ちがう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．おうちミッション：まほうの あじみ</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="cup">🥛</span>
+        <div>
+          きれいなコップの <ruby>水<rt>みず</rt></ruby>に、<ruby>塩<rt>しお</rt></ruby>を <b>ひとつまみ</b>。<ruby>見<rt>み</rt></ruby>えなくなったら ひとくち……あじは どうだった？<br>
+          （ しょっぱかった！ ・ あじがしなかった ）に〇　→　つぶは（ いる ・ いない ）！<br>
+          <span style="font-size:8.5pt">※おうちの<ruby>人<rt>ひと</rt></ruby>と いっしょに、きれいな<ruby>水<rt>みず</rt></ruby>と コップで ためしてね。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならいポーションマスター、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】まほう薬屋ほしずく — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4〜6（小5「もののとけ方」・学力幅あり・協力型）／ 使うもの：「まほう薬屋ほしずく_じゅぎょう画面.html」・プロジェクタ・このシート（1ページ目を人数分）。実験器具・薬品は一切不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLファイルを開き、「🥄1さじ いれる」ボタンで粒が落ちて とけるか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11キーで全画面</b>／音の確認（出なくても授業は成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷、えんぴつ準備</li>
+      <li>☐ 中断してしまった時は、URLの後ろに <b>?step=m_limit</b> のように付けると途中から再開できます（m_weight／m_limit／m_temp／m_crystal／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。挙手で分布を見る。<b>ここでは答えを言わない</b>（最後に画面が種明かし）</td></tr>
+      <tr><td class="min">4〜12分</td><td>🌟きらきら（重さの保存）</td><td>シート２に予想→画面のボタンでも選択→代表がとかす→はかり110gをシートに記入。「めがねの粒はどこへ行った？」</td></tr>
+      <tr><td class="min">12〜20分</td><td>🫧まんぷく（とける限度）</td><td>予想のさじ数をシートに→全員で「1さじ、2さじ…」とカウント→とけ残り発見→結果記入</td></tr>
+      <tr><td class="min">20〜30分</td><td>🔥ほかほか（温度・物による違い）</td><td>シートに〇→塩を加熱「とけない！」の驚きを拾う→ミョウバンで再挑戦→結果記入。<b>今日いちばんの山場</b></td></tr>
+      <tr><td class="min">30〜37分</td><td>💎ほうせき（再結晶）</td><td>予想に〇→冷やして結晶→見えたものをスケッチ。「なんで出てきたと思う？」と問い返す</td></tr>
+      <tr><td class="min">37〜41分</td><td>はかせチャレンジ（濃さは均一）</td><td>シート３に〇→スポイト3か所で確認</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート４記入→シート５（おうちミッション）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 時間が足りない時は「はかせチャレンジ」を右下の「つぎ▶」でスキップしてOK（まとめは削らない）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答えと数値のたね明かし（本物の理科です）</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>②</b>／🌟＝<b>110g</b>（重さは保存）／🫧＝<b>7さじ（約35g）</b>、8さじ目はとけ残る／
+      🔥＝塩は<b>とけない</b>・ミョウバンは<b>とけた</b>／💎＝<b>つぶ（結晶）が出てくる</b>／はかせ＝<b>Ｃ</b>／
+      まとめ＝①<b>なくならない</b> ②<b>かぎり</b> ③<b>もの</b><br>
+      「ほしの塩」＝<b>食塩</b>（水100gに 20℃で35.8g → 60℃でも37.1g・ほぼ不変）、「つきのミョウバン」＝<b>ミョウバン</b>（20℃11.4g → 60℃57.4g・冷やすと差の分が結晶に）。1さじ＝5g。理科年表の実測値なので、そのまま教科書・テストにつながります。
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント（安心して参加できるように）</h2>
+    <ul>
+      <li>予想がはずれたら：<b>「実験は1回で当たらなくていい。データがひとつ増えた！」</b>。特に🔥の「塩はとけない」はほとんどの子がはずれる想定 — その驚きこそ今日のごほうび</li>
+      <li>操作の代表は毎回交代。見ている子は「カウント係」「シート記録係」「気づき発表係」に。読みが苦手な子には、ルナのセリフを先生が音読（全文ふりがな付き・短文）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・注意</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「60℃の水にミョウバンは何さじとける？（11さじ）」「宝石をもう一度とかすには？（あたためる）」「水をふやしたら？」</li>
+      <li>本物のミョウバン（焼きミョウバン）はスーパーで買えます。60℃のお湯で本物の結晶づくりをすると授業が実物につながります（大人と一緒に）</li>
+      <li><b>教室では味見をしない</b>（衛生）。おうちミッションは「きれいなコップ・きれいな水・ひとつまみ」を守るよう声かけを</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

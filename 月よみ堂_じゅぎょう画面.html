@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>月よみ堂 — 月の満ち欠けたいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #0a0e24 0%, #131a3d 60%, #1a2150 100%);
+    color: #f2efff;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- 背景の星 ---------- */
+  #starsLayer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .bgstar {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: .85; } }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.2vw, 30px); font-weight: 700;
+    color: #ffe9a8; text-shadow: 0 0 14px rgba(255, 214, 107, .55);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #bdc4f5; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #1c2450; border: 2px solid #3a437a;
+    font-size: clamp(16px, 1.8vw, 26px); color: #444d86;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2a93b);
+    border-color: #ffd66b; color: #7a4d00;
+    box-shadow: 0 0 16px rgba(255, 214, 107, .8);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #crystalWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 42%, #232c5e 0%, #141a3d 70%, #0e132e 100%);
+    border: 2px solid #3a437a;
+    box-shadow: inset 0 0 60px rgba(120, 140, 255, .12), 0 4px 24px rgba(0,0,0,.4);
+    overflow: hidden;
+  }
+  #crystal { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #crystalTitle {
+    position: absolute; top: .8vh; left: 1.2vw; pointer-events: none;
+    color: #aab3ff; font-size: clamp(13px, 1.3vw, 18px); opacity: .9;
+  }
+  #dayChip {
+    position: absolute; top: .8vh; right: 1.2vw; display: none;
+    background: #ffd66b; color: #5a3c00; font-weight: 700;
+    font-size: clamp(16px, 1.7vw, 24px);
+    padding: .3em .8em; border-radius: 999px;
+    box-shadow: 0 0 14px rgba(255, 214, 107, .6);
+  }
+  #rayToggle {
+    position: absolute; left: 1.2vw; bottom: 1.2vh;
+    background: #1c2450cc; border: 1px solid #3a437a; color: #cfd6ff;
+    border-radius: 999px; padding: .35em .9em;
+    font-size: clamp(13px, 1.25vw, 17px); cursor: pointer;
+  }
+  #rayToggle:hover { background: #2a3468; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #skyWrap {
+    position: relative; width: min(100%, 28vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #c9a44a; overflow: hidden;
+    box-shadow: 0 0 24px rgba(255, 220, 140, .28), inset 0 0 30px rgba(0,0,0,.5);
+    flex-shrink: 0;
+  }
+  #sky { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #skyCaption {
+    text-align: center; color: #bdc4f5;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #phaseName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(18px, 2vw, 28px);
+    color: #ffe9a8; text-shadow: 0 0 12px rgba(255, 214, 107, .4);
+    min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #1b2245d9; border: 1px solid #3a437a; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #bdc4f5; }
+  .cat { width: 100%; animation: floaty 4s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .cat .tail { transform-origin: 22px 92px; animation: sway 3.2s ease-in-out infinite; }
+  @keyframes sway { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(14deg); } }
+  .cat .eyes { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.12); } }
+
+  #bubble {
+    flex: 1; background: #fdfbf4; color: #33304a;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fdfbf4;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #7a4d00; background: #ffefc2; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fff8e3, #ffefc2); color: #5a4300;
+    border: 2px dashed #d9a520; border-radius: 14px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #a8760a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ffd66b, #f2a93b); color: #3a2a00;
+    box-shadow: 0 3px 0 #b97e17, 0 6px 14px rgba(0,0,0,.35);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #b97e17; }
+  .btn.sub {
+    background: #2a3468; color: #cfd6ff; box-shadow: 0 3px 0 #171d3f;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fdfbf4; color: #33304a; box-shadow: 0 3px 0 #b5b0d0; font-weight: 400; }
+  .btn.choice.picked { background: #ffefc2; outline: 3px solid #f2a93b; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(7, 9, 24, .9); backdrop-filter: blur(3px);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #1b2249, #141a3d);
+    border: 2px solid #3a437a; border-radius: 26px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 0 60px rgba(120, 140, 255, .18);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(34px, 5.5vw, 64px);
+    color: #ffe9a8; text-shadow: 0 0 24px rgba(255, 214, 107, .6);
+    letter-spacing: .06em;
+  }
+  .panel h2 { margin: .2em 0 .5em; font-size: clamp(20px, 2.6vw, 32px); color: #ffe9a8; }
+  .panel .sub { color: #bdc4f5; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fdfbf4; color: #33304a; border-radius: 16px;
+    padding: .6em .9em; font-size: clamp(14px, 1.6vw, 20px); line-height: 1.65;
+    text-align: left; margin: .9vh auto; max-width: 640px;
+  }
+  .panel .foot { color: #8f96c8; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .35em; margin: .4vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fdfbf4; color: #33304a; border-radius: 16px;
+    padding: 1.2em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid transparent; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #f2a93b; background: #fff4d6; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #f2a93b; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+
+  #endMoonBox {
+    display: inline-flex; align-items: center; gap: 1.2vw;
+    background: #0d1230; border: 1px solid #3a437a; border-radius: 18px;
+    padding: 1vh 1.6vw; margin: 1vh 0;
+  }
+  #endMoonBox .emname { font-size: clamp(18px, 2vw, 26px); color: #ffe9a8; font-weight: 700; }
+  #endMoonBox .emnote { font-size: clamp(12px, 1.2vw, 15px); color: #bdc4f5; }
+  #blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #ffd66b;
+    color: #ffd66b; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .35; transition: opacity .2s; font-size: 12px; color: #8f96c8;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #1c2450; color: #cfd6ff;
+    border: 1px solid #3a437a; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #2a3468; }
+</style>
+</head>
+<body>
+<div id="starsLayer"></div>
+
+<header>
+  <div id="logo">🌙 <ruby>月<rt>つき</rt></ruby>よみ<ruby>堂<rt>どう</rt></ruby><small>— <ruby>月<rt>つき</rt></ruby>の<ruby>満<rt>み</rt></ruby>ち<ruby>欠<rt>か</rt></ruby>け たいけん —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_full" title="満月">★</div>
+    <div class="badge" id="bd_m_new" title="新月">★</div>
+    <div class="badge" id="bd_m_half" title="半月">★</div>
+    <div class="badge" id="bd_m_crescent" title="三日月">★</div>
+    <div class="badge" id="bd_cycle" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="crystalWrap">
+    <canvas id="crystal"></canvas>
+    <div id="crystalTitle">✦ まほうの水晶盤（すいしょうばん）〜そらの上から 見たところ〜</div>
+    <div id="dayChip"></div>
+    <button id="rayToggle">☀ ひかりのすじ：<span id="rayState">ON</span></button>
+  </section>
+
+  <aside id="side">
+    <div id="skyWrap">
+      <canvas id="sky"></canvas>
+    </div>
+    <div id="skyCaption">✦ そらの<ruby>窓<rt>まど</rt></ruby> 〜ちきゅうから<ruby>見<rt>み</rt></ruby>た<ruby>月<rt>つき</rt></ruby>〜</div>
+    <div id="phaseName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="cat" viewBox="0 0 120 132" aria-hidden="true">
+            <path class="tail" d="M20 106 C 0 100, 2 72, 22 80" fill="none" stroke="#232433" stroke-width="10" stroke-linecap="round"/>
+            <ellipse cx="60" cy="102" rx="34" ry="26" fill="#232433"/>
+            <ellipse cx="46" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <ellipse cx="74" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <path d="M36 44 L29 14 L54 30 Z" fill="#232433"/>
+            <path d="M84 44 L91 14 L66 30 Z" fill="#232433"/>
+            <path d="M38 39 L34 21 L49 31 Z" fill="#6b5aa0"/>
+            <path d="M82 39 L86 21 L71 31 Z" fill="#6b5aa0"/>
+            <circle cx="60" cy="60" r="30" fill="#232433"/>
+            <g class="eyes">
+              <ellipse cx="49" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <ellipse cx="71" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <circle cx="49" cy="62" r="2.7" fill="#1b1c26"/>
+              <circle cx="71" cy="62" r="2.7" fill="#1b1c26"/>
+            </g>
+            <path d="M57 68 l3 3 l3 -3 z" fill="#f0a0b0"/>
+            <path d="M55 74 Q60 78 65 74" stroke="#8f93b8" fill="none" stroke-width="2" stroke-linecap="round"/>
+            <path d="M28 62 h14 M29 69 h13 M78 62 h14 M78 69 h13" stroke="#8f93b8" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="60" cy="90" r="5" fill="#ffd66b"/>
+            <path d="M58 4 L76 34 Q60 27 44 34 Z" fill="#4a3d8f"/>
+            <ellipse cx="60" cy="35" rx="27" ry="7" fill="#5a4aa8"/>
+            <circle cx="57" cy="12" r="3.6" fill="#ffd66b"/>
+          </svg>
+          <div class="catname">てんしゅ ルナ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">✉ お客さまの おねがいカード</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前のミッションへ">◀ まえ</button>
+  <button id="tbNext" title="次のミッションへ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script type="text/javascript">
+'use strict';
+/* =====================================================
+   月よみ堂 — 月の満ち欠け体験（小4〜6・協力型・1ファイル）
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const wrapPi = x => { while (x > Math.PI) x -= TAU; while (x < -Math.PI) x += TAU; return x; };
+const deg = d => d * Math.PI / 180;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+// よく使う ふりがな付きことば
+const W = {
+  tsuki: ruby('月', 'つき'),
+  taiyo: ruby('太陽', 'たいよう'),
+  chikyu: ruby('地球', 'ちきゅう'),
+  mangetsu: ruby('満月', 'まんげつ'),
+  shingetsu: ruby('新月', 'しんげつ'),
+  hangetsu: ruby('半月', 'はんげつ'),
+  mikazuki: ruby('三日月', 'みかづき'),
+  katachi: ruby('形', 'かたち'),
+  hikari: ruby('光', 'ひかり'),
+};
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  moonA: Math.PI / 4,       // 月の角度（canvas座標系・④ふくらんだ月の位置から開始）
+  targetA: Math.PI / 4,
+  raysOn: true,
+  sound: true,
+  dragEnabled: false,
+  dragging: false,
+  sweep: 0,                 // れんしゅう用：動かした合計角度
+  practiceDone: false,
+  missionPhase: '',         // predict / operate / done
+  cyclePhase: '',           // ask / anim1 / pause / anim2 / done
+  cycleChoice: -1,
+  cycleProgress: 0,         // 満月からの累積角度(rad)
+  votePicked: new Set(),
+  badges: new Set(),
+};
+
+// ---------- 太陽との角度（離角） ----------
+// canvas角 a：①新月= π、⑤満月= 0。elong: 0=新月 〜 π=満月
+const elong = a => Math.abs(wrapPi(a - Math.PI));
+const isWaxing = a => Math.sin(a) > 0;   // 画面下半分＝これからふくらむ月
+
+function phaseInfo(a) {
+  const e = elong(a), ed = e * 180 / Math.PI;
+  if (ed < 12)  return { name: W.shingetsu, plain: 'しんげつ' };
+  if (ed < 62)  return { name: W.mikazuki + 'がた（ほそい' + W.tsuki + '）', plain: 'みかづきがた' };
+  if (ed < 112) return { name: W.hangetsu, plain: 'はんげつ' };
+  if (ed < 160) return { name: 'ふくらんだ' + W.tsuki, plain: 'ふくらんだつき' };
+  return { name: W.mangetsu, plain: 'まんげつ' };
+}
+
+// ---------- 音（WebAudio・外部ファイルなし） ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス準備 ----------
+const crystal = $('crystal'), skyCv = $('sky'), fxCv = $('fx');
+const cctx = crystal.getContext('2d'), sctx = skyCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+window.addEventListener('resize', () => { skyStars = null; crystalStars = null; });
+
+// ---------- 星（背景かざり） ----------
+(function makeBgStars() {
+  const layer = $('starsLayer');
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('span');
+    s.className = 'bgstar';
+    const size = 1 + Math.random() * 2.2;
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;animation-delay:${Math.random() * 3}s;`;
+    layer.appendChild(s);
+  }
+})();
+let crystalStars = null, skyStars = null;
+const makeStars = (n, w, h) => Array.from({ length: n }, () => ({
+  x: Math.random() * w, y: Math.random() * h,
+  r: 0.5 + Math.random() * 1.4, p: Math.random() * TAU, sp: 0.5 + Math.random() * 1.5,
+}));
+
+// ---------- 月の形の描画（そらの窓用） ----------
+// e: 離角(0=新月〜π=満月), litRight: 右側が光るか
+function drawPhase(ctx, cx, cy, R, e, litRight) {
+  // 月の暗い面
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU);
+  ctx.fillStyle = '#2c3358'; ctx.fill();
+  // クレーター（うっすら）
+  ctx.clip();
+  ctx.globalAlpha = 0.13; ctx.fillStyle = '#111629';
+  [[-.3, -.25, .18], [.25, .1, .13], [-.05, .38, .11], [.4, -.35, .09]].forEach(([dx, dy, dr]) => {
+    ctx.beginPath(); ctx.arc(cx + dx * R, cy + dy * R, dr * R, 0, TAU); ctx.fill();
+  });
+  ctx.restore();
+
+  const f = (1 - Math.cos(e)) / 2;  // 光って見える割合
+  if (f > 0.004) {
+    const k = Math.cos(e);          // ターミネーターのふくらみ
+    const rx = Math.abs(k) * R;
+    ctx.save();
+    ctx.beginPath();
+    if (litRight) {
+      ctx.arc(cx, cy, R, -Math.PI / 2, Math.PI / 2, false);        // 右の外周（上→下）
+      if (k > 0) ctx.ellipse(cx, cy, Math.max(rx, .01), R, 0, Math.PI / 2, -Math.PI / 2, true);   // 三日月がた：右にふくらむ
+      else       ctx.ellipse(cx, cy, Math.max(rx, .01), R, 0, Math.PI / 2, 3 * Math.PI / 2, false); // ふくらんだ月：左にふくらむ
+    } else {
+      ctx.arc(cx, cy, R, Math.PI / 2, 3 * Math.PI / 2, false);     // 左の外周（下→上）
+      if (k > 0) ctx.ellipse(cx, cy, Math.max(rx, .01), R, 0, 3 * Math.PI / 2, Math.PI / 2, true);  // 左にふくらむ
+      else       ctx.ellipse(cx, cy, Math.max(rx, .01), R, 0, 3 * Math.PI / 2, Math.PI / 2, false); // 右にふくらむ
+    }
+    ctx.closePath();
+    ctx.shadowColor = 'rgba(255,240,200,.8)'; ctx.shadowBlur = R * 0.5 * Math.max(f, 0.25);
+    ctx.fillStyle = '#f6eecf'; ctx.fill();
+    ctx.shadowBlur = 0;
+    // 光る面にもうっすらクレーター
+    ctx.clip();
+    ctx.globalAlpha = 0.1; ctx.fillStyle = '#c9b98a';
+    [[-.3, -.25, .18], [.25, .1, .13], [-.05, .38, .11]].forEach(([dx, dy, dr]) => {
+      ctx.beginPath(); ctx.arc(cx + dx * R, cy + dy * R, dr * R, 0, TAU); ctx.fill();
+    });
+    ctx.restore();
+  } else {
+    // 新月：そこに「いる」ことが分かるように、ふちだけ見せる
+    ctx.save();
+    ctx.globalAlpha = 0.3; ctx.strokeStyle = '#8f9ad6'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ---------- 水晶盤の描画 ----------
+const POS_CHARS = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
+const posAngle = i => Math.PI - i * Math.PI / 4;   // ①=π(新月) → ⑤=0(満月)
+
+function drawCrystal(t) {
+  const { w, h, dpr } = fitCanvas(crystal);
+  cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cctx.clearRect(0, 0, w, h);
+  const m = Math.min(w, h), cx = w / 2, cy = h / 2;
+  const Ro = m * 0.345, earthR = m * 0.068, moonR = m * 0.042;
+
+  // 星
+  if (!crystalStars) crystalStars = makeStars(45, w, h);
+  crystalStars.forEach(s => {
+    cctx.globalAlpha = 0.25 + 0.5 * (0.5 + 0.5 * Math.sin(t * s.sp + s.p));
+    cctx.fillStyle = '#cfd6ff';
+    cctx.beginPath(); cctx.arc(s.x, s.y, s.r, 0, TAU); cctx.fill();
+  });
+  cctx.globalAlpha = 1;
+
+  // 太陽（左はし）
+  const sunX = m * 0.01, sunY = cy;
+  let grd = cctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, m * 0.16);
+  grd.addColorStop(0, 'rgba(255,230,150,.95)');
+  grd.addColorStop(0.5, 'rgba(255,200,90,.35)');
+  grd.addColorStop(1, 'rgba(255,200,90,0)');
+  cctx.fillStyle = grd;
+  cctx.beginPath(); cctx.arc(sunX, sunY, m * 0.16, 0, TAU); cctx.fill();
+  cctx.fillStyle = '#ffdf8a';
+  cctx.beginPath(); cctx.arc(sunX, sunY, m * 0.075, 0, TAU); cctx.fill();
+  cctx.fillStyle = '#ffe9a8'; cctx.font = `700 ${m * 0.034}px sans-serif`;
+  cctx.textAlign = 'left'; cctx.textBaseline = 'middle';
+  cctx.fillText('たいよう', m * 0.02, cy + m * 0.115);
+
+  // ひかりのすじ（平行光線）
+  if (S.raysOn) {
+    cctx.save();
+    cctx.strokeStyle = 'rgba(255,214,107,.16)'; cctx.lineWidth = 2;
+    cctx.setLineDash([13, 17]);
+    cctx.lineDashOffset = -(t * 45) % 30;
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      const y = cy + (i - (n - 1) / 2) * (h * 0.105);
+      cctx.beginPath(); cctx.moveTo(m * 0.1, y); cctx.lineTo(w, y); cctx.stroke();
+    }
+    cctx.restore();
+  }
+
+  // 軌道
+  cctx.save();
+  cctx.strokeStyle = 'rgba(143,154,214,.45)'; cctx.lineWidth = 1.6;
+  cctx.setLineDash([6, 10]);
+  cctx.beginPath(); cctx.arc(cx, cy, Ro, 0, TAU); cctx.stroke();
+  cctx.restore();
+
+  // ①〜⑧の目もり
+  const pulse = (S.missionPhase === 'predict') ? (0.55 + 0.45 * Math.sin(t * 4)) : 0.75;
+  cctx.font = `${m * 0.043}px sans-serif`; cctx.textAlign = 'center'; cctx.textBaseline = 'middle';
+  for (let i = 0; i < 8; i++) {
+    const a = posAngle(i);
+    const px = cx + Math.cos(a) * Ro * 1.17, py = cy + Math.sin(a) * Ro * 1.17;
+    cctx.globalAlpha = pulse;
+    cctx.fillStyle = (S.missionPhase === 'predict') ? '#ffe9a8' : '#aab3ff';
+    cctx.fillText(POS_CHARS[i], px, py);
+    cctx.globalAlpha = 0.55;
+    cctx.fillStyle = '#8f9ad6';
+    const dx = cx + Math.cos(a) * Ro, dy = cy + Math.sin(a) * Ro;
+    cctx.beginPath(); cctx.arc(dx, dy, 2.4, 0, TAU); cctx.fill();
+  }
+  cctx.globalAlpha = 1;
+
+  // 地球
+  grd = cctx.createRadialGradient(cx - earthR * 0.4, cy - earthR * 0.4, earthR * 0.2, cx, cy, earthR);
+  grd.addColorStop(0, '#6fb1ef'); grd.addColorStop(1, '#2f5fb0');
+  cctx.fillStyle = grd;
+  cctx.beginPath(); cctx.arc(cx, cy, earthR, 0, TAU); cctx.fill();
+  cctx.save();
+  cctx.beginPath(); cctx.arc(cx, cy, earthR, 0, TAU); cctx.clip();
+  cctx.fillStyle = '#4fae6e';
+  cctx.beginPath(); cctx.ellipse(cx - earthR * 0.35, cy - earthR * 0.3, earthR * 0.42, earthR * 0.28, 0.5, 0, TAU); cctx.fill();
+  cctx.beginPath(); cctx.ellipse(cx + earthR * 0.3, cy + earthR * 0.4, earthR * 0.35, earthR * 0.22, -0.4, 0, TAU); cctx.fill();
+  // 夜のがわ（太陽と反対がわ＝右）
+  cctx.fillStyle = 'rgba(10,14,36,.45)';
+  cctx.fillRect(cx, cy - earthR, earthR, earthR * 2);
+  cctx.restore();
+  cctx.fillStyle = '#cfd6ff'; cctx.font = `700 ${m * 0.032}px sans-serif`; cctx.textAlign = 'center';
+  cctx.fillText('ちきゅう', cx, cy + earthR + m * 0.032);
+
+  // 月（光る半分はいつも太陽がわ＝左）
+  const mx = cx + Math.cos(S.moonA) * Ro, my = cy + Math.sin(S.moonA) * Ro;
+  if (S.dragEnabled) {
+    cctx.save();
+    cctx.strokeStyle = `rgba(255,214,107,${0.5 + 0.3 * Math.sin(t * 5)})`;
+    cctx.lineWidth = 3;
+    cctx.beginPath(); cctx.arc(mx, my, moonR + 7, 0, TAU); cctx.stroke();
+    cctx.restore();
+  }
+  cctx.fillStyle = '#3a4166';
+  cctx.beginPath(); cctx.arc(mx, my, moonR, 0, TAU); cctx.fill();
+  cctx.fillStyle = '#f6eecf';
+  cctx.beginPath(); cctx.arc(mx, my, moonR, Math.PI / 2, 3 * Math.PI / 2, false); cctx.fill();
+  cctx.strokeStyle = 'rgba(246,238,207,.5)'; cctx.lineWidth = 1;
+  cctx.beginPath(); cctx.arc(mx, my, moonR, 0, TAU); cctx.stroke();
+  cctx.fillStyle = '#ffe9a8'; cctx.font = `700 ${m * 0.03}px sans-serif`;
+  cctx.fillText('つき', mx, my - moonR - m * 0.024);
+}
+
+// ---------- そらの窓の描画 ----------
+function drawSky(t) {
+  const { w, h, dpr } = fitCanvas(skyCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+
+  let grd = sctx.createLinearGradient(0, 0, 0, h);
+  grd.addColorStop(0, '#0a0e28'); grd.addColorStop(0.7, '#1a2150'); grd.addColorStop(1, '#2a2c60');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  if (!skyStars) skyStars = makeStars(40, w, h);
+  skyStars.forEach(s => {
+    sctx.globalAlpha = 0.3 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.sp + s.p));
+    sctx.fillStyle = '#e8ecff';
+    sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, TAU); sctx.fill();
+  });
+  sctx.globalAlpha = 1;
+
+  // 月
+  drawPhase(sctx, w / 2, h * 0.42, w * 0.26, elong(S.moonA), isWaxing(S.moonA));
+
+  // おかの silhouette と 小さな塔
+  sctx.fillStyle = '#191537';
+  sctx.beginPath();
+  sctx.moveTo(0, h);
+  sctx.quadraticCurveTo(w * 0.25, h * 0.78, w * 0.55, h * 0.9);
+  sctx.quadraticCurveTo(w * 0.8, h * 0.98, w, h * 0.88);
+  sctx.lineTo(w, h); sctx.closePath(); sctx.fill();
+  // 塔
+  sctx.fillStyle = '#191537';
+  sctx.fillRect(w * 0.72, h * 0.68, w * 0.07, h * 0.24);
+  sctx.beginPath();
+  sctx.moveTo(w * 0.705, h * 0.68); sctx.lineTo(w * 0.755, h * 0.58); sctx.lineTo(w * 0.805, h * 0.68);
+  sctx.closePath(); sctx.fill();
+  sctx.fillStyle = `rgba(255,214,107,${0.75 + 0.25 * Math.sin(t * 2.2)})`;
+  sctx.fillRect(w * 0.74, h * 0.76, w * 0.028, h * 0.035);
+}
+
+// ---------- キラキラ エフェクト ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: Math.random() < 0.6 ? '#ffd66b' : (Math.random() < 0.5 ? '#fff' : '#b9a8ff'),
+    });
+  }
+}
+function skyBurst() {
+  const r = $('skyWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  // 月の位置をなめらかに
+  if (!S.cyclePhase.startsWith('anim')) {
+    const d = wrapPi(S.targetA - S.moonA);
+    if (Math.abs(d) > 0.0005) {
+      const step = d * 0.22;
+      S.moonA = S.moonA + step;
+      if (S.stepIndex === FLOW.indexOf('practice') && !S.practiceDone) {
+        S.sweep += Math.abs(step);
+        if (S.sweep > deg(310)) practiceComplete();
+      }
+    }
+  } else {
+    // はかせチャレンジ：時間をすすめる
+    const speed = S.cyclePhase === 'anim1' ? 0.45 : 0.85;
+    S.cycleProgress += speed * dt;
+    S.moonA = -S.cycleProgress;        // 満月(0)から visual-CCW（角度マイナス方向）
+    S.targetA = S.moonA;
+    const day = S.cycleProgress / TAU * 29.53;
+    $('dayChip').textContent = day >= 29.4 ? '満月から やく29.5日' : `満月から ${Math.floor(day)}日`;
+    if (S.cyclePhase === 'anim1' && S.cycleProgress >= Math.PI / 2) cyclePause();
+    if (S.cyclePhase === 'anim2' && S.cycleProgress >= TAU) cycleEnd();
+  }
+
+  drawCrystal(t);
+  drawSky(t);
+  drawFx(dt);
+
+  // 月の名前ラベル
+  const info = phaseInfo(S.moonA);
+  if (phaseNameEl.dataset.plain !== info.plain) {
+    phaseNameEl.dataset.plain = info.plain;
+    phaseNameEl.innerHTML = info.name;
+  }
+  requestAnimationFrame(loop);
+}
+const phaseNameEl = $('phaseName');
+
+// ---------- ドラッグ・タッチ操作 ----------
+function pointerToAngle(ev) {
+  const r = crystal.getBoundingClientRect();
+  const x = ev.clientX - r.left - r.width / 2;
+  const y = ev.clientY - r.top - r.height / 2;
+  return Math.atan2(y, x);
+}
+crystal.addEventListener('pointerdown', ev => {
+  ac();
+  if (!S.dragEnabled) return;
+  S.dragging = true;
+  crystal.setPointerCapture(ev.pointerId);
+  S.targetA = pointerToAngle(ev);
+});
+crystal.addEventListener('pointermove', ev => {
+  if (!S.dragging || !S.dragEnabled) return;
+  S.targetA = pointerToAngle(ev);
+});
+crystal.addEventListener('pointerup', () => { S.dragging = false; });
+crystal.addEventListener('pointercancel', () => { S.dragging = false; });
+
+// キーボードでも動かせる（マウスが苦手な子・発表用リモコン対応）
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowLeft' && S.dragEnabled) { S.targetA = S.targetA - deg(5); ev.preventDefault(); }
+  if (ev.key === 'ArrowRight' && S.dragEnabled) { S.targetA = S.targetA + deg(5); ev.preventDefault(); }
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UI ヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) {
+  document.body.style.overflow = 'hidden';
+  panelEl.innerHTML = html;
+  overlayEl.classList.add('show');
+}
+function hideOverlay() {
+  overlayEl.classList.remove('show');
+}
+
+// ---------- ミッション定義 ----------
+const MISSIONS = {
+  m_full: {
+    icon: '🐇', starLabel: W.mangetsu,
+    wish: `こんやは おつきみパーティー！<br>まんまるの <b>${W.mangetsu}</b>に してほしいの。`,
+    check: a => elong(a) >= deg(166),
+    point: `${W.tsuki}が ${W.taiyo}の <b>はんたいがわ</b>に あるとき、${W.hikari}っている${ruby('面', 'めん')}が ぜんぶ 見えて ${W.mangetsu}に なるんだね！`,
+  },
+  m_new: {
+    icon: '🌠', starLabel: W.shingetsu,
+    wish: `ながれ${ruby('星', 'ぼし')}を ゆっくり 見たいの。<br>${W.tsuki}あかりを <b>けして</b> くれる？`,
+    check: a => elong(a) <= deg(14),
+    point: `${W.tsuki}は きえたんじゃ ないよ。${W.taiyo}と <b>おなじ ほうこう</b>に あると、${W.hikari}る がわが うらがわに なって 見えないんだ。これが <b>${W.shingetsu}</b>！`,
+  },
+  m_half: {
+    icon: '🐭', starLabel: W.hangetsu,
+    wish: `はんぶんこの チーズみたいな<br><b>${W.hangetsu}</b>が 見たいなあ。`,
+    check: a => Math.abs(elong(a) - deg(90)) <= deg(14),
+    point: `${W.taiyo}と ちょうど <b>90${ruby('度', 'ど')}</b>の ばしょだと ${W.hangetsu}！ みぎ${ruby('半分', 'はんぶん')}が${W.hikari}る${W.hangetsu}は「${ruby('上弦', 'じょうげん')}の${W.tsuki}」、ひだりは「${ruby('下弦', 'かげん')}の${W.tsuki}」って よぶんだよ。`,
+  },
+  m_crescent: {
+    icon: '🧚', starLabel: W.mikazuki,
+    wish: `${W.mikazuki}の ブランコに のりたいの。<br><b>ほそーい ${W.tsuki}</b>に してね。`,
+    check: a => { const e = elong(a); return e >= deg(22) && e <= deg(58); },
+    point: `${W.taiyo}に <b>ちかい</b>ほど、${W.tsuki}は ほそく 見えるんだね。${W.mikazuki}は ゆうがたの にしの そらで 見つけやすいよ！`,
+  },
+};
+
+// ---------- ステップ（授業の流れ） ----------
+const FLOW = ['intro', 'vote', 'practice', 'm_full', 'm_new', 'm_half', 'm_crescent', 'cycle', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = Math.max(0, Math.min(FLOW.length - 1, i));
+  S.missionPhase = ''; S.cyclePhase = '';
+  $('dayChip').style.display = 'none';
+  hideOverlay(); hideWish();
+  STEPS[FLOW[S.stepIndex]].enter();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  // --- オープニング ---
+  intro: {
+    enter() {
+      S.dragEnabled = false;
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌑🌒🌓🌔🌕🌖🌗🌘</div>
+        <h1>${ruby('月', 'つき')}よみ${ruby('堂', 'どう')}</h1>
+        <div class="sub">〜 ${W.tsuki}を あやつる みならい${ruby('月', 'つき')}よみ、ぼしゅう${ruby('中', 'ちゅう')} 〜</div>
+        <p class="talk">ようこそ、よぞらの おみせ「${ruby('月', 'つき')}よみ${ruby('堂', 'どう')}」へ。わたしは ${ruby('店主', 'てんしゅ')}の <b>ルナ</b>。<br>
+        この おみせの <b>まほうの${ruby('水晶盤', 'すいしょうばん')}</b>は、ほんものの ${W.tsuki}を うごかせるの。<br>
+        こんやは お${ruby('客', 'きゃく')}さまの おねがいを かなえながら、${W.tsuki}の ひみつを いっしょに といていこう！</p>
+        <button class="btn" id="startBtn">おみせに はいる</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。マウス・タッチ・矢印キーで操作できます。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  // --- よそうタイム（誤概念の表出） ---
+  vote: {
+    enter() {
+      S.dragEnabled = false;
+      showOverlay(`
+        <h2>🌙 よそうタイム</h2>
+        <p class="talk">${W.tsuki}は ${ruby('日', 'ひ')}によって ${W.katachi}が かわって 見えるよね。<br><b>どうしてだと ${ruby('思', 'おも')}う？</b></p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">☁️</span><b>①</b> くもが ${W.tsuki}を かくしている から</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌗</span><b>②</b> ${W.tsuki}そのものの ${W.katachi}が かわっている から</div>
+          <div class="vcard" data-v="2"><span class="vicon">👀</span><b>③</b> ${W.tsuki}の <b>見えかた</b>が かわっている から</div>
+        </div>
+        <div class="sub">思うものに タッチ（いくつでも）。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめに いこう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); c.classList.toggle('picked');
+          const v = +c.dataset.v;
+          S.votePicked.has(v) ? S.votePicked.delete(v) : S.votePicked.add(v);
+        };
+      });
+      $('voteGo').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  // --- れんしゅう：月を1周させる ---
+  practice: {
+    enter() {
+      S.dragEnabled = true; S.sweep = 0; S.practiceDone = false;
+      say(`まずは れんしゅう！ ${ruby('水晶盤', 'すいしょうばん')}を さわって、${W.tsuki}を <b>ぐるっと 1しゅう</b> おさんぽ させてみて。<br>「そらの${ruby('窓', 'まど')}」の ${W.tsuki}が どう かわるか、みんなで よーく 見ててね！`);
+      setButtons([]);
+    },
+  },
+
+  // --- ミッション×4 ---
+  m_full: { enter() { missionEnter('m_full'); } },
+  m_new: { enter() { missionEnter('m_new'); } },
+  m_half: { enter() { missionEnter('m_half'); } },
+  m_crescent: { enter() { missionEnter('m_crescent'); } },
+
+  // --- はかせチャレンジ：満ち欠けのじゅんばん ---
+  cycle: {
+    enter() {
+      S.dragEnabled = false;
+      S.cyclePhase = 'ask'; S.cycleChoice = -1; S.cycleProgress = 0;
+      S.targetA = 0;  // 満月の位置へ
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ いま ${W.tsuki}は ${W.mangetsu}。<br>この つぎの${ruby('日', 'ひ')}から、${W.tsuki}は <b>どう かわっていく</b>と ${ruby('思', 'おも')}う？ シートにも 〇を つけてね。`);
+      setButtons([
+        { label: `Ａ すこしずつ ほそくなる`, cls: 'choice', cb: el => cycleChoose(0, el) },
+        { label: `Ｂ もっと ふくらんでいく`, cls: 'choice', cb: el => cycleChoose(1, el) },
+        { label: `Ｃ ${ruby('日', 'ひ')}によって バラバラに かわる`, cls: 'choice', cb: el => cycleChoose(2, el) },
+      ]);
+    },
+  },
+
+  // --- まとめ ---
+  ending: {
+    enter() {
+      S.dragEnabled = false;
+      const age = realMoonAge();
+      const info = realMoonInfo(age);
+      showOverlay(`
+        <h2>⭐ みならい${ruby('月', 'つき')}よみ にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk">きょうの <b>たいせつな ひみつ</b>、もう いえるかな？<br>
+        ${W.tsuki}の ${W.katachi}が かわって 見えるのは、${W.tsuki}と ${W.taiyo}の 「<span id="blankWord">？？？</span>」 が かわるから。
+        <span style="font-size:.8em;color:#8a86a0">（タッチすると こたえが 出るよ）</span></p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>③「${W.tsuki}の 見えかたが かわっている から」</b>！ ${W.tsuki}じしんは いつも まんまるの ボールなんだね。</p>
+        <div id="endMoonBox">
+          <canvas id="endMoon" width="110" height="110"></canvas>
+          <div style="text-align:left">
+            <div class="emnote">ちなみに……こんやの ほんものの ${W.tsuki}は だいたい こんな${W.katachi}！</div>
+            <div class="emname">${info.name}</div>
+            <div class="emnote">こんや そらを 見上げて たしかめてみてね。<br>きろくシートの「こんやの${W.tsuki}」コーナーも わすれずに！</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(skyBurst, 200);
+      $('blankWord').onclick = function () {
+        this.innerHTML = `いち（${ruby('位置', 'いち')}）`;
+        this.style.color = '#7ee787'; sYes(); skyBurst();
+      };
+      const cv = $('endMoon');
+      drawPhase(cv.getContext('2d'), 55, 55, 40, info.e, info.litRight);
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  // --- じゆうモード（早い子・発展） ---
+  free: {
+    enter() {
+      S.dragEnabled = true;
+      say(`<b>じゆうモード</b>！ こんどは みんなが ${ruby('問題', 'もんだい')}を 出す${ruby('番', 'ばん')}。<br>「${W.mangetsu}に してみて！」「26${ruby('日', 'にち')}めの ${W.tsuki}は どんな${W.katachi}？」など、${ruby('友', 'とも')}だちと クイズを 出しあってみよう！`);
+      setButtons([
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+  },
+};
+
+// ---------- ミッション共通処理 ----------
+function missionEnter(id) {
+  const M = MISSIONS[id];
+  S.missionPhase = 'predict';
+  S.dragEnabled = false;
+  setWish(M.icon, M.wish);
+  say(`おねがいカードが とどいたよ。${W.tsuki}を <b>①〜⑧の どこ</b>に おけば いいかな？<br>きろくシートの ばんごうに 〇を つけて、よそうしよう！`);
+  setButtons([{ label: 'みんな よそうできた！', cb: () => missionOperate(id) }]);
+}
+function missionOperate(id) {
+  S.missionPhase = 'operate';
+  S.dragEnabled = true;
+  say(`だいひょうさん、${ruby('水晶盤', 'すいしょうばん')}の ${W.tsuki}を うごかして！<br>みんなは 「そらの${ruby('窓', 'まど')}」を 見ながら <b>こえで おうえん</b>してね。（もっと${ruby('下', 'した')}！ もうちょっと！）`);
+  setButtons([{ label: 'これで どう？', cb: () => missionCheck(id) }]);
+}
+function missionCheck(id) {
+  const M = MISSIONS[id];
+  if (M.check(S.moonA)) {
+    S.missionPhase = 'done';
+    S.dragEnabled = false;
+    sYes(); skyBurst(); award(id);
+    say(`✨ できたー！ おねがい かんりょう！ ✨<br><br>💡 <b>たいせつポイント</b><br>${M.point}`);
+    setButtons([{ label: 'つぎの おねがいへ', cb: nextStep }]);
+  } else {
+    sHmm();
+    const e = elong(S.moonA);
+    let target;
+    if (id === 'm_full') target = Math.PI;
+    else if (id === 'm_new') target = 0;
+    else if (id === 'm_half') target = Math.PI / 2;
+    else target = deg(40);
+    const hint = (e < target)
+      ? `もうすこし ${W.taiyo}から <b>とおい ばしょ</b>に おいてみたら どうかな？`
+      : `もうすこし ${W.taiyo}に <b>ちかい ばしょ</b>かも しれないよ？`;
+    say(`うーん、おしい！ いまは「${phaseInfo(S.moonA).name}」だね。<br>${hint} そうさの ${ruby('人', 'ひと')}を こうたいしても いいよ。`);
+  }
+}
+
+// ---------- れんしゅう完了 ----------
+function practiceComplete() {
+  S.practiceDone = true;
+  sYes(); skyBurst();
+  say(`その ちょうし！ ${W.tsuki}の ${W.katachi}、くるくる かわったね。<br>${W.tsuki}の <b>ばしょ</b>と ${W.katachi}、なにか かんけいが ありそう……？<br>それじゃあ、お${ruby('客', 'きゃく')}さまの おねがいを かなえに いこう！`);
+  setButtons([{ label: 'おねがいカードを 見る', cb: nextStep }]);
+}
+
+// ---------- はかせチャレンジ ----------
+function cycleChoose(n, el) {
+  S.cycleChoice = n;
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+  say(`「${['Ａ すこしずつ ほそくなる', 'Ｂ もっと ふくらんでいく', 'Ｃ バラバラに かわる'][n]}」だね。<br>それじゃあ、まほうで <b>じかんを すすめて</b> たしかめよう！`);
+  setButtons([{ label: '▶ じかんを すすめる！', cb: cycleStart }]);
+}
+function cycleStart() {
+  S.cyclePhase = 'anim1';
+  S.cycleProgress = 0;
+  $('dayChip').style.display = 'block';
+  say(`いくよ〜！ 「そらの${ruby('窓', 'まど')}」の ${W.tsuki}に ちゅうもく……！`);
+  setButtons([]);
+}
+function cyclePause() {
+  S.cyclePhase = 'pause';
+  award('cycle');
+  const praise = S.cycleChoice === 0 ? 'よそう どおり！ すごい！' : 'じっけんで はっけん できたね！';
+  sYes();
+  say(`ストップ！ ${W.mangetsu}から 1しゅうかんで、${W.tsuki}は <b>すこしずつ ほそく</b> なっていったね。<br>こたえは <b>Ａ</b>！ ${praise}<br><br>このまま つづけたら、いつ ${W.mangetsu}に もどるかな？`);
+  setButtons([{ label: '▶ つづきを 見る', cb: () => {
+    S.cyclePhase = 'anim2';
+    say(`${W.shingetsu}を こえて…… ${W.tsuki}が また ふくらんでいくよ……！`);
+    setButtons([]);
+  } }]);
+}
+function cycleEnd() {
+  S.cyclePhase = 'done';
+  S.moonA = 0; S.targetA = 0;
+  sYes(); skyBurst();
+  say(`${W.mangetsu}に もどった！ ${W.mangetsu}から つぎの ${W.mangetsu}まで <b>やく1か${ruby('月', 'げつ')}（29.5${ruby('日', 'にち')}）</b>。<br>だから ${W.tsuki}の ${W.katachi}は、まいにち すこしずつ、<b>きまった じゅんばん</b>で かわるんだね！`);
+  setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+}
+
+// ---------- こんやの本物の月 ----------
+function realMoonAge() {
+  const jd = Date.now() / 86400000 + 2440587.5;
+  let age = (jd - 2451550.26) % 29.530588853;
+  if (age < 0) age += 29.530588853;
+  return age;
+}
+function realMoonInfo(age) {
+  const half = 29.530588853 / 2;
+  const e = (age < half ? age / half : (29.530588853 - age) / half) * Math.PI;
+  const litRight = age < half;
+  const ed = e * 180 / Math.PI;
+  let name;
+  if (ed < 12) name = W.shingetsu;
+  else if (ed < 62) name = 'ほそい' + W.tsuki + '（' + W.mikazuki + 'がた）';
+  else if (ed < 112) name = W.hangetsu;
+  else if (ed < 160) name = 'ふくらんだ' + W.tsuki;
+  else name = W.mangetsu;
+  return { e, litRight, name };
+}
+
+// ---------- 先生バー・そのほか ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+$('rayToggle').onclick = function () {
+  S.raysOn = !S.raysOn; sTap();
+  $('rayState').textContent = S.raysOn ? 'ON' : 'OFF';
+};
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_full などを付けると途中から始められます。授業が中断した時の復帰用）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

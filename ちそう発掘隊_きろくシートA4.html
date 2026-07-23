@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ちそう発掘隊 はっくつノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #6e4e28; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 9pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .twoCol { display: flex; gap: 4mm; align-items: flex-start; }
+  .twoCol .diagram { flex-shrink: 0; text-align: center; font-size: 8.5pt; }
+  .twoCol .diagram svg { border: .35mm solid #999; border-radius: 2mm; background: #fbf8f2; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用はっくつノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⛏ ちそう<ruby>発掘隊<rt>はっくつたい</rt></ruby> はっくつノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      がけの しま<ruby>模様<rt>もよう</rt></ruby>（<ruby>地層<rt>ちそう</rt></ruby>）は、どうやって できた？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 🖌 だれかが ぬったり けずったり した</div>
+        <div class="voteOpt"><span class="vnum">②</span> 🌊 <ruby>水<rt>みず</rt></ruby>の<ruby>底<rt>そこ</rt></ruby>に <ruby>土<rt>つち</rt></ruby>が つもって できた</div>
+        <div class="voteOpt"><span class="vnum">③</span> ☀️ <ruby>地面<rt>じめん</rt></ruby>が かわいて ひびわれた</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．うみの じっけん</span>
+    <div class="secBody">
+      <div class="twoCol">
+        <div class="diagram">
+          <svg width="58mm" height="26mm" viewBox="0 0 220 98">
+            <path d="M4 10 Q20 30 30 55 L30 98" fill="none" stroke="#4a8ab8" stroke-width="6"/>
+            <path d="M30 55 L216 78" fill="none" stroke="#7a6a4a" stroke-width="2"/>
+            <path d="M30 55 L216 30 L216 78 Z" fill="#cfe4f0" opacity=".7"/>
+            <text x="12" y="8" font-size="8">川</text>
+            <text x="62" y="72" font-size="8">㋐</text>
+            <text x="122" y="79" font-size="8">㋑</text>
+            <text x="182" y="87" font-size="8">㋒</text>
+            <text x="60" y="94" font-size="7">河口ちかく</text>
+            <text x="180" y="97" font-size="7">おき</text>
+          </svg>
+        </div>
+        <div>
+          まざった<ruby>土<rt>つち</rt></ruby>が <ruby>海<rt>うみ</rt></ruby>に ながれこむと……<br>
+          よそう：いちばん <b>とおくの おき</b>まで はこばれるのは？<br>
+          （ れき ・ すな ・ どろ ）に〇<br>
+          けっか：㋐（<span class="fillLine" style="width:13mm"></span>）　㋑（<span class="fillLine" style="width:13mm"></span>）　㋒（<span class="fillLine" style="width:13mm"></span>）<br>
+          <span class="wordBank">ことば：れき（2mmより大きい）／ すな ／ どろ（細かい）</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．がけの ちょうさ</span>
+    <div class="secBody">
+      <div class="twoCol">
+        <div class="diagram">
+          <svg width="44mm" height="42mm" viewBox="0 0 166 158">
+            <rect x="30" y="8" width="120" height="24" fill="#e8dcc2" stroke="#555" stroke-width="1"/>
+            <rect x="30" y="32" width="120" height="24" fill="#f2e6c2" stroke="#555" stroke-width="1"/>
+            <rect x="30" y="56" width="120" height="24" fill="#d8d4d0" stroke="#555" stroke-width="1"/>
+            <rect x="30" y="80" width="120" height="24" fill="#e0d0b0" stroke="#555" stroke-width="1"/>
+            <rect x="30" y="104" width="120" height="24" fill="#f2e6c2" stroke="#555" stroke-width="1"/>
+            <rect x="30" y="128" width="120" height="24" fill="#d8c49a" stroke="#555" stroke-width="1"/>
+            <g font-size="11" text-anchor="middle" dominant-baseline="middle">
+              <text x="14" y="21">①</text><text x="14" y="45">②</text><text x="14" y="69">③</text>
+              <text x="14" y="93">④</text><text x="14" y="117">⑤</text><text x="14" y="141">⑥</text>
+            </g>
+            <g font-size="8">
+              <text x="36" y="48">🌀</text><text x="118" y="72">▲▲</text><text x="36" y="96">🍃</text><text x="118" y="120">🐚</text>
+            </g>
+            <g fill="#8a6a42">
+              <ellipse cx="55" cy="140" rx="5" ry="3.4"/><ellipse cx="80" cy="144" rx="4" ry="3"/>
+              <ellipse cx="105" cy="139" rx="5" ry="3.4"/><ellipse cx="130" cy="143" rx="4" ry="3"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          ① いちばん <b><ruby>古<rt>ふる</rt></ruby>い</b><ruby>層<rt>そう</rt></ruby>は？　よそう（<span class="fillLine" style="width:10mm"></span>）<ruby>番<rt>ばん</rt></ruby> → けっか（<span class="fillLine" style="width:10mm"></span>）<ruby>番<rt>ばん</rt></ruby><br>
+          ② ほり<ruby>出<rt>だ</rt></ruby>した<ruby>化石<rt>かせき</rt></ruby>に ☑：　☐ <ruby>貝<rt>かい</rt></ruby>　☐ <ruby>木<rt>き</rt></ruby>の<ruby>葉<rt>は</rt></ruby>　☐ アンモナイト<br>
+          ③ <ruby>山<rt>やま</rt></ruby>のがけから <ruby>貝<rt>かい</rt></ruby>の<ruby>化石<rt>かせき</rt></ruby>！<br>
+          　→ ここは <ruby>大昔<rt>おおむかし</rt></ruby>（ <ruby>海<rt>うみ</rt></ruby> ・ ずっと<ruby>山<rt>やま</rt></ruby> ・ さばく ）だった に〇
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．はかせチャレンジ（③の<ruby>層<rt>そう</rt></ruby>のなぞ）</span>
+    <div class="secBody">
+      はいいろの ③の<ruby>層<rt>そう</rt></ruby>の <ruby>正体<rt>しょうたい</rt></ruby>は？　<b>そう思うものに 〇</b><br>
+      　Ａ．<ruby>火山灰<rt>かざんばい</rt></ruby>（<ruby>噴火<rt>ふんか</rt></ruby>で ふってきた）　／　Ｂ．<ruby>海<rt>うみ</rt></ruby>の すなの<ruby>一種<rt>いっしゅ</rt></ruby>　／　Ｃ．コンクリート<br>
+      しょうこ：つぶが（ かくばっている ・ <ruby>丸<rt>まる</rt></ruby>い ）→ <ruby>水<rt>みず</rt></ruby>を <ruby>通<rt>とお</rt></ruby>らず <ruby>空<rt>そら</rt></ruby>から ふってきた！
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① <ruby>地層<rt>ちそう</rt></ruby>は（<span class="fillLine" style="width:12mm"></span>）の<ruby>底<rt>そこ</rt></ruby>に、つぶの<ruby>大<rt>おお</rt></ruby>きさで 分かれた<ruby>土<rt>つち</rt></ruby>が つもって できる。<br>
+      ② <ruby>下<rt>した</rt></ruby>の<ruby>層<rt>そう</rt></ruby>ほど（<span class="fillLine" style="width:14mm"></span>）。<br>
+      ③ <ruby>貝<rt>かい</rt></ruby>の<ruby>化石<rt>かせき</rt></ruby>が <ruby>出<rt>で</rt></ruby>たら、そこは<ruby>大昔<rt>おおむかし</rt></ruby>（<span class="fillLine" style="width:12mm"></span>）だった。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．おうちミッション：しまもよう さがし</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">⛰</span>
+        <div>
+          <ruby>近<rt>ちか</rt></ruby>くの がけ・<ruby>切<rt>き</rt></ruby>り<ruby>通<rt>どお</rt></ruby>し・<ruby>工事<rt>こうじ</rt></ruby>の あとで、<b>しま<ruby>模様<rt>もよう</rt></ruby></b>を さがそう（<ruby>教科書<rt>きょうかしょ</rt></ruby>や<ruby>図鑑<rt>ずかん</rt></ruby>の<ruby>写真<rt>しゃしん</rt></ruby>でもOK）。<br>
+          ☐ <ruby>見<rt>み</rt></ruby>つけた！　<ruby>層<rt>そう</rt></ruby>の かずは（<span style="border-bottom:.4mm solid #222;display:inline-block;width:10mm">　</span>）くらい あった<br>
+          <span style="font-size:8.5pt">※がけに <ruby>近<rt>ちか</rt></ruby>よらない・のぼらない。<ruby>工事現場<rt>こうじげんば</rt></ruby>に <ruby>入<rt>はい</rt></ruby>らない。<ruby>大人<rt>おとな</rt></ruby>と いっしょに はなれて <ruby>見<rt>み</rt></ruby>るだけ。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい ちそう<ruby>発掘隊<rt>はっくつたい</rt></ruby>、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ちそう発掘隊 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「土地のつくりと変化（地層）」・学力幅あり・協力型／ 使うもの：「ちそう発掘隊_じゅぎょう画面.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、「🪣土をながす」で粒が3つに分かれて積もるか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kaseki</b> などで途中再開（m_tsubu／m_kasanaru／m_kaseki／m_yomu／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（実験と変身で判明します）</td></tr>
+      <tr><td class="min">4〜13分</td><td>🌊 つぶのじっけん（うみ）</td><td>予想に〇→代表が🪣→れき・すな・どろが3つに分かれる→シート２に記入</td></tr>
+      <tr><td class="min">13〜22分</td><td>🕰 層のまほう → ⏩なん万年</td><td>予想に〇→🪣を2回くり返して しま模様→<b>⏩でがけに変身（今日の見せ場）</b>。「下ほど古い」をここでおさえる</td></tr>
+      <tr><td class="min">22〜30分</td><td>⛏ 化石のなぞ（がけ）</td><td>代表交代で✦を3つタッチ発掘→「山から貝＝昔は海」をクイズ→シート３に記入</td></tr>
+      <tr><td class="min">30〜36分</td><td>🕰 じゅんばんのなぞ</td><td>シート３①に番号で予想→がけの層をタッチして回答（⑥→①の2問）</td></tr>
+      <tr><td class="min">36〜41分</td><td>はかせチャレンジ（火山灰）</td><td>シート４に〇→🔍で粒を拡大→「かくばってる＝空から降った」の推理を楽しむ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート５。しま模様さがし（シート６）を安全の約束とセットで予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「じゅんばんのなぞ」を右下「つぎ▶」でスキップOK（まとめは削らない）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>②</b>／うみのじっけん＝おきまで運ばれるのは<b>どろ</b>・㋐<b>れき</b> ㋑<b>すな</b> ㋒<b>どろ</b>／
+      がけ＝いちばん古いのは<b>⑥</b>（新しいのは①）・貝の化石→<b>海</b>だった／はかせ＝<b>Ａ 火山灰</b>・つぶが<b>かくばっている</b>／
+      まとめ＝①<b>水</b> ②<b>古い</b> ③<b>海</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>れき（直径2mm以上）・すな・どろ（泥）の区分、粒の大きい順に河口近くへ沈む（大きい粒ほど早く沈む）、層は上へ重なる＝<b>下位ほど古い</b>（地層累重の法則）——すべて教科書どおり</li>
+      <li>貝の化石＝堆積当時そこが海底だった証拠。火山灰の粒は<b>流水で運ばれていないため角ばったまま</b>——前回「流れる水」の丸い石との対比が決め手（2つの授業がつながる仕掛けです）</li>
+      <li>発展：層が固まると れき岩・砂岩・でい岩に。がけ全体が斜めなのは大地の傾き（しゅう曲・断層は中学内容なので触れる程度に）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「⏩なん万年」の変身は一度きりの見せ場。押す前に<b>「よく見ててね」</b>と全員の目を集める</li>
+      <li>発掘は代表交代で1人1つ。見ている子は「どの層から出たか」を記録係に</li>
+      <li>おうちミッションは<b>安全最優先</b>：がけに近よらない・のぼらない・工事現場に入らない・大人と一緒。教科書の写真でも十分と伝える</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「④と⑤、古いのはどっち？」「火山灰のつぶの形は？」「どろの層は河口から近い？遠い？」</li>
+      <li>ペットボトルに土と水を入れてふって置くと、本物の「粒の大きさで分かれる」実験ができます（一晩置くと層に）</li>
+      <li>博物館の地層はぎ取り標本や、地域のジオパーク・崖の見学があれば最高の続きです</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

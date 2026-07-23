@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ながれる水の探検隊 たんけんノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #22753f; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 9pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .mtable { width: 100%; border-collapse: collapse; }
+  .mtable th, .mtable td {
+    border: .4mm solid #222; padding: 1.1mm 1.6mm;
+    font-size: 9pt; text-align: left; vertical-align: middle; line-height: 1.45;
+  }
+  .mtable th { background: #eee; text-align: center; font-size: 8.5pt; }
+  .mtable .mname { font-size: 9.5pt; font-weight: 700; white-space: nowrap; text-align: center; }
+  .mtable .micon { font-size: 11pt; }
+
+  .fillLine { display: inline-block; width: 22mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .stoneRow { display: flex; gap: 5mm; align-items: center; }
+  .stoneBox { text-align: center; font-size: 9pt; }
+  .stoneBox svg { border: .35mm solid #999; border-radius: 2mm; background: #f0f6fa; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用たんけんノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🏞 ながれる<ruby>水<rt>みず</rt></ruby>の<ruby>探検隊<rt>たんけんたい</rt></ruby> たんけんノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      <ruby>上流<rt>じょうりゅう</rt></ruby>の<ruby>石<rt>いし</rt></ruby>と <ruby>下流<rt>かりゅう</rt></ruby>の<ruby>石<rt>いし</rt></ruby>、ちがいは ある？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 🟰 どこも だいたい おなじ</div>
+        <div class="voteOpt"><span class="vnum">②</span> ⛰ <ruby>上流<rt>じょうりゅう</rt></ruby>は ゴツゴツ<ruby>大<rt>おお</rt></ruby>きく、<ruby>下流<rt>かりゅう</rt></ruby>は <ruby>丸<rt>まる</rt></ruby>く<ruby>小<rt>ちい</rt></ruby>さい</div>
+        <div class="voteOpt"><span class="vnum">③</span> 🔄 <ruby>上流<rt>じょうりゅう</rt></ruby>が <ruby>丸<rt>まる</rt></ruby>くて、<ruby>下流<rt>かりゅう</rt></ruby>が ゴツゴツ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．たんけんきろく（3つのはたらき＋カーブ）</span>
+    <div class="secBody">
+      <table class="mtable">
+        <tr>
+          <th style="width:26mm">ばしょ</th>
+          <th>よそう（〇を つけよう）</th>
+          <th style="width:52mm">じっけんで わかったこと</th>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">⛰</span> <ruby>上流<rt>じょうりゅう</rt></ruby></td>
+          <td><ruby>水<rt>みず</rt></ruby>を ながしつづけると<ruby>川<rt>かわ</rt></ruby>のそこは？<br>（ ふかく けずられる ・ かわらない ・ あさくなる ）</td>
+          <td>けずる はたらき＝<br>「しん<span style="border-bottom:.4mm solid #222;display:inline-block;width:10mm">　</span>」という</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🪨</span> <ruby>石<rt>いし</rt></ruby>ころの<ruby>旅<rt>たび</rt></ruby></td>
+          <td><ruby>海<rt>うみ</rt></ruby>に つくころの <ruby>石<rt>いし</rt></ruby>は？<br>（ <ruby>角<rt>かく</rt></ruby>ばったまま ・ <ruby>丸<rt>まる</rt></ruby>く<ruby>小<rt>ちい</rt></ruby>さく ・ <ruby>大<rt>おお</rt></ruby>きく ）</td>
+          <td>はこぶ はたらき＝<br>「<span style="border-bottom:.4mm solid #222;display:inline-block;width:10mm">　</span>ぱん」という</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🌊</span> <ruby>下流<rt>かりゅう</rt></ruby>・<ruby>河口<rt>かこう</rt></ruby></td>
+          <td>はこばれた すなや<ruby>石<rt>いし</rt></ruby>は？<br>（ ながれつづける ・ ゆるい<ruby>所<rt>ところ</rt></ruby>に つもる ・ きえる ）</td>
+          <td>つもらせる はたらき＝<br>「たい<span style="border-bottom:.4mm solid #222;display:inline-block;width:10mm">　</span>」という</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🌀</span> カーブ</td>
+          <td>けずられるのは どっち？<br>（ そとがわ ・ うちがわ ・ りょうほう<ruby>同<rt>おな</rt></ruby>じ ）</td>
+          <td>けずれる＝（ そと ・ うち ）がわ<br>つもる＝（ そと ・ うち ）がわ</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．<ruby>石<rt>いし</rt></ruby>のスケッチ</span>
+    <div class="secBody">
+      <div class="stoneRow">
+        <div class="stoneBox">
+          <svg width="40mm" height="20mm" viewBox="0 0 150 75">
+            <path d="M35 15 L55 22 L60 40 L48 58 L25 55 L15 35 Z" fill="#b8b2a8" stroke="#555" stroke-width="1.5"/>
+            <path d="M90 30 L108 24 L122 38 L118 55 L98 58 L86 45 Z" fill="#b8b2a8" stroke="#555" stroke-width="1.5"/>
+          </svg><br>
+          <ruby>上流<rt>じょうりゅう</rt></ruby>の<ruby>石<rt>いし</rt></ruby>（ゴツゴツ・<ruby>大<rt>おお</rt></ruby>きい）
+        </div>
+        <div class="stoneBox">
+          <svg width="40mm" height="20mm" viewBox="0 0 150 75">
+            <text x="75" y="42" font-size="10" text-anchor="middle" fill="#888">下流の石を かいてみよう</text>
+          </svg><br>
+          <ruby>下流<rt>かりゅう</rt></ruby>の<ruby>石<rt>いし</rt></ruby>（どんな<ruby>形<rt>かたち</rt></ruby>？ かいてみよう）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．はかせチャレンジ（<ruby>大雨<rt>おおあめ</rt></ruby>）</span>
+    <div class="secBody">
+      <ruby>大雨<rt>おおあめ</rt></ruby>で <ruby>水<rt>みず</rt></ruby>が ふえると、けずる<ruby>力<rt>ちから</rt></ruby>・はこぶ<ruby>力<rt>ちから</rt></ruby>は？　<b>そう思うものに 〇</b><br>
+      　Ａ．つよくなる　／　Ｂ．かわらない　／　Ｃ．よわくなる<br>
+      🚨 <ruby>探検隊<rt>たんけんたい</rt></ruby>の おきて：<ruby>雨<rt>あめ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>と <ruby>雨上<rt>あめあ</rt></ruby>がりの <ruby>川<rt>かわ</rt></ruby>には ぜったいに（<span class="fillLine" style="width:24mm"></span>）！
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      <span class="wordBank">ことばのヒント：しん食 ／ 運ぱん ／ たい積</span><br>
+      <ruby>流<rt>なが</rt></ruby>れる<ruby>水<rt>みず</rt></ruby>の 3つの はたらき ＝ けずる（<span class="fillLine" style="width:18mm"></span>）・はこぶ（<span class="fillLine" style="width:18mm"></span>）・つもらせる（<span class="fillLine" style="width:18mm"></span>）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．おうちミッション：<ruby>石<rt>いし</rt></ruby>ウォッチング</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🪨</span>
+        <div>
+          <ruby>近<rt>ちか</rt></ruby>くの<ruby>川<rt>かわ</rt></ruby>や<ruby>用水路<rt>ようすいろ</rt></ruby>の<ruby>石<rt>いし</rt></ruby>を、<b>はなれた<ruby>所<rt>ところ</rt></ruby>から</b><ruby>見<rt>み</rt></ruby>てみよう（<ruby>教科書<rt>きょうかしょ</rt></ruby>や<ruby>図鑑<rt>ずかん</rt></ruby>の<ruby>写真<rt>しゃしん</rt></ruby>でもOK）。<br>
+          <ruby>見<rt>み</rt></ruby>つけた<ruby>石<rt>いし</rt></ruby>は（ <ruby>丸<rt>まる</rt></ruby>かった ・ <ruby>角<rt>かく</rt></ruby>ばっていた ）→ ここは<ruby>川<rt>かわ</rt></ruby>の（ <ruby>上流<rt>じょうりゅう</rt></ruby> ・ <ruby>下流<rt>かりゅう</rt></ruby> ）に<ruby>近<rt>ちか</rt></ruby>いのかも！<br>
+          <span style="font-size:8.5pt">※<ruby>大人<rt>おとな</rt></ruby>と いっしょに。<ruby>水<rt>みず</rt></ruby>ぎわに <ruby>近<rt>ちか</rt></ruby>づかない。<ruby>雨<rt>あめ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>は <ruby>行<rt>い</rt></ruby>かない。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい<ruby>川<rt>かわ</rt></ruby>の<ruby>探検隊<rt>たんけんたい</rt></ruby>、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ながれる水の探検隊 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5理科「流れる水のはたらき」・学力幅あり・協力型／ 使うもの：「ながれる水の探検隊_じゅぎょう画面.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具・砂場は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、「💧水をながす」ボタンで川に土の粒が流れるか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_hakobu</b> などで途中再開（m_kezuru／m_hakobu／m_tsumoru／m_curve／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（石ころの旅で自然に判明します）</td></tr>
+      <tr><td class="min">4〜12分</td><td>⛰ けずる（しん食）</td><td>予想に〇→代表が💧→途中で💦「水をふやす」で削れ方の変化も観察→シート２に記入</td></tr>
+      <tr><td class="min">12〜20分</td><td>🪨 はこぶ（運ぱん）＝石ころゴロタの旅</td><td>予想に〇→▶で旅スタート。むしめがねで角がとれていく様子に注目→シート２・３に記入</td></tr>
+      <tr><td class="min">20〜27分</td><td>🌊 つもる（たい積）</td><td>予想に〇→💧で河口に砂の土地ができる→シート２に記入</td></tr>
+      <tr><td class="min">27〜34分</td><td>🌀 カーブのなぞ</td><td><b>今日の応用問題</b>。けずる・つもるの知識で推理→💧で外側けずれ・内側つもるを確認→シート２に記入</td></tr>
+      <tr><td class="min">34〜40分</td><td>はかせチャレンジ（大雨）</td><td>シート４に〇→🌧で増水を観察→<b>防災「雨の日の川に近づかない」を全員で声に出す</b></td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート５。石ウォッチング（シート６）を安全の約束とセットで予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「カーブのなぞ」を右下「つぎ▶」でスキップOK（はかせ＝防災は削らない）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>②</b>／⛰＝<b>ふかくけずられる・しん「食」</b>／🪨＝<b>丸く小さく・「運」ぱん</b>／🌊＝<b>ゆるい所につもる・たい「積」</b>／
+      🌀＝<b>そとがわがけずれ、うちがわにつもる</b>／はかせ＝<b>Ａ・近づかない</b>／まとめ＝<b>しん食・運ぱん・たい積</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>用語は教科書どおり「<b>しん食・運ぱん・たい積</b>」。上流＝流れが速く侵食が強い（V字谷）、下流＝ゆるやかで堆積、カーブ外側＝速い→侵食（がけ）・内側＝遅い→堆積（川原）、増水で3つの力すべてが強まる——すべて実際の川の性質どおり</li>
+      <li>石が丸く小さくなるのは「流されながらぶつかって角がとれる」ため。上流ほど大きく角ばり、下流ほど丸く小さい——テスト頻出ポイントです。V字谷・扇状地・三角州の名前は発展（画面の河口の砂地が三角州のイメージ）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>カーブの問題は「けずる」「つもる」を学んだ直後の応用。まちがえても<b>「推理の材料はそろってる。もう一回考えよう」</b>と持ち上げる</li>
+      <li>はかせチャレンジの防災は必ず全員で確認：<b>雨の日・雨上がりの川、増水した川には絶対に近づかない</b>。おうちミッションも「大人と・離れた所から・雨の日は行かない」を約束してから出す</li>
+      <li>ボタン操作の代表は毎回交代。見ている子は「むしめがね観察係」「シート記録係」に。読みが苦手な子にはスイ隊長のセリフを先生が音読（全文ふりがな付き）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「3つのはたらきの名前は？」「カーブでキャンプするなら外側・内側どっちが安全？（→内側の川原。ただし増水したら両方危険）」</li>
+      <li>砂場や土の斜面にじょうろで水を流す本物のミニ実験をすると、画面の学びが実物とつながります（汚れてよい服で）</li>
+      <li>地域のハザードマップで自分の町の川を見ると、防災学習として完結します</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

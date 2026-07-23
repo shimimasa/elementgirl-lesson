@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>おなかのなか探検隊 たんけんノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #a5533f; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 2.4mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.5mm 2mm; font-size: 9pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  /* 消化管マップ＋記録テーブル */
+  .journey { display: flex; gap: 4mm; align-items: stretch; }
+  .journeyMap { flex-shrink: 0; width: 40mm; }
+  .mtable { width: 100%; border-collapse: collapse; }
+  .mtable th, .mtable td {
+    border: .4mm solid #222; padding: 1.2mm 1.6mm;
+    font-size: 9pt; text-align: left; vertical-align: middle; line-height: 1.45;
+  }
+  .mtable th { background: #eee; text-align: center; font-size: 8.5pt; }
+  .mtable .mname { font-size: 9.5pt; font-weight: 700; white-space: nowrap; text-align: center; }
+  .mtable .micon { font-size: 12pt; }
+
+  .fillLine { display: inline-block; width: 24mm; border-bottom: .5mm solid #222; height: 5mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .rice { font-size: 26pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用たんけんノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🍙 おなかのなか<ruby>探検隊<rt>たんけんたい</rt></ruby> たんけんノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      たべた おにぎりは、さいごに どうなる？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 🍙 おにぎりのまま、<ruby>体<rt>からだ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>に たまる</div>
+        <div class="voteOpt"><span class="vnum">②</span> ✨ 小さな つぶに かわって、<ruby>体<rt>からだ</rt></ruby>に とりこまれる</div>
+        <div class="voteOpt"><span class="vnum">③</span> 💨 ぜんぶ そのまま <ruby>出<rt>で</rt></ruby>ていくだけ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．たべものの たび（きろく）</span>
+    <div class="secBody">
+      <div class="journey">
+        <div class="journeyMap">
+          <!-- 消化管マップ（画面と同じ道すじ） -->
+          <svg width="40mm" height="74mm" viewBox="0 0 80 148">
+            <path d="M40 12 L40 34 L28 46 L28 66 L46 74 L54 82 L44 90 L54 98 L40 106 L40 138"
+                  fill="none" stroke="#f0b8a4" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- 口 -->
+            <ellipse cx="40" cy="12" rx="12" ry="5" fill="#fff" stroke="#c86a4e" stroke-width="1.5"/>
+            <text x="56" y="14" font-size="6.5">口(くち)</text>
+            <text x="52" y="30" font-size="6">食道</text>
+            <!-- 胃 -->
+            <ellipse cx="28" cy="55" rx="13" ry="11" fill="#fff" stroke="#c86a4e" stroke-width="1.5"/>
+            <text x="2" y="57" font-size="6.5">胃(い)</text>
+            <!-- 小腸 -->
+            <text x="58" y="90" font-size="6">小腸</text>
+            <!-- 大腸 -->
+            <text x="52" y="128" font-size="6">大腸</text>
+            <text x="14" y="146" font-size="5.5" fill="#888">↑たべものが 入る</text>
+          </svg>
+        </div>
+        <table class="mtable">
+          <tr>
+            <th style="width:24mm">ばしょ</th>
+            <th>よそう（〇を つけよう）</th>
+            <th style="width:44mm">わかったこと</th>
+          </tr>
+          <tr>
+            <td class="mname"><span class="micon">👄</span> 口</td>
+            <td>かむと あじは？<br>（ かわらない ・ <ruby>甘<rt>あま</rt></ruby>くなる ・ にがい ）</td>
+            <td><ruby>甘<rt>あま</rt></ruby>くなった＝（<span style="border-bottom:.4mm solid #222;display:inline-block;width:20mm">　　　</span>）が<br>でんぷんを 消化</td>
+          </tr>
+          <tr>
+            <td class="mname"><span class="micon">🫃</span> 胃</td>
+            <td>胃の しごとは？<br>（ ためるだけ ・ ドロドロ ・ すいとる ）</td>
+            <td><ruby>胃液<rt>いえき</rt></ruby>で（<span style="border-bottom:.4mm solid #222;display:inline-block;width:20mm">　　　</span>）に する</td>
+          </tr>
+          <tr>
+            <td class="mname"><span class="micon">🌀</span> 小腸</td>
+            <td><ruby>養分<rt>ようぶん</rt></ruby>を とるのは どこ？<br>（ 胃 ・ 小腸 ・ 大腸 ）</td>
+            <td>小腸で <ruby>養分<rt>ようぶん</rt></ruby>を（<span style="border-bottom:.4mm solid #222;display:inline-block;width:16mm">　　</span>）</td>
+          </tr>
+          <tr>
+            <td class="mname"><span class="micon">➰</span> 大腸</td>
+            <td>大腸が すいとるのは？<br>（ 水 ・ あぶら ・ 空気 ）</td>
+            <td>大腸で（<span style="border-bottom:.4mm solid #222;display:inline-block;width:16mm">　　</span>）を すいとる</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．はかせチャレンジ</span>
+    <div class="secBody">
+      <ruby>口<rt>くち</rt></ruby>から <ruby>大腸<rt>だいちょう</rt></ruby>の <ruby>出口<rt>でぐち</rt></ruby>まで、たべ物の <ruby>通<rt>とお</rt></ruby>り<ruby>道<rt>みち</rt></ruby>（<ruby>消化管<rt>しょうかかん</rt></ruby>）は どれくらい 長い？　<b>そう思うものに 〇</b><br>
+      　Ａ．やく1m（せの <ruby>半分<rt>はんぶん</rt></ruby>）　／　Ｂ．やく3m（きょうしつの よこ）　／　Ｃ．やく9m（バス1<ruby>台<rt>だい</rt></ruby>ぶん！）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① たべ物を <ruby>体<rt>からだ</rt></ruby>に とりこめる 小さな つぶに かえることを（<span class="fillLine" style="width:20mm"></span>）という。<br>
+      ② <ruby>養分<rt>ようぶん</rt></ruby>を おもに とりこむのは（<span class="fillLine" style="width:20mm"></span>）。<br>
+      ③ 口→食道→胃→小腸→大腸の 道を（<span class="fillLine" style="width:22mm"></span>）といい、やく（<span class="fillLine" style="width:10mm"></span>）mも ある！
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．おうちミッション：<ruby>自分<rt>じぶん</rt></ruby>の <ruby>体<rt>からだ</rt></ruby>で <ruby>実験<rt>じっけん</rt></ruby>！</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="rice">🍚</span>
+        <div>
+          ごはんを ひとくち、口の中で <b>30回 かんで</b>みよう。だんだん…… → あじは（ <ruby>甘<rt>あま</rt></ruby>くなった ・ かわらない ）に〇<br>
+          これが きょう <ruby>見<rt>み</rt></ruby>た「口の 消化」！ かんそう：<span style="border-bottom:.4mm solid #222;display:inline-block;width:70mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい<ruby>探検隊<rt>たんけんたい</rt></ruby>、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】おなかのなか探検隊 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「体のつくりとはたらき（消化・吸収）」・学力幅あり・協力型／ 使うもの：「おなかの探検隊_じゅぎょう画面.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、口の場面で「🦷かむ」ボタンを押すとスコープの粒が分かれるか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_stomach</b> などで途中再開（m_mouth／m_stomach／m_small／m_large／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（最後に画面が種明かし）</td></tr>
+      <tr><td class="min">4〜13分</td><td>👄 口（かむ＋だ液）</td><td>予想に〇 → 代表が「🦷かむ」を全員でカウントしながら30回 → 甘くなる＝だ液の消化。結果を記入</td></tr>
+      <tr><td class="min">13〜21分</td><td>🫃 胃（胃液でドロドロ）</td><td>予想に〇 →「🌀胃をうごかす」で消化を観察。<b>養分はまだ取り込まない</b>点を強調</td></tr>
+      <tr><td class="min">21〜31分</td><td>🌀 小腸（養分の吸収）</td><td>予想に〇 →「✨養分をとりこむ」でじゅう毛の吸収を観察。<b>今日の主役</b>。結果を記入</td></tr>
+      <tr><td class="min">31〜37分</td><td>➰ 大腸（水の吸収）</td><td>予想に〇 →「💧水をすいとる」で観察。ここまでが「たべ物の旅」</td></tr>
+      <tr><td class="min">37〜41分</td><td>はかせチャレンジ（消化管の長さ）</td><td>シート３に〇 → 答え合わせ。約9m＝バス1台分の驚きを共有</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め → シート４・５。家で「ごはん30回かみ」実験を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「はかせチャレンジ」を右下「つぎ▶」でスキップOK（まとめは削らない）。じゆうモードで5臓器を自由に巡って復習もできます。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>②</b>／👄口＝<b>甘くなる</b>（だ液がでんぷんを消化）／🫃胃＝<b>ドロドロにする</b>（胃液）／🌀小腸＝<b>小腸</b>（養分を吸収）／➰大腸＝<b>水</b>（を吸収）／
+      はかせ＝<b>Ｃ 約9m</b>／まとめ＝①<b>消化</b> ②<b>小腸</b> ③<b>消化管</b>・約<b>9</b>m
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>用語のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>だ液・胃液・すい液・腸液などの「食べ物を分解する液」を<b>消化液</b>、その働きを<b>消化</b>、養分が体に取り込まれることを<b>吸収</b>という（教科書と同じ用語）</li>
+      <li>養分の吸収はおもに<b>小腸</b>（内側のひだ＝じゅう毛）、水の吸収はおもに<b>大腸</b>。消化管全体は大人で<b>約9m</b>、うち小腸が6〜7m</li>
+      <li>この授業では「でんぷん→だ液で変化して甘くなる」を扱いますが、消化液の細かい名前（アミラーゼ等）は小6では扱わなくてOK。「だ液の力」で十分です</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけ・配慮のヒント</h2>
+    <ul>
+      <li>体・食べ物・排せつの話題です。うんちの話で笑いが起きても<b>「生きている証拠だね」</b>と自然に受けとめる。恥ずかしさより「自分の体ってすごい」に着地させる</li>
+      <li>予想がはずれても<b>「探検で新しいことが分かった！」</b>。特に「胃で養分を取る」と予想する子は多い→小腸との違いが今日の学び</li>
+      <li>読みが苦手な子には、ビフィーのセリフを先生が音読（全文ふりがな付き・短文）。カウントや記録の係も用意して全員参加に</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>おうちミッション（ごはん30回かみ）の結果を持ち寄って「クラスで甘くなった人・回数」を集計すると、だ液の働きが実感に変わります</li>
+      <li>じゆうモードのクイズ例：「養分を取るのはどこ？」「だ液は何を消化する？」「消化管は何m？」— 出題する側が一番力がつきます</li>
+      <li>発展：肝臓・すい臓など「消化を助ける臓器」や、呼吸・血液の循環（養分を全身へ運ぶ）につなげると、体全体のはたらきの学習に広がります</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

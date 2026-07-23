@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>おなかのなか探検隊 — 食べ物の消化 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #ffe8dd 0%, #ffd9cc 60%, #f7c9bd 100%);
+    color: #5a2f28;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #d8523c; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #97614f; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ffe0d3; border: 2px solid #e6a591;
+    font-size: clamp(16px, 1.8vw, 26px); color: #e6a591;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2a93b);
+    border-color: #f0a53b; color: #7a4d00;
+    box-shadow: 0 0 14px rgba(240, 165, 59, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 35%, #ffd3c4 0%, #f6b9a8 75%, #e89f8d 100%);
+    border: 3px solid #e09580;
+    box-shadow: inset 0 0 50px rgba(180, 90, 70, .18), 0 4px 18px rgba(120, 60, 45, .3);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #a5533f; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #d8523c; color: #fff5ee; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(150, 50, 30, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(180, 90, 70, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #f0a53b; cursor: pointer;
+    background: linear-gradient(180deg, #ffd98a, #f3b24a); color: #5a3a00;
+    box-shadow: 0 3px 0 #c67f17; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #cf8f5a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(120, 90, 40, .3), inset 0 0 24px rgba(140, 110, 60, .18);
+    flex-shrink: 0; background: #fff2e8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #97614f;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(17px, 1.9vw, 26px);
+    color: #c0452e; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fff6ef; border: 2px solid #f0cbb8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #97614f; }
+  .mascot { width: 100%; animation: floaty 3.6s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #4a2c25;
+    border: 1.5px solid #f0d3c5;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #c0452e; background: #ffe6d6; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fffdf6, #fff0e0); color: #6a3d10;
+    border: 2px solid #d8523c; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #d8523c; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #e8654b, #d8523c); color: #fff5ee;
+    box-shadow: 0 3px 0 #9e3020, 0 5px 12px rgba(110, 45, 30, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #9e3020; }
+  .btn.sub {
+    background: #ffe0d3; color: #8a4634; box-shadow: 0 3px 0 #d8a08e;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #4a2c25; box-shadow: 0 3px 0 #e0c0b2; font-weight: 400; border: 1.5px solid #f0d3c5; }
+  .btn.choice.picked { background: #ffe6d6; outline: 3px solid #e8654b; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(90, 47, 40, .78); backdrop-filter: blur(3px);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fff6ee, #ffe9db);
+    border: 3px solid #cf8f5a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(60, 30, 20, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #d8523c; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #d8523c; }
+  .panel .sub { color: #97614f; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #4a2c25; border: 1.5px solid #f0d3c5; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #97614f; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #4a2c25; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #f0d3c5; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #e8654b; background: #fff2e9; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #e8654b; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #e8654b;
+    color: #d8523c; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #97614f;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ffe0d3; color: #8a4634;
+    border: 1px solid #e6a591; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ffd0bf; }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="logo">🍙 おなかのなか<ruby>探検隊<rt>たんけんたい</rt></ruby><small>— たべものの <ruby>消化<rt>しょうか</rt></ruby> たいけん —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_mouth" title="口">★</div>
+    <div class="badge" id="bd_m_stomach" title="胃">★</div>
+    <div class="badge" id="bd_m_small" title="小腸">★</div>
+    <div class="badge" id="bd_m_large" title="大腸">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">🍙 たべものの たび</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔬 たんけんスコープ 〜<ruby>目<rt>め</rt></ruby>に<ruby>見<rt>み</rt></ruby>えない つぶの<ruby>世界<rt>せかい</rt></ruby>〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="118" rx="30" ry="7" fill="rgba(150,90,70,.18)"/>
+            <!-- からだ（にっこり菌ビフィー：カプセル形） -->
+            <rect x="34" y="34" width="52" height="74" rx="26" fill="#8fd06a"/>
+            <rect x="34" y="34" width="52" height="74" rx="26" fill="none" stroke="#5fa843" stroke-width="3"/>
+            <ellipse cx="48" cy="52" rx="7" ry="5" fill="#b6e88f" opacity=".7"/>
+            <!-- 顔 -->
+            <g class="eyes">
+              <circle cx="50" cy="66" r="6" fill="#fff"/>
+              <circle cx="70" cy="66" r="6" fill="#fff"/>
+              <circle cx="51" cy="67" r="3" fill="#2c3a1a"/>
+              <circle cx="71" cy="67" r="3" fill="#2c3a1a"/>
+            </g>
+            <ellipse cx="43" cy="76" rx="4" ry="2.6" fill="#f2a0a0" opacity=".8"/>
+            <ellipse cx="77" cy="76" rx="4" ry="2.6" fill="#f2a0a0" opacity=".8"/>
+            <path d="M52 78 Q60 86 68 78" stroke="#3a6a24" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+            <!-- 手あし -->
+            <path d="M34 74 q-10 4 -12 14" stroke="#5fa843" fill="none" stroke-width="5" stroke-linecap="round"/>
+            <path d="M86 74 q10 4 12 14" stroke="#5fa843" fill="none" stroke-width="5" stroke-linecap="round"/>
+            <!-- たんけん帽 -->
+            <path d="M36 36 Q60 12 84 36 Z" fill="#e8654b"/>
+            <ellipse cx="60" cy="36" rx="27" ry="6" fill="#d8523c"/>
+            <circle cx="60" cy="20" r="4.5" fill="#ffd98a"/>
+          </svg>
+          <div class="catname">あんない<ruby>菌<rt>きん</rt></ruby> ビフィー</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🔦 たんけんミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   おなかのなか探検隊 — 食べ物の消化体験（小6理科・協力型・1ファイル）
+   口→食道→胃→小腸→大腸／消化・吸収・消化管の長さ約9m
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+const W = {
+  kuchi: ruby('口', 'くち'),
+  shokudo: ruby('食道', 'しょくどう'),
+  i: ruby('胃', 'い'),
+  shocho: ruby('小腸', 'しょうちょう'),
+  daicho: ruby('大腸', 'だいちょう'),
+  shoka: ruby('消化', 'しょうか'),
+  daeki: ruby('だ液', 'だえき'),
+  ieki: ruby('胃液', 'いえき'),
+  yobun: ruby('養分', 'ようぶん'),
+  kyushu: ruby('吸収', 'きゅうしゅう'),
+  jikken: ruby('実験', 'じっけん'),
+  amai: ruby('甘', 'あま') + 'い',
+  chikara: ruby('力', 'ちから'),
+};
+
+// ---------- 消化管ステーション ----------
+const STATIONS = [
+  { key: 'mouth',   name: '口',   kana: 'くち',       emoji: '👄' },
+  { key: 'shokudo', name: '食道', kana: 'しょくどう', emoji: '↧' },
+  { key: 'stomach', name: '胃',   kana: 'い',         emoji: '🫃' },
+  { key: 'small',   name: '小腸', kana: 'しょうちょう', emoji: '🌀' },
+  { key: 'large',   name: '大腸', kana: 'だいちょう', emoji: '➰' },
+];
+const stationIndex = key => STATIONS.findIndex(s => s.key === key);
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  loc: 'mouth',          // いま探検隊がいる場所
+  foodX: 0.5, foodY: 0,  // おにぎり（食べ物）の進行 0..1 の縦位置
+  chew: 0,               // かんだ回数
+  digest: 0,             // その臓器での消化の進み 0..1
+  absorb: 0,             // 吸収の進み 0..1
+  sound: true,
+  phase: '',
+  votePicked: new Set(),
+  badges: new Set(),
+  particles2: [],        // スコープ内の粒
+  scopeMode: 'starch',   // starch / broken / absorb / water
+  wiggle: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sChew = () => { tone(200 + Math.random() * 60, 0, 0.1, 'square', 0.05); };
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sSquish = () => { tone(160, 0, 0.2, 'sine', 0.08); tone(120, 0.12, 0.25, 'sine', 0.06); };
+const sShimmer = () => [880, 1174, 1568].forEach((f, i) => tone(f, i * 0.05, 0.28, 'sine', 0.05));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 体の中の地図（消化管）描画 ----------
+// 論理座標で消化管の道を定義（縦長の体）
+const PAD_T = 54, PAD_B = 62, PAD_X = 24;
+// 各臓器のガイド位置（0..1 の相対、体の絵の中で）
+const ORGAN_POS = {
+  mouth:   { x: 0.5,  y: 0.09 },
+  shokudo: { x: 0.5,  y: 0.24 },
+  stomach: { x: 0.38, y: 0.42 },
+  small:   { x: 0.56, y: 0.66 },
+  large:   { x: 0.5,  y: 0.86 },
+};
+let ambient = null;
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const top = PAD_T, bot = h - PAD_B, H = bot - top;
+  const cx = w / 2;
+  const X = rx => PAD_X + rx * (w - PAD_X * 2);
+  const Y = ry => top + ry * H;
+
+  // ふわふわ粒（体液のイメージ）
+  if (!ambient) ambient = Array.from({ length: 22 }, () => ({ x: Math.random(), y: Math.random(), r: 1 + Math.random() * 2, p: Math.random() * TAU, sp: .4 + Math.random() }));
+  ambient.forEach(s => {
+    gctx.globalAlpha = 0.12 + 0.16 * (0.5 + 0.5 * Math.sin(t * s.sp + s.p));
+    gctx.fillStyle = '#fff';
+    gctx.beginPath(); gctx.arc(s.x * w, top + s.y * H, s.r, 0, TAU); gctx.fill();
+  });
+  gctx.globalAlpha = 1;
+
+  // 消化管の道（太いパイプ）
+  const path = [
+    [0.5, 0.06], [0.5, 0.20],                    // 口→食道
+    [0.5, 0.30], [0.38, 0.38], [0.38, 0.50],     // 胃
+    [0.48, 0.56], [0.62, 0.60],                  // 小腸へ
+    [0.60, 0.72], [0.44, 0.74],                  // 小腸うねうね
+    [0.5, 0.80], [0.5, 0.94],                    // 大腸
+  ];
+  // パイプ背景
+  gctx.lineCap = 'round'; gctx.lineJoin = 'round';
+  gctx.strokeStyle = '#f3a892'; gctx.lineWidth = Math.min(w, H) * 0.11;
+  gctx.beginPath();
+  path.forEach((p, i) => i === 0 ? gctx.moveTo(X(p[0]), Y(p[1])) : gctx.lineTo(X(p[0]), Y(p[1])));
+  gctx.stroke();
+  gctx.strokeStyle = '#ffd9c9'; gctx.lineWidth = Math.min(w, H) * 0.075;
+  gctx.beginPath();
+  path.forEach((p, i) => i === 0 ? gctx.moveTo(X(p[0]), Y(p[1])) : gctx.lineTo(X(p[0]), Y(p[1])));
+  gctx.stroke();
+
+  // 各臓器のふくらみ＋ラベル
+  const organs = [
+    { key: 'mouth', rx: 0.5, ry: 0.06, w: 0.12, h: 0.05, label: '口', kana: 'くち' },
+    { key: 'shokudo', rx: 0.5, ry: 0.20, w: 0.05, h: 0.12, label: '食道', kana: 'しょくどう' },
+    { key: 'stomach', rx: 0.36, ry: 0.42, w: 0.20, h: 0.15, label: '胃', kana: 'い' },
+    { key: 'small', rx: 0.55, ry: 0.66, w: 0.22, h: 0.14, label: '小腸', kana: 'しょうちょう' },
+    { key: 'large', rx: 0.5, ry: 0.87, w: 0.30, h: 0.09, label: '大腸', kana: 'だいちょう' },
+  ];
+  organs.forEach(o => {
+    const isHere = S.loc === o.key;
+    const ox = X(o.rx), oy = Y(o.ry), ow = o.w * (w - PAD_X * 2), oh = o.h * H;
+    gctx.save();
+    if (o.key === 'stomach') {
+      // 胃：まがった袋
+      gctx.fillStyle = isHere ? '#ff9a7a' : '#f7b39e';
+      gctx.strokeStyle = '#d87a5e'; gctx.lineWidth = 3;
+      gctx.beginPath();
+      gctx.ellipse(ox, oy, ow * 0.7, oh, 0.3, 0, TAU);
+      gctx.fill(); gctx.stroke();
+    } else if (o.key === 'small') {
+      // 小腸：うねうね
+      gctx.strokeStyle = isHere ? '#ff9a7a' : '#f7b39e'; gctx.lineWidth = oh * 0.5;
+      gctx.lineCap = 'round';
+      gctx.beginPath();
+      for (let i = 0; i <= 30; i++) {
+        const a = i / 30;
+        const xx = ox + Math.sin(a * TAU * 2.2) * ow * 0.5;
+        const yy = oy - oh + a * oh * 2;
+        i === 0 ? gctx.moveTo(xx, yy) : gctx.lineTo(xx, yy);
+      }
+      gctx.stroke();
+    } else if (o.key === 'large') {
+      // 大腸：太い門型
+      gctx.strokeStyle = isHere ? '#ff9a7a' : '#f0a98e'; gctx.lineWidth = oh * 0.8;
+      gctx.lineCap = 'round';
+      gctx.beginPath();
+      gctx.moveTo(ox - ow * 0.5, oy + oh); gctx.lineTo(ox - ow * 0.5, oy - oh * 0.5);
+      gctx.lineTo(ox + ow * 0.5, oy - oh * 0.5); gctx.lineTo(ox + ow * 0.5, oy + oh);
+      gctx.stroke();
+    } else if (o.key === 'mouth') {
+      gctx.fillStyle = isHere ? '#ff9a7a' : '#f7b39e';
+      gctx.strokeStyle = '#d87a5e'; gctx.lineWidth = 3;
+      gctx.beginPath(); gctx.ellipse(ox, oy, ow, oh, 0, 0, TAU); gctx.fill(); gctx.stroke();
+    }
+    if (isHere) {
+      gctx.strokeStyle = `rgba(216,82,60,${0.5 + 0.4 * Math.sin(t * 5)})`;
+      gctx.lineWidth = 4; gctx.setLineDash([8, 6]);
+      gctx.beginPath(); gctx.ellipse(ox, oy, ow * 0.95 + 12, oh + 12, 0, 0, TAU); gctx.stroke();
+      gctx.setLineDash([]);
+    }
+    gctx.restore();
+    // ラベル
+    gctx.fillStyle = isHere ? '#b5261a' : '#a5533f';
+    gctx.font = `700 ${Math.max(15, Math.min(w, H) * 0.036)}px sans-serif`;
+    gctx.textAlign = 'left'; gctx.textBaseline = 'middle';
+    const lx = o.key === 'stomach' ? ox - ow - 46 : ox + ow * 0.7 + 12;
+    gctx.fillText(o.label, ox + ow * 0.7 + 14, oy);
+  });
+
+  // 食べ物（おにぎり）— 現在地の臓器のところに置く
+  const here = organs.find(o => o.key === S.loc);
+  if (here) {
+    const fx = X(here.rx), fyBase = Y(here.ry);
+    const shrink = 1 - S.digest * 0.55 - S.absorb * 0.35;   // 消化・吸収で小さく
+    const fr = Math.min(w, H) * 0.05 * clamp(shrink, 0.25, 1);
+    gctx.save();
+    gctx.translate(fx, fyBase + Math.sin(t * 3) * 3);
+    if (S.loc === 'stomach') gctx.rotate(Math.sin(t * 6) * 0.15 * (S.phase === 'churn' ? 1 : 0.2));
+    // おにぎり
+    gctx.fillStyle = '#fff'; gctx.strokeStyle = '#e0b48a'; gctx.lineWidth = 2;
+    gctx.beginPath();
+    gctx.moveTo(0, -fr); gctx.lineTo(fr * 0.9, fr * 0.7); gctx.lineTo(-fr * 0.9, fr * 0.7); gctx.closePath();
+    gctx.fill(); gctx.stroke();
+    gctx.fillStyle = '#3a7a3a';
+    gctx.fillRect(-fr * 0.5, fr * 0.05, fr, fr * 0.6);   // のり
+    // 消化がすすむと色がドロっと
+    if (S.digest > 0.3) {
+      gctx.globalAlpha = clamp((S.digest - 0.3) * 1.2, 0, 0.7);
+      gctx.fillStyle = '#d8a15e';
+      gctx.beginPath(); gctx.arc(0, 0, fr * 0.95, 0, TAU); gctx.fill();
+      gctx.globalAlpha = 1;
+    }
+    gctx.restore();
+  }
+
+  // 方位ならぬ「入口→出口」ガイド
+  gctx.fillStyle = '#c96b52'; gctx.font = `${Math.max(12, Math.min(w, H) * 0.028)}px sans-serif`;
+  gctx.textAlign = 'center';
+  gctx.fillText('▲ たべものが 入る（口）', cx, top - 20);
+}
+
+// ---------- たんけんスコープ（粒の世界） ----------
+let scopeParticles = [];
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#ffe6d8'); grd.addColorStop(1, '#f3c3ae');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scopeMode;
+  // モードに応じた粒
+  if (mode === 'starch') {
+    // でんぷんの大きな粒（かたまり）
+    ensure(scopeParticles, 6, () => ({ x: rnd(w), y: rnd(h), r: 15 + Math.random() * 8, vx: 0, vy: 0 }));
+    trim(scopeParticles, 6);
+    moveDots(scopeParticles, w, h, R, 6, dt);
+    scopeParticles.forEach(d => grain(d.x, d.y, d.r, '#f0c674', '#d89a3a'));
+    label('でんぷんの つぶ');
+  } else if (mode === 'broken') {
+    // だ液で小さく分かれた粒
+    ensure(scopeParticles, 40, () => ({ x: rnd(w), y: rnd(h), r: 3.5 + Math.random() * 2, vx: 0, vy: 0 }));
+    trim(scopeParticles, 40);
+    moveDots(scopeParticles, w, h, R, 40, dt);
+    scopeParticles.forEach(d => grain(d.x, d.y, d.r, '#ffd98a', '#e0a94a'));
+    label('小さく 分かれた！');
+  } else if (mode === 'absorb') {
+    // 養分の粒がじゅう毛（壁）に吸い込まれる
+    // 壁（じゅう毛）
+    sctx.strokeStyle = '#e88f74'; sctx.lineWidth = 5;
+    for (let i = 0; i < 7; i++) {
+      const x = (i + 0.5) * w / 7;
+      sctx.beginPath();
+      sctx.moveTo(x, h);
+      sctx.quadraticCurveTo(x + Math.sin(t * 2 + i) * 6, h * 0.55, x, h * 0.42);
+      sctx.stroke();
+    }
+    ensure(scopeParticles, 22, () => ({ x: rnd(w), y: R * (0.2 + Math.random() * 0.5), r: 4, vx: 0, vy: 0, suck: Math.random() * 3 }));
+    trim(scopeParticles, 22);
+    scopeParticles.forEach(d => {
+      d.suck -= dt;
+      if (d.suck < 0) { d.y += 40 * dt; if (d.y > h - 6) { d.y = R * 0.2; d.x = rnd(w); d.suck = 1 + Math.random() * 2; } }
+      else { d.x += Math.sin(t * 3 + d.x) * 6 * dt; }
+      grain(d.x, d.y, d.r, '#ffd98a', '#e0a94a');
+    });
+    if (Math.random() < dt * 2) sShimmer();
+    label('養分を すいこむ！');
+  } else if (mode === 'water') {
+    // 水が吸われて、残りが固まる
+    ensure(scopeParticles, 30, () => ({ x: rnd(w), y: rnd(h), r: 3, vx: 0, vy: 0, water: Math.random() < 0.6 }));
+    trim(scopeParticles, 30);
+    moveDots(scopeParticles, w, h, R, 30, dt);
+    scopeParticles.forEach(d => {
+      if (d.water) grain(d.x, d.y, 2.5, '#9fd0ff', '#5fa8e0');
+      else grain(d.x, d.y, 4, '#b78a5a', '#8a6238');
+    });
+    label('水を すいとる');
+  }
+
+  function grain(x, y, r, fill, stroke) {
+    sctx.save(); sctx.translate(x, y);
+    sctx.fillStyle = fill; sctx.strokeStyle = stroke; sctx.lineWidth = 1.5;
+    sctx.shadowColor = fill; sctx.shadowBlur = 4;
+    sctx.beginPath(); sctx.arc(0, 0, r, 0, TAU); sctx.fill(); sctx.stroke();
+    sctx.restore();
+  }
+  function label(txt) {
+    sctx.font = `700 ${R * 0.1}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,246,238,.82)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#a5533f';
+    sctx.fillText(txt, R, ly);
+  }
+}
+function rnd(m) { return Math.random() * m; }
+function ensure(arr, n, gen) { while (arr.length < n) arr.push(gen()); }
+function trim(arr, n) { if (arr.length > n) arr.length = n; }
+function moveDots(arr, w, h, R, n, dt) {
+  arr.forEach(d => {
+    d.vx = (d.vx || 0) + (Math.random() - 0.5) * 40 * dt * 8;
+    d.vy = (d.vy || 0) + (Math.random() - 0.5) * 40 * dt * 8;
+    d.vx = clamp(d.vx, -30, 30); d.vy = clamp(d.vy, -30, 30);
+    d.x += d.vx * dt; d.y += d.vy * dt;
+    const ddx = d.x - R, ddy = d.y - R, dist = Math.hypot(ddx, ddy);
+    const lim = R - (d.r || 4) - 4;
+    if (dist > lim) { d.x = R + ddx / dist * lim; d.y = R + ddy / dist * lim; d.vx *= -0.5; d.vy *= -0.5; }
+  });
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#e8654b', '#f0a53b', '#8fd06a', '#ffd98a'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const step = STEPS[FLOW[S.stepIndex]];
+  if (step.tick) step.tick(dt);
+  drawStage(t);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+
+// 操作ボタン
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl'; el.innerHTML = b.label; el.id = b.id || '';
+    el.onclick = () => { ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const st = STATIONS.find(s => s.key === S.loc);
+  $('locChip').textContent = `いまここ：${st.name}（${st.kana}）`;
+  const idx = stationIndex(S.loc);
+  $('stateName').innerHTML = `${st.emoji} ${ruby(st.name, st.kana)} 〜${idx + 1}／5〜`;
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_mouth', 'm_stomach', 'm_small', 'm_large', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.digest = 0; S.absorb = 0; S.chew = 0;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      S.loc = 'mouth'; S.scopeMode = 'starch';
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🍙👄🫃🌀➰</div>
+        <h1>おなかのなか<ruby>探検隊<rt>たんけんたい</rt></ruby></h1>
+        <div class="sub">〜 <ruby>体<rt>からだ</rt></ruby>の ひみつを さぐる みならい<ruby>隊員<rt>たいいん</rt></ruby>、ぼしゅう${ruby('中', 'ちゅう')} 〜</div>
+        <p class="talk">やあ、ようこそ！ ぼくは おなかの中に すんでる あんない${ruby('菌', 'きん')}の <b>ビフィー</b>。<br>
+        きょうは きみたちを <b>うーんと 小さく</b> して、たべた <b>おにぎり</b>と いっしょに ${ruby('体', 'からだ')}の中を たびするよ。<br>
+        おにぎりは どこで、どう かわっていくのかな？ いっしょに たしかめよう！</p>
+        <button class="btn" id="startBtn">たんけんに しゅっぱつ！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      S.loc = 'mouth';
+      showOverlay(`
+        <h2>🍙 よそうタイム</h2>
+        <p class="talk">たべた おにぎりは、${ruby('体', 'からだ')}の中を たびして、さいごは どうなると ${ruby('思', 'おも')}う？<br>
+        <b>おにぎりの ゆくえは？</b></p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🍙</span><b>①</b> おにぎりのまま、体の中に たまっていく</div>
+          <div class="vcard" data-v="1"><span class="vicon">✨</span><b>②</b> 小さな つぶに かわって、体に とりこまれる</div>
+          <div class="vcard" data-v="2"><span class="vicon">💨</span><b>③</b> ぜんぶ そのまま 出ていくだけ</div>
+        </div>
+        <div class="sub">思うものに タッチ（いくつでも）。たんけんノート（シート）にも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たんけん スタート！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); c.classList.toggle('picked');
+          const v = +c.dataset.v;
+          S.votePicked.has(v) ? S.votePicked.delete(v) : S.votePicked.add(v);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- 口：かむ＋だ液 ---
+  m_mouth: {
+    enter() {
+      S.loc = 'mouth'; S.digest = 0; S.chew = 0; S.scopeMode = 'starch'; S.phase = 'predict';
+      updateLoc();
+      setWish('👄', `さいしょは <b>口</b>！ おにぎりを 口に 入れたよ。<br>スコープには <b>でんぷんの 大きな つぶ</b>が 見えるね。かむと どうなる？`);
+      say(`ここは 消化の スタート、<b>口</b>。よそう：おにぎりを かんで <b>${W.daeki}</b>と まぜると、あじは どうなる？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ かわらない', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: `Ｂ ${W.amai}くなる`, cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ にがくなる', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`「${['Ａ かわらない', `Ｂ ${W.amai}くなる`, 'Ｃ にがくなる'][n]}」だね。<br>それじゃあ、みんなで <b>30回 かんで</b> たしかめよう！ 🦷ボタンを おしてね。`);
+      S.phase = 'chew';
+      setControls([{ label: '🦷 かむ！', id: 'chewBtn', cb: () => this.chew() }]);
+      setButtons([]);
+    },
+    chew() {
+      S.chew++; sChew();
+      S.digest = clamp(S.chew / 30, 0, 1);
+      S.wiggle = 1;
+      if (S.chew >= 12 && S.scopeMode === 'starch') S.scopeMode = 'broken';   // 途中で粒が分かれ始める
+      $('locChip').textContent = `かんだ かず：${S.chew}回`;
+      if (S.chew >= 30 && S.phase === 'chew') {
+        S.phase = 'done';
+        setControls([]);
+        sYes(); scopeBurst(); award('m_mouth');
+        say(`✨ ${W.amai}くなった！ こたえは <b>Ｂ</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.daeki}には、でんぷんを <b>小さな つぶ（${W.amai}いもの）に かえる</b> ${W.chikara}が ある。これが 消化の はじまり！ よく かむほど 消化を てつだえるよ。`);
+        setButtons([{ label: 'ゴクン！ つぎへ（食道→胃）', cb: nextStep }]);
+        updateLoc();
+      }
+    },
+  },
+
+  // --- 胃：胃液でドロドロ ---
+  m_stomach: {
+    enter() {
+      S.loc = 'stomach'; S.digest = 0.3; S.scopeMode = 'broken'; S.phase = 'predict';
+      updateLoc();
+      setWish('🫃', `おにぎりは 食道を とおって <b>胃</b>に とうちゃく！<br>胃は これから どんな しごとを すると ${ruby('思', 'おも')}う？`);
+      say(`ゴクン……食道を すべって、<b>胃</b>に ついたよ。<br>よそう：胃は おにぎりを どうする？ シートに 〇を つけてね。`);
+      setButtons([
+        { label: 'Ａ ためておくだけ', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 胃液とまぜて ドロドロにする', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ すぐ 養分を すいとる', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`なるほど「${['Ａ ためるだけ', 'Ｂ ドロドロにする', 'Ｃ すいとる'][n]}」だね。<br><b>🌀 胃を うごかす</b>ボタンで、胃の しごとを 見てみよう！`);
+      S.phase = 'churn';
+      setControls([{ label: '🌀 胃を うごかす', id: 'churnBtn', cb: () => { S.churnT = 3.2; sSquish(); } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.phase === 'churn') {
+        if (S.churnT > 0) { S.churnT -= dt; S.digest = clamp(S.digest + dt * 0.28, 0, 1); }
+        if (S.digest >= 0.99 && !S.stomachDone) {
+          S.stomachDone = true; S.phase = 'done';
+          setControls([]);
+          sYes(); scopeBurst(); award('m_stomach');
+          say(`✨ おにぎりが ドロドロの おかゆみたいに！ こたえは <b>Ｂ</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>胃は のびちぢみして、<b>${W.ieki}</b>と まぜながら たべ物を どろどろに 消化する。でも <b>${W.yobun}を とりこむのは まだ</b>。つぎの ばしょが 本番だよ！`);
+          setButtons([{ label: 'つぎへ（小腸）', cb: nextStep }]);
+          updateLoc();
+        }
+      }
+    },
+  },
+
+  // --- 小腸：養分の吸収 ---
+  m_small: {
+    enter() {
+      S.loc = 'small'; S.digest = 1; S.absorb = 0; S.scopeMode = 'absorb'; S.phase = 'predict';
+      S.stomachDone = false;
+      updateLoc();
+      setWish('🌀', `ドロドロに なった たべ物が <b>小腸</b>へ。<br>ここは 全部で やく <b>6〜7m</b>も ある、体で いちばん 長い 消化管！`);
+      say(`さあ <b>小腸</b>。ここが 今日の 主役かも。<br>よそう：たべ物の <b>${W.yobun}（体の${W.chikara}になるもの）</b>は、おもに どこで 体に とりこまれる？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ 胃', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 小腸', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ 大腸', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`「${['Ａ 胃', 'Ｂ 小腸', 'Ｃ 大腸'][n]}」だね。<br><b>✨ 養分を とりこむ</b>ボタンで、小腸の かべ（じゅう毛）の しごとを 見よう！`);
+      S.phase = 'absorb';
+      setControls([{ label: '✨ 養分を とりこむ', id: 'absBtn', cb: () => { S.absT = 3.5; } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.phase === 'absorb') {
+        if (S.absT > 0) { S.absT -= dt; S.absorb = clamp(S.absorb + dt * 0.28, 0, 1); }
+        if (S.absorb >= 0.99 && !S.smallDone) {
+          S.smallDone = true; S.phase = 'done';
+          setControls([]);
+          sYes(); scopeBurst(); award('m_small');
+          say(`✨ ${W.yobun}が 小腸の かべから すいこまれた！ こたえは <b>Ｂ 小腸</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>小腸の 内がわは <b>じゅう毛</b>という 小さな ヒダで びっしり。だから ${W.yobun}を たくさん ${W.kyushu}できる。ここで とりこまれた ${W.yobun}は 血に のって 体じゅうへ！`);
+          setButtons([{ label: 'つぎへ（大腸）', cb: nextStep }]);
+          updateLoc();
+        }
+      }
+    },
+  },
+
+  // --- 大腸：水の吸収 ---
+  m_large: {
+    enter() {
+      S.loc = 'large'; S.absorb = 1; S.scopeMode = 'water'; S.phase = 'predict';
+      S.smallDone = false;
+      updateLoc();
+      setWish('➰', `${W.yobun}を とられた のこりが <b>大腸</b>へ。<br>大腸は さいごに 何を すると ${ruby('思', 'おも')}う？`);
+      say(`さいごの 消化管、<b>大腸</b>。<br>よそう：養分の のこりから、大腸は おもに 何を すいとる？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ 水', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ あぶら', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ 空気', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`「${['Ａ 水', 'Ｂ あぶら', 'Ｃ 空気'][n]}」だね。<br><b>💧 水を すいとる</b>ボタンで たしかめよう！`);
+      S.phase = 'water';
+      setControls([{ label: '💧 水を すいとる', id: 'waterBtn', cb: () => { S.waterT = 3; } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.phase === 'water') {
+        if (S.waterT > 0) { S.waterT -= dt; S.digest = clamp(S.digest + dt * 0.3, 0, 1); }
+        if (S.digest >= 0.99 && !S.largeDone) {
+          S.largeDone = true; S.phase = 'done';
+          setControls([]);
+          sYes(); scopeBurst(); award('m_large');
+          say(`✨ こたえは <b>Ａ 水</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>大腸は のこりから <b>水を ${W.kyushu}</b>する。水を とられた のこりは、体の外へ 出ていく（うんち）。ここまでが たべ物の <b>長い たび</b>だったんだね！`);
+          setButtons([{ label: 'はかせチャレンジへ！', cb: nextStep }]);
+          updateLoc();
+        }
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：消化管の長さ ---
+  hakase: {
+    enter() {
+      S.loc = 'large'; S.scopeMode = 'water'; S.phase = 'ask';
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！<br>口から 大腸の 出口まで、たべ物の 通り道（消化管）を ぜんぶ のばすと、<b>どれくらい 長い</b>と ${ruby('思', 'おも')}う？ シートに 〇！`);
+      setButtons([
+        { label: `Ａ やく 1m（せの ${ruby('半分', 'はんぶん')}）`, cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ やく 3m（きょうしつの よこ）', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ やく 9m（バス1台ぶん！）', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      S.pickH = n;
+      say(`「${['やく1m', 'やく3m', 'やく9m'][n]}」だね。せーの……こたえ、はっぴょう！`);
+      setButtons([{ label: '🎉 こたえを 見る！', cb: () => this.reveal() }]);
+    },
+    reveal() {
+      S.phase = 'done';
+      award('hakase'); scopeBurst();
+      const hit = S.pickH === 2 ? 'よそう どおり、すごい！' : 'びっくりだね！';
+      sYes();
+      say(`こたえは <b>Ｃ やく 9m</b>！ ${hit}<br><br>💡 <b>たいせつポイント</b><br>大人の 消化管は ぜんぶで <b>やく9m</b>。とくに 小腸が 6〜7mと 長い。こんなに 長い 道を とおる あいだに、たべ物は 少しずつ 消化・${W.kyushu}されるんだ。きみの おなかの中に、そんな 長い たびが かくれているんだね！`);
+      setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      S.loc = 'small';
+      showOverlay(`
+        <h2>⭐ みならい<ruby>探検隊<rt>たんけんたい</rt></ruby> にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>たびの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① たべ物を 体に とりこめる <b>小さな つぶ</b>に かえることを（<span class="blankWord" data-a="消化">？？？</span>）という。<br>
+        ② ${W.yobun}を おもに とりこむ（${W.kyushu}する）のは（<span class="blankWord" data-a="小腸">？？？</span>）。<br>
+        ③ 口→食道→胃→小腸→大腸と つづく 道を（<span class="blankWord" data-a="消化管">？？？</span>）といい、やく（<span class="blankWord" data-a="9">？</span>）mも ある！</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>②「小さな つぶに かわって、体に とりこまれる」</b>でした！ たべ物は きえるんじゃなくて、きみの 体の 一部に なるんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>ごはんを ひとくち、口の中で <b>30回 かんで</b>みて。だんだん <b>${W.amai}く</b> なってくるよ！ それが きょう 見た「口の 消化」——きみの 体で じっさいに おきている しょうこ。たんけんノートに かんそうを かこう！</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで たんけん</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#3a9a4a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      S.phase = 'free';
+      say(`<b>じゆうモード</b>！ 5つの ばしょを タッチで めぐって、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「養分を とるのは どこ？」「だ液は 何を 消化する？」「消化管は 何m？」`);
+      const btns = STATIONS.map(st => ({
+        label: `${st.emoji} ${st.name}`, cls: 'sub',
+        cb: () => { S.loc = st.key; updateLoc(); setScopeForLoc(); sTap(); },
+      }));
+      btns.push({ label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) });
+      setButtons(btns);
+      setControls([]);
+    },
+  },
+};
+
+function setScopeForLoc() {
+  S.scopeMode = ({ mouth: 'broken', shokudo: 'broken', stomach: 'broken', small: 'absorb', large: 'water' })[S.loc] || 'starch';
+  S.digest = S.loc === 'mouth' ? 0.5 : 1;
+  S.absorb = (S.loc === 'small' || S.loc === 'large') ? 1 : 0;
+}
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_stomach などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

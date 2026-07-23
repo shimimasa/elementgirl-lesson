@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ながれる水の探検隊 — 流れる水のはたらき たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf5e4 0%, #dbeed2 60%, #cde6c2 100%);
+    color: #2d4a2a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #22753f; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5f8259; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ddeed4; border: 2px solid #a5c898;
+    font-size: clamp(16px, 1.8vw, 26px); color: #a5c898;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2a93b);
+    border-color: #d9a520; color: #7a4d00;
+    box-shadow: 0 0 14px rgba(217, 165, 32, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #cfe8c2 0%, #bfe0b0 100%);
+    border: 3px solid #7fb56f;
+    box-shadow: inset 0 0 40px rgba(80, 140, 70, .15), 0 4px 18px rgba(40, 90, 40, .25);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #4a7a42; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #22753f; color: #f0fbf0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(20, 80, 40, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(40, 90, 40, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #6ab86a; cursor: pointer;
+    background: linear-gradient(180deg, #4aa85c, #2a8544); color: #fff;
+    box-shadow: 0 3px 0 #1a5e2c; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.storm { background: linear-gradient(180deg, #5a7a9a, #3a5a7a); border-color: #7a9aba; box-shadow: 0 3px 0 #2a4058; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #8a7248; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(80, 60, 30, .3), inset 0 0 24px rgba(80, 60, 30, .18);
+    flex-shrink: 0; background: #eef4e8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #5f8259;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #1d6a38; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fdfffc; border: 2px solid #c5ddb8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #5f8259; }
+  .mascot { width: 100%; animation: floaty 3.6s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2d452a;
+    border: 1.5px solid #d5e8ca;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1d6a38; background: #dcf2d8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #f6fcf2, #e4f2da); color: #2d4a2a;
+    border: 2px solid #2a8544; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #22753f; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #3a9a52, #2a8544); color: #fff;
+    box-shadow: 0 3px 0 #1a5e2c, 0 5px 12px rgba(20, 70, 30, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1a5e2c; }
+  .btn.sub {
+    background: #ddeed4; color: #33663a; box-shadow: 0 3px 0 #a5c898;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2d452a; box-shadow: 0 3px 0 #bcd6ae; font-weight: 400; border: 1.5px solid #d5e8ca; }
+  .btn.choice.picked { background: #dcf2d8; outline: 3px solid #3a9a52; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(25, 50, 25, .8); backdrop-filter: blur(3px);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f8fdf4, #e8f4dd);
+    border: 3px solid #7fa868; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(15, 35, 15, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #22753f; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #22753f; }
+  .panel .sub { color: #5f8259; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2d452a; border: 1.5px solid #d5e8ca; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #5f8259; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #2d452a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d5e8ca; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #3a9a52; background: #ecf8e8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #3a9a52; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #3a9a52;
+    color: #22753f; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #5f8259;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ddeed4; color: #33663a;
+    border: 1px solid #a5c898; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #cde6c2; }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="logo">🏞 ながれる<ruby>水<rt>みず</rt></ruby>の<ruby>探検隊<rt>たんけんたい</rt></ruby><small>— <ruby>流<rt>なが</rt></ruby>れる<ruby>水<rt>みず</rt></ruby>のはたらき たいけん —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kezuru" title="けずる">★</div>
+    <div class="badge" id="bd_m_hakobu" title="はこぶ">★</div>
+    <div class="badge" id="bd_m_tsumoru" title="つもる">★</div>
+    <div class="badge" id="bd_m_curve" title="カーブ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">🏞 <ruby>川<rt>かわ</rt></ruby>のたんけんマップ 〜<ruby>空<rt>そら</rt></ruby>から<ruby>見<rt>み</rt></ruby>たところ〜</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 <ruby>石<rt>いし</rt></ruby>のむしめがね 〜そこの<ruby>石<rt>いし</rt></ruby>を<ruby>拡大<rt>かくだい</rt></ruby>〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="28" ry="6" fill="rgba(60,90,40,.18)"/>
+            <!-- しっぽ -->
+            <path d="M88 100 q18 -2 20 -18" stroke="#7a5c3e" fill="none" stroke-width="11" stroke-linecap="round"/>
+            <!-- からだ -->
+            <ellipse cx="60" cy="92" rx="30" ry="26" fill="#8a6a48"/>
+            <ellipse cx="60" cy="98" rx="19" ry="17" fill="#cfa87a"/>
+            <!-- あし -->
+            <ellipse cx="44" cy="114" rx="9" ry="5.5" fill="#6f5438"/>
+            <ellipse cx="76" cy="114" rx="9" ry="5.5" fill="#6f5438"/>
+            <!-- あたま -->
+            <circle cx="60" cy="52" r="27" fill="#8a6a48"/>
+            <circle cx="38" cy="34" r="7" fill="#8a6a48"/>
+            <circle cx="82" cy="34" r="7" fill="#8a6a48"/>
+            <circle cx="38" cy="34" r="3.4" fill="#cfa87a"/>
+            <circle cx="82" cy="34" r="3.4" fill="#cfa87a"/>
+            <!-- くちもと -->
+            <ellipse cx="60" cy="62" rx="14" ry="10" fill="#cfa87a"/>
+            <g class="eyes">
+              <circle cx="49" cy="50" r="4.6" fill="#2c2015"/>
+              <circle cx="71" cy="50" r="4.6" fill="#2c2015"/>
+              <circle cx="50.5" cy="48.5" r="1.5" fill="#fff"/>
+              <circle cx="72.5" cy="48.5" r="1.5" fill="#fff"/>
+            </g>
+            <ellipse cx="60" cy="58" rx="4.5" ry="3.2" fill="#2c2015"/>
+            <path d="M54 66 Q60 70 66 66" stroke="#6f5438" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M32 58 h12 M33 64 h11 M76 58 h12 M76 64 h11" stroke="#b59a78" stroke-width="1.6" stroke-linecap="round"/>
+            <!-- たんけんぼうし -->
+            <path d="M36 32 Q60 8 84 32 Z" fill="#4a8a3c"/>
+            <ellipse cx="60" cy="32" rx="27" ry="6" fill="#3f7a34"/>
+            <circle cx="60" cy="18" r="4" fill="#ffd98a"/>
+          </svg>
+          <div class="catname">たいちょう スイ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">📖 たんけんミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ながれる水の探検隊 — 流れる水のはたらき（小5理科・協力型・1ファイル）
+   けずる（しん食）・はこぶ（運ぱん）・つもらせる（たい積）
+   カーブの外＝しん食／内＝たい積。増水で3つの力が強まる→防災へ
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+const W = {
+  kawa: ruby('川', 'かわ'),
+  mizu: ruby('水', 'みず'),
+  ishi: ruby('石', 'いし'),
+  shinshoku: 'しん' + ruby('食', 'しょく'),
+  unpan: ruby('運', 'うん') + 'ぱん',
+  taiseki: 'たい' + ruby('積', 'せき'),
+  joryu: ruby('上流', 'じょうりゅう'),
+  churyu: ruby('中流', 'ちゅうりゅう'),
+  karyu: ruby('下流', 'かりゅう'),
+  umi: ruby('海', 'うみ'),
+  ooame: ruby('大雨', 'おおあめ'),
+  nagare: ruby('流', 'なが') + 'れ',
+};
+
+// ---------- 川のかたち（空から見た図・論理1000×700） ----------
+const RIVER = [
+  [175, 55], [225, 130], [300, 190], [395, 220], [500, 235],
+  [590, 270], [640, 340], [615, 415], [530, 450], [475, 505],
+  [520, 560], [610, 595], [700, 620],
+];
+function riverPoint(t) {
+  const n = RIVER.length - 1;
+  const f = clamp(t, 0, 1) * n;
+  const i = Math.min(Math.floor(f), n - 1);
+  const u = f - i;
+  return {
+    x: lerp(RIVER[i][0], RIVER[i + 1][0], u),
+    y: lerp(RIVER[i][1], RIVER[i + 1][1], u),
+  };
+}
+const LOCS = {
+  up:    { name: '上流', kana: 'じょうりゅう', x: 250, y: 155 },
+  mid:   { name: '中流', kana: 'ちゅうりゅう', x: 500, y: 235 },
+  curve: { name: 'カーブ', kana: 'かーぶ', x: 625, y: 380 },
+  down:  { name: '下流・河口', kana: 'かりゅう・かこう', x: 640, y: 600 },
+};
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  loc: 'up',
+  flowT: 0,          // 水を流している残り時間
+  strong: false,     // 水を増やしたか
+  erosion: 0,        // 上流のけずれ 0..1
+  stonePos: -1,      // 石ころの旅の位置 0..1（-1=非表示）
+  stoneRound: 0,     // 石の丸み 0..1
+  deposit: 0,        // 河口のたい積 0..1
+  curveProg: 0,      // カーブのしん食・たい積 0..1
+  flood: 0,          // 増水 0..1
+  rainT: 0,
+  scopeMode: 'up',   // up / mid / down / rolling / flood
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sFlow = () => { tone(300, 0, 0.25, 'sine', 0.05); tone(360, 0.1, 0.25, 'sine', 0.05); };
+const sKnock = () => tone(180 + Math.random() * 60, 0, 0.08, 'square', 0.04);
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 探検マップの描画 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 700;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+let sediments = [];   // 運ばれる土のつぶ
+let debris = [];      // 増水時のながれもの
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+
+  // 海（右下）
+  gctx.fillStyle = '#79b8dc';
+  gctx.beginPath();
+  gctx.moveTo(X(560), Y(700));
+  gctx.quadraticCurveTo(X(600), Y(620), X(700), Y(585));
+  gctx.quadraticCurveTo(X(830), Y(545), X(1000), Y(530));
+  gctx.lineTo(X(1000), Y(700));
+  gctx.closePath(); gctx.fill();
+  // なみ
+  gctx.strokeStyle = 'rgba(255,255,255,.5)'; gctx.lineWidth = 2;
+  for (let i = 0; i < 3; i++) {
+    gctx.beginPath();
+    for (let x = 640 + i * 60; x <= 980; x += 14) {
+      const yy = 610 + i * 26 - (x - 640) * 0.08 + Math.sin(t * 2 + x * 0.05 + i) * 2.5;
+      x === 640 + i * 60 ? gctx.moveTo(X(x), Y(yy)) : gctx.lineTo(X(x), Y(yy));
+    }
+    gctx.stroke();
+  }
+  // すなはま
+  gctx.strokeStyle = '#e8d8a8'; gctx.lineWidth = 9 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(560), Y(696));
+  gctx.quadraticCurveTo(X(600), Y(620), X(700), Y(585));
+  gctx.quadraticCurveTo(X(830), Y(545), X(1000), Y(532));
+  gctx.stroke();
+
+  // 山（上流のおく）
+  const mt = (px, py, wdt, col) => {
+    gctx.fillStyle = col;
+    gctx.beginPath();
+    gctx.moveTo(X(px - wdt / 2), Y(py + wdt * 0.62));
+    gctx.lineTo(X(px), Y(py));
+    gctx.lineTo(X(px + wdt / 2), Y(py + wdt * 0.62));
+    gctx.closePath(); gctx.fill();
+  };
+  mt(90, 30, 190, '#6a9a5c');
+  mt(215, 12, 170, '#7aa868');
+  mt(330, 55, 150, '#88b476');
+  // 木
+  gctx.fillStyle = '#3f7a3c';
+  [[60, 180], [120, 230], [330, 160], [390, 120], [80, 300], [180, 280], [420, 300], [250, 330], [850, 300], [900, 380], [790, 240], [150, 420], [250, 480], [90, 520], [330, 560], [820, 460]].forEach(([tx, ty]) => {
+    gctx.beginPath();
+    gctx.moveTo(X(tx), Y(ty - 20)); gctx.lineTo(X(tx + 9), Y(ty)); gctx.lineTo(X(tx - 9), Y(ty));
+    gctx.closePath(); gctx.fill();
+  });
+
+  // ---- 川 ----
+  const flooding = S.flood;
+  const wUp = 13 * (1 + flooding * 0.7), wDown = 40 * (1 + flooding * 0.5);
+  const waterCol = flooding > 0.3 ? `rgb(${lerp(95, 150, flooding)},${lerp(168, 125, flooding)},${lerp(212, 80, flooding)})` : '#5fa8d4';
+  const n = RIVER.length - 1;
+  // 上流のけずれ（V字のみぞ：くらい線）
+  if (S.erosion > 0.02) {
+    gctx.strokeStyle = `rgba(90,75,55,${S.erosion * 0.55})`;
+    gctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      gctx.lineWidth = (wUp + 14 + S.erosion * 10) * sc;
+      gctx.beginPath();
+      gctx.moveTo(X(RIVER[i][0]), Y(RIVER[i][1]));
+      gctx.lineTo(X(RIVER[i + 1][0]), Y(RIVER[i + 1][1]));
+      gctx.stroke();
+    }
+  }
+  // きし→水
+  for (const pass of [0, 1]) {
+    for (let i = 0; i < n; i++) {
+      const tw1 = lerp(wUp, wDown, i / n), tw2 = lerp(wUp, wDown, (i + 1) / n);
+      gctx.strokeStyle = pass === 0 ? '#8aa878' : waterCol;
+      gctx.lineWidth = ((tw1 + tw2) / 2 + (pass === 0 ? 7 : 0)) * sc;
+      gctx.lineCap = 'round'; gctx.lineJoin = 'round';
+      gctx.beginPath();
+      gctx.moveTo(X(RIVER[i][0]), Y(RIVER[i][1]));
+      gctx.lineTo(X(RIVER[i + 1][0]), Y(RIVER[i + 1][1]));
+      gctx.stroke();
+    }
+  }
+  // ながれのすじ
+  const flowSpeed = 40 * (1 + (S.flowT > 0 ? 1 : 0) + flooding * 2.5 + (S.strong ? 0.8 : 0));
+  gctx.strokeStyle = flooding > 0.3 ? 'rgba(255,240,210,.55)' : 'rgba(255,255,255,.55)';
+  gctx.lineWidth = 2.5 * sc;
+  gctx.setLineDash([10 * sc, 16 * sc]);
+  gctx.lineDashOffset = -(t * flowSpeed * sc) % (26 * sc);
+  gctx.beginPath();
+  RIVER.forEach((p, i) => i === 0 ? gctx.moveTo(X(p[0]), Y(p[1])) : gctx.lineTo(X(p[0]), Y(p[1])));
+  gctx.stroke();
+  gctx.setLineDash([]);
+
+  // カーブのしん食・たい積
+  if (S.curveProg > 0.02) {
+    const cp = S.curveProg;
+    // そとがわ（右）＝けずれ
+    gctx.strokeStyle = `rgba(120,85,55,${cp * 0.85})`;
+    gctx.lineWidth = 5 * sc; gctx.setLineDash([7 * sc, 5 * sc]);
+    gctx.beginPath();
+    gctx.moveTo(X(672), Y(310));
+    gctx.quadraticCurveTo(X(692) + cp * 8 * sc, Y(378), X(650), Y(448));
+    gctx.stroke();
+    gctx.setLineDash([]);
+    gctx.fillStyle = `rgba(120,85,55,${cp * 0.7})`;
+    [[678, 340], [685, 385], [668, 425]].forEach(([bx, by], i) => {
+      gctx.beginPath(); gctx.arc(X(bx + cp * 6), Y(by), (3 + i) * sc * cp, 0, TAU); gctx.fill();
+    });
+    // うちがわ（左）＝すなのたい積
+    gctx.fillStyle = `rgba(232,216,168,${cp * 0.95})`;
+    gctx.beginPath();
+    gctx.ellipse(X(585), Y(388), 26 * sc * cp, 44 * sc * cp, 0.5, 0, TAU);
+    gctx.fill();
+  }
+  // 河口のたい積（すなの三角地帯）
+  if (S.deposit > 0.02) {
+    const dp = S.deposit;
+    gctx.fillStyle = `rgba(232,216,168,${0.55 + dp * 0.4})`;
+    gctx.beginPath();
+    gctx.moveTo(X(690), Y(608));
+    gctx.lineTo(X(690 + 65 * dp), Y(608 + 45 * dp));
+    gctx.quadraticCurveTo(X(720), Y(665 + 15 * dp), X(650 - 30 * dp), Y(648 + 20 * dp));
+    gctx.closePath(); gctx.fill();
+  }
+
+  // 土のつぶ（けずれて流れる）
+  if ((S.flowT > 0 && (S.phase === 'flow' || S.phase === 'deposit' || S.phase === 'curve')) || flooding > 0.3) {
+    if (Math.random() < dt * (14 + flooding * 26)) sediments.push({ t: Math.random() * 0.15, sp: 0.09 + Math.random() * 0.05 + flooding * 0.1 });
+  }
+  sediments = sediments.filter(sd => sd.t < 1);
+  sediments.forEach(sd => {
+    sd.t += sd.sp * dt * (1 + flooding);
+    const p = riverPoint(sd.t);
+    gctx.fillStyle = 'rgba(150,120,80,.8)';
+    gctx.beginPath(); gctx.arc(X(p.x + Math.sin(sd.t * 60) * 6), Y(p.y), 2.4 * sc, 0, TAU); gctx.fill();
+  });
+  // 増水時のながれもの（えだ）
+  if (flooding > 0.4) {
+    if (Math.random() < dt * 5) debris.push({ t: 0.02, sp: 0.18 + Math.random() * 0.08, a: Math.random() * TAU });
+    debris = debris.filter(d => d.t < 1);
+    debris.forEach(d => {
+      d.t += d.sp * dt; d.a += dt * 6;
+      const p = riverPoint(d.t);
+      gctx.save();
+      gctx.translate(X(p.x), Y(p.y)); gctx.rotate(d.a);
+      gctx.strokeStyle = '#6a4a28'; gctx.lineWidth = 3 * sc;
+      gctx.beginPath(); gctx.moveTo(-8 * sc, 0); gctx.lineTo(8 * sc, 0); gctx.stroke();
+      gctx.restore();
+    });
+  } else debris = [];
+
+  // 大雨
+  if (S.rainT > 0) {
+    gctx.strokeStyle = 'rgba(80,120,180,.5)'; gctx.lineWidth = 1.8 * sc;
+    for (let i = 0; i < 40; i++) {
+      const rx = (i * 173 + (t * 500) % 97) % 1000, ry = ((i * 89 + t * 620) % 660);
+      gctx.beginPath();
+      gctx.moveTo(X(rx), Y(ry)); gctx.lineTo(X(rx - 3), Y(ry + 16));
+      gctx.stroke();
+    }
+  }
+
+  // 石ころの旅（M2）
+  if (S.stonePos >= 0) {
+    const p = riverPoint(S.stonePos);
+    const r = lerp(9, 5.5, S.stoneRound) * sc;
+    gctx.save();
+    gctx.translate(X(p.x), Y(p.y));
+    gctx.rotate(t * 4);
+    drawStonePoly(gctx, 0, 0, r, S.stoneRound, 7);
+    gctx.restore();
+  }
+
+  // ラベル
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillStyle = '#2d5a2a';
+  gctx.font = `700 ${Math.max(13, 22 * sc)}px sans-serif`;
+  gctx.fillText('上流', X(165), Y(165));
+  gctx.fillText('中流', X(575), Y(150));
+  gctx.fillText('下流', X(455), Y(555));
+  gctx.fillStyle = '#1a5e8a';
+  gctx.fillText('海', X(880), Y(640));
+  // ながれのむき
+  gctx.fillStyle = '#4a7a42';
+  gctx.font = `${Math.max(11, 17 * sc)}px sans-serif`;
+  gctx.fillText('▲ 山（水の はじまり）', X(200), Y(28));
+
+  // いまいる場所のリング＋スイのミニすがた
+  const L = LOCS[S.loc];
+  if (L) {
+    gctx.strokeStyle = `rgba(216,120,40,${0.6 + 0.35 * Math.sin(t * 5)})`;
+    gctx.lineWidth = 4;
+    gctx.setLineDash([9, 7]);
+    gctx.beginPath(); gctx.ellipse(X(L.x), Y(L.y), 62 * sc, 48 * sc, 0, 0, TAU); gctx.stroke();
+    gctx.setLineDash([]);
+    const sy = Y(L.y) - 60 * sc + Math.sin(t * 3) * 4;
+    gctx.fillStyle = '#8a6a48';
+    gctx.beginPath(); gctx.arc(X(L.x), sy, 11 * sc, 0, TAU); gctx.fill();
+    gctx.beginPath(); gctx.arc(X(L.x) - 8 * sc, sy - 8 * sc, 3.5 * sc, 0, TAU); gctx.fill();
+    gctx.beginPath(); gctx.arc(X(L.x) + 8 * sc, sy - 8 * sc, 3.5 * sc, 0, TAU); gctx.fill();
+    gctx.fillStyle = '#cfa87a';
+    gctx.beginPath(); gctx.ellipse(X(L.x), sy + 3 * sc, 6 * sc, 4.5 * sc, 0, 0, TAU); gctx.fill();
+    gctx.fillStyle = '#2c2015';
+    gctx.beginPath(); gctx.arc(X(L.x) - 4 * sc, sy - 2 * sc, 1.7 * sc, 0, TAU); gctx.fill();
+    gctx.beginPath(); gctx.arc(X(L.x) + 4 * sc, sy - 2 * sc, 1.7 * sc, 0, TAU); gctx.fill();
+  }
+}
+
+// 石のかたち（roundness 0=ゴツゴツ → 1=まんまる）
+function jag(seed, i) { return 0.14 + 0.36 * Math.abs(Math.sin(seed * 89.7 + i * 13.3)); }
+function drawStonePoly(ctx, x, y, R, roundness, seed) {
+  const N = 9;
+  ctx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const a = i / N * TAU;
+    const r = R * (1 - jag(seed, i % N) * (1 - roundness));
+    const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = '#9a948a'; ctx.fill();
+  ctx.strokeStyle = '#6a645a'; ctx.lineWidth = Math.max(1.2, R * 0.08); ctx.stroke();
+}
+
+// ---------- 石のむしめがね ----------
+let chipParts = [];
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+  const mode = S.scopeMode;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  if (mode === 'flood') { grd.addColorStop(0, '#b09468'); grd.addColorStop(1, '#8a6f48'); }
+  else { grd.addColorStop(0, '#dceef8'); grd.addColorStop(1, '#b8d8e8'); }
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  if (mode === 'up') {
+    drawStonePoly(sctx, R * 0.62, R * 0.85, R * 0.3, 0.04, 3);
+    drawStonePoly(sctx, R * 1.34, R * 1.02, R * 0.24, 0.08, 8);
+    drawStonePoly(sctx, R * 0.95, R * 1.42, R * 0.27, 0.02, 5);
+    label('ゴツゴツ・大きい');
+  } else if (mode === 'mid') {
+    drawStonePoly(sctx, R * 0.62, R * 0.85, R * 0.2, 0.5, 3);
+    drawStonePoly(sctx, R * 1.3, R * 0.95, R * 0.17, 0.55, 8);
+    drawStonePoly(sctx, R * 0.95, R * 1.35, R * 0.18, 0.5, 5);
+    drawStonePoly(sctx, R * 1.35, R * 1.4, R * 0.13, 0.6, 11);
+    label('すこし 丸くなった');
+  } else if (mode === 'down') {
+    sctx.fillStyle = '#e0d0a0';
+    for (let i = 0; i < 40; i++) {
+      const a = i * 2.4, rr = R * 0.75 * Math.sqrt((i % 10) / 10);
+      sctx.beginPath();
+      sctx.arc(R + Math.cos(a) * rr, R * 1.25 + Math.sin(a) * rr * 0.5, 2.2, 0, TAU);
+      sctx.fill();
+    }
+    drawStonePoly(sctx, R * 0.7, R * 0.8, R * 0.13, 0.95, 3);
+    drawStonePoly(sctx, R * 1.25, R * 0.9, R * 0.11, 0.97, 8);
+    drawStonePoly(sctx, R * 0.95, R * 1.1, R * 0.12, 0.96, 5);
+    drawStonePoly(sctx, R * 1.3, R * 1.25, R * 0.09, 0.98, 11);
+    label('丸い・小さい・すなも');
+  } else if (mode === 'rolling') {
+    // ころがる石（丸くなっていく）
+    sctx.save();
+    sctx.translate(R, R * 0.95);
+    sctx.rotate(t * 3);
+    drawStonePoly(sctx, 0, 0, R * 0.34, S.stoneRound, 7);
+    sctx.restore();
+    // かけら
+    chipParts = chipParts.filter(c => c.life > 0);
+    chipParts.forEach(c => {
+      c.life -= dt * 1.5; c.x += c.vx * dt; c.y += c.vy * dt;
+      sctx.globalAlpha = Math.max(0, c.life);
+      drawStonePoly(sctx, c.x, c.y, 4, 0.2, c.seed);
+      sctx.globalAlpha = 1;
+    });
+    label(S.stoneRound < 0.3 ? 'ゴツゴツの石' : S.stoneRound < 0.75 ? '角が とれてきた！' : '丸く 小さくなった！');
+  } else if (mode === 'flood') {
+    for (let i = 0; i < 5; i++) {
+      const xx = ((i * 137 + t * 260) % (w + 60)) - 30;
+      drawStonePoly(sctx, xx, R * (0.6 + (i % 3) * 0.35), R * (0.1 + (i % 2) * 0.06), 0.4, i + 2);
+    }
+    sctx.strokeStyle = '#5a3f22'; sctx.lineWidth = 4;
+    for (let i = 0; i < 3; i++) {
+      const xx = ((i * 211 + t * 330) % (w + 80)) - 40;
+      sctx.save();
+      sctx.translate(xx, R * (0.75 + i * 0.28)); sctx.rotate(t * 5 + i);
+      sctx.beginPath(); sctx.moveTo(-12, 0); sctx.lineTo(12, 0); sctx.stroke();
+      sctx.restore();
+    }
+    label('石も えだも ながされる！');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.1}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.85)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#4a5f2a';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3a9a52', '#7fd0f0', '#f2a93b', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  S.flowT = Math.max(0, S.flowT - dt);
+  S.rainT = Math.max(0, S.rainT - dt);
+  const step = STEPS[FLOW[S.stepIndex]];
+  if (step.tick) step.tick(dt);
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.onclick = () => { ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const L = LOCS[S.loc];
+  $('locChip').textContent = `いまここ：${L.name}（${L.kana}）`;
+  $('stateName').innerHTML = ({
+    up: `⛰ ${W.joryu} 〜${W.nagare}が ${ruby('急', 'きゅう')}〜`,
+    mid: `🏞 ${W.churyu} 〜${W.ishi}ころの${ruby('旅', 'たび')}〜`,
+    curve: `🌀 カーブ 〜そと？うち？〜`,
+    down: `🌊 ${W.karyu} 〜${W.nagare}が ゆるやか〜`,
+  })[S.loc] || '';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kezuru', 'm_hakobu', 'm_tsumoru', 'm_curve', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = {}; S.flowT = 0; S.strong = false;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { loc: 'up', scopeMode: 'up', erosion: 0, stonePos: -1, stoneRound: 0, deposit: 0, curveProg: 0, flood: 0 });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">⛰️🏞🌀🌊🦦</div>
+        <h1>ながれる${ruby('水', 'みず')}の${ruby('探検隊', 'たんけんたい')}</h1>
+        <div class="sub">〜 ${W.kawa}が 大地を つくる ひみつを さぐる、みならい${ruby('隊員', 'たいいん')} ぼしゅう${ruby('中', 'ちゅう')} 〜</div>
+        <p class="talk">やあ！ ぼくは カワウソの <b>スイ${ruby('隊長', 'たいちょう')}</b>。${ruby('生', 'う')}まれも${ruby('育', 'そだ')}ちも この${ruby('川', 'かわ')}さ。<br>
+        ${ruby('山', 'やま')}の ${ruby('上流', 'じょうりゅう')}から ${ruby('海', 'うみ')}の ${ruby('河口', 'かこう')}まで——${ruby('川', 'かわ')}は ${ruby('毎日', 'まいにち')}、${ruby('大地', 'だいち')}を <b>けずって、はこんで、つもらせて</b> いるんだ。<br>
+        きょうは そのひみつを、${ruby('空', 'そら')}から ${ruby('見', 'み')}ながら たしかめよう！</p>
+        <button class="btn" id="startBtn">${ruby('探検隊', 'たんけんたい')}に ${ruby('入隊', 'にゅうたい')}する！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🪨 よそうタイム</h2>
+        <p class="talk">${ruby('山', 'やま')}の${ruby('近', 'ちか')}く（${W.joryu}）の${ruby('川', 'かわ')}の${W.ishi}と、${ruby('海', 'うみ')}の${ruby('近', 'ちか')}く（${W.karyu}）の${ruby('川', 'かわ')}の${W.ishi}。<br><b>${ruby('形', 'かたち')}や ${ruby('大', 'おお')}きさに ちがいは ある？</b></p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🟰</span><b>①</b> どこも だいたい おなじ</div>
+          <div class="vcard" data-v="1"><span class="vicon">⛰</span><b>②</b> ${W.joryu}は ゴツゴツ${ruby('大', 'おお')}きく、${W.karyu}は ${ruby('丸', 'まる')}く${ruby('小', 'ちい')}さい</div>
+          <div class="vcard" data-v="2"><span class="vicon">🔄</span><b>③</b> ${W.joryu}が ${ruby('丸', 'まる')}くて、${W.karyu}が ゴツゴツ</div>
+        </div>
+        <div class="sub">思うものに タッチ（いくつでも）。たんけんノート（シート）にも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、${ruby('川', 'かわ')}へ しゅっぱつ！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); c.classList.toggle('picked');
+          const v = +c.dataset.v;
+          S.votePicked.has(v) ? S.votePicked.delete(v) : S.votePicked.add(v);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：けずる（しん食） ---
+  m_kezuru: {
+    enter() {
+      Object.assign(S, { loc: 'up', scopeMode: 'up', erosion: 0, stonePos: -1, flood: 0, deposit: 0, curveProg: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('⛰️', `ここは ${ruby('山', 'やま')}の${ruby('中', 'なか')}の <b>${W.joryu}</b>。${W.nagare}が いちばん ${ruby('急', 'きゅう')}な ばしょだ。むしめがねの ${W.ishi}にも ちゅうもく！`);
+      say(`${W.joryu}に ${W.mizu}を ながしつづけると、${ruby('川', 'かわ')}の そこや きしは どうなると ${ruby('思', 'おも')}う？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ ふかく けずられていく', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ かわらない', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ うまって あさくなる', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`それじゃあ ${ruby('実験', 'じっけん')}！ <b>💧ボタン</b>で ${W.mizu}を ながしてみよう。`);
+      S.phase = 'flow';
+      setControls([{ label: '💧 水を ながす', cb: () => { S.flowT = 3; sFlow(); } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.phase === 'flow' && S.flowT > 0) {
+        S.erosion = clamp(S.erosion + dt * (S.strong ? 0.22 : 0.09), 0, 1);
+        if (S.erosion > 0.45 && !S.strong && !S.anim.offered) {
+          S.anim.offered = true;
+          say(`みぞが けずれてきた……！ もっと はっきり ${ruby('見', 'み')}たい？ <b>💦${W.mizu}を ふやす</b>と どうなるかな！`);
+          setControls([
+            { label: '💧 水を ながす', cb: () => { S.flowT = 3; sFlow(); } },
+            { label: '💦 水を もっと ふやす', cb: () => { S.strong = true; S.flowT = 4; sFlow(); } },
+          ]);
+        }
+        if (S.erosion >= 1) {
+          S.phase = 'done';
+          setControls([]);
+          sYes(); scopeBurst(); award('m_kezuru');
+          say(`✨ ${ruby('谷', 'たに')}が ふかく けずれた！ こたえは <b>Ａ</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>${ruby('流', 'なが')}れる${W.mizu}が ${ruby('地面', 'じめん')}を けずる はたらきを <b>${W.shinshoku}</b>という。${W.nagare}が ${ruby('急', 'きゅう')}で ${ruby('速', 'はや')}い ${W.joryu}ほど ${ruby('強', 'つよ')}い。${W.mizu}を ふやすと もっと ${ruby('強', 'つよ')}く なったね！`);
+          setButtons([{ label: `つぎへ（${ruby('石', 'いし')}ころの${ruby('旅', 'たび')}）`, cb: nextStep }]);
+        }
+      }
+    },
+  },
+
+  // --- M2：はこぶ（運ぱん） ---
+  m_hakobu: {
+    enter() {
+      Object.assign(S, { loc: 'mid', scopeMode: 'rolling', erosion: 1, stonePos: 0, stoneRound: 0, flood: 0 });
+      chipParts = [];
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🪨', `${W.joryu}で ${ruby('生', 'う')}まれた ゴツゴツ${W.ishi}の「<b>ゴロタ</b>」。${ruby('海', 'うみ')}まで ${ruby('旅', 'たび')}を したら、どんな すがたに なる？`);
+      say(`ゴロタが ${ruby('海', 'うみ')}に つくころの すがたは？ よそうして シートに 〇！`);
+      setButtons([
+        { label: 'Ａ 角ばったまま・おなじ大きさ', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 丸く 小さくなる', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ もっと 大きくなる', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`それじゃあ しゅっぱつ！ <b>▶ボタン</b>で ゴロタの ${ruby('旅', 'たび')}を すすめよう。むしめがねで へんかを かんさつ！`);
+      S.phase = 'roll';
+      setControls([{ label: '▶ 石ころの 旅を すすめる', cb: () => { S.anim.rolling = true; sFlow(); } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.phase === 'roll' && S.anim.rolling) {
+        S.stonePos = clamp(S.stonePos + dt * 0.14, 0, 1);
+        const newRound = clamp(S.stonePos * 1.05, 0, 1);
+        if (Math.floor(newRound * 12) > Math.floor(S.stoneRound * 12)) {
+          sKnock();
+          const R = scopeCv.getBoundingClientRect().width / 2;
+          chipParts.push({ x: R + (Math.random() - 0.5) * R * 0.6, y: R * 0.95, vx: (Math.random() - 0.5) * 120, vy: -60 - Math.random() * 60, life: 1, seed: Math.random() * 20 });
+        }
+        S.stoneRound = newRound;
+        if (S.stonePos >= 1) {
+          S.phase = 'done';
+          setControls([]);
+          sYes(); scopeBurst(); award('m_hakobu');
+          say(`✨ ${ruby('海', 'うみ')}に とうちゃく！ ゴロタは <b>${ruby('丸', 'まる')}く ${ruby('小', 'ちい')}さく</b> なった。こたえは <b>Ｂ</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.mizu}が ${W.ishi}や ${ruby('土', 'つち')}を はこぶ はたらきを <b>${W.unpan}</b>という。ころがりながら ぶつかって ${ruby('角', 'かど')}が とれるから、<b>${W.karyu}の ${W.ishi}ほど ${ruby('丸', 'まる')}くて ${ruby('小', 'ちい')}さい</b>んだ！`);
+          setButtons([{ label: `つぎへ（${W.karyu}）`, cb: nextStep }]);
+        }
+      }
+    },
+  },
+
+  // --- M3：つもる（たい積） ---
+  m_tsumoru: {
+    enter() {
+      Object.assign(S, { loc: 'down', scopeMode: 'down', erosion: 1, stonePos: -1, deposit: 0, flood: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🌊', `${ruby('海', 'うみ')}の${ruby('近', 'ちか')}くの <b>${W.karyu}</b>。${W.nagare}が いちばん <b>ゆるやか</b>な ばしょだ。はこばれてきた すなや ${W.ishi}は……？`);
+      say(`${W.nagare}が ゆるやかに なると、はこばれてきた すなや ${W.ishi}は どうなる？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ そのまま ながれつづける', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ ながれの ゆるい ところに つもる', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ きえて なくなる', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`ためしてみよう！ <b>💧ボタン</b>で ${W.mizu}を ながして、${ruby('河口', 'かこう')}に ちゅうもく！`);
+      S.phase = 'deposit';
+      setControls([{ label: '💧 水を ながす', cb: () => { S.flowT = 3; S.anim.depositing = true; sFlow(); } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.phase === 'deposit' && S.anim.depositing && S.flowT > 0) {
+        S.deposit = clamp(S.deposit + dt * 0.22, 0, 1);
+        if (S.deposit >= 1) {
+          S.phase = 'done';
+          setControls([]);
+          sYes(); scopeBurst(); award('m_tsumoru');
+          say(`✨ ${ruby('河口', 'かこう')}に すなの ${ruby('地面', 'じめん')}が できた！ こたえは <b>Ｂ</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.nagare}が ゆるやかに なると、はこべなく なって つもる。これが <b>${W.taiseki}</b>。${ruby('新', 'あたら')}しい ${ruby('土地', 'とち')}は、こうやって ${ruby('川', 'かわ')}が ${ruby('作', 'つく')}っているんだ！`);
+          setButtons([{ label: 'つぎへ（カーブのなぞ）', cb: nextStep }]);
+        }
+      }
+    },
+  },
+
+  // --- M4：カーブのなぞ ---
+  m_curve: {
+    enter() {
+      Object.assign(S, { loc: 'curve', scopeMode: 'mid', erosion: 1, deposit: 1, curveProg: 0, flood: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🌀', `${ruby('探検隊', 'たんけんたい')} さいだいの なぞ！ ${ruby('川', 'かわ')}の <b>カーブ</b>では、<b>そとがわ</b>と <b>うちがわ</b>、どっちが けずられる？`);
+      say(`きょう ${ruby('学', 'まな')}んだ「けずる」と「つもる」を つかって すいりしよう。カーブで けずられるのは どっち？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ そとがわ', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ うちがわ', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ りょうほう おなじ', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`さあ、しんそうは……！ <b>💧ボタン</b>で ${W.mizu}を ながして、カーブを よーく ${ruby('見', 'み')}て！`);
+      S.phase = 'curve';
+      setControls([{ label: '💧 水を ながす', cb: () => { S.flowT = 3; S.anim.curving = true; sFlow(); } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.phase === 'curve' && S.anim.curving && S.flowT > 0) {
+        S.curveProg = clamp(S.curveProg + dt * 0.22, 0, 1);
+        if (S.curveProg >= 1) {
+          S.phase = 'done';
+          setControls([]);
+          sYes(); scopeBurst(); award('m_curve');
+          say(`✨ こたえは <b>Ａ そとがわ</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>カーブの <b>そとがわ</b>は ${W.nagare}が ${ruby('速', 'はや')}い→<b>${W.shinshoku}</b>（がけに なりやすい）。<b>うちがわ</b>は ${W.nagare}が ゆっくり→<b>${W.taiseki}</b>（${ruby('川原', 'かわら')}が できる）。ひとつの カーブで、けずると つもるが ${ruby('同時', 'どうじ')}に おきているんだ！`);
+          setButtons([{ label: 'さいごの チャレンジへ！', cb: nextStep }]);
+        }
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：大雨と防災 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { loc: 'mid', scopeMode: 'flood', erosion: 1, deposit: 1, curveProg: 1, flood: 0 });
+      updateLoc();
+      S.phase = 'ask';
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！<br>${W.ooame}で ${ruby('川', 'かわ')}の ${W.mizu}が ぐんと ふえたら、けずる${ruby('力', 'ちから')}・はこぶ${ruby('力', 'ちから')}は どうなる？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ つよくなる', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ かわらない', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ よわくなる', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      S.pick = n;
+      say(`それじゃあ……${ruby('空', 'そら')}が くらくなってきた。<b>🌧ボタン</b>で ${W.ooame}を ふらせてみよう。`);
+      setControls([{ label: '🌧 大雨を ふらせる', cls: 'storm', cb: () => {
+        S.rainT = 6; S.anim.storming = true; sFlow();
+        say(`ゴロゴロ……！ ${ruby('川', 'かわ')}の ようすに ちゅうもく……！`);
+        setControls([]);
+      } }]);
+      setButtons([]);
+    },
+    tick(dt) {
+      if (S.anim.storming) {
+        S.flood = clamp(S.flood + dt * 0.25, 0, 1);
+        if (S.flood >= 1 && S.phase === 'ask') {
+          S.phase = 'done';
+          const hit = S.pick === 0 ? 'よそう どおり！' : 'じっけんで わかったね！';
+          sYes(); award('hakase');
+          say(`こたえは <b>Ａ つよくなる</b>！ ${hit}<br><br>💡 <b>たいせつポイント</b><br>${ruby('増水', 'ぞうすい')}すると、けずる・はこぶ ${ruby('力', 'ちから')}が <b>ぐんと ${ruby('強', 'つよ')}く</b>なる。ひとばんで ${ruby('川', 'かわ')}の ${ruby('形', 'かたち')}が かわることも あるんだ。<br><br>🚨 だから ${ruby('探検隊', 'たんけんたい')}の <b>いちばん${ruby('大事', 'だいじ')}な おきて</b>——<b>${ruby('雨', 'あめ')}の${ruby('日', 'ひ')}と ${ruby('雨上', 'あめあ')}がりの ${ruby('川', 'かわ')}には、ぜったいに ${ruby('近', 'ちか')}づかない！</b>`);
+          setButtons([{ label: 'まとめへ すすむ', cb: () => { S.flood = 0; S.rainT = 0; nextStep(); } }]);
+        }
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { flood: 0, rainT: 0 });
+      showOverlay(`
+        <h2>⭐ みならい${ruby('川', 'かわ')}の${ruby('探検隊', 'たんけんたい')} にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${ruby('流', 'なが')}れる${ruby('水', 'みず')}の 3つの はたらき＝けずる（${W.shinshoku}）・はこぶ（${W.unpan}）・つもらせる（<span class="blankWord" data-a="たい積">？？？</span>）。<br>
+        ② ${W.karyu}の ${W.ishi}ほど（<span class="blankWord" data-a="丸く小さい">？？？</span>）。ころがって ${ruby('角', 'かど')}が とれるから。<br>
+        ③ カーブで けずられるのは（<span class="blankWord" data-a="そとがわ">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>②「${W.joryu}は ゴツゴツ${ruby('大', 'おお')}きく、${W.karyu}は ${ruby('丸', 'まる')}く${ruby('小', 'ちい')}さい」</b>でした！</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>${ruby('近', 'ちか')}くの ${ruby('川', 'かわ')}や ${ruby('用水路', 'ようすいろ')}の ${W.ishi}を、<b>はなれた ところから</b> ${ruby('見', 'み')}てみよう。${ruby('丸', 'まる')}い？ ${ruby('角', 'かく')}ばってる？ どうしてか、きょうの ひみつで せつめいできるかな。${ruby('教科書', 'きょうかしょ')}や ${ruby('図鑑', 'ずかん')}の ${ruby('川', 'かわ')}の${ruby('写真', 'しゃしん')}でも OK！<br>
+        🚨 やくそく：${ruby('川', 'かわ')}を ${ruby('見', 'み')}るときは ${ruby('大人', 'おとな')}と いっしょ。${ruby('水', 'みず')}ぎわには ${ruby('近', 'ちか')}づかない。${ruby('雨', 'あめ')}の${ruby('日', 'ひ')}は ${ruby('見', 'み')}に${ruby('行', 'い')}かない。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#c0662a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { erosion: 1, deposit: 1, curveProg: 1, flood: 0, stonePos: -1 });
+      say(`<b>じゆうモード</b>！ ${ruby('川', 'かわ')}の ばしょを めぐって、${ruby('友', 'とも')}だちと クイズを ${ruby('出', 'だ')}しあおう。<br>れい：「けずる はたらきの ${ruby('名前', 'なまえ')}は？」「カーブの うちがわは どっち？」`);
+      const spots = [
+        ['⛰ 上流', 'up', 'up'],
+        ['🏞 中流', 'mid', 'mid'],
+        ['🌀 カーブ', 'curve', 'mid'],
+        ['🌊 下流', 'down', 'down'],
+      ];
+      const btns = spots.map(([label, loc, mode]) => ({
+        label, cls: 'sub',
+        cb: () => { S.loc = loc; S.scopeMode = mode; updateLoc(); sTap(); },
+      }));
+      btns.push({ label: '🌧 大雨オン/オフ', cls: 'sub', cb: () => {
+        if (S.flood > 0.5) { S.flood = 0; S.rainT = 0; S.scopeMode = ({ up: 'up', mid: 'mid', curve: 'mid', down: 'down' })[S.loc]; }
+        else { S.anim.freeflood = true; S.rainT = 5; S.scopeMode = 'flood'; }
+        sTap();
+      } });
+      btns.push({ label: 'まとめに もどる', cls: 'sub', cb: () => { S.flood = 0; gotoStep(FLOW.indexOf('ending')); } });
+      setButtons(btns);
+      setControls([]);
+    },
+    tick(dt) {
+      if (S.anim.freeflood) {
+        S.flood = clamp(S.flood + dt * 0.4, 0, 1);
+        if (S.flood >= 1) S.anim.freeflood = false;
+      }
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_hakobu などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>みずの旅 ちょうさノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1a5e8a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 9pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  /* 旅マップの流れ図 */
+  .flowRow { display: flex; align-items: center; gap: 1mm; flex-wrap: wrap; font-size: 9.5pt; }
+  .fbox {
+    border: .45mm solid #222; border-radius: 2mm; padding: 1.2mm 2mm;
+    text-align: center; background: #f2f9fd; white-space: nowrap;
+  }
+  .fbox.blank { background: #fff; min-width: 17mm; }
+  .fbox .blankLine { display: inline-block; width: 13mm; border-bottom: .5mm solid #222; height: 4.5mm; }
+  .arrow { font-weight: 700; }
+
+  .mtable { width: 100%; border-collapse: collapse; }
+  .mtable th, .mtable td {
+    border: .4mm solid #222; padding: 1.1mm 1.6mm;
+    font-size: 9pt; text-align: left; vertical-align: middle; line-height: 1.45;
+  }
+  .mtable th { background: #eee; text-align: center; font-size: 8.5pt; }
+  .mtable .mname { font-size: 9.5pt; font-weight: 700; white-space: nowrap; text-align: center; }
+  .mtable .micon { font-size: 11pt; }
+
+  .fillLine { display: inline-block; width: 22mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用ちょうさノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>💧 みずの<ruby>旅<rt>たび</rt></ruby> ちょうさノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      じゃ<ruby>口<rt>ぐち</rt></ruby>の<ruby>水<rt>みず</rt></ruby>は、もともと<ruby>何<rt>なん</rt></ruby>の<ruby>水<rt>みず</rt></ruby>？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 🌧 <ruby>雨<rt>あめ</rt></ruby>の<ruby>水<rt>みず</rt></ruby>（<ruby>山<rt>やま</rt></ruby>や<ruby>川<rt>かわ</rt></ruby>を とおってきた）</div>
+        <div class="voteOpt"><span class="vnum">②</span> 🌊 <ruby>海<rt>うみ</rt></ruby>の<ruby>水<rt>みず</rt></ruby>を そのまま はこんだ</div>
+        <div class="voteOpt"><span class="vnum">③</span> 🏭 <ruby>工場<rt>こうじょう</rt></ruby>で <ruby>作<rt>つく</rt></ruby>った<ruby>水<rt>みず</rt></ruby></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．みずの<ruby>旅<rt>たび</rt></ruby>マップ（あいてる<ruby>箱<rt>はこ</rt></ruby>を うめよう）</span>
+    <div class="secBody">
+      <span class="wordBank">ことばのヒント：みどり ／ ダム ／ こす（ろか） ／ はいすい<ruby>池<rt>いけ</rt></ruby></span>
+      <div class="flowRow" style="margin-top:1.5mm">
+        <span class="fbox">☁ <ruby>雨<rt>あめ</rt></ruby></span><span class="arrow">→</span>
+        <span class="fbox blank">⛰（<span class="blankLine"></span>）のダム＝<ruby>森<rt>もり</rt></ruby></span><span class="arrow">→</span>
+        <span class="fbox blank">（<span class="blankLine"></span>）</span><span class="arrow">→</span>
+        <span class="fbox">🏭 じょうすい<ruby>場<rt>じょう</rt></ruby></span><span class="arrow">→</span>
+        <span class="fbox blank">（<span class="blankLine"></span>）</span><span class="arrow">→</span>
+        <span class="fbox">🚰 じゃ<ruby>口<rt>ぐち</rt></ruby></span>
+      </div>
+      <div class="flowRow" style="margin-top:1.2mm">
+        <span style="font-size:9pt">じょうすい<ruby>場<rt>じょう</rt></ruby>の<ruby>中<rt>なか</rt></ruby>：</span>
+        <span class="fbox">しずめる（ちんでん）</span><span class="arrow">→</span>
+        <span class="fbox blank">（<span class="blankLine"></span>）</span><span class="arrow">→</span>
+        <span class="fbox">✨ <ruby>消毒<rt>しょうどく</rt></ruby></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．じょうすい<ruby>場<rt>じょう</rt></ruby>の じっけんきろく</span>
+    <div class="secBody">
+      <table class="mtable">
+        <tr>
+          <th style="width:26mm">ばしょ</th>
+          <th>よそう（〇を つけよう）</th>
+          <th style="width:52mm">むしめがねで <ruby>見<rt>み</rt></ruby>えたこと</th>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🕳</span> ちんでん<ruby>池<rt>いけ</rt></ruby></td>
+          <td>さいしょに することは？<br>（ <ruby>薬<rt>くすり</rt></ruby>でかためて しずめる ・ いきなり<ruby>消毒<rt>しょうどく</rt></ruby> ・ ふっとう ）</td>
+          <td><ruby>大<rt>おお</rt></ruby>きな よごれが（ しずんだ ・ うかんだ ）</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">🏖</span> ろか<ruby>池<rt>いけ</rt></ruby></td>
+          <td>のこりの よごれは？<br>（ すなの<ruby>層<rt>そう</rt></ruby>で こしとる ・ あみですくう ・ そのまま ）</td>
+          <td>とうめいに なった！ でも（<span style="border-bottom:.4mm solid #222;display:inline-block;width:12mm">　</span>）が まだ いた！</td>
+        </tr>
+        <tr>
+          <td class="mname"><span class="micon">✨</span> <ruby>消毒<rt>しょうどく</rt></ruby></td>
+          <td><ruby>菌<rt>きん</rt></ruby>を やっつけるには？<br>（ <ruby>消毒<rt>しょうどく</rt></ruby>の<ruby>薬<rt>くすり</rt></ruby>をすこし ・ もういちどこす ・ こおらせる ）</td>
+          <td>ついに（ のめる ・ のめない ）<ruby>水<rt>みず</rt></ruby>に なった！</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．はかせチャレンジ</span>
+    <div class="secBody">
+      おふろや トイレで つかった<ruby>水<rt>みず</rt></ruby>は、そのあと どこへ？　<b>そう思うものに 〇</b><br>
+      　Ａ．そのまま <ruby>川<rt>かわ</rt></ruby>に ながす　／　Ｂ．<ruby>下水処理場<rt>げすいしょりじょう</rt></ruby>で きれいにしてから <ruby>川<rt>かわ</rt></ruby>へ　／　Ｃ．きえて なくなる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① じゃ<ruby>口<rt>ぐち</rt></ruby>の<ruby>水<rt>みず</rt></ruby>の もとは（<span class="fillLine" style="width:14mm"></span>）。<ruby>森<rt>もり</rt></ruby>や ダムに たくわえられる。<br>
+      ② じょうすい<ruby>場<rt>じょう</rt></ruby>の じゅんばんは、しずめる →（<span class="fillLine" style="width:16mm"></span>）→ <ruby>消毒<rt>しょうどく</rt></ruby>。<br>
+      ③ つかった<ruby>水<rt>みず</rt></ruby>も きれいにして<ruby>川<rt>かわ</rt></ruby>へ。<ruby>水<rt>みず</rt></ruby>は ぐるぐる（<span class="fillLine" style="width:18mm"></span>）いる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．おうちミッション：みずの<ruby>調査員<rt>ちょうさいん</rt></ruby>に なろう</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🚰</span>
+        <div>
+          ① おうちの じゃ<ruby>口<rt>ぐち</rt></ruby>を ぜんぶ さがそう！ → ぜんぶで（<span style="border-bottom:.4mm solid #222;display:inline-block;width:10mm">　</span>）こ あった<br>
+          ② <ruby>歯<rt>は</rt></ruby>みがきの とき <ruby>水<rt>みず</rt></ruby>を とめる チャレンジ　☐ できた！（<ruby>出<rt>だ</rt></ruby>しっぱなしだと 30<ruby>秒<rt>びょう</rt></ruby>で やく6リットル！）<br>
+          <span style="font-size:8.5pt">かんそう：<span style="border-bottom:.4mm solid #222;display:inline-block;width:80mm">　</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい すいどう<ruby>調査隊<rt>ちょうさたい</rt></ruby>、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】みずの旅 だいぼうけん — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4社会「水はどこから」・学力幅あり・協力型／ 使うもの：「みずの旅_じゅぎょう画面.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、「☔雨をふらせる」ボタンで雨が降りダムに水がたまるか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_chinden</b> などで途中再開（m_dam／m_chinden／m_roka／m_shodoku／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（最後に画面が種明かし）</td></tr>
+      <tr><td class="min">4〜12分</td><td>⛰ 山とダム</td><td>予想に〇→代表が☔で雨→ダム満水→水門をあける。「森＝みどりのダム」をおさえ、シート２の旅マップを埋め始める</td></tr>
+      <tr><td class="min">12〜20分</td><td>🕳 ちんでん池</td><td>むしめがねの「どろ・ごみ・菌」に注目→予想→⏳でしずめる→シート３に記入</td></tr>
+      <tr><td class="min">20〜29分</td><td>🏖 ろか池</td><td>予想→🏖でこす→<b>「とうめい！でものめる？」で一呼吸置く</b>→菌の発見が今日の山場。シート３に記入</td></tr>
+      <tr><td class="min">29〜37分</td><td>✨ 消毒 → じゃ口</td><td>予想→💊消毒→⬆ポンプ→🚰じゃ口で大団円。みんなで「かんぱい！」→シート３に記入</td></tr>
+      <tr><td class="min">37〜41分</td><td>はかせチャレンジ</td><td>シート４に〇→使った水のゆくえ＝水の循環。1日200Lの驚きを共有</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート５。じゃ口かぞえ＆節水チャレンジ（シート６）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「はかせチャレンジ」を右下「つぎ▶」でスキップOK（まとめは削らない）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>①</b>／⛰＝<b>Ａ（森が水をたくわえる）</b>／🕳＝<b>薬でかためてしずめる・しずんだ</b>／🏖＝<b>すなの層でこしとる・菌（きん）がまだいた</b>／✨＝<b>消毒の薬をすこし・のめる</b>／
+      はかせ＝<b>Ｂ</b>／旅マップ＝<b>みどり・ダム・はいすい池／こす（ろか）</b>／まとめ＝①<b>雨</b> ②<b>こす</b> ③<b>めぐって</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の社会科です）</h2>
+    <ul>
+      <li>浄水場の工程順（凝集・沈でん→ろ過→塩素消毒→配水池→給水）は実際の浄水場と同じ。「見た目が透明でも菌がいるから消毒が必要」が核心です</li>
+      <li>数値は実測ベース：1人1日の水使用量<b>約200L</b>（2Lペットボトル約100本）、歯みがき出しっぱなし30秒で<b>約6L</b>。「森＝緑のダム」「配水池は高低差で送る」も教科書用語どおり</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>ろ過のあと「のめる！」と答える子が多い想定——まちがいこそ今日のごほうび。<b>「見た目にだまされないのが調査隊」</b>と持ち上げる</li>
+      <li>ボタン操作の代表は毎回交代。見ている子は「むしめがね観察係」「シート記録係」に。読みが苦手な子にはシズクのセリフを先生が音読（全文ふりがな付き）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「じょうすい場のじゅんばんは？」「なぜ消毒がいる？」「はいすい池はなぜ高いところにある？」</li>
+      <li>ペットボトルと砂・小石で本物のろ過実験ができます（できた水は飲まない・大人と一緒に）。浄水場や水道局の見学があれば最高の続きです</li>
+      <li>おうちミッションのじゃ口の数・節水結果を持ち寄って「クラスの水しらべ」にまとめると学びが完結します</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

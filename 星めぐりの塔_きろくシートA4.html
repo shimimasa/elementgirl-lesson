@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>星めぐりの塔 かんさつノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1b2245; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.5mm 2mm; font-size: 9pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 24mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .seizaRow { display: flex; gap: 5mm; align-items: flex-start; }
+  .seizaBox { text-align: center; font-size: 9pt; }
+  .seizaBox svg { border: .35mm solid #999; border-radius: 2mm; background: #f4f4fb; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用かんさつノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌌 <ruby>星<rt>ほし</rt></ruby>めぐりの<ruby>塔<rt>とう</rt></ruby> かんさつノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      よるの あいだ、そらの <ruby>星<rt>ほし</rt></ruby>は どうなっている？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 📌 ずっと おなじ ばしょに ある</div>
+        <div class="voteOpt"><span class="vnum">②</span> 🌠 みんなで そろって <ruby>動<rt>うご</rt></ruby>く（ならび<ruby>方<rt>かた</rt></ruby>は そのまま）</div>
+        <div class="voteOpt"><span class="vnum">③</span> 🎆 バラバラに <ruby>動<rt>うご</rt></ruby>いて ならび<ruby>方<rt>かた</rt></ruby>も かわる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．<ruby>星<rt>ほし</rt></ruby>しらべ</span>
+    <div class="secBody">
+      <span class="wordBank">ことばのヒント：ベガ ／ デネブ ／ アルタイル ／ アンタレス</span><br>
+      ・<ruby>南<rt>みなみ</rt></ruby>の そらで いちばん <ruby>明<rt>あか</rt></ruby>るい <ruby>星<rt>ほし</rt></ruby>（おりひめ<ruby>星<rt>ぼし</rt></ruby>）＝（<span class="fillLine"></span>）<br>
+      ・さそり<ruby>座<rt>ざ</rt></ruby>の <ruby>赤<rt>あか</rt></ruby>い <ruby>星<rt>ほし</rt></ruby>＝（<span class="fillLine"></span>）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．<ruby>星座<rt>せいざ</rt></ruby>を つなごう（<ruby>点<rt>てん</rt></ruby>を<ruby>線<rt>せん</rt></ruby>でむすぶ）</span>
+    <div class="secBody">
+      <div class="seizaRow">
+        <div class="seizaBox">
+          <svg width="48mm" height="27mm" viewBox="0 0 156 88">
+            <circle cx="42" cy="22" r="4" fill="#333"/><text x="42" y="12" font-size="7" text-anchor="middle">ベガ</text>
+            <circle cx="118" cy="16" r="3.4" fill="#333"/><text x="118" y="8" font-size="7" text-anchor="middle">デネブ</text>
+            <circle cx="92" cy="70" r="3.4" fill="#333"/><text x="92" y="83" font-size="7" text-anchor="middle">アルタイル</text>
+          </svg><br>
+          <ruby>夏<rt>なつ</rt></ruby>の<ruby>大三角<rt>だいさんかく</rt></ruby>（3つを つなぐ）
+        </div>
+        <div class="seizaBox">
+          <svg width="48mm" height="27mm" viewBox="0 0 156 88">
+            <circle cx="24" cy="30" r="3.2" fill="#333"/>
+            <circle cx="54" cy="56" r="3.2" fill="#333"/>
+            <circle cx="80" cy="34" r="2.6" fill="#333"/>
+            <circle cx="108" cy="60" r="3.2" fill="#333"/>
+            <circle cx="134" cy="38" r="2.6" fill="#333"/>
+            <text x="78" y="82" font-size="7" text-anchor="middle">じゅんばんに つなぐと…？</text>
+          </svg><br>
+          カシオペヤ<ruby>座<rt>ざ</rt></ruby>（5つを はしから つなぐ）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．<ruby>星<rt>ほし</rt></ruby>は まわる（<ruby>北<rt>きた</rt></ruby>の そら）</span>
+    <div class="secBody">
+      <div style="display:flex; gap:5mm; align-items:center">
+        <svg width="34mm" height="34mm" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="42" fill="none" stroke="#999" stroke-width="0.8" stroke-dasharray="3 3"/>
+          <circle cx="60" cy="60" r="2.6" fill="#333"/>
+          <text x="60" y="52" font-size="7" text-anchor="middle">北極星</text>
+          <g font-size="9" text-anchor="middle" dominant-baseline="middle">
+            <text x="60" y="12">①</text><text x="94" y="26">②</text><text x="108" y="60">③</text>
+            <text x="94" y="94">④</text><text x="60" y="108">⑤</text><text x="26" y="94">⑥</text>
+            <text x="12" y="60">⑦</text><text x="26" y="26">⑧</text>
+          </g>
+          <text x="97" y="72" font-size="8" text-anchor="middle" fill="#b5432e">Ｗ</text>
+        </svg>
+        <div>
+          いま（よる8<ruby>時<rt>じ</rt></ruby>）、カシオペヤ<ruby>座<rt>ざ</rt></ruby>（Ｗ）は <b>③</b>に いる。<br>
+          3<ruby>時間後<rt>じかんご</rt></ruby>の よる11<ruby>時<rt>じ</rt></ruby>には どこに いる？<br>
+          よそう：<b>① ② ③ ④ ⑤ ⑥ ⑦ ⑧</b> に〇<br>
+          けっか：（<span class="fillLine" style="width:12mm"></span>）だった！　<ruby>北極星<rt>ほっきょくせい</rt></ruby>は（ <ruby>動<rt>うご</rt></ruby>いた ・ ほとんど<ruby>動<rt>うご</rt></ruby>かない ）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．はかせチャレンジ（<ruby>南<rt>みなみ</rt></ruby>の そら）</span>
+    <div class="secBody">
+      <ruby>南<rt>みなみ</rt></ruby>の そらの <ruby>星<rt>ほし</rt></ruby>は、<ruby>時間<rt>じかん</rt></ruby>が たつと どう<ruby>動<rt>うご</rt></ruby>く？　<b>そう思うものに 〇</b><br>
+      　Ａ．<ruby>東<rt>ひがし</rt></ruby>から <ruby>西<rt>にし</rt></ruby>へ <ruby>動<rt>うご</rt></ruby>く　／　Ｂ．<ruby>動<rt>うご</rt></ruby>かない　／　Ｃ．バラバラに とびちる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．こんやの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① <ruby>星<rt>ほし</rt></ruby>には（<span class="fillLine" style="width:20mm"></span>）や <ruby>色<rt>いろ</rt></ruby>の ちがいが ある。<br>
+      ② <ruby>星<rt>ほし</rt></ruby>は <ruby>時間<rt>じかん</rt></ruby>が たつと <ruby>動<rt>うご</rt></ruby>く。でも（<span class="fillLine" style="width:24mm"></span>）は かわらない。<br>
+      ③ <ruby>北<rt>きた</rt></ruby>の そらの <ruby>星<rt>ほし</rt></ruby>は（<span class="fillLine" style="width:22mm"></span>）を <ruby>中心<rt>ちゅうしん</rt></ruby>に <ruby>回<rt>まわ</rt></ruby>る。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．おうちミッション：ほんものの よぞらで</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <svg width="30mm" height="16mm" viewBox="0 0 120 60">
+          <path d="M12 26 L30 40 L48 28 L66 44 L84 30" fill="none" stroke="#666" stroke-width="1.6"/>
+          <g fill="#333">
+            <circle cx="12" cy="26" r="2.6"/><circle cx="30" cy="40" r="2.6"/><circle cx="48" cy="28" r="2.2"/>
+            <circle cx="66" cy="44" r="2.6"/><circle cx="84" cy="30" r="2.2"/>
+          </g>
+          <text x="98" y="38" font-size="9">←Ｗ</text>
+        </svg>
+        <div>
+          こんや、<ruby>北<rt>きた</rt></ruby>の そらで <b>カシオペヤ<ruby>座<rt>ざ</rt></ruby>（Ｗ）</b>か <b><ruby>北斗七星<rt>ほくとしちせい</rt></ruby>（ひしゃく）</b>を さがそう！<br>
+          ☐ <ruby>見<rt>み</rt></ruby>つけた！（<ruby>時<rt>じ</rt></ruby>こく：　　<ruby>時<rt>じ</rt></ruby>ごろ）　☐ くもりで <ruby>見<rt>み</rt></ruby>えなかった（またこんど！）<br>
+          <span style="font-size:8.5pt">※<ruby>時間<rt>じかん</rt></ruby>を あけて 2<ruby>回<rt>かい</rt></ruby> <ruby>見<rt>み</rt></ruby>ると、<ruby>動<rt>うご</rt></ruby>いたことも わかるよ。よるの<ruby>外<rt>そと</rt></ruby>は おうちの<ruby>人<rt>ひと</rt></ruby>と いっしょにね。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい<ruby>星<rt>ほし</rt></ruby>よみ、こんやも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】星めぐりの塔 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4理科「月と星」（星の明るさ・色／星座／星の動き）・学力幅あり・協力型／ 使うもの：「星めぐりの塔_じゅぎょう画面.html」・プロジェクタ・このノート（1ページ目を人数分）</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、星をクリックすると「星のむしめがね」に拡大されるか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／部屋を暗くできると星空がきれいです（音は出なくても成立。右下🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_cassio</b> などで途中再開（m_bright／m_triangle／m_cassio／m_rotate／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（最後に画面が種明かし）</td></tr>
+      <tr><td class="min">4〜12分</td><td>⭐明るさと色（南の空）</td><td>代表交代で「いちばん明るい星」→「赤い星」をさがしてタッチ。むしめがねで色くらべ→シート２に記入</td></tr>
+      <tr><td class="min">12〜19分</td><td>🎋夏の大三角</td><td>ベガ・デネブ・アルタイルを3つタッチしてつなぐ。七夕の話題（おりひめ星・ひこぼし星）で盛り上げる→シート３をなぞる</td></tr>
+      <tr><td class="min">19〜26分</td><td>👑カシオペヤ座（北の空）</td><td>Wの5つをタッチ。北極星・北斗七星も確認→シート３をなぞる</td></tr>
+      <tr><td class="min">26〜34分</td><td>🌙星は回る（時間送り）</td><td>シート４に①〜⑧で予想→「▶よる11時まですすめる」→③→②を確認。<b>形が変わらない・北極星が動かない</b>に注目させる。<b>今日の山場</b></td></tr>
+      <tr><td class="min">34〜40分</td><td>はかせチャレンジ（南の空）</td><td>シート５に〇→時間送りで東→西の動きを確認。大三角の形もそのまま</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート６。今夜の観察（シート７）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「はかせチャレンジ」を右下「つぎ▶」でスキップOK（まとめは削らない）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>②</b>／星しらべ＝<b>ベガ</b>・<b>アンタレス</b>／星は回る＝<b>②</b>（反時計回りに1マス）・北極星は<b>ほとんど動かない</b>／
+      はかせ＝<b>Ａ（東から西へ）</b>／まとめ＝①<b>明るさ</b> ②<b>ならび方</b> ③<b>北極星</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>星空の設定について（本物との対応）</h2>
+    <ul>
+      <li>画面は<b>夏よる8時ごろの空の模式図</b>（正確な星図ではない）。ただし理科は本物：<b>星は1時間に約15度→3時間で45度（①〜⑧の1マス）</b>。北の空は北極星中心に反時計回り、南は東→西、並び方は不変</li>
+      <li>ベガ（織姫星）・デネブ・アルタイル（彦星）・アンタレス（赤い1等星）・北極星（<b>2等星</b>＝明るいからでなく「動かないから」目印）の性質は実在どおり</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「北極星はいちばん明るい星？」→<b>ちがう（2等星）</b>。引っかかりやすいポイントで、むしめがねで確かめられます</li>
+      <li>星さがしは見ている子が「もっと右！」と声で参加。代表は毎回交代。読みが苦手な子にはルナのセリフを先生が音読（全文ふりがな付き）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>北極星の見つけ方：北斗七星のひしゃくの先2つを5倍のばす（じゆうモードで教えられます）。星座早見盤の回し方の理解にも直結</li>
+      <li>おうちミッションの結果を持ち寄って「本当に動いていた！」報告会をすると学びが完結。プラネタリウム見学の事前学習にも最適</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
