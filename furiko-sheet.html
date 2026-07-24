@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ふりこの間 ふりこノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2a3468; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd66b; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 3mm; margin-top: 1mm; }
+  .voteOpt {
+    flex: 1; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 9pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .twoCol { display: flex; gap: 4mm; align-items: flex-start; }
+  .twoCol .diagram { flex-shrink: 0; text-align: center; font-size: 8.5pt; }
+  .twoCol .diagram svg { border: .35mm solid #999; border-radius: 2mm; background: #fbf8f2; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用ふりこノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⏰ ふりこの<ruby>間<rt>ま</rt></ruby> ふりこノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      <ruby>振<rt>ふ</rt></ruby>り<ruby>子<rt>こ</rt></ruby>が 1<ruby>往復<rt>おうふく</rt></ruby>する 時間を きめるのは？　<b>そう思うものに 〇</b>（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> ⚖ おもりの <ruby>重<rt>おも</rt></ruby>さ</div>
+        <div class="voteOpt"><span class="vnum">②</span> 📐 ふれ<ruby>幅<rt>はば</rt></ruby>（大きく・小さく）</div>
+        <div class="voteOpt"><span class="vnum">③</span> 📏 ひもの <ruby>長<rt>なが</rt></ruby>さ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．長さくらべ</span>
+    <div class="secBody">
+      <div class="twoCol">
+        <div class="diagram">
+          <svg width="34mm" height="34mm" viewBox="0 0 140 130">
+            <line x1="50" y1="6" x2="50" y2="124" stroke="#999" stroke-width="2"/>
+            <g font-size="11" text-anchor="start">
+              <line x1="42" y1="20" x2="58" y2="20" stroke="#222" stroke-width="2"/><text x="61" y="24">① 10cm</text>
+              <line x1="42" y1="34" x2="58" y2="34" stroke="#c07a30" stroke-width="3"/><text x="61" y="38">② 25cm</text>
+              <line x1="42" y1="48" x2="58" y2="48" stroke="#999" stroke-width="2"/><text x="61" y="52">③ 40cm</text>
+              <line x1="42" y1="62" x2="58" y2="62" stroke="#999" stroke-width="2"/><text x="61" y="66">④ 55cm</text>
+              <line x1="42" y1="76" x2="58" y2="76" stroke="#999" stroke-width="2"/><text x="61" y="80">⑤ 70cm</text>
+              <line x1="42" y1="90" x2="58" y2="90" stroke="#999" stroke-width="2"/><text x="61" y="94">⑥ 85cm</text>
+              <line x1="42" y1="104" x2="58" y2="104" stroke="#c07a30" stroke-width="3"/><text x="61" y="108">⑦ 100cm</text>
+              <line x1="42" y1="118" x2="58" y2="118" stroke="#999" stroke-width="2"/><text x="61" y="122">⑧ 115cm</text>
+            </g>
+          </svg>
+        </div>
+        <div>
+          ②（25cm・みじかい）と ⑦（100cm・ながい）、1<ruby>往復<rt>おうふく</rt></ruby>する 時間が <b>はやい</b>のは？<br>
+          よそう：（ ② ・ ⑦ ・ <ruby>同<rt>おな</rt></ruby>じ ）に〇<br>
+          けっか：② は（<span class="fillLine" style="width:14mm"></span>）びょう　　⑦ は（<span class="fillLine" style="width:14mm"></span>）びょう<br>
+          <span class="wordBank">わかった こと：ひもが（ みじかい ・ ながい ）ほど はやい</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．おもりくらべ ／ ふれはばくらべ</span>
+    <div class="secBody">
+      長さは ④の まま。　①おもりの<ruby>重<rt>おも</rt></ruby>さ　②ふれ<ruby>幅<rt>はば</rt></ruby>　を それぞれ 変えたら、時間は？<br>
+      よそう：おもり（ <ruby>重<rt>おも</rt></ruby>い方がはやい ・ <ruby>軽<rt>かる</rt></ruby>い方がはやい ・ <ruby>同<rt>おな</rt></ruby>じ ）に〇　　ふれはば（ 大きい方がはやい ・ 小さい方がはやい ・ <ruby>同<rt>おな</rt></ruby>じ ）に〇<br>
+      けっか：おもり（<span class="fillLine" style="width:12mm"></span>）　ふれはば（<span class="fillLine" style="width:12mm"></span>）　←どちらも 同じなら「かわらない」と書こう
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．ねらいうちチャレンジ ／ はかせチャレンジ</span>
+    <div class="secBody">
+      <div class="twoCol">
+        <div class="diagram">
+          <svg width="30mm" height="26mm" viewBox="0 0 120 100">
+            <rect x="20" y="8" width="60" height="8" fill="#8a6a3a"/>
+            <line x1="50" y1="16" x2="50" y2="55" stroke="#c9a227" stroke-width="2"/>
+            <circle cx="50" cy="60" r="9" fill="#fff" stroke="#7a4d00" stroke-width="1.6"/>
+            <line x1="50" y1="16" x2="90" y2="86" stroke="#999" stroke-width="1.4" stroke-dasharray="3,2"/>
+            <text x="94" y="90" font-size="10">🎯</text>
+          </svg>
+        </div>
+        <div>
+          もくひょう 1.0びょう → 見つけた 長さ（<span class="fillLine" style="width:10mm"></span>）ばん<br>
+          もくひょう 2.0びょう → 見つけた 長さ（<span class="fillLine" style="width:10mm"></span>）ばん<br>
+          はかせ：ふりこ<ruby>時計<rt>とけい</rt></ruby>や メトロノームが ふりこを つかう <ruby>理由<rt>りゆう</rt></ruby>は？<br>
+          （ Ａ音がきれい ・ Ｂ時間がいつも同じ ・ Ｃ見た目 ）に〇
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 1<ruby>往復<rt>おうふく</rt></ruby>する 時間を きめるのは（<span class="fillLine" style="width:16mm"></span>）。<br>
+      ② おもりの <ruby>重<rt>おも</rt></ruby>さを 変えても、時間は（<span class="fillLine" style="width:14mm"></span>）。<br>
+      ③ ふれ<ruby>幅<rt>はば</rt></ruby>を 変えても、時間は（<span class="fillLine" style="width:14mm"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．おうちミッション：じぶんの ふりこを 作ろう</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">⏳</span>
+        <div>
+          <ruby>糸<rt>いと</rt></ruby>と <ruby>小<rt>ちい</rt></ruby>さい おもり（クリップ・けしゴムなど）で ふりこを 作り、<ruby>長<rt>なが</rt></ruby>さを 変えて 1<ruby>往復<rt>おうふく</rt></ruby>する 時間を たしかめよう。10<ruby>回<rt>かい</rt></ruby> <ruby>往復<rt>おうふく</rt></ruby>させて 10で わると、より <ruby>正確<rt>せいかく</rt></ruby>に はかれるよ。<br>
+          ☐ やってみた！　いちばん <ruby>長<rt>なが</rt></ruby>い ときの 時間は（<span style="border-bottom:.4mm solid #222;display:inline-block;width:10mm">　</span>）びょうくらい<br>
+          <span style="font-size:8.5pt">※ふりまわして 人に ぶつけない。<ruby>高<rt>たか</rt></ruby>い所から 物を ぶら下げない。おもりは <ruby>小<rt>ちい</rt></ruby>さく <ruby>軽<rt>かる</rt></ruby>い物を つかう。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みならい とけい<ruby>職人<rt>しょくにん</rt></ruby>、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ふりこの間 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5理科「振り子の運動」・学力幅あり・協力型／ 使うもの：「furiko.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、「ふって ためす」でふりこが揺れて秒数が表示されるか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_haba</b> などで途中再開（m_nagasa／m_omori／m_haba／m_nerau／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（実験で判明します）</td></tr>
+      <tr><td class="min">4〜12分</td><td>📏 長さくらべ</td><td>予想に〇→代表が②と⑦を交代でふる→短い方が速いと発見→シート２に記入</td></tr>
+      <tr><td class="min">12〜26分</td><td>⚖おもりくらべ→📐ふれはばくらべ</td><td>予想に〇→軽重・大小をふって比較→<b>どちらも「かわらない」が今日の山場</b>→シート３</td></tr>
+      <tr><td class="min">26〜35分</td><td>🎯 ねらいうちチャレンジ</td><td>1.0秒→2.0秒の順に、長さボタンで調整して命中を目指す（②→⑦）→シート４</td></tr>
+      <tr><td class="min">35〜40分</td><td>はかせチャレンジ</td><td>ふりこ時計・メトロノームの謎に挑戦→シート４</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート５。じぶんのふりこ作り（シート６）を安全の約束とセットで予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「ふれはばくらべ」を右下「つぎ▶」でスキップOK（まとめは削らない）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>③ ひもの長さ</b>／長さくらべ＝②は<b>約1.0秒</b>・⑦は<b>約2.0秒</b>、みじかい方が<b>はやい</b>／
+      おもりくらべ・ふれはばくらべ＝どちらも<b>かわらない</b>／ねらいうち＝1.0秒→<b>②</b>・2.0秒→<b>⑦</b>／
+      はかせ＝<b>Ｂ 時間がいつも同じだから</b>／まとめ＝①<b>長さ</b> ②<b>かわらない</b> ③<b>かわらない</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>振り子の周期は T=2π√(L/g) で決まり、<b>ひもの長さ L だけ</b>に依存する（おもりの質量・ふれ幅は式に登場しない）。25cm→約1秒、100cm→約2秒はこの式どおりの実測値</li>
+      <li>ふれ幅を変えても周期が一定なこの性質を<b>等時性</b>という。ガリレオ・ガリレイが教会のシャンデリアの揺れを自分の脈拍で数えて発見した逸話は、子どもへの導入話として使いやすい</li>
+      <li>実際の振り子時計・メトロノームは、この等時性を利用して一定リズムで歯車を動かし、正確に時を刻んでいる</li>
+      <li>発展（中学内容）：ふれ幅が非常に大きい場合はごくわずかに周期が伸びるが、教室で扱う角度（15〜45°程度）ではほぼ無視できる差</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「おもりくらべ」「ふれはばくらべ」で<b>予想が割れた班は特にほめる</b>——多くの子が「重い方が速い」と考えるのが自然な誤概念。それが実験で裏切られる驚きが今日の核</li>
+      <li>ねらいうちチャレンジは代表交代で1人1回。惜しかった時は「もう少し長く/短く」の声かけを子ども自身に言わせるとよい</li>
+      <li>おうちミッションは<b>安全最優先</b>：ふりまわして人にぶつけない・高い所から物をぶら下げない・小さく軽いおもりを使う</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「④と⑦、どっちが速い？」「おもさを重くしたら時間は？」「1.5秒に合わせるには何番？」</li>
+      <li>実際に糸とおもりで振り子を作り、ストップウォッチで10往復を計測→10で割ると、画面の値とほぼ一致することを確認できる</li>
+      <li>次回候補「てこ」（まほう薬屋の天秤の続編）につなげると、力・運動分野の学びが連続する</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

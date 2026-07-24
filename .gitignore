@@ -6,3 +6,8 @@
 
 # Vercel
 .vercel
+
+.vercel
+
+# Claude Code のローカル個人設定（モデル既定など・公開リポジトリに含めない）
+.claude/settings.local.json

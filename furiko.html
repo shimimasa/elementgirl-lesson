@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ふりこの間 — ふりこ たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #0a0e24 0%, #131a3d 60%, #1a2150 100%);
+    color: #f2efff;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- 背景の星 ---------- */
+  #starsLayer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .bgstar {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: .85; } }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #ffe9a8; text-shadow: 0 0 14px rgba(255, 214, 107, .55);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #bdc4f5; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #1c2450; border: 2px solid #3a437a;
+    font-size: clamp(16px, 1.8vw, 26px); color: #444d86;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2a93b);
+    border-color: #ffd66b; color: #7a4d00;
+    box-shadow: 0 0 16px rgba(255, 214, 107, .8);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #1a2150 0%, #10152f 70%, #0a0e24 100%);
+    border: 2px solid #3a437a;
+    box-shadow: inset 0 0 60px rgba(120, 140, 255, .12), 0 4px 24px rgba(0,0,0,.4);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #aab3ff; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #timeChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #ffd66b; color: #5a3c00; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 0 14px rgba(255, 214, 107, .5);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(10, 14, 36, .6) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #ffd66b; cursor: pointer;
+    background: linear-gradient(180deg, #ffd66b, #f2a93b); color: #3a2a00;
+    box-shadow: 0 3px 0 #b97e17; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.alt { background: linear-gradient(180deg, #6a5aa8, #4a3d8a); border-color: #9a8ad0; box-shadow: 0 3px 0 #2e2560; color: #fff; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #zoomWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #c9a44a; overflow: hidden;
+    box-shadow: 0 0 24px rgba(255, 220, 140, .28), inset 0 0 30px rgba(0,0,0,.5);
+    flex-shrink: 0;
+  }
+  #zoom { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #zoomCaption {
+    text-align: center; color: #bdc4f5;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #ffe9a8; text-shadow: 0 0 12px rgba(255, 214, 107, .4);
+    min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #1b2245d9; border: 1px solid #3a437a; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #bdc4f5; }
+  .cat { width: 100%; animation: floaty 4s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .cat .tail { transform-origin: 60px 96px; animation: sway 2.4s ease-in-out infinite; }
+  @keyframes sway { 0%,100% { transform: rotate(-16deg); } 50% { transform: rotate(16deg); } }
+  .cat .eyes { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.12); } }
+
+  #bubble {
+    flex: 1; background: #fdfbf4; color: #33304a;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fdfbf4;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #7a4d00; background: #ffefc2; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fff8e3, #ffefc2); color: #5a4300;
+    border: 2px dashed #d9a520; border-radius: 14px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #a8760a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ffd66b, #f2a93b); color: #3a2a00;
+    box-shadow: 0 3px 0 #b97e17, 0 6px 14px rgba(0,0,0,.35);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #b97e17; }
+  .btn.sub {
+    background: #2a3468; color: #cfd6ff; box-shadow: 0 3px 0 #171d3f;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fdfbf4; color: #33304a; box-shadow: 0 3px 0 #b5b0d0; font-weight: 400; }
+  .btn.choice.picked { background: #ffefc2; outline: 3px solid #f2a93b; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(7, 9, 24, .9);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #1b2249, #141a3d);
+    border: 2px solid #3a437a; border-radius: 26px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 0 60px rgba(120, 140, 255, .18);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(30px, 5vw, 58px);
+    color: #ffe9a8; text-shadow: 0 0 24px rgba(255, 214, 107, .6);
+    letter-spacing: .06em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #ffe9a8; }
+  .panel .sub { color: #bdc4f5; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fdfbf4; color: #33304a; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8f96c8; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .35em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fdfbf4; color: #33304a; border-radius: 16px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid transparent; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #f2a93b; background: #fff4d6; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #f2a93b; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #ffd66b;
+    color: #ffd66b; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .35; transition: opacity .2s; font-size: 12px; color: #8f96c8;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #1c2450; color: #cfd6ff;
+    border: 1px solid #3a437a; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #2a3468; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（2026-07-23／ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<div id="starsLayer"></div>
+
+<header>
+  <div id="logo">⏰ <ruby>振<rt>ふ</rt></ruby>り<ruby>子<rt>こ</rt></ruby>の<ruby>間<rt>ま</rt></ruby><small>— ふりこの ひみつ たいけん —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_nagasa" title="長さ">★</div>
+    <div class="badge" id="bd_m_omori" title="おもり">★</div>
+    <div class="badge" id="bd_m_haba" title="ふれはば">★</div>
+    <div class="badge" id="bd_m_nerau" title="ねらいうち">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">🕰 とけいじかけの <ruby>部屋<rt>へや</rt></ruby> 〜大きな ふりこ〜</div>
+    <div id="timeChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="zoomWrap">
+      <canvas id="zoom"></canvas>
+    </div>
+    <div id="zoomCaption">🔎 ふりこの <ruby>記録計<rt>きろくけい</rt></ruby> 〜ゆれの リズムを 見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="cat" viewBox="0 0 120 132" aria-hidden="true">
+            <g class="tail">
+              <line x1="60" y1="94" x2="60" y2="118" stroke="#a8760a" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="60" cy="121" r="7" fill="#ffd66b" stroke="#a8760a" stroke-width="2"/>
+            </g>
+            <circle cx="60" cy="58" r="40" fill="#fdfbf4" stroke="#c9a227" stroke-width="5"/>
+            <g fill="#c9a227">
+              <circle cx="27" cy="28" r="10"/>
+              <circle cx="93" cy="28" r="10"/>
+            </g>
+            <g fill="#ffd66b">
+              <circle cx="27" cy="28" r="5"/>
+              <circle cx="93" cy="28" r="5"/>
+            </g>
+            <g stroke="#c9a227" stroke-width="2.4">
+              <line x1="60" y1="19" x2="60" y2="25"/>
+              <line x1="60" y1="91" x2="60" y2="97"/>
+              <line x1="21" y1="58" x2="27" y2="58"/>
+              <line x1="93" y1="58" x2="99" y2="58"/>
+            </g>
+            <line x1="60" y1="58" x2="60" y2="37" stroke="#3a2a55" stroke-width="3.6" stroke-linecap="round"/>
+            <line x1="60" y1="58" x2="79" y2="58" stroke="#3a2a55" stroke-width="3.6" stroke-linecap="round"/>
+            <circle cx="60" cy="58" r="3.2" fill="#3a2a55"/>
+            <g class="eyes">
+              <circle cx="47" cy="69" r="4.2" fill="#232433"/>
+              <circle cx="73" cy="69" r="4.2" fill="#232433"/>
+            </g>
+            <ellipse cx="40" cy="77" rx="5" ry="3.2" fill="#ffb0c0" opacity=".55"/>
+            <ellipse cx="80" cy="77" rx="5" ry="3.2" fill="#ffb0c0" opacity=".55"/>
+            <path d="M52 81 Q60 86 68 81" stroke="#8a760a" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">とけいの<ruby>精<rt>せい</rt></ruby> コトン</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">⏳ コトンの おねがいカード</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ふりこの間 — ふりこ体験（小5理科・協力型・1ファイル）
+   1往復する時間（周期）はひもの長さだけで決まる。
+   重さ・ふれはばは無関係（等時性）。 T = 2π√(L/g), g=9.8
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+const W = {
+  furiko: ruby('振', 'ふ') + 'り' + ruby('子', 'こ'),
+  ouhuku: '1' + ruby('往復', 'おうふく'),
+  nagasa: ruby('長', 'なが') + 'さ',
+  omosa: ruby('重', 'おも') + 'さ',
+  furehaba: 'ふれ' + ruby('幅', 'はば'),
+  toujisei: ruby('等時性', 'とうじせい'),
+};
+
+// ---------- 物理 ----------
+const G = 9.8;
+const periodOf = Lm => TAU * Math.sqrt(Lm / G);
+
+// ---------- 長さ ①〜⑧（紙対応・cm） ----------
+const TICK_CM = [10, 25, 40, 55, 70, 85, 100, 115];
+const TICK_LABEL = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  tickIdx: 3,
+  weight: 'light',
+  angleDeg: 25,
+  theta: 25 * Math.PI / 180,
+  swing: null,          // {L, theta0, t0, cycles, measured, onCycle}
+  trace: [],
+  targetIdx: -1,
+  targetRound: 0,
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sSwing = () => { tone(440, 0, 0.15, 'triangle', 0.06); tone(330, 0.1, 0.2, 'triangle', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), zoomCv = $('zoom'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = zoomCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+(function makeBgStars() {
+  const layer = $('starsLayer');
+  for (let i = 0; i < 26; i++) {
+    const s = document.createElement('span');
+    s.className = 'bgstar';
+    const size = 1 + Math.random() * 2.2;
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;animation-delay:${Math.random() * 3}s;`;
+    layer.appendChild(s);
+  }
+})();
+
+// ---------- 座標変換 ----------
+const PAD_T = 56, PAD_B = 16, PAD_X = 14;
+const MAPW = 1000, MAPH = 680;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+const PIVOT = { x: 500, y: 148 };
+const PX_PER_CM = 3.3;
+const RULER_X = 800;
+
+// ---------- 歯車（かざり） ----------
+function drawGear(cx, cy, r, teeth, rotDeg) {
+  gctx.save();
+  gctx.translate(cx, cy); gctx.rotate(rotDeg * Math.PI / 180);
+  gctx.fillStyle = 'rgba(120,140,255,.10)';
+  gctx.beginPath();
+  for (let i = 0; i < teeth * 2; i++) {
+    const a = i / (teeth * 2) * TAU;
+    const rr = i % 2 === 0 ? r : r * 0.82;
+    const px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+    i === 0 ? gctx.moveTo(px, py) : gctx.lineTo(px, py);
+  }
+  gctx.closePath(); gctx.fill();
+  gctx.beginPath(); gctx.arc(0, 0, r * 0.3, 0, TAU); gctx.fillStyle = 'rgba(120,140,255,.14)'; gctx.fill();
+  gctx.restore();
+}
+
+// ---------- ものさし①〜⑧ ----------
+function drawRuler(X, Y, sc) {
+  gctx.strokeStyle = 'rgba(189,196,255,.4)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(RULER_X), Y(PIVOT.y));
+  gctx.lineTo(X(RULER_X), Y(PIVOT.y + TICK_CM[7] * PX_PER_CM + 16));
+  gctx.stroke();
+  TICK_CM.forEach((cm, i) => {
+    const ty = PIVOT.y + cm * PX_PER_CM;
+    const active = i === S.tickIdx;
+    gctx.strokeStyle = active ? '#ffd66b' : 'rgba(189,196,255,.5)';
+    gctx.lineWidth = (active ? 3 : 2) * sc;
+    gctx.beginPath(); gctx.moveTo(X(RULER_X - 10), Y(ty)); gctx.lineTo(X(RULER_X + 10), Y(ty)); gctx.stroke();
+    gctx.font = `700 ${Math.max(11, (active ? 19 : 14) * sc)}px sans-serif`;
+    gctx.fillStyle = active ? '#ffe9a8' : '#8f96c8';
+    gctx.textAlign = 'left'; gctx.textBaseline = 'middle';
+    gctx.fillText(TICK_LABEL[i], X(RULER_X + 16), Y(ty));
+  });
+  const Lpx = TICK_CM[S.tickIdx] * PX_PER_CM;
+  gctx.setLineDash([4, 4]); gctx.strokeStyle = 'rgba(255,214,107,.55)'; gctx.lineWidth = 1.6 * sc;
+  gctx.beginPath(); gctx.moveTo(X(PIVOT.x), Y(PIVOT.y + Lpx)); gctx.lineTo(X(RULER_X), Y(PIVOT.y + Lpx)); gctx.stroke();
+  gctx.setLineDash([]);
+  if (S.targetIdx >= 0) {
+    const ty2 = PIVOT.y + TICK_CM[S.targetIdx] * PX_PER_CM;
+    gctx.font = `${22 * sc}px sans-serif`;
+    gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('🎯', X(RULER_X - 30), Y(ty2));
+  }
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+
+  gctx.fillStyle = '#0d1230';
+  gctx.fillRect(X(0), Y(0), MAPW * sc, MAPH * sc);
+  drawGear(X(150), Y(470), 150 * sc, 10, t * 6);
+  drawGear(X(900), Y(560), 95 * sc, 8, -t * 8);
+  drawGear(X(930), Y(190), 55 * sc, 6, t * 10);
+
+  // てんじょうの はり
+  gctx.fillStyle = '#4a3d2a';
+  gctx.fillRect(X(360), Y(105), 280 * sc, 20 * sc);
+  gctx.fillStyle = '#6a5638';
+  gctx.fillRect(X(360), Y(105), 280 * sc, 6 * sc);
+  gctx.strokeStyle = '#8a6a3a'; gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(PIVOT.x), Y(125)); gctx.lineTo(X(PIVOT.x), Y(PIVOT.y)); gctx.stroke();
+
+  drawRuler(X, Y, sc);
+
+  // ふれはばの めやす（点線）
+  const theta0 = S.swing ? S.swing.theta0 : S.angleDeg * Math.PI / 180;
+  const Lpx = TICK_CM[S.tickIdx] * PX_PER_CM;
+  gctx.setLineDash([5, 5]); gctx.strokeStyle = 'rgba(255,214,107,.35)'; gctx.lineWidth = 2 * sc;
+  [theta0, -theta0].forEach(a => {
+    const ex = PIVOT.x + Math.sin(a) * Lpx, ey = PIVOT.y + Math.cos(a) * Lpx;
+    gctx.beginPath(); gctx.moveTo(X(PIVOT.x), Y(PIVOT.y)); gctx.lineTo(X(ex), Y(ey)); gctx.stroke();
+  });
+  gctx.setLineDash([]);
+
+  // ふりこ本体
+  const bx = PIVOT.x + Math.sin(S.theta) * Lpx, by = PIVOT.y + Math.cos(S.theta) * Lpx;
+  gctx.strokeStyle = '#c9a227'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(PIVOT.x), Y(PIVOT.y)); gctx.lineTo(X(bx), Y(by)); gctx.stroke();
+
+  const bobR = (S.weight === 'heavy' ? 24 : 15) * sc;
+  const bobCol = S.weight === 'heavy' ? '#e8c53a' : '#cfd6ff';
+  const grd = gctx.createRadialGradient(X(bx) - bobR * 0.3, Y(by) - bobR * 0.3, bobR * 0.1, X(bx), Y(by), bobR);
+  grd.addColorStop(0, '#fff'); grd.addColorStop(1, bobCol);
+  gctx.fillStyle = grd;
+  gctx.beginPath(); gctx.arc(X(bx), Y(by), bobR, 0, TAU); gctx.fill();
+  gctx.strokeStyle = '#7a4d00'; gctx.lineWidth = 2 * sc; gctx.stroke();
+
+  gctx.fillStyle = '#8a6a3a';
+  gctx.beginPath(); gctx.arc(X(PIVOT.x), Y(PIVOT.y), 8 * sc, 0, TAU); gctx.fill();
+
+  // ゆか
+  gctx.fillStyle = 'rgba(10,14,36,.85)';
+  gctx.fillRect(X(0), Y(628), 1000 * sc, 52 * sc);
+  gctx.strokeStyle = 'rgba(120,140,255,.25)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(X(0), Y(628)); gctx.lineTo(X(1000), Y(628)); gctx.stroke();
+}
+
+// ---------- 記録計（丸窓） ----------
+function drawScope(t) {
+  const { w, h, dpr } = fitCanvas(zoomCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  const grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#1c2450'); grd.addColorStop(1, '#0d1030');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  S.trace.push({ t, th: S.theta });
+  const WINDOW = 6;
+  while (S.trace.length && t - S.trace[0].t > WINDOW) S.trace.shift();
+
+  sctx.save();
+  sctx.beginPath(); sctx.arc(R, R, R, 0, TAU); sctx.clip();
+  const cx0 = R * 0.15, cx1 = R * 1.85, cy = R, ampPx = R * 0.6;
+  sctx.strokeStyle = 'rgba(189,196,255,.28)'; sctx.lineWidth = 1;
+  sctx.beginPath(); sctx.moveTo(cx0, cy); sctx.lineTo(cx1, cy); sctx.stroke();
+  for (let s = 0; s <= WINDOW; s++) {
+    const gx = cx1 - (s / WINDOW) * (cx1 - cx0);
+    sctx.strokeStyle = 'rgba(189,196,255,.14)';
+    sctx.beginPath(); sctx.moveTo(gx, cy - ampPx * 1.1); sctx.lineTo(gx, cy + ampPx * 1.1); sctx.stroke();
+  }
+  sctx.strokeStyle = '#ffd66b'; sctx.lineWidth = 2.4; sctx.beginPath();
+  S.trace.forEach((p, i) => {
+    const gx = cx1 - ((t - p.t) / WINDOW) * (cx1 - cx0);
+    const gy = cy - (p.th / (Math.PI / 2)) * ampPx;
+    i === 0 ? sctx.moveTo(gx, gy) : sctx.lineTo(gx, gy);
+  });
+  sctx.stroke();
+  sctx.restore();
+
+  let label = 'ふりこを ふってね';
+  if (S.swing) {
+    if (S.swing.measured != null) label = `1おうふく：${S.swing.measured.toFixed(1)}びょう`;
+    else label = `けいそく中… ${(t - S.swing.t0).toFixed(1)}びょう`;
+  }
+  sctx.font = `700 ${Math.max(11, R * 0.105)}px sans-serif`;
+  sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+  const ly = h - R * 0.22;
+  const tw = sctx.measureText(label).width;
+  sctx.fillStyle = 'rgba(13,16,48,.88)';
+  sctx.beginPath(); sctx.roundRect(R - tw / 2 - 10, ly - R * 0.1, tw + 20, R * 0.2, R * 0.1); sctx.fill();
+  sctx.fillStyle = '#ffe9a8';
+  sctx.fillText(label, R, ly);
+}
+
+// ---------- キラキラ（#fxは非表示のため見た目には出ないが処理は残す） ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ffd66b', '#f2a93b', '#cfd6ff', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('zoomWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- ふりこの物理 ----------
+let simNow = performance.now() / 1000;
+function startSwing(tickIdx, angleDeg, onCycle) {
+  S.tickIdx = tickIdx;
+  S.angleDeg = angleDeg;
+  const L = TICK_CM[tickIdx] / 100;
+  S.swing = { L, theta0: angleDeg * Math.PI / 180, t0: simNow, cycles: 0, measured: null, fired: false, onCycle };
+  S.theta = S.swing.theta0;
+  S.trace = [];
+  sSwing();
+}
+function stopSwing() {
+  S.swing = null;
+  S.theta = S.angleDeg * Math.PI / 180;
+}
+function stepSwing(t) {
+  if (!S.swing) return;
+  const sw = S.swing;
+  const T = periodOf(sw.L);
+  const elapsed = t - sw.t0;
+  S.theta = sw.theta0 * Math.cos(TAU * elapsed / T);
+  const cyclesNow = Math.floor(elapsed / T);
+  if (cyclesNow > sw.cycles) {
+    sw.cycles = cyclesNow;
+    sw.measured = T;
+    if (!sw.fired) { sw.fired = true; if (sw.onCycle) sw.onCycle(T); }
+  }
+}
+
+let _lastChip = '';
+function updateChip() {
+  const label = `${TICK_LABEL[S.tickIdx]}　${TICK_CM[S.tickIdx]}cm`;
+  if (label !== _lastChip) { _lastChip = label; $('timeChip').textContent = label; }
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now; simNow = t;
+  stepSwing(t);
+  drawStage(t);
+  drawScope(t);
+  drawFx(dt);
+  updateChip();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow'), controlsEl = $('controls');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.onclick = () => { ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_nagasa', 'm_omori', 'm_haba', 'm_nerau', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.pick = -1; S.swing = null; S.targetIdx = -1;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { tickIdx: 3, weight: 'light', angleDeg: 25, swing: null, trace: [] });
+      S.theta = S.angleDeg * Math.PI / 180;
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">⏰⚙️🕰️✨</div>
+        <h1>ふりこの${ruby('間', 'ま')}</h1>
+        <div class="sub">〜 ${ruby('塔', 'とう')}の${ruby('奥', 'おく')}に ねむる、${ruby('大', 'おお')}きな${ruby('歯車', 'はぐるま')}じかけの ${ruby('部屋', 'へや')} 〜</div>
+        <p class="talk">コチコチ……ようこそ！ ぼくは とけいの${ruby('精', 'せい')}、<b>コトン</b>だよ。<br>
+        この${ruby('部屋', 'へや')}には、とっても ${ruby('大', 'おお')}きな <b>${W.furiko}</b>が ぶら下がっているんだ。<br>
+        ふしぎな ことに、この ${W.furiko}は いつも <b>おなじ リズム</b>で ゆれつづける……なぜだと${ruby('思', 'おも')}う？ いっしょに たしかめに いこう！</p>
+        <button class="btn" id="startBtn">${W.furiko}の 間へ 入る！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>⏰ よそうタイム</h2>
+        <p class="talk">${W.furiko}が <b>${W.ouhuku}する 時間</b>（ゆれる はやさ）を きめるのは、つぎの うち どれだと${ruby('思', 'おも')}う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">⚖</span><b>①</b> おもりの ${W.omosa}</div>
+          <div class="vcard" data-v="1"><span class="vicon">📐</span><b>②</b> ${W.furehaba}（大きく・小さく ふる）</div>
+          <div class="vcard" data-v="2"><span class="vicon">📏</span><b>③</b> ひもの ${W.nagasa}</div>
+        </div>
+        <div class="sub">${ruby('思', 'おも')}う ものに タッチ（いくつでも）。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめに いこう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); c.classList.toggle('picked');
+          const v = +c.dataset.v;
+          S.votePicked.has(v) ? S.votePicked.delete(v) : S.votePicked.add(v);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：長さくらべ ---
+  m_nagasa: {
+    enter() {
+      Object.assign(S, { tickIdx: 1, weight: 'light', angleDeg: 25, swing: null });
+      S.theta = S.angleDeg * Math.PI / 180;
+      this.done = {};
+      S.phase = 'predict';
+      setWish('📏', `②（25cm・みじかい）と ⑦（100cm・ながい）の ${W.furiko}を くらべるよ。${W.ouhuku}するのに かかる 時間は、どちらが はやいかな？`);
+      say(`シートに よそうを 〇したら、下の ボタンで <b>りょうほう ためして みよう</b>！`);
+      setButtons([
+        { label: 'Ａ ②(みじかい方)が はやい', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ ⑦(ながい方)が はやい', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ 同じ', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+      setControls([]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`それでは じっけんだ！ ボタンで <b>②</b>と<b>⑦</b>、りょうほう ふって くらべてみよう。`);
+      setButtons([]);
+      setControls([
+        { label: '📏 ②(25cm)を ふる', cb: () => this.test(1) },
+        { label: '📏 ⑦(100cm)を ふる', cb: () => this.test(6) },
+      ]);
+    },
+    test(idx) {
+      startSwing(idx, 25, measured => {
+        this.done[idx] = measured;
+        $('stateName').innerHTML = `${TICK_LABEL[idx]}：${measured.toFixed(1)}びょう`;
+        sYes();
+        if (this.done[1] != null && this.done[6] != null) this.reveal();
+      });
+    },
+    reveal() {
+      S.phase = 'done';
+      setControls([]);
+      scopeBurst(); award('m_nagasa');
+      say(`✨ ②は <b>${this.done[1].toFixed(1)}びょう</b>、⑦は <b>${this.done[6].toFixed(1)}びょう</b>！ こたえは <b>Ａ みじかい方が はやい</b>！ ✨<br><br>💡 <b>たいせつポイント</b><br>ひもが ${ruby('短', 'みじか')}いほど ${W.ouhuku}が はやく（時間が ${ruby('短', 'みじか')}く）、${ruby('長', 'なが')}いほど ゆっくり（時間が ${ruby('長', 'なが')}く）なる。ふりこの はやさは <b>${W.nagasa}</b>で 決まりそうだね。`);
+      setButtons([{ label: 'つぎへ（おもりくらべ）', cb: nextStep }]);
+    },
+  },
+
+  // --- M2：おもりくらべ ---
+  m_omori: {
+    enter() {
+      Object.assign(S, { tickIdx: 3, weight: 'light', angleDeg: 25, swing: null });
+      S.theta = S.angleDeg * Math.PI / 180;
+      this.done = {};
+      S.phase = 'predict';
+      setWish('⚖', `こんどは ${W.nagasa}は <b>④の まま</b>。おもりの ${W.omosa}だけを 変えてみよう。重い方が はやいと${ruby('思', 'おも')}う？`);
+      say(`よそうを 〇したら、かるい おもりと おもい おもりを りょうほう ふって くらべよう。`);
+      setButtons([
+        { label: 'Ａ 重い方が はやい', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 軽い方が はやい', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ 同じ', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+      setControls([]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`じっけん しよう！ おもさを かえて、りょうほう ふってみて。`);
+      setButtons([]);
+      setControls([
+        { label: '🪶 かるい おもりで ふる', cb: () => this.test('light') },
+        { label: '⚙ おもい おもりで ふる', cb: () => this.test('heavy') },
+      ]);
+    },
+    test(kind) {
+      S.weight = kind;
+      startSwing(3, 25, measured => {
+        this.done[kind] = measured;
+        $('stateName').innerHTML = `${kind === 'light' ? 'かるい' : 'おもい'}：${measured.toFixed(1)}びょう`;
+        sYes();
+        if (this.done.light != null && this.done.heavy != null) this.reveal();
+      });
+    },
+    reveal() {
+      S.phase = 'done';
+      setControls([]);
+      scopeBurst(); award('m_omori');
+      say(`⚖ かるい おもりも おもい おもりも、どちらも <b>${this.done.light.toFixed(1)}びょう</b>！ おなじだった！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.ouhuku}する 時間は、${ruby('重', 'おも')}さが 変わっても <b>${ruby('変', 'か')}わらない</b>。おもさは かんけい なかったんだね！`);
+      setButtons([{ label: 'つぎへ（ふれはばくらべ）', cb: nextStep }]);
+    },
+  },
+
+  // --- M3：ふれはばくらべ ---
+  m_haba: {
+    enter() {
+      Object.assign(S, { tickIdx: 3, weight: 'light', angleDeg: 15, swing: null });
+      S.theta = S.angleDeg * Math.PI / 180;
+      this.done = {};
+      S.phase = 'predict';
+      setWish('📐', `${W.nagasa}は ④の まま。こんどは <b>${W.furehaba}</b>（ふる ${ruby('角度', 'かくど')}）を 変えてみよう。大きく ふると はやいと${ruby('思', 'おも')}う？`);
+      say(`よそうを 〇したら、小さく ふる場合と 大きく ふる場合を くらべよう。`);
+      setButtons([
+        { label: 'Ａ 大きく ふると はやい', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 小さく ふると はやい', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ 同じ', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+      setControls([]);
+    },
+    pick(n, el) {
+      btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+      el.classList.add('picked');
+      say(`じっけん しよう！ ふれはばを かえて、りょうほう ふってみて。`);
+      setButtons([]);
+      setControls([
+        { label: '📐 小さく(15°) ふる', cb: () => this.test('small', 15) },
+        { label: '📐 大きく(45°) ふる', cb: () => this.test('big', 45) },
+      ]);
+    },
+    test(kind, deg) {
+      S.weight = 'light';
+      startSwing(3, deg, measured => {
+        this.done[kind] = measured;
+        $('stateName').innerHTML = `${kind === 'small' ? '小さく' : '大きく'}：${measured.toFixed(1)}びょう`;
+        sYes();
+        if (this.done.small != null && this.done.big != null) this.reveal();
+      });
+    },
+    reveal() {
+      S.phase = 'done';
+      setControls([]);
+      scopeBurst(); award('m_haba');
+      say(`📐 小さく ふっても 大きく ふっても、どちらも <b>${this.done.small.toFixed(1)}びょう</b>！ また 同じだ！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.furehaba}を 変えても、${W.ouhuku}する 時間は <b>${ruby('変', 'か')}わらない</b>。${ruby('重', 'おも')}さも ${W.furehaba}も かんけい ない——のこるのは <b>${W.nagasa}</b>だけ！`);
+      setButtons([{ label: 'つぎへ（ねらいうちチャレンジ）', cb: nextStep }]);
+    },
+  },
+
+  // --- M4：ねらいうちチャレンジ ---
+  m_nerau: {
+    targets: [
+      { idx: 1, sec: '1.0' },
+      { idx: 6, sec: '2.0' },
+    ],
+    enter() {
+      Object.assign(S, { tickIdx: 3, weight: 'light', angleDeg: 25, swing: null, targetRound: 0 });
+      S.theta = S.angleDeg * Math.PI / 180;
+      this.startRound(0);
+    },
+    startRound(r) {
+      S.targetRound = r;
+      const tg = this.targets[r];
+      S.targetIdx = tg.idx;
+      S.phase = 'aim';
+      setWish('🎯', `${ruby('目標', 'もくひょう')}：<b>${tg.sec}びょう</b>に 合わせて ふってみよう！ 長さボタンで ちょうせいしてね。（ヒント：ものさしの 🎯じるし）`);
+      say(`いまの 長さは <b>${TICK_LABEL[S.tickIdx]}</b>。ボタンで 長さを かえて、「ふる」で ためそう！`);
+      setButtons([]);
+      this.renderControls();
+    },
+    renderControls() {
+      setControls([
+        { label: '◀ みじかく', cb: () => { stopSwing(); S.tickIdx = clamp(S.tickIdx - 1, 0, 7); sTap(); this.renderControls(); } },
+        { label: 'ながく ▶', cb: () => { stopSwing(); S.tickIdx = clamp(S.tickIdx + 1, 0, 7); sTap(); this.renderControls(); } },
+        { label: '🎯 ふって ためす', cls: 'alt', cb: () => this.test() },
+      ]);
+    },
+    test() {
+      const idx = S.tickIdx;
+      startSwing(idx, 25, measured => {
+        $('stateName').innerHTML = `${TICK_LABEL[idx]}：${measured.toFixed(1)}びょう`;
+        if (idx === S.targetIdx) {
+          sYes(); scopeBurst();
+          say(`🎯 ピッタリ！ <b>${TICK_LABEL[idx]}</b>で <b>${measured.toFixed(1)}びょう</b>！ せいかい！`);
+          setControls([]);
+          const isLast = S.targetRound >= this.targets.length - 1;
+          setButtons([{ label: isLast ? 'つぎへ（はかせチャレンジ）' : 'つぎの もくひょうへ', cb: () => {
+            if (isLast) { award('m_nerau'); nextStep(); }
+            else this.startRound(S.targetRound + 1);
+          } }]);
+        } else {
+          sHmm();
+          const hint = idx < S.targetIdx ? 'もう少し ながく してみよう' : 'もう少し みじかく してみよう';
+          say(`${TICK_LABEL[idx]}は <b>${measured.toFixed(1)}びょう</b>。おしい！ ${hint}。`);
+          this.renderControls();
+        }
+      });
+    },
+  },
+
+  // --- はかせチャレンジ：等時性の利用 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { tickIdx: 3, weight: 'light', angleDeg: 25, swing: null, targetIdx: -1 });
+      S.theta = S.angleDeg * Math.PI / 180;
+      S.phase = 'ask';
+      hideWish();
+      setControls([]);
+      say(`さいごは <b>はかせチャレンジ</b>！<br>むかしの <b>${ruby('振', 'ふ')}り${ruby('子', 'こ')}${ruby('時計', 'とけい')}</b>や <b>メトロノーム</b>は、なぜ ${W.furiko}の しくみを つかっているんだろう？`);
+      setButtons([
+        { label: 'Ａ 音が きれいだから', cls: 'choice', cb: () => this.pick(0) },
+        { label: 'Ｂ 時間が いつも 同じだから', cls: 'choice', cb: () => this.pick(1) },
+        { label: 'Ｃ 見た目が かっこいいから', cls: 'choice', cb: () => this.pick(2) },
+      ]);
+    },
+    pick(n) {
+      S.phase = 'done';
+      sYes(); scopeBurst(); award('hakase');
+      const hit = n === 1 ? 'せいかい！' : 'じつは——';
+      say(`${hit} こたえは <b>Ｂ 時間が いつも 同じだから</b>！<br><br>💡 <b>たいせつポイント</b><br>${W.nagasa}を ${ruby('一定', 'いってい')}に すれば、${ruby('重', 'おも')}さや ${W.furehaba}が 変わっても、${W.furiko}は <b>いつも 同じ リズム</b>で ゆれる。この せいしつを <b>${W.toujisei}</b>と いうんだ。むかしの ${ruby('時計', 'とけい')}は、この ${W.furiko}の ゆれで ${ruby('歯車', 'はぐるま')}を うごかして、${ruby('正確', 'せいかく')}に 時を きざんでいたんだよ。`);
+      setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      setControls([]);
+      showOverlay(`
+        <h2>⭐ みならい とけい${ruby('職人', 'しょくにん')} にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.furiko}が ${W.ouhuku}する 時間を きめるのは（<span class="blankWord" data-a="ひもの長さ">？？？</span>）。<br>
+        ② おもりの ${W.omosa}を 変えても、時間は（<span class="blankWord" data-a="変わらない">？？？</span>）。<br>
+        ③ ${W.furehaba}を 変えても、時間は（<span class="blankWord" data-a="変わらない">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>③ ひもの ${W.nagasa}</b>でした！ ${ruby('重', 'おも')}さや ${W.furehaba}は、じつは かんけい なかったんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちで <b>糸</b>と <b>おもり</b>（クリップ・けしゴムなど）で 自分だけの ${W.furiko}を 作ってみよう。${ruby('長', 'なが')}さを 変えて、${W.ouhuku}する 時間が どう変わるか たしかめてね。10${ruby('回', 'かい')} ${ruby('往復', 'おうふく')}させて 10で わると、より ${ruby('正確', 'せいかく')}に はかれるよ。<br>
+        🚨 やくそく：ふりまわして 人に ぶつけない。高い所から 物を ぶら下げない。おもりは 小さくて 軽い物を つかう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#3a8a3a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { tickIdx: 3, weight: 'light', angleDeg: 25, swing: null, targetIdx: -1 });
+      S.theta = S.angleDeg * Math.PI / 180;
+      S.phase = 'free';
+      say(`<b>じゆうモード</b>だよ！ 長さ・おもさ・ふれはばを じゆうに かえて、ともだちと クイズを 出しあってみよう。<br>れい：「④と⑦、どっちが はやい？」「おもさを 重くしたら 時間は？」`);
+      setButtons([
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+      this.renderControls();
+    },
+    renderControls() {
+      setControls([
+        { label: '◀ みじかく', cb: () => { stopSwing(); S.tickIdx = clamp(S.tickIdx - 1, 0, 7); sTap(); this.renderControls(); } },
+        { label: 'ながく ▶', cb: () => { stopSwing(); S.tickIdx = clamp(S.tickIdx + 1, 0, 7); sTap(); this.renderControls(); } },
+        { label: S.weight === 'light' ? '🪶→⚙ おもさを かえる' : '⚙→🪶 おもさを かえる', cb: () => { stopSwing(); S.weight = S.weight === 'light' ? 'heavy' : 'light'; sTap(); this.renderControls(); } },
+        { label: S.angleDeg === 25 ? '📐 大きく ふる' : '📐 小さく ふる', cb: () => { stopSwing(); S.angleDeg = S.angleDeg === 25 ? 45 : 25; S.theta = S.angleDeg * Math.PI / 180; sTap(); this.renderControls(); } },
+        { label: '🎯 ふる', cls: 'alt', cb: () => startSwing(S.tickIdx, S.angleDeg, measured => { $('stateName').innerHTML = `${TICK_LABEL[S.tickIdx]}：${measured.toFixed(1)}びょう`; sYes(); }) },
+      ]);
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_omori などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
