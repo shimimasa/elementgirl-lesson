@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>めばえラボ — 植物の発芽 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f5fbef 0%, #eaf6e0 60%, #d9edc8 100%);
+    color: #33511f;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #3f8a2e; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a8a50; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e3f3d4; border: 2px solid #b8dba0;
+    font-size: clamp(16px, 1.8vw, 26px); color: #b8dba0;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #eaffb0, #7dc242);
+    border-color: #4a9e2f; color: #2c5c14;
+    box-shadow: 0 0 14px rgba(74, 158, 47, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #eaf7e0 0%, #f6fbe8 100%);
+    border: 3px solid #7fbf5a;
+    box-shadow: inset 0 0 40px rgba(60, 120, 30, .12), 0 4px 18px rgba(40, 80, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #3f6a28; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #3f8a2e; color: #f8ffe8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(30, 70, 10, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(40, 80, 20, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #a8dd7a; cursor: pointer;
+    background: linear-gradient(180deg, #7dc24a, #4a9e2f); color: #fff;
+    box-shadow: 0 3px 0 #2c5c14; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.time { background: linear-gradient(180deg, #6a5aa8, #4a3d8a); border-color: #9a8ad0; box-shadow: 0 3px 0 #2e2560; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #4a9e2f; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(40, 80, 20, .3), inset 0 0 24px rgba(40, 80, 20, .18);
+    flex-shrink: 0; background: #f2f8e2;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6a8a50;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #2c6a14; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fdfff5; border: 2px solid #cbe8a8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6a8a50; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #33511f;
+    border: 1.5px solid #dcefc0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #2c6a14; background: #e3f7c0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #f7ffe8, #e6f5cc); color: #33511f;
+    border: 2px solid #3f8a2e; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #3f8a2e; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #7dc24a, #4a9e2f); color: #fff;
+    box-shadow: 0 3px 0 #2c5c14, 0 5px 12px rgba(40, 90, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #2c5c14; }
+  .btn.sub {
+    background: #e3f3d4; color: #3d6b28; box-shadow: 0 3px 0 #b8dba0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #33511f; box-shadow: 0 3px 0 #cbe8a8; font-weight: 400; border: 1.5px solid #dcefc0; }
+  .btn.choice.picked { background: #eaf9cf; outline: 3px solid #7dc24a; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(20, 40, 10, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fbffef, #e9f5d4);
+    border: 3px solid #7fbf5a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(15, 30, 5, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #3f8a2e; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #3f8a2e; }
+  .panel .sub { color: #6a8a50; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #33511f; border: 1.5px solid #dcefc0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6a8a50; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #33511f; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #dcefc0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #4a9e2f; background: #eefadb; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #4a9e2f; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #4a9e2f;
+    color: #2c6a14; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6a8a50;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e3f3d4; color: #3d6b28;
+    border: 1px solid #b8dba0; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #d4ecc0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（2026-07-23／ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🌱 めばえラボ<small>— たねの ひみつ けんきゅうじょ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_water" title="水">★</div>
+    <div class="badge" id="bd_m_air" title="空気">★</div>
+    <div class="badge" id="bd_m_temp" title="温度">★</div>
+    <div class="badge" id="bd_m_light" title="日光・肥料">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">🌱 じっけんテーブル 〜ポットで たしかめよう〜</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 めばえスコープ 〜たねの中が 見える〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(60,100,20,.18)"/>
+            <!-- ふたばの かみ -->
+            <path d="M60 56 Q30 18 16 28 Q20 56 50 60 Z" fill="#7dc24a" stroke="#3f8a2e" stroke-width="1.6"/>
+            <path d="M60 56 Q34 24 18 28" stroke="#3f8a2e" stroke-width="1.2" fill="none"/>
+            <path d="M60 56 Q90 18 104 28 Q100 56 70 60 Z" fill="#7dc24a" stroke="#3f8a2e" stroke-width="1.6"/>
+            <path d="M60 56 Q86 24 102 28" stroke="#3f8a2e" stroke-width="1.2" fill="none"/>
+            <!-- からだ（たね） -->
+            <ellipse cx="60" cy="82" rx="32" ry="36" fill="#f0dfa0" stroke="#d4b86a" stroke-width="2"/>
+            <path d="M60 48 Q54 82 60 116" stroke="#d4b86a" stroke-width="1.6" fill="none"/>
+            <!-- ほっぺ -->
+            <ellipse cx="42" cy="88" rx="6" ry="4" fill="#f8b8b0" opacity=".7"/>
+            <ellipse cx="78" cy="88" rx="6" ry="4" fill="#f8b8b0" opacity=".7"/>
+            <!-- め -->
+            <g class="eyes">
+              <circle cx="48" cy="78" r="4" fill="#2c2015"/>
+              <circle cx="72" cy="78" r="4" fill="#2c2015"/>
+            </g>
+            <!-- くち -->
+            <path d="M52 92 Q60 98 68 92" stroke="#8a6a34" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- ちいさな 根っこ -->
+            <path d="M48 116 q-4 8 -10 10 M60 118 q0 9 0 12 M72 116 q4 8 10 10" stroke="#c9a86a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>芽生<rt>めば</rt></ruby>えの<ruby>妖精<rt>ようせい</rt></ruby> フタバ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌱 めばえミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   めばえラボ — 植物の発芽（小5理科・協力型・1ファイル）
+   ポット①〜⑧の対照実験で「発芽の3条件＝水・空気・適温」を発見。
+   ⑦⑧（日光・肥料）は両方とも発芽する＝最大の誤概念の裏切り。
+   はかせチャレンジでヨウ素でんぷん反応（子葉の養分）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeOutBack(x) {
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+}
+function lerpColor(a, b, t) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ar = (pa >> 16) & 255, ag = (pa >> 8) & 255, ab = pa & 255;
+  const br = (pb >> 16) & 255, bg = (pb >> 8) & 255, bb = pb & 255;
+  return `rgb(${Math.round(lerp(ar, br, t))},${Math.round(lerp(ag, bg, t))},${Math.round(lerp(ab, bb, t))})`;
+}
+
+const W = {
+  hatsuga: ruby('発芽', 'はつが'),
+  seichou: ruby('成長', 'せいちょう'),
+  kuuki: ruby('空気', 'くうき'),
+  ondo: ruby('温度', 'おんど'),
+  hiryou: ruby('肥料', 'ひりょう'),
+  nikkou: ruby('日光', 'にっこう'),
+  youbun: ruby('養分', 'ようぶん'),
+  shiyou: ruby('子葉', 'しよう'),
+  kankei: ruby('関係', 'かんけい'),
+  mizu: ruby('水', 'みず'),
+};
+
+// ---------- ポットの配置（じっけんテーブル） ----------
+const PX_A = 300, PX_B = 700;
+const SOIL_Y = 430, POT_BOT_Y = 560, NUM_Y = 208, CHIP_Y = 256;
+const TOP_W = 170, BOT_W = 130;
+const GROW_DUR = 3.4;
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ミッションごとのポット組（設計核どおり）
+const MISSIONS = {
+  m_water: {
+    A: { no: 1, x: PX_A, germinate: false, chip: ['💧 水：なし'] },
+    B: { no: 2, x: PX_B, germinate: true, chip: ['💧 水：あり'] },
+  },
+  m_air: {
+    A: { no: 3, x: PX_A, germinate: false, sealed: true, chip: ['🫙 空気：なし'] },
+    B: { no: 4, x: PX_B, germinate: true, chip: ['🌬️ 空気：あり'] },
+  },
+  m_temp: {
+    A: { no: 5, x: PX_A, germinate: false, cold: true, chip: ['❄️ 低い 温度'] },
+    B: { no: 6, x: PX_B, germinate: true, chip: ['🌡️ ちょうど よい温度'] },
+  },
+  m_light: {
+    A: { no: 7, x: PX_A, germinate: true, dark: true, chip: ['🌑くらい部屋', '肥料なし'] },
+    B: { no: 8, x: PX_B, germinate: true, bright: true, fert: true, chip: ['☀️明るい', '肥料あり'] },
+  },
+};
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  stageMode: 'pots',   // pots / cut
+  mission: null,
+  growT: 0, growDay: 0,
+  iodine: 0, dropY: 0,
+  selPot: -1,
+  scope: { type: 'dormant', label: 'たね' },
+  tapEnabled: false,
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sGrow = () => { tone(340, 0, 0.3, 'sine', 0.05); tone(420, 0.15, 0.3, 'sine', 0.05); };
+const sDrop = () => { tone(880, 0, 0.12, 'sine', 0.08); tone(660, 0.1, 0.2, 'sine', 0.06); };
+const sMagic = () => [392, 523, 659, 880, 1174].forEach((f, i) => tone(f, i * 0.12, 0.5, 'sine', 0.07));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 背景（温室のけんきゅうじょ） ----------
+function drawGreenhouseBG(t, X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(560));
+  g.addColorStop(0, '#eaf8ea'); g.addColorStop(1, '#f7fbe6');
+  gctx.fillStyle = g;
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 560 * sc);
+  // まどガラスの グリッド
+  gctx.strokeStyle = 'rgba(255,255,255,.65)'; gctx.lineWidth = 2 * sc;
+  for (let x = 0; x <= 1000; x += 125) { gctx.beginPath(); gctx.moveTo(X(x), Y(0)); gctx.lineTo(X(x), Y(560)); gctx.stroke(); }
+  for (let y = 0; y <= 560; y += 110) { gctx.beginPath(); gctx.moveTo(X(0), Y(y)); gctx.lineTo(X(1000), Y(y)); gctx.stroke(); }
+  // ひざし
+  gctx.fillStyle = 'rgba(255,244,180,.55)';
+  gctx.beginPath(); gctx.arc(X(910), Y(60), 46 * sc, 0, TAU); gctx.fill();
+  // つる草の かざり（すみ）
+  gctx.strokeStyle = '#7dc24a'; gctx.lineWidth = 3 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(20), Y(0)); gctx.quadraticCurveTo(X(60), Y(40), X(30), Y(80)); gctx.stroke();
+  [[28, 18], [45, 42], [26, 66]].forEach(([lx, ly]) => {
+    gctx.fillStyle = '#7dc24a';
+    gctx.beginPath(); gctx.ellipse(X(lx), Y(ly), 9 * sc, 6 * sc, 0.5, 0, TAU); gctx.fill();
+  });
+  // テーブル（あし場）
+  gctx.fillStyle = '#c9a06a';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+  gctx.strokeStyle = 'rgba(140,100,50,.35)'; gctx.lineWidth = 1.5 * sc;
+  for (let x = 60; x < 1000; x += 130) { gctx.beginPath(); gctx.moveTo(X(x), Y(560)); gctx.lineTo(X(x), Y(640)); gctx.stroke(); }
+}
+
+// ---------- ポットの びょうしゃ ----------
+function drawPot(t, X, Y, sc, cfg, showResult) {
+  const px = cfg.x;
+  if (cfg.cold) {
+    gctx.fillStyle = 'rgba(140,195,255,.28)';
+    gctx.beginPath(); gctx.roundRect(X(px - 118), Y(SOIL_Y - 210), 236 * sc, 350 * sc, 24); gctx.fill();
+  }
+  if (cfg.dark) {
+    gctx.fillStyle = 'rgba(40,35,25,.42)';
+    gctx.beginPath(); gctx.roundRect(X(px - 118), Y(SOIL_Y - 210), 236 * sc, 350 * sc, 24); gctx.fill();
+  }
+  if (cfg.bright) {
+    const gr = gctx.createRadialGradient(X(px), Y(SOIL_Y - 90), 5 * sc, X(px), Y(SOIL_Y - 90), 150 * sc);
+    gr.addColorStop(0, 'rgba(255,244,180,.55)'); gr.addColorStop(1, 'rgba(255,244,180,0)');
+    gctx.fillStyle = gr; gctx.beginPath(); gctx.arc(X(px), Y(SOIL_Y - 90), 150 * sc, 0, TAU); gctx.fill();
+  }
+
+  // 鉢
+  gctx.fillStyle = '#c9773f';
+  gctx.beginPath();
+  gctx.moveTo(X(px - TOP_W / 2), Y(SOIL_Y));
+  gctx.lineTo(X(px - BOT_W / 2), Y(POT_BOT_Y));
+  gctx.lineTo(X(px + BOT_W / 2), Y(POT_BOT_Y));
+  gctx.lineTo(X(px + TOP_W / 2), Y(SOIL_Y));
+  gctx.closePath(); gctx.fill();
+  gctx.strokeStyle = '#a35a28'; gctx.lineWidth = 2 * sc; gctx.stroke();
+  gctx.fillStyle = '#d68a4c';
+  gctx.beginPath(); gctx.ellipse(X(px), Y(SOIL_Y), TOP_W / 2 * sc, 14 * sc, 0, 0, TAU); gctx.fill();
+  gctx.strokeStyle = '#a35a28'; gctx.lineWidth = 1.6 * sc; gctx.stroke();
+  gctx.fillStyle = '#4a3420';
+  gctx.beginPath(); gctx.ellipse(X(px), Y(SOIL_Y), (TOP_W / 2 - 10) * sc, 10 * sc, 0, 0, TAU); gctx.fill();
+
+  const grow = cfg.germinate ? easeOutBack(clamp(S.growT, 0, 1)) : 0;
+  if (grow > 0.03) {
+    const stemH = 150 * clamp(grow, 0, 1.15);
+    const sway = Math.sin(t * 1.6 + px) * 4 * clamp(grow, 0, 1);
+    gctx.strokeStyle = '#4a9e2f'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+    gctx.beginPath();
+    gctx.moveTo(X(px), Y(SOIL_Y - 2));
+    gctx.quadraticCurveTo(X(px + sway), Y(SOIL_Y - stemH * 0.6), X(px + sway), Y(SOIL_Y - stemH));
+    gctx.stroke();
+    const lx = X(px + sway), ly = Y(SOIL_Y - stemH);
+    [-1, 1].forEach(dir => {
+      gctx.save();
+      gctx.translate(lx, ly);
+      gctx.rotate(dir * 0.55);
+      const s = clamp(grow, 0, 1.15);
+      gctx.fillStyle = '#7dc24a';
+      gctx.beginPath(); gctx.ellipse(dir * 24 * sc * s, -6 * sc * s, 25 * sc * s, 15 * sc * s, 0, 0, TAU); gctx.fill();
+      gctx.strokeStyle = '#4a9e2f'; gctx.lineWidth = 1.6; gctx.stroke();
+      gctx.beginPath(); gctx.moveTo(0, 0); gctx.lineTo(dir * 42 * sc * s, -6 * sc * s); gctx.strokeStyle = '#4a9e2f'; gctx.lineWidth = 1.2; gctx.stroke();
+      gctx.restore();
+    });
+  } else {
+    gctx.save();
+    gctx.translate(X(px), Y(SOIL_Y - 2));
+    gctx.fillStyle = '#e8d29a'; gctx.strokeStyle = '#c9a86a'; gctx.lineWidth = 1.6;
+    gctx.beginPath(); gctx.ellipse(0, 0, 13 * sc, 9 * sc, 0.15, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.beginPath(); gctx.moveTo(-6 * sc, -2 * sc); gctx.quadraticCurveTo(0, 3 * sc, 6 * sc, -1 * sc); gctx.strokeStyle = '#c9a86a'; gctx.lineWidth = 1; gctx.stroke();
+    gctx.restore();
+    if (showResult && !cfg.germinate) {
+      gctx.fillStyle = 'rgba(110,100,80,.9)';
+      gctx.font = `700 ${Math.max(11, 15 * sc)}px sans-serif`;
+      gctx.textAlign = 'center';
+      gctx.fillText('… 変化なし', X(px), Y(SOIL_Y + 30));
+    }
+  }
+
+  if (cfg.sealed) {
+    gctx.fillStyle = 'rgba(190,225,255,.3)';
+    gctx.beginPath();
+    gctx.moveTo(X(px - 95), Y(SOIL_Y + 4));
+    gctx.quadraticCurveTo(X(px - 95), Y(SOIL_Y - 150), X(px), Y(SOIL_Y - 162));
+    gctx.quadraticCurveTo(X(px + 95), Y(SOIL_Y - 150), X(px + 95), Y(SOIL_Y + 4));
+    gctx.closePath(); gctx.fill();
+    gctx.strokeStyle = 'rgba(255,255,255,.7)'; gctx.lineWidth = 2 * sc; gctx.stroke();
+    gctx.strokeStyle = 'rgba(255,255,255,.55)'; gctx.lineWidth = 3 * sc;
+    gctx.beginPath(); gctx.moveTo(X(px - 58), Y(SOIL_Y - 118)); gctx.lineTo(X(px - 48), Y(SOIL_Y - 42)); gctx.stroke();
+  }
+
+  if (cfg.fert) {
+    gctx.save();
+    gctx.translate(X(px + TOP_W / 2 + 34), Y(POT_BOT_Y - 24));
+    gctx.fillStyle = '#8a6a42';
+    gctx.beginPath(); gctx.roundRect(-15 * sc, -22 * sc, 30 * sc, 34 * sc, 6); gctx.fill();
+    gctx.fillStyle = '#fff'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText('肥', 0, -2 * sc);
+    gctx.restore();
+  }
+  if (cfg.cold) { gctx.font = `${22 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.fillText('❄️', X(px - TOP_W / 2 - 30), Y(SOIL_Y - 40)); }
+  if (cfg.bright) { gctx.font = `${24 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.fillText('☀️', X(px + TOP_W / 2 + 34), Y(SOIL_Y - 90)); }
+
+  // 番号バッジ ＋ チップ
+  gctx.beginPath(); gctx.arc(X(px), Y(NUM_Y), 24 * sc, 0, TAU);
+  gctx.fillStyle = '#fff'; gctx.fill(); gctx.strokeStyle = '#4a9e2f'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+  gctx.fillStyle = '#2c6a14'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(NUMS[cfg.no - 1], X(px), Y(NUM_Y));
+
+  const lines = cfg.chip;
+  const lh = 19 * sc;
+  gctx.font = `700 ${Math.max(11, 15 * sc)}px sans-serif`;
+  let maxW = 0; lines.forEach(l => { maxW = Math.max(maxW, gctx.measureText(l).width); });
+  const chipW = maxW + 22 * sc, chipH = lines.length * lh + 12 * sc;
+  gctx.fillStyle = 'rgba(255,255,255,.94)';
+  gctx.beginPath(); gctx.roundRect(X(px) - chipW / 2, Y(CHIP_Y) - chipH / 2, chipW, chipH, 10); gctx.fill();
+  gctx.strokeStyle = '#4a9e2f'; gctx.lineWidth = 1.6 * sc; gctx.stroke();
+  gctx.fillStyle = '#2c6a14';
+  lines.forEach((l, i) => {
+    gctx.fillText(l, X(px), Y(CHIP_Y) - chipH / 2 + 6 * sc + lh * (i + 0.5));
+  });
+
+  if (S.selPot === cfg.no) {
+    gctx.strokeStyle = `rgba(74,158,47,${0.6 + 0.35 * Math.sin(t * 5)})`;
+    gctx.lineWidth = 4; gctx.setLineDash([10, 7]);
+    gctx.beginPath(); gctx.ellipse(X(px), Y(SOIL_Y - 70), 118 * sc, 108 * sc, 0, 0, TAU); gctx.stroke();
+    gctx.setLineDash([]);
+  }
+}
+
+function drawPots(t, dt, X, Y, sc) {
+  drawGreenhouseBG(t, X, Y, sc);
+  if (!S.mission) return;
+  const showResult = !S.anim.growing && S.growT >= 0.99;
+  drawPot(t, X, Y, sc, S.mission.A, showResult);
+  drawPot(t, X, Y, sc, S.mission.B, showResult);
+  if (S.anim.growing) {
+    gctx.fillStyle = 'rgba(74,158,47,.92)';
+    const tx = S.growDay < 1.1 ? '1にちめ…' : S.growDay < 2.2 ? '2にちめ…' : '3にちめ……';
+    gctx.font = `700 ${Math.max(18, 32 * sc)}px sans-serif`;
+    const tw = gctx.measureText(tx).width;
+    gctx.beginPath(); gctx.roundRect(X(500) - tw / 2 - 16, Y(90) - 28 * sc, tw + 32, 56 * sc, 14); gctx.fill();
+    gctx.fillStyle = '#fff'; gctx.textAlign = 'center'; gctx.fillText(tx, X(500), Y(90));
+  }
+}
+
+// ---------- たねを 切った ようす（はかせ） ----------
+function drawCutSeed(t, X, Y, sc) {
+  drawGreenhouseBG(t, X, Y, sc);
+  const cx = 500, cy = 400;
+  gctx.fillStyle = '#ddd8c8';
+  gctx.beginPath(); gctx.ellipse(X(cx), Y(cy + 130), 190 * sc, 26 * sc, 0, 0, TAU); gctx.fill();
+
+  const col = lerpColor('#f3e6bd', '#3a2a6e', S.iodine);
+  [-1, 1].forEach(dir => {
+    gctx.save();
+    gctx.translate(X(cx), Y(cy));
+    gctx.rotate(dir * 0.16);
+    gctx.fillStyle = col; gctx.strokeStyle = '#c9a86a'; gctx.lineWidth = 2.4 * sc;
+    gctx.beginPath();
+    gctx.moveTo(0, 8 * sc);
+    gctx.quadraticCurveTo(dir * 150 * sc, -30 * sc, dir * 118 * sc, -150 * sc);
+    gctx.quadraticCurveTo(dir * 40 * sc, -180 * sc, 0, -140 * sc);
+    gctx.closePath(); gctx.fill(); gctx.stroke();
+    gctx.restore();
+  });
+  // はい（芽・根の もと）
+  gctx.save();
+  gctx.translate(X(cx), Y(cy - 20));
+  gctx.fillStyle = '#e8d29a'; gctx.strokeStyle = '#c9a86a'; gctx.lineWidth = 1.6;
+  gctx.beginPath(); gctx.ellipse(0, 0, 14 * sc, 20 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = '#7dc24a'; gctx.lineWidth = 2.2 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(0, -8 * sc); gctx.lineTo(0, -22 * sc); gctx.stroke();
+  gctx.strokeStyle = '#c9a86a'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(0, 12 * sc); gctx.quadraticCurveTo(6 * sc, 24 * sc, 3 * sc, 34 * sc); gctx.stroke();
+  gctx.restore();
+
+  if (S.anim.dropping || S.iodine > 0.001) {
+    const dy = cy - 170 + S.dropY * 220;
+    if (S.anim.dropping) {
+      gctx.fillStyle = '#2a6fd8';
+      gctx.beginPath(); gctx.ellipse(X(cx), Y(dy), 8 * sc, 11 * sc, 0, 0, TAU); gctx.fill();
+    }
+  }
+  gctx.fillStyle = '#4a3520'; gctx.font = `700 ${Math.max(12, 17 * sc)}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('半分に 切った たね', X(cx), Y(cy + 170));
+}
+
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.stageMode === 'pots') drawPots(t, dt, X, Y, sc);
+  else drawCutSeed(t, X, Y, sc);
+}
+
+// ---------- めばえスコープ ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f6fbe8'); grd.addColorStop(1, '#dcefc0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'sprout') {
+    sctx.strokeStyle = '#8a6a42'; sctx.lineWidth = R * 0.05; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(R, R * 0.92); sctx.quadraticCurveTo(R - R * 0.1, R * 1.25, R - R * 0.05, R * 1.5); sctx.stroke();
+    sctx.strokeStyle = '#4a9e2f';
+    sctx.beginPath(); sctx.moveTo(R, R * 0.92); sctx.quadraticCurveTo(R + R * 0.1, R * 0.6, R + R * 0.05, R * 0.42); sctx.stroke();
+    [-1, 1].forEach(dir => {
+      sctx.save(); sctx.translate(R + R * 0.05, R * 0.42); sctx.rotate(dir * 0.5);
+      sctx.fillStyle = '#7dc24a'; sctx.strokeStyle = '#4a9e2f'; sctx.lineWidth = 1.4;
+      sctx.beginPath(); sctx.ellipse(dir * R * 0.17, 0, R * 0.16, R * 0.1, 0, 0, TAU); sctx.fill(); sctx.stroke();
+      sctx.restore();
+    });
+    sctx.fillStyle = '#c9a86a'; sctx.strokeStyle = '#a8895a'; sctx.lineWidth = 1.2;
+    sctx.beginPath(); sctx.ellipse(R, R * 0.92, R * 0.13, R * 0.09, 0, 0, TAU); sctx.fill(); sctx.stroke();
+    label('めが 出た！');
+  } else if (mode === 'dormant') {
+    sctx.fillStyle = '#e8d29a'; sctx.strokeStyle = '#c9a86a'; sctx.lineWidth = R * 0.03;
+    sctx.beginPath(); sctx.ellipse(R, R, R * 0.44, R * 0.32, 0.1, 0, TAU); sctx.fill(); sctx.stroke();
+    sctx.strokeStyle = '#c9a86a'; sctx.lineWidth = R * 0.015;
+    sctx.beginPath(); sctx.moveTo(R - R * 0.22, R); sctx.quadraticCurveTo(R, R + R * 0.13, R + R * 0.22, R - R * 0.04); sctx.stroke();
+    label(S.scope.label || 'たねの まま');
+  } else if (mode === 'starch') {
+    const col = lerpColor('#f3e6bd', '#3a2a6e', S.iodine);
+    sctx.fillStyle = col; sctx.strokeStyle = '#c9a86a'; sctx.lineWidth = R * 0.03;
+    sctx.beginPath(); sctx.ellipse(R * 0.7, R, R * 0.34, R * 0.5, -0.1, 0, TAU); sctx.fill(); sctx.stroke();
+    sctx.beginPath(); sctx.ellipse(R * 1.3, R, R * 0.34, R * 0.5, 0.1, 0, TAU); sctx.fill(); sctx.stroke();
+    label(S.iodine > 0.5 ? 'でんぷん、あり！' : 'たねの 中身');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2c6a14';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#4a9e2f', '#e8c53a', '#7dc24a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  if (S.anim.growing) {
+    S.growDay += dt;
+    S.growT = clamp(S.growDay / GROW_DUR, 0, 1);
+    if (S.growDay >= GROW_DUR) {
+      S.anim.growing = false;
+      const step = STEPS[FLOW[S.stepIndex]];
+      if (step.onGrowDone) step.onGrowDone();
+    }
+  }
+  if (S.anim.dropping) {
+    S.dropY = clamp(S.dropY + dt / 0.5, 0, 1);
+    if (S.dropY >= 1) {
+      S.anim.dropping = false; S.anim.spreading = true;
+      burst(window.innerWidth * 0.5, window.innerHeight * 0.42, 30);
+    }
+  }
+  if (S.anim.spreading) {
+    S.iodine = clamp(S.iodine + dt / 1.3, 0, 1);
+    if (S.iodine >= 1) {
+      S.anim.spreading = false;
+      const step = STEPS[FLOW[S.stepIndex]];
+      if (step.onIodineDone) step.onIodineDone();
+    }
+  }
+
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+// ---------- タッチ（ポットを しらべる） ----------
+stageCv.addEventListener('pointerdown', ev => {
+  ac();
+  if (!S.tapEnabled || S.stageMode !== 'pots' || !S.mission) return;
+  const r = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(r.width, r.height);
+  const mx = (ev.clientX - r.left - ox) / sc, my = (ev.clientY - r.top - oy) / sc;
+  [S.mission.A, S.mission.B].forEach(cfg => {
+    if (Math.abs(mx - cfg.x) < TOP_W / 2 + 20 && my > SOIL_Y - 220 && my < POT_BOT_Y + 10) {
+      S.selPot = cfg.no;
+      sTap();
+      const step = STEPS[FLOW[S.stepIndex]];
+      if (step.onPotTap) step.onPotTap(cfg);
+    }
+  });
+});
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  if (S.stageMode === 'pots') {
+    $('locChip').textContent = 'いまここ：じっけんテーブル';
+    $('stageTitle').innerHTML = `🌱 じっけんテーブル 〜ポットで たしかめよう〜`;
+  } else {
+    $('locChip').textContent = 'いまここ：たねの だんめん';
+    $('stageTitle').innerHTML = `🔬 たねを 半分に 切ったよ`;
+  }
+}
+function startGrow() {
+  if (S.anim.growing) return;
+  S.anim.growing = true; S.growT = 0; S.growDay = 0;
+  sGrow();
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_water', 'm_air', 'm_temp', 'm_light', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = {}; S.tapEnabled = false; S.selPot = -1;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { stageMode: 'pots', mission: null, growT: 0, growDay: 0, iodine: 0, dropY: 0, scope: { type: 'dormant', label: 'たね' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌱💧🌬️🌡️☀️</div>
+        <h1>めばえラボ</h1>
+        <div class="sub">〜 たねが めを 出す ひみつを さぐる けんきゅういん ぼしゅう中 〜</div>
+        <p class="talk">やあ、ようこそ！ ぼくは たねの ${ruby('妖精', 'ようせい')} <b>フタバ</b>。 なまえの とおり、はっぱが ふたばに なって うまれたんだ。<br>
+        たねって、いつも めを 出すわけじゃ ないって しってた？ めが 出る（<b>${W.hatsuga}</b>する）ためには、なにかが たりないと うまく いかないんだ。${ruby('今日', 'きょう')}は 8つの ポットで ${ruby('実験', 'じっけん')}して、その <b>ひみつ</b>を いっしょに さがそう！</p>
+        <button class="btn" id="startBtn">けんきゅういんに なる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🌱 よそうタイム</h2>
+        <p class="talk">たねが めを 出す（${W.hatsuga}する）ために、<b>ひつようだ</b>と ${ruby('思', 'おも')}う ものに 〇を つけてね（いくつでも）。</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">💧</span><b>①</b> 水</div>
+          <div class="vcard" data-v="1"><span class="vicon">☀️</span><b>②</b> 日光</div>
+          <div class="vcard" data-v="2"><span class="vicon">🌱</span><b>③</b> 肥料（ひりょう）</div>
+          <div class="vcard" data-v="3"><span class="vicon">🌬️</span><b>④</b> 空気</div>
+          <div class="vcard" data-v="4"><span class="vicon">🌡️</span><b>⑤</b> ちょうどよい 温度</div>
+        </div>
+        <div class="sub">思うものに タッチ。めばえノート（シート）にも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、ポットで たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); c.classList.toggle('picked');
+          const v = +c.dataset.v;
+          S.votePicked.has(v) ? S.votePicked.delete(v) : S.votePicked.add(v);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：水のなぞ ---
+  m_water: {
+    enter() {
+      Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_water.A }, B: { ...MISSIONS.m_water.B } }, growT: 0, growDay: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('💧', `ここに ①と②、2つの ポットが あるよ。①には <b>水を あげない</b>。②には <b>水を あげる</b>。ほかの じょうけん（空気・${ruby('温度', 'おんど')}・${ruby('日光', 'にっこう')}）は ぜんぶ 同じにしてあるよ。`);
+      say(`3${ruby('日後', 'にちご')}、めが 出るのは どっちだと ${ruby('思', 'おも')}う？ シートに 〇を つけてから、<b>🕐ボタン</b>で 時間を すすめよう！`);
+      setButtons(choiceRow(['Ａ ①（水なし）', 'Ｂ ②（水あり）'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      say(`それじゃあ 時間を すすめよう！`);
+      S.phase = 'grow';
+      setControls([{ label: '🕐 3日後を 見る', cb: () => startGrow() }]);
+      setButtons([]);
+    },
+    onGrowDone() {
+      if (S.phase !== 'grow') return;
+      S.phase = 'done'; S.tapEnabled = true;
+      sYes(); scopeBurst(); award('m_water');
+      setControls([]);
+      say(`✨ ②だけ めが 出た！ ✨<br><br>💡 <b>たいせつポイント</b><br>たねが めを 出すには <b>${W.mizu}</b>が ひつよう。水を すいこむと、たねの中で めを 出す じゅんびが はじまるんだ。ポットを タッチして、たねの中も のぞいて みてね。`);
+      setButtons([{ label: 'つぎへ（空気のなぞ）', cb: nextStep }]);
+    },
+    onPotTap(cfg) {
+      if (S.phase !== 'done') return;
+      const germ = cfg.germinate && S.growT >= 0.99;
+      S.scope = germ ? { type: 'sprout' } : { type: 'dormant', label: '水なし → たねのまま' };
+      $('stateName').innerHTML = `${NUMS[cfg.no - 1]} ${germ ? '水あり → めが 出た！' : '水なし → たねのまま'}`;
+      germ && scopeBurst();
+    },
+  },
+
+  // --- M2：空気のなぞ ---
+  m_air: {
+    enter() {
+      Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_air.A }, B: { ...MISSIONS.m_air.B } }, growT: 0, growDay: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🌬️', `③は <b>びんで ふたを して ${W.kuuki}を とじこめる</b>。④は ふたを あけたまま。水・${ruby('温度', 'おんど')}・${ruby('日光', 'にっこう')}は 同じだよ。`);
+      say(`3${ruby('日後', 'にちご')}、めが 出るのは どっち？ シートに 〇を つけてから すすめよう！`);
+      setButtons(choiceRow(['Ａ ③（空気なし）', 'Ｂ ④（空気あり）'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      say(`それじゃあ 時間を すすめよう！`);
+      S.phase = 'grow';
+      setControls([{ label: '🕐 3日後を 見る', cb: () => startGrow() }]);
+      setButtons([]);
+    },
+    onGrowDone() {
+      if (S.phase !== 'grow') return;
+      S.phase = 'done'; S.tapEnabled = true;
+      sYes(); scopeBurst(); award('m_air');
+      setControls([]);
+      say(`✨ ④だけ めが 出た！ ✨<br><br>💡 <b>たいせつポイント</b><br>たねにも <b>${W.kuuki}</b>が ひつよう。めを 出すには、わたしたちが いきを する（${ruby('呼吸', 'こきゅう')}）のと 同じように、空気の中の <ruby>酸素<rt>さんそ</rt></ruby>を つかうんだ。`);
+      setButtons([{ label: 'つぎへ（温度のなぞ）', cb: nextStep }]);
+    },
+    onPotTap(cfg) {
+      if (S.phase !== 'done') return;
+      const germ = cfg.germinate && S.growT >= 0.99;
+      S.scope = germ ? { type: 'sprout' } : { type: 'dormant', label: '空気なし → たねのまま' };
+      $('stateName').innerHTML = `${NUMS[cfg.no - 1]} ${germ ? '空気あり → めが 出た！' : '空気なし → たねのまま'}`;
+      germ && scopeBurst();
+    },
+  },
+
+  // --- M3：温度のなぞ ---
+  m_temp: {
+    enter() {
+      Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_temp.A }, B: { ...MISSIONS.m_temp.B } }, growT: 0, growDay: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🌡️', `⑤は <b>れいぞうこの中（つめたい）</b>。⑥は <b>きょうしつ（室温）</b>。水・空気・日光は 同じだよ。`);
+      say(`3${ruby('日後', 'にちご')}、めが 出るのは どっち？ シートに 〇を つけてから すすめよう！`);
+      setButtons(choiceRow(['Ａ ⑤（つめたい）', 'Ｂ ⑥（室温）'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      say(`それじゃあ 時間を すすめよう！`);
+      S.phase = 'grow';
+      setControls([{ label: '🕐 3日後を 見る', cb: () => startGrow() }]);
+      setButtons([]);
+    },
+    onGrowDone() {
+      if (S.phase !== 'grow') return;
+      S.phase = 'done'; S.tapEnabled = true;
+      sYes(); scopeBurst(); award('m_temp');
+      setControls([]);
+      say(`✨ ⑥だけ めが 出た！ ✨<br><br>💡 <b>たいせつポイント</b><br>めを 出すには <b>ちょうどよい ${W.ondo}</b>も ひつよう。つめたすぎると、たねは ねむったまま めざめないんだ。`);
+      setButtons([{ label: 'つぎへ（さいごの なぞ！）', cb: nextStep }]);
+    },
+    onPotTap(cfg) {
+      if (S.phase !== 'done') return;
+      const germ = cfg.germinate && S.growT >= 0.99;
+      S.scope = germ ? { type: 'sprout' } : { type: 'dormant', label: 'つめたい → たねのまま' };
+      $('stateName').innerHTML = `${NUMS[cfg.no - 1]} ${germ ? '室温 → めが 出た！' : 'つめたい → たねのまま'}`;
+      germ && scopeBurst();
+    },
+  },
+
+  // --- M4：日光・肥料のなぞ（最大の誤概念くつがえし） ---
+  m_light: {
+    enter() {
+      Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_light.A }, B: { ...MISSIONS.m_light.B } }, growT: 0, growDay: 0 });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('☀️', `⑦は <b>くらい部屋・肥料なし</b>。⑧は <b>明るい・肥料あり</b>。水・空気・温度は もう 同じに そろえてあるよ。`);
+      say(`ここまで、じょうけんが そろった方だけ めが 出てきたね。 では ⑦と⑧、めが 出るのは どっちだと ${ruby('思', 'おも')}う？`);
+      setButtons(choiceRow(['Ａ ⑦だけ', 'Ｂ ⑧だけ', 'Ｃ りょうほう'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      S.pick = n;
+      say(`それじゃあ 時間を すすめよう！`);
+      S.phase = 'grow';
+      setControls([{ label: '🕐 3日後を 見る', cb: () => startGrow() }]);
+      setButtons([]);
+    },
+    onGrowDone() {
+      if (S.phase !== 'grow') return;
+      S.phase = 'done'; S.tapEnabled = true;
+      sFanfare(); scopeBurst(); award('m_light');
+      setControls([]);
+      const re = S.pick === 2 ? 'せいかい！ するどい！' : 'おっと、よそうと ちがったかな？';
+      say(`✨ なんと——<b>りょうほう</b> めが 出た！ ✨ ${re}<br><br>💡 <b>たいせつポイント</b><br>${W.nikkou}や ${W.hiryou}は、めを 出す（${W.hatsuga}）ことには <b>${W.kankei}ない</b>！ ひつようなのは 水・空気・温度の 3つだけ。<br>（日光や 肥料が ひつように なるのは、めが 出た あと <b>ぐんぐん ${ruby('育', 'そだ')}つ（${W.seichou}）</b>とき なんだ）`);
+      setButtons([{ label: 'はかせチャレンジへ！', cb: nextStep }]);
+    },
+    onPotTap(cfg) {
+      if (S.phase !== 'done') return;
+      S.scope = { type: 'sprout' };
+      $('stateName').innerHTML = `${NUMS[cfg.no - 1]} ${cfg.no === 7 ? 'くらい・肥料なし' : '明るい・肥料あり'} → めが 出た！`;
+      scopeBurst();
+    },
+  },
+
+  // --- はかせチャレンジ：たねの中のなぞ ---
+  hakase: {
+    enter() {
+      Object.assign(S, { stageMode: 'cut', iodine: 0, dropY: 0, scope: { type: 'starch' } });
+      updateLoc();
+      S.phase = 'ask';
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${ruby('発芽', 'はつが')}した たねを ${ruby('半分', 'はんぶん')}に 切ってみたよ。中には 何が 入っていると ${ruby('思', 'おも')}う？`);
+      setButtons(choiceRow(['Ａ 空気の あな', 'Ｂ めを 出す 力のもと', 'Ｃ 何も 入っていない'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      S.pick = n;
+      say(`ほんとうに そうか、${ruby('確', 'たし')}かめよう！ <b>🧪ボタン</b>で ヨウ素液を たらすよ。`);
+      S.phase = 'drop';
+      setControls([{ label: '🧪 ヨウ素液を たらす', cb: () => {
+        if (S.anim.dropping || S.anim.spreading) return;
+        S.anim.dropping = true; S.dropY = 0; S.iodine = 0;
+        sDrop();
+        setControls([{ label: '🧪 ヨウ素液を たらす', cb: () => {}, disabled: true }]);
+      } }]);
+      setButtons([]);
+    },
+    onIodineDone() {
+      S.phase = 'done';
+      setControls([]);
+      const hit = S.pick === 1 ? 'よそう どおり！' : 'おどろいたかの！';
+      sYes(); scopeBurst(); award('hakase');
+      say(`✨ ${ruby('青紫色', 'あおむらさきいろ')}に かわった！ ✨ ${hit}<br><br>💡 <b>たいせつポイント</b><br>青むらさき色に なったのは <b>${W.youbun}（でんぷん）</b>が ある しょうこ！ たねの中の ${W.shiyou}（ふたばに なる ところ）に、めを 出す ための エネルギーが たくわえられて いたんだ。フタバの はっぱの もとにも、この でんぷんが つかわれたんだよ。`);
+      setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      const votedOk = [0, 3, 4].every(v => S.votePicked.has(v)) && ![1, 2].some(v => S.votePicked.has(v));
+      showOverlay(`
+        <h2>⭐ めばえラボ けんきゅういん にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.hatsuga}に ひつようなのは（<span class="blankWord" data-a="水・空気・ちょうどよい温度">？？？</span>）。<br>
+        ② 日光や 肥料は 発芽そのものには（<span class="blankWord" data-a="かんけいない">？？？</span>）。<br>
+        ③ たねの中には ${W.youbun}として（<span class="blankWord" data-a="でんぷん">？？？</span>）が 入っている。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>①水 ④空気 ⑤ちょうどよい 温度</b> の 3つでした！ 日光と 肥料は、めが 出た あと 育つときに ひつように なります。${votedOk ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>ぬらした ティッシュ（か だっしめん）を ふくろに 入れて、ダイズか インゲンマメの たねを ${W.hatsuga}させてみよう。ひとつは 日光の 当たる ところ、もうひとつは 当たらない ところに 置いて、どちらも めが 出るか かんさつ日記を つけてね。<br>
+        🚨 やくそく：たねは 口に 入れない。さわった あとは 手を あらう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#2c6a14'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_light.A }, B: { ...MISSIONS.m_light.B } }, growT: 1, growDay: GROW_DUR });
+      updateLoc();
+      S.tapEnabled = true; S.phase = 'done';
+      say(`<b>じゆうモード</b>だよ！ ポットを タッチして しらべながら、${ruby('友', 'とも')}だちと クイズを ${ruby('出', 'だ')}しあおう。<br>れい：「空気が ないと どうなる？」「日光と 肥料は 発芽に ひつよう？」`);
+      setButtons([
+        { label: '💧 水の じっけんに もどる', cls: 'sub', cb: () => this.show('m_water') },
+        { label: '🌬️ 空気の じっけんに もどる', cls: 'sub', cb: () => this.show('m_air') },
+        { label: '🌡️ 温度の じっけんに もどる', cls: 'sub', cb: () => this.show('m_temp') },
+        { label: '☀️ 日光・肥料の じっけんに もどる', cls: 'sub', cb: () => this.show('m_light') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(key) {
+      Object.assign(S, { mission: { A: { ...MISSIONS[key].A }, B: { ...MISSIONS[key].B } }, growT: 1, growDay: GROW_DUR });
+      sTap();
+    },
+    onPotTap(cfg) {
+      const germ = cfg.germinate;
+      S.scope = germ ? { type: 'sprout' } : { type: 'dormant', label: 'たねのまま' };
+      $('stateName').innerHTML = `${NUMS[cfg.no - 1]} ${germ ? 'めが 出た！' : 'たねのまま（発芽せず）'}`;
+      germ && scopeBurst();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_temp などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>めばえラボ めばえノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #3d6b28; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #d7f08a; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #eef6de; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .twoCol { display: flex; gap: 4mm; align-items: flex-start; }
+  .twoCol .diagram { flex-shrink: 0; text-align: center; font-size: 8.5pt; }
+  .twoCol .diagram svg { border: .35mm solid #999; border-radius: 2mm; background: #fbfbf3; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用めばえノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌱 めばえラボ めばえノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      たねが めを 出す（<ruby>発芽<rt>はつが</rt></ruby>する）ために <b>ひつようだと 思うもの</b>に 〇（いくつでも）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">①</span> 💧 水</div>
+        <div class="voteOpt"><span class="vnum">②</span> ☀️ 日光</div>
+        <div class="voteOpt"><span class="vnum">③</span> 🌱 肥料</div>
+        <div class="voteOpt"><span class="vnum">④</span> 🌬️ 空気</div>
+        <div class="voteOpt"><span class="vnum">⑤</span> 🌡️ ちょうどよい温度</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．3つの じっけん（水・空気・温度）</span>
+    <div class="secBody">
+      それぞれ <b>じょうけんが ある方／ない方</b>で くらべるよ。めが 出るのは どっち？ よそうに 〇、けっかを かこう。
+      <table class="expTable">
+        <tr><th style="width:20%">じっけん</th><th style="width:18%">ポットＡ</th><th style="width:18%">ポットＢ</th><th style="width:20%">よそう</th><th style="width:24%">けっか（めが 出たのは）</th></tr>
+        <tr><td class="item">💧 水のなぞ</td><td>①水なし</td><td>②水あり</td><td>Ａ ・ Ｂ</td><td>① ・ ②</td></tr>
+        <tr><td class="item">🌬️ 空気のなぞ</td><td>③みっぺい</td><td>④あけたまま</td><td>Ａ ・ Ｂ</td><td>③ ・ ④</td></tr>
+        <tr><td class="item">🌡️ 温度のなぞ</td><td>⑤つめたい</td><td>⑥室温</td><td>Ａ ・ Ｂ</td><td>⑤ ・ ⑥</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．日光・肥料のなぞ（さいごの じっけん）</span>
+    <div class="secBody">
+      <div class="twoCol">
+        <div class="diagram">
+          <svg width="56mm" height="24mm" viewBox="0 0 210 90">
+            <rect x="6" y="8" width="90" height="70" rx="6" fill="#666" opacity=".55"/>
+            <text x="51" y="30" font-size="9" text-anchor="middle" fill="#fff">くらい</text>
+            <text x="51" y="42" font-size="8" text-anchor="middle" fill="#fff">肥料なし</text>
+            <text x="51" y="70" font-size="12" text-anchor="middle" fill="#fff">⑦</text>
+            <circle cx="180" cy="16" r="9" fill="#ffd97a"/>
+            <rect x="114" y="8" width="90" height="70" rx="6" fill="#fff6d2" stroke="#e0c060" stroke-width="1.4"/>
+            <text x="159" y="30" font-size="9" text-anchor="middle">明るい</text>
+            <text x="159" y="42" font-size="8" text-anchor="middle">肥料あり</text>
+            <text x="159" y="70" font-size="12" text-anchor="middle">⑧</text>
+          </svg>
+        </div>
+        <div>
+          ⑦は <b>くらい部屋・肥料なし</b>。⑧は <b>明るい・肥料あり</b>。（水・空気・温度は もう そろえてあるよ）<br>
+          よそう：めが 出るのは？　（ ⑦だけ ・ ⑧だけ ・ <b>りょうほう</b> ）に〇<br>
+          けっか：⑦（ 出た ・ 出なかった ）　⑧（ 出た ・ 出なかった ）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．はかせチャレンジ（たねの中のなぞ）</span>
+    <div class="secBody">
+      発芽した たねを 半分に 切って、<b>ヨウ素液</b>を たらすと……？<br>
+      よそう：中に あるのは？　Ａ．空気の あな　／　Ｂ．めを 出す 力のもと　／　Ｃ．何も ない　→（<span class="fillLine" style="width:10mm"></span>）に〇<br>
+      けっか：（ <span class="fillLine" style="width:24mm"></span> ）色に かわった　＝　（ <span class="fillLine" style="width:20mm"></span> ）が ある しょうこ
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① <ruby>発芽<rt>はつが</rt></ruby>に ひつようなのは（<span class="fillLine" style="width:30mm"></span>）の 3つ。<br>
+      ② 日光や 肥料は 発芽そのものには（<span class="fillLine" style="width:16mm"></span>）。<br>
+      ③ たねの中には <ruby>養分<rt>ようぶん</rt></ruby>として（<span class="fillLine" style="width:14mm"></span>）が 入っている。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．おうちミッション：たねを 発芽させよう</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌱</span>
+        <div>
+          ぬらした ティッシュ（か だっしめん）を ふくろに 入れて、ダイズか インゲンマメの たねを 発芽させよう。<b>ひとつは 日光の 当たる ところ、もうひとつは 当たらない ところ</b>に 置いて、かんさつ日記を つけてね。<br>
+          ☐ めが 出た！（ ひづけ：<span style="border-bottom:.4mm solid #222;display:inline-block;width:16mm">　</span> ）<br>
+          <span style="font-size:8.5pt">※たねは 口に 入れない。さわった あとは 手を あらう。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　めばえラボ けんきゅういん、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】めばえラボ — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5理科「植物の発芽と成長」・学力幅あり・協力型／ 使うもの：「mebae.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションで「🕐 3日後を見る」を押して、対照ポットの片方だけ めが出るか確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_light</b> などで途中再開（m_water／m_air／m_temp／m_light／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（5つのじっけんで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>💧 水のなぞ</td><td>予想に〇→代表が🕐→②だけ発芽→シート２に記入。ポットタッチで たねの中も見られる</td></tr>
+      <tr><td class="min">11〜18分</td><td>🌬️ 空気のなぞ</td><td>びんで密閉した③との対比。「わたしたちの呼吸と同じ」に つなげる</td></tr>
+      <tr><td class="min">18〜25分</td><td>🌡️ 温度のなぞ</td><td>れいぞうこの⑤との対比。ここまでで「水・空気・温度」の3条件がそろう</td></tr>
+      <tr><td class="min">25〜33分</td><td>☀️ 日光・肥料のなぞ（<b>今日の見せ場</b>）</td><td>⑦⑧どちらが発芽するか予想（多くは⑧だけと予想しがち）→<b>りょうほう発芽</b>で誤概念をくつがえす</td></tr>
+      <tr><td class="min">33〜39分</td><td>🔬 はかせチャレンジ</td><td>たねを切ってヨウ素液→青むらさき色＝でんぷん。シート４に記入</td></tr>
+      <tr><td class="min">39〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート５。発芽させる観察（シート６）を安全の約束とセットで予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「温度のなぞ」を右下「つぎ▶」でスキップ可（<b>日光・肥料のなぞ と まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>①水 ④空気 ⑤ちょうどよい温度</b>／水のなぞ＝<b>②</b>／空気のなぞ＝<b>④</b>／温度のなぞ＝<b>⑥</b>／
+      日光・肥料のなぞ＝<b>りょうほう</b>（Ｃ）／はかせ＝Ｂ・<b>青むらさき色</b>／
+      まとめ＝①<b>水・空気・ちょうどよい温度</b>　②<b>かんけいない</b>　③<b>でんぷん</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>発芽の3条件＝<b>水・空気（酸素）・適当な温度</b>は教科書共通。日光・肥料は発芽そのものには不要で、発芽<b>後</b>ぐんぐん育つ（成長）ときに必要になる——「発芽」と「成長」を区別するのが本単元最大のポイント</li>
+      <li>たねの中の子葉には養分として<b>でんぷん</b>が蓄えられており、発芽のエネルギー源になる。ヨウ素液で青むらさき色に変わるのは本物のヨウ素でんぷん反応</li>
+      <li>教材の定番はインゲンマメ・ダイズ。空気（酸素）が必要なのは、種子内で呼吸によって養分からエネルギーを取り出すため</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「日光・肥料のなぞ」は今日いちばんの見せ場。予想を聞くとき⑧（好条件そろい）に票が集まりやすい——あえて「⑦は本当に出ないかな？」と揺さぶってから🕐を押すと発見が引き立つ</li>
+      <li>代表交代は1人1じっけん。見ている子は「①〜⑧のうちどれが発芽したか」を記録係に</li>
+      <li>おうちミッションは<b>安全最優先</b>：たねは口に入れない・さわった後は手を洗う。教室で本物のインゲンマメを育てて記録に発展させても良い</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「空気がないと どうなる？」「日光と肥料は発芽に必要？」「①〜⑧のうちいちばん条件が悪いのは？」</li>
+      <li>教室で実際にインゲンマメを発芽させ、日光あり／なしの2鉢で育ちの違いを数週間かけて観察すると「発芽と成長の違い」がさらに実感できます</li>
+      <li>とう明な容器（ペットボトルなど）で発芽させると、根が下に・くきが上に伸びる向きも観察できます</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
