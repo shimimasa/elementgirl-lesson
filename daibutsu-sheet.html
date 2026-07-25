@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>大仏づくり工房 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #6a4010; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe6a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .stageRow { display: flex; gap: 1.4mm; margin-top: 1mm; flex-wrap: wrap; }
+  .stageBox {
+    width: 10mm; height: 10mm; border: .5mm solid #222; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 8.6pt; font-weight: 700;
+  }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #f7e6bf; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🔔 大仏づくり工房 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      大仏づくりに <b>かかわった 人</b>は、どれくらいだったと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🧑 100人くらい</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 👥 1万人くらい</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🌏 260万人以上</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．なぜ 大仏を つくったの？</span>
+    <div class="secBody">
+      当時 起きていた できごとに 〇：（ 病気の 大はやり ・ ききん ・ 貴族の 反乱 ）→ ぜんぶ！<br>
+      聖武天皇が 大仏を つくった 理由は？　→（ ア みんなに じまん ・ イ 仏の力で 国を 守る ・ ウ 外国への プレゼント ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．材料を 集めよう</span>
+    <div class="secBody">
+      大仏づくりに 必要だった 銅の 重さは？　→（ ア 100トン ・ イ 500トン ・ ウ 1000トン ）<br>
+      じっさいの 重さ：やく（<span class="fillLine sm"></span>）トン　10円玉（銅）に すると なんまい分？（<span class="fillLine"></span>）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．銅を 流しこもう（鋳造 8段階）</span>
+    <div class="secBody">
+      とけた 銅を 下から 上へ、8回に わけて 流しこんだよ。すすんだ 段に 色を ぬろう。
+      <div class="stageRow">
+        <div class="stageBox">①</div><div class="stageBox">②</div><div class="stageBox">③</div><div class="stageBox">④</div>
+        <div class="stageBox">⑤</div><div class="stageBox">⑥</div><div class="stageBox">⑦</div><div class="stageBox">⑧</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．開眼供養</span>
+    <div class="secBody">
+      目を 描きいれる 役目に まねかれたのは、どこの お坊さん？　→（ ア 日本 ・ イ 中国 ・ ウ インド ）<br>
+      その お坊さんの 名前：<span class="wordBank">菩提僊那（ぼだいせんな）</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（正倉院と シルクロード）</span>
+    <div class="secBody">
+      <table class="expTable">
+        <tr><th>たからもの</th><th>どんな もの？</th><th>どこから 来た？</th></tr>
+        <tr><td class="item">瑠璃坏（るりのつき）</td><td>ガラスの さかずき</td><td>ペルシャ（今の イラン）</td></tr>
+        <tr><td class="item">螺鈿紫檀五絃琵琶</td><td>5本弦の 琵琶（びわ）</td><td>シルクロード経由</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 大仏づくりを 命じたのは（<span class="fillLine" style="width:24mm"></span>）。<br>
+      ② 銅は 8回に わけて（<span class="fillLine" style="width:30mm"></span>）へ 流しこまれた。<br>
+      ③ 大仏づくりに かかわった 人は、のべ（<span class="fillLine" style="width:24mm"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション：正倉院の 宝物を しらべよう</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏺</span>
+        <div>
+          教科書や 資料集で、正倉院の 宝物を 1つ しらべてみよう。おうちの人に 大仏づくりの 話を してみよう。<br>
+          ☐ しらべた 宝物の 名前：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　大仏づくり工房 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】大仏づくり工房 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（奈良時代・大仏づくり）」・学力幅あり・協力型／ 使うもの：「daibutsu.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_chuzo</b> などで途中再開（m_riyu／m_zairyo／m_chuzo／m_kaigen／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>😟 なぜ 大仏を つくったの？</td><td>病気・ききん・反乱の3つを確認 → 理由クイズ。誤答してもヒントで再挑戦</td></tr>
+      <tr><td class="min">10〜16分</td><td>🔨 材料を あつめよう</td><td>銅の重さを3択で予想 → ゲージが伸びて正解を確認。10円玉換算の実感を強調</td></tr>
+      <tr><td class="min">16〜26分</td><td>🔥 銅を 流しこもう（<b>今日の見せ場</b>）</td><td>①〜⑧を順番に押し、下から上へ大仏の姿ができあがる様子を見る。1人1段ずつ交代させると全員参加できる</td></tr>
+      <tr><td class="min">26〜33分</td><td>👁 開眼供養</td><td>招かれたお坊さんを3択で予想 → 正解後、大仏の顔をタップして目を描き入れる</td></tr>
+      <tr><td class="min">33〜40分</td><td>🌏 はかせチャレンジ</td><td>正倉院の宝物2つをタップして見る。シルクロードで世界とつながっていたことを紹介</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。正倉院の宝物調べ（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「材料を あつめよう」を右下「つぎ▶」でスキップ可（<b>銅を流しこもう と まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ 260万人以上</b>／なぜ つくったか＝<b>イ 仏の力で 国を 守ろうとした</b>／材料＝<b>イ 500トン</b>／
+      鋳造＝<b>8段階・下から上へ</b>／開眼供養＝<b>ウ インドから来たお坊さん（菩提僊那）</b>／
+      まとめ＝①<b>聖武天皇</b>　②<b>下から上</b>　③<b>260万人以上</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>735〜737年ごろ天然痘が大流行し、多くの人が亡くなった。ききんや貴族の反乱（藤原広嗣の乱など）も続き、世の中が不安定だった</li>
+      <li>743年、聖武天皇が大仏をつくるよう全国に伝えた。お坊さんの行基も協力し、全国をまわって人々に呼びかけた</li>
+      <li>大仏（盧舎那仏）の像高は<b>約15m</b>（14.98m、台座を含めると約18m）。使われた銅は熟銅約74万斤＝<b>約500トン</b>（10円玉〈青銅製・1枚4.5g〉に換算すると約1億1千万枚分）</li>
+      <li>鋳造は<b>8回に分けて下から上へ</b>銅を流しこむ方法で行われた（1段ずつ冷やして固めながら進めた）</li>
+      <li>752年、開眼供養が行われ、インド出身の僧・菩提僊那が導師をつとめた。多くの人が開眼の筆に結んだ糸を一緒に持ち、完成を祝った</li>
+      <li>大仏づくりに関わった人はのべ260万人以上（当時の人口の約半分ともいわれる）</li>
+      <li>正倉院にはシルクロードを通って伝わった宝物が納められている（瑠璃坏＝ペルシャ由来のガラス器、螺鈿紫檀五絃琵琶＝現存する世界唯一の5弦琵琶）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「銅を流しこもう」は今日いちばんの見せ場。①〜⑧を1人1段ずつ交代で押させると、大仏が少しずつ完成していく過程を全員で共有できる</li>
+      <li>開眼供養の目を描く場面は、正解した後に画面（大仏の顔）をタップする操作。タップし忘れがないよう声かけを</li>
+      <li>おうちミッションは資料集や図書室の本を使ってよい。無理に見つけさせる必要はなく、家族との会話のきっかけでよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「大仏は 何段階で 作られた？」「開眼供養で まねかれたのは どこの お坊さん？」</li>
+      <li>実際に大仏（教科書・写真集）を見て、大きさを体感すると理解が深まる。修学旅行や社会見学で東大寺を訪れた経験があれば話を広げやすい</li>
+      <li>正倉院宝物からシルクロードへ、さらに他の時代の国際交流（遣唐使など）へと発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

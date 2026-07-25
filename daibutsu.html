@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大仏づくり工房 — 奈良の大仏 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fff3d6 0%, #f7dfa0 55%, #e8b968 100%);
+    color: #5a3a10;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #b8672a; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8a6a3a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #f7e6bf; border: 2px solid #e0b878;
+    font-size: clamp(16px, 1.8vw, 26px); color: #e0b878;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe6a8, #c9822c);
+    border-color: #8a5a2a; color: #5a3a10;
+    box-shadow: 0 0 14px rgba(200, 140, 40, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #fff6e0 0%, #fdeecb 100%);
+    border: 3px solid #d9944a;
+    box-shadow: inset 0 0 40px rgba(140, 90, 30, .12), 0 4px 18px rgba(100, 60, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #6a4010; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #b8672a; color: #fff8e8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(90, 50, 10, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(100, 60, 20, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #f0c080; cursor: pointer;
+    background: linear-gradient(180deg, #d9944a, #b8672a); color: #fff;
+    box-shadow: 0 3px 0 #6a4010; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #6a8ab0, #3d5f8a); border-color: #a0c0e0; box-shadow: 0 3px 0 #253d5c; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #b8672a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(120, 70, 20, .3), inset 0 0 24px rgba(120, 70, 20, .18);
+    flex-shrink: 0; background: #fdf2da;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #8a6a3a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #6a4010; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffaf0; border: 2px solid #e0b878; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #8a6a3a; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #5a3a10;
+    border: 1.5px solid #e8d0a0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #b8672a; background: #ffe6a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #f7e0b0, #fdeecb); color: #5a3a10;
+    border: 2px solid #b8672a; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #b8672a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #d9944a, #b8672a); color: #fff;
+    box-shadow: 0 3px 0 #6a4010, 0 5px 12px rgba(120, 70, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #6a4010; }
+  .btn.sub {
+    background: #f7e6bf; color: #8a5a2a; box-shadow: 0 3px 0 #e0b878;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #5a3a10; box-shadow: 0 3px 0 #e0b878; font-weight: 400; border: 1.5px solid #e8d0a0; }
+  .btn.choice.picked { background: #ffe6c0; outline: 3px solid #d9944a; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(40, 24, 8, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fffaf0, #fdeecb);
+    border: 3px solid #d9944a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(80, 40, 10, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #b8672a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #b8672a; }
+  .panel .sub { color: #8a6a3a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #5a3a10; border: 1.5px solid #e8d0a0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8a6a3a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #5a3a10; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #e8d0a0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #b8672a; background: #ffe6c0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #b8672a; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #b8672a;
+    color: #6a4010; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #8a6a3a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #f7e6bf; color: #8a5a2a;
+    border: 1px solid #e0b878; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #f0d8a0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🔔 大仏づくり工房<small>— 奈良の大仏が できるまで —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_riyu" title="なぜ作られたか">★</div>
+    <div class="badge" id="bd_m_zairyo" title="材料集め">★</div>
+    <div class="badge" id="bd_m_chuzo" title="鋳造">★</div>
+    <div class="badge" id="bd_m_kaigen" title="開眼供養">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">大仏づくり</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 コンドウめがね 〜 大仏の ひみつが 見える 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(90,60,20,.18)"/>
+            <!-- ほのおの かざり -->
+            <g fill="#ffce54" stroke="#e0a020" stroke-width=".8">
+              <path d="M52 10 Q47 0 53 -9 Q58 0 54 9 Z"/>
+              <path d="M68 10 Q73 0 67 -9 Q62 0 66 9 Z"/>
+            </g>
+            <!-- あたま -->
+            <circle cx="60" cy="46" r="34" fill="#f3e0b0" stroke="#8a5a2a" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="36" cy="52" rx="6" ry="4" fill="#e0a05a" opacity=".5"/>
+            <ellipse cx="84" cy="52" rx="6" ry="4" fill="#e0a05a" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="44" cy="44" rx="4.5" ry="6" fill="#5a3a10"/>
+              <ellipse cx="76" cy="44" rx="4.5" ry="6" fill="#5a3a10"/>
+              <circle cx="45.5" cy="41" r="1.4" fill="#fff"/>
+              <circle cx="77.5" cy="41" r="1.4" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M50 60 Q60 66 70 60" stroke="#8a5a2a" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- からだ（しずく形） -->
+            <path d="M30 122 Q22 85 40 74 Q60 66 80 74 Q98 85 90 122 Z" fill="#c9822c" stroke="#8a5a2a" stroke-width="2.5"/>
+            <!-- きんいろの おび -->
+            <rect x="30" y="96" width="60" height="8" fill="#ffce54"/>
+            <circle cx="60" cy="100" r="5" fill="#f3e0b0" stroke="#8a5a2a" stroke-width="1.2"/>
+          </svg>
+          <div class="catname">こんどうの<ruby>精霊<rt>せいれい</rt></ruby> <ruby>コンドウ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🔔 大仏づくりミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   大仏づくり工房 — 奈良の大仏（小6社会・歴史・協力型・1ファイル）
+   なぜ作られたか → 材料を集める → 鋳造8段階 →
+   開眼供養 → はかせ（正倉院とシルクロード）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  shoumu: ruby('聖武天皇', 'しょうむてんのう'),
+  gyouki: ruby('行基', 'ぎょうき'),
+  kaigen: ruby('開眼供養', 'かいげんくよう'),
+  bodai: ruby('菩提僊那', 'ぼだいせんな'),
+  shosoin: ruby('正倉院', 'しょうそういん'),
+  ruri: ruby('瑠璃坏', 'るりのつき'),
+  biwa: ruby('螺鈿紫檀五絃琵琶', 'らでんしたんのごげんびわ'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'riyu',
+  build: { level: 0, levelF: 0 },
+  scope: { type: 'idle' },
+  eyesPainted: false,
+  zairyoFill: 0,
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 大仏の形（座標） ----------
+const ST = { cx: 500, baseY: 570, headCY: 215, headR: 55, ushR: 13 };
+const ST_TOP = ST.headCY - ST.headR - ST.ushR * 2 - 4; // ≈130
+const ST_TOTALH = ST.baseY - ST_TOP; // ≈440
+
+function statuePolyPath(ctx, X, Y, pts) {
+  pts.forEach(([x, y], i) => {
+    const px = X(x), py = Y(y);
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  });
+}
+function statueShapeFill(ctx, X, Y, sc) {
+  const cx = ST.cx;
+  ctx.beginPath(); ctx.ellipse(X(cx), Y(ST.baseY - 8), 170 * sc, 22 * sc, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); statuePolyPath(ctx, X, Y, [[cx - 150, ST.baseY], [cx + 150, ST.baseY], [cx + 115, 470], [cx - 115, 470]]); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(X(cx), Y(470), 130 * sc, 42 * sc, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); statuePolyPath(ctx, X, Y, [[cx - 95, 470], [cx + 95, 470], [cx + 78, 290], [cx - 78, 290]]); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(X(cx), Y(290), 95 * sc, 30 * sc, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); statuePolyPath(ctx, X, Y, [[cx - 22, 296], [cx + 22, 296], [cx + 18, 254], [cx - 18, 254]]); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.arc(X(cx), Y(ST.headCY), ST.headR * sc, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.arc(X(cx), Y(ST.headCY - ST.headR - ST.ushR), ST.ushR * sc, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(X(cx - ST.headR + 5), Y(ST.headCY + 16), 8 * sc, 22 * sc, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(X(cx + ST.headR - 5), Y(ST.headCY + 16), 8 * sc, 22 * sc, 0, 0, TAU); ctx.fill();
+}
+function strokeStatueShape(ctx, X, Y, sc) {
+  const cx = ST.cx;
+  ctx.beginPath(); ctx.ellipse(X(cx), Y(ST.baseY - 8), 170 * sc, 22 * sc, 0, 0, TAU); ctx.stroke();
+  ctx.beginPath(); statuePolyPath(ctx, X, Y, [[cx - 150, ST.baseY], [cx + 150, ST.baseY], [cx + 115, 470], [cx - 115, 470]]); ctx.closePath(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(X(cx), Y(470), 130 * sc, 42 * sc, 0, 0, TAU); ctx.stroke();
+  ctx.beginPath(); statuePolyPath(ctx, X, Y, [[cx - 95, 470], [cx + 95, 470], [cx + 78, 290], [cx - 78, 290]]); ctx.closePath(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(X(cx), Y(290), 95 * sc, 30 * sc, 0, 0, TAU); ctx.stroke();
+  ctx.beginPath(); ctx.arc(X(cx), Y(ST.headCY), ST.headR * sc, 0, TAU); ctx.stroke();
+  ctx.beginPath(); ctx.arc(X(cx), Y(ST.headCY - ST.headR - ST.ushR), ST.ushR * sc, 0, TAU); ctx.stroke();
+}
+
+// ---------- 背景・やぐら ----------
+function drawSky(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(420));
+  g.addColorStop(0, '#ffe9b0'); g.addColorStop(1, '#f7cf8a');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 420 * sc);
+  gctx.fillStyle = 'rgba(180,140,80,.35)';
+  gctx.beginPath(); gctx.moveTo(X(0), Y(360));
+  gctx.quadraticCurveTo(X(200), Y(280), X(420), Y(350));
+  gctx.quadraticCurveTo(X(650), Y(270), X(1000), Y(340));
+  gctx.lineTo(X(1000), Y(420)); gctx.lineTo(X(0), Y(420)); gctx.closePath(); gctx.fill();
+  gctx.fillStyle = 'rgba(255,220,140,.6)';
+  gctx.beginPath(); gctx.arc(X(880), Y(70), 40 * sc, 0, TAU); gctx.fill();
+}
+function drawGroundYard(X, Y, sc) {
+  gctx.fillStyle = '#c9a56a';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+  gctx.strokeStyle = 'rgba(110,80,40,.3)'; gctx.lineWidth = 1 * sc;
+  for (let x = 30; x < 980; x += 70) { gctx.beginPath(); gctx.moveTo(X(x), Y(560)); gctx.lineTo(X(x + 10), Y(640)); gctx.stroke(); }
+}
+function drawScaffold(X, Y, sc) {
+  gctx.strokeStyle = '#8a5a2a'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  [ST.cx - 235, ST.cx + 235].forEach(px => {
+    gctx.beginPath(); gctx.moveTo(X(px), Y(ST.baseY + 10)); gctx.lineTo(X(px), Y(ST_TOP - 30)); gctx.stroke();
+  });
+  gctx.lineWidth = 4 * sc;
+  [200, 320, 440].forEach(ly => {
+    gctx.beginPath(); gctx.moveTo(X(ST.cx - 235), Y(ly)); gctx.lineTo(X(ST.cx + 235), Y(ly)); gctx.stroke();
+  });
+}
+function drawStatueOutline(X, Y, sc) {
+  gctx.save();
+  gctx.strokeStyle = 'rgba(120,90,50,.55)';
+  gctx.setLineDash([7 * sc, 6 * sc]);
+  gctx.lineWidth = 2 * sc;
+  strokeStatueShape(gctx, X, Y, sc);
+  gctx.restore();
+}
+function drawStatueFilled(X, Y, sc) {
+  const frac = clamp((S.build.levelF || 0) / 8, 0, 1);
+  if (frac <= 0.001) return;
+  const fillTopLocalY = ST.baseY - ST_TOTALH * frac;
+  const rectPxY = Y(fillTopLocalY);
+  const rectPxH = Math.max(0, Y(ST.baseY + 50) - rectPxY);
+  gctx.save();
+  gctx.beginPath();
+  gctx.rect(X(ST.cx - 230), rectPxY, 460 * sc, rectPxH);
+  gctx.clip();
+  const grad = gctx.createLinearGradient(X(ST.cx - 100), 0, X(ST.cx + 100), 0);
+  grad.addColorStop(0, '#8a5a2a'); grad.addColorStop(0.5, '#e0a94f'); grad.addColorStop(1, '#8a5a2a');
+  gctx.fillStyle = grad;
+  statueShapeFill(gctx, X, Y, sc);
+  gctx.restore();
+  if (S.anim.casting) {
+    gctx.save();
+    gctx.globalAlpha = 0.7 + Math.sin(performance.now() / 90) * 0.2;
+    const glowGrad = gctx.createLinearGradient(0, rectPxY - 14 * sc, 0, rectPxY + 14 * sc);
+    glowGrad.addColorStop(0, 'rgba(255,220,120,0)'); glowGrad.addColorStop(0.5, 'rgba(255,200,80,.9)'); glowGrad.addColorStop(1, 'rgba(255,220,120,0)');
+    gctx.fillStyle = glowGrad;
+    gctx.fillRect(X(ST.cx - 180), rectPxY - 14 * sc, 360 * sc, 28 * sc);
+    gctx.restore();
+  }
+}
+function drawStageMarkers(X, Y, sc) {
+  if (S.scene === 'shosoin') return;
+  for (let n = 1; n <= 8; n++) {
+    const ly = ST.baseY - ST_TOTALH * (n / 8);
+    const done = (S.build.level || 0) >= n;
+    const px = X(ST.cx - 205), py = Y(ly);
+    gctx.beginPath(); gctx.arc(px, py, 13 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#c9822c' : '#fff6e0';
+    gctx.fill();
+    gctx.strokeStyle = '#8a5a2a'; gctx.lineWidth = 1.6 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#8a5a2a';
+    gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(String(n), px, py + 0.5 * sc);
+  }
+}
+function drawEyes(X, Y, sc, painted) {
+  const ex = ST.headR * 0.32, ey = ST.headCY + 2;
+  [-1, 1].forEach(side => {
+    const px = X(ST.cx + side * ex), py = Y(ey);
+    gctx.beginPath(); gctx.ellipse(px, py, 9 * sc, 5 * sc, 0, 0, TAU);
+    gctx.fillStyle = painted ? '#2c1c08' : '#fdfaf0';
+    gctx.fill();
+    gctx.strokeStyle = '#5a3a10'; gctx.lineWidth = 1.4 * sc; gctx.stroke();
+    if (painted) { gctx.fillStyle = '#fff'; gctx.beginPath(); gctx.arc(px - 2 * sc, py - 1.5 * sc, 1.6 * sc, 0, TAU); gctx.fill(); }
+  });
+}
+function drawPourFx(X, Y, sc, t) {
+  const targetY = ST.baseY - ST_TOTALH * clamp((S.build.levelF || 0) / 8, 0, 1);
+  gctx.fillStyle = 'rgba(255,190,70,.85)';
+  for (let i = 0; i < 5; i++) {
+    const seed = i * 0.37;
+    const drop = ((t * 1.6 + seed) % 1);
+    const dy = lerp(ST_TOP - 20, targetY, drop);
+    const dx = ST.cx + Math.sin((t * 3 + seed) * 5) * 10;
+    gctx.beginPath(); gctx.ellipse(X(dx), Y(dy), 3 * sc, 6 * sc, 0, 0, TAU); gctx.fill();
+  }
+}
+function drawTroubledTown(X, Y, sc) {
+  gctx.fillStyle = 'rgba(90,70,40,.55)';
+  const huts = [[120, 520], [170, 530], [220, 515], [860, 525], [900, 535]];
+  huts.forEach(([hx, hy]) => {
+    gctx.fillRect(X(hx - 14), Y(hy - 18), 28 * sc, 22 * sc);
+    gctx.beginPath(); gctx.moveTo(X(hx - 18), Y(hy - 18)); gctx.lineTo(X(hx), Y(hy - 34)); gctx.lineTo(X(hx + 18), Y(hy - 18)); gctx.closePath(); gctx.fill();
+  });
+  gctx.fillStyle = 'rgba(80,60,40,.25)';
+  gctx.fillRect(X(0), Y(480), 1000 * sc, 160 * sc);
+}
+function drawGatherInset(X, Y, sc) {
+  const gx = 870, gy = 470, gw = 40, gh = 260;
+  gctx.fillStyle = 'rgba(255,255,255,.6)'; gctx.strokeStyle = '#8a5a2a'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(gx - gw / 2), Y(gy - gh), gw * sc, gh * sc); gctx.fill(); gctx.stroke();
+  const frac = clamp((S.zairyoFill || 0) / 1000, 0, 1);
+  gctx.fillStyle = '#c9822c';
+  gctx.fillRect(X(gx - gw / 2), Y(gy - gh * frac), gw * sc, gh * frac * sc);
+  [100, 500, 1000].forEach(v => {
+    const ty = gy - gh * (v / 1000);
+    gctx.strokeStyle = '#8a5a2a'; gctx.lineWidth = 1.4 * sc;
+    gctx.beginPath(); gctx.moveTo(X(gx - gw / 2 - 6), Y(ty)); gctx.lineTo(X(gx + gw / 2 + 6), Y(ty)); gctx.stroke();
+  });
+  gctx.fillStyle = '#5a3a10'; gctx.font = `700 ${14 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(Math.round(S.zairyoFill || 0) + 'トン', X(gx), Y(gy - gh - 16));
+}
+function drawRuriCup(ctx, px, py, s) {
+  ctx.save(); ctx.translate(px, py); ctx.scale(s, s);
+  ctx.fillStyle = 'rgba(120,190,220,.85)'; ctx.strokeStyle = '#3a6a80'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-22, -30); ctx.quadraticCurveTo(-26, 10, -10, 26); ctx.lineTo(10, 26); ctx.quadraticCurveTo(26, 10, 22, -30);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, -30, 22, 7, 0, 0, TAU); ctx.fillStyle = 'rgba(180,220,235,.9)'; ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.beginPath(); ctx.ellipse(-8, -5, 4, 14, -0.3, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+function drawBiwa(ctx, px, py, s) {
+  ctx.save(); ctx.translate(px, py); ctx.scale(s, s);
+  ctx.fillStyle = '#8a5a2a'; ctx.strokeStyle = '#5a3a10'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(0, 10, 26, 34, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#c9822c';
+  ctx.beginPath(); ctx.ellipse(0, 10, 17, 24, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#5a3a10'; ctx.fillRect(-5, -46, 10, 40);
+  ctx.strokeStyle = 'rgba(255,230,168,.9)'; ctx.lineWidth = 1.4;
+  for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 3, -40); ctx.lineTo(i * 4, 40); ctx.stroke(); }
+  ctx.restore();
+}
+function drawShosoinScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f7e6bf'); g.addColorStop(1, '#e8c98a');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.strokeStyle = 'rgba(138,90,42,.55)'; gctx.lineWidth = 3 * sc; gctx.setLineDash([10, 8]);
+  gctx.beginPath(); gctx.moveTo(X(80), Y(120)); gctx.quadraticCurveTo(X(400), Y(60), X(560), Y(140)); gctx.quadraticCurveTo(X(750), Y(200), X(880), Y(160)); gctx.stroke();
+  gctx.setLineDash([]);
+  gctx.fillStyle = '#5a3a10'; gctx.font = `${16 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('ペルシャ・インド', X(110), Y(100));
+  gctx.fillText('唐（中国）', X(560), Y(120));
+  gctx.fillText('奈良', X(880), Y(140));
+  [[350, 460], [650, 460]].forEach(([px, py]) => {
+    gctx.fillStyle = '#c9822c'; gctx.fillRect(X(px - 70), Y(py), 140 * sc, 80 * sc);
+    gctx.strokeStyle = '#8a5a2a'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(px - 70), Y(py), 140 * sc, 80 * sc);
+  });
+  drawRuriCup(gctx, X(350), Y(430), sc * 1.1);
+  drawBiwa(gctx, X(650), Y(430), sc * 1.1);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'shosoin') { drawShosoinScene(X, Y, sc); return; }
+  drawSky(X, Y, sc);
+  drawGroundYard(X, Y, sc);
+  drawScaffold(X, Y, sc);
+  drawStatueOutline(X, Y, sc);
+  drawStatueFilled(X, Y, sc);
+  drawStageMarkers(X, Y, sc);
+  if (S.anim.casting) drawPourFx(X, Y, sc, t);
+  if ((S.build.levelF || 0) >= 7.99) drawEyes(X, Y, sc, S.eyesPainted);
+  if (S.scene === 'riyu') drawTroubledTown(X, Y, sc);
+  if (S.scene === 'zairyo') drawGatherInset(X, Y, sc);
+}
+
+// ---------- コンドウめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fff6e0'); grd.addColorStop(1, '#e8c98a');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'gauge') {
+    const v = clamp((S.zairyoFill || 0) / 1000, 0, 1);
+    const barW = R * 0.5;
+    const bh = v * R * 1.1;
+    sctx.strokeStyle = '#8a5a2a'; sctx.lineWidth = R * 0.02; sctx.strokeRect(R - barW / 2, R * 0.15, barW, R * 1.65);
+    sctx.fillStyle = '#c9822c';
+    sctx.beginPath(); sctx.roundRect(R - barW / 2, h - R * 0.3 - bh, barW, bh, 8); sctx.fill();
+    label(Math.round(S.zairyoFill || 0) + ' トン');
+  } else if (mode === 'layer') {
+    const n = S.scope.n || 0;
+    const segW = R * 0.18, segGap = R * 0.05, totalW = (segW + segGap) * 8 - segGap;
+    const startX = R - totalW / 2;
+    for (let i = 1; i <= 8; i++) {
+      const done = i <= n;
+      sctx.fillStyle = done ? '#c9822c' : 'rgba(138,90,42,.15)';
+      sctx.strokeStyle = '#8a5a2a'; sctx.lineWidth = R * 0.012;
+      const bx = startX + (i - 1) * (segW + segGap);
+      const bh2 = R * 0.9;
+      sctx.beginPath(); sctx.rect(bx, R * 1.25 - bh2, segW, bh2); sctx.fill(); sctx.stroke();
+    }
+    label(n > 0 ? ('いま ' + NUMS[n - 1] + 'だんめ') : 'じゅんびちゅう');
+  } else if (mode === 'eye') {
+    if (S.scope.painted) {
+      sctx.fillStyle = '#fdfaf0'; sctx.beginPath(); sctx.ellipse(R, R, R * 0.55, R * 0.32, 0, 0, TAU); sctx.fill();
+      sctx.fillStyle = '#2c1c08'; sctx.beginPath(); sctx.arc(R, R, R * 0.16, 0, TAU); sctx.fill();
+      sctx.fillStyle = '#fff'; sctx.beginPath(); sctx.arc(R - R * 0.05, R - R * 0.05, R * 0.05, 0, TAU); sctx.fill();
+    } else {
+      sctx.fillStyle = '#fdfaf0'; sctx.beginPath(); sctx.ellipse(R, R, R * 0.5, R * 0.28, 0, 0, TAU); sctx.fill();
+    }
+    sctx.strokeStyle = '#8a5a2a'; sctx.lineWidth = R * 0.03;
+    sctx.beginPath(); sctx.ellipse(R, R, R * 0.55, R * 0.32, 0, 0, TAU); sctx.stroke();
+    label(S.scope.painted ? '目が 描きこまれた！' : 'まだ 目が ない…');
+  } else if (mode === 'treasure') {
+    if (S.scope.item === 'ruri') {
+      drawRuriCup(sctx, R, R * 0.95, R * 0.028);
+      label('瑠璃坏（るりのつき）');
+    } else if (S.scope.item === 'biwa') {
+      drawBiwa(sctx, R, R * 0.95, R * 0.028);
+      label('螺鈿紫檀五絃琵琶');
+    } else {
+      sctx.fillStyle = '#c9822c'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+      sctx.fillText('🏺', R, R * 0.85);
+      label('タップして しらべよう');
+    }
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe6a8'); g2.addColorStop(1, 'rgba(255,230,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#c9822c'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🙏', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#c9822c'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔔', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#5a3a10';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#b8672a', '#ffce54', '#d9944a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 鋳造の時間送り ----------
+function startCast(target, onDone) {
+  if (S.anim.casting) return;
+  S.anim = { casting: true, t: 0, from: S.build.levelF, to: target, onDone };
+  sClank();
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  if (S.anim.casting) {
+    S.anim.t = clamp(S.anim.t + dt / 1.1, 0, 1);
+    S.build.levelF = lerp(S.anim.from, S.anim.to, easeInOut(S.anim.t));
+    if (S.anim.t >= 1) {
+      S.build.level = S.anim.to; S.build.levelF = S.anim.to;
+      S.anim.casting = false;
+      const cb = S.anim.onDone; S.anim = {};
+      if (cb) cb();
+    }
+  }
+  if (S.anim.zfilling) {
+    S.anim.zt = clamp(S.anim.zt + dt / 0.9, 0, 1);
+    S.zairyoFill = lerp(0, S.anim.zTarget, easeInOut(S.anim.zt));
+    if (S.anim.zt >= 1) { S.zairyoFill = S.anim.zTarget; S.anim.zfilling = false; }
+  }
+
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+stageCv.addEventListener('pointerdown', ev => {
+  ac();
+  const r = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(r.width, r.height);
+  const mx = (ev.clientX - r.left - ox) / sc, my = (ev.clientY - r.top - oy) / sc;
+  if (S.scene === 'kaigen' && STEPS.m_kaigen.readyForEye && !S.eyesPainted) {
+    if (my > ST.headCY - 70 && my < ST.headCY + 70 && mx > ST.cx - ST.headR - 10 && mx < ST.cx + ST.headR + 10) {
+      STEPS.m_kaigen.paintEyes();
+    }
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '奈良時代（710〜784年ごろ）';
+  const titles = {
+    riyu: '😟 なぜ 大仏を つくったの？',
+    zairyo: '🔨 材料を あつめよう',
+    chuzo: '🔥 銅を 流しこもう（①〜⑧）',
+    kaigen: '👁 開眼供養',
+    shosoin: '🌏 正倉院と シルクロード',
+    done: '🙏 大仏づくり ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '大仏づくり';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_riyu', 'm_zairyo', 'm_chuzo', 'm_kaigen', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = {};
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'riyu', build: { level: 0, levelF: 0 }, scope: { type: 'idle' }, eyesPainted: false });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🔥🙏✨</div>
+        <h1>大仏づくり工房</h1>
+        <div class="sub">〜 奈良の大仏が できるまでの ひみつ 〜</div>
+        <p class="talk">ようこそ！ ぼくは 銅から 生まれた 精霊、<b>コンドウ</b>。今から 1300年近く前、大仏が 作られた ときの ことを おぼえているんだ。<br>
+        大仏は どうして 作られたのか、どうやって あの 大きな すがたに なったのか……<b>いっしょに たしかめに いこう！</b></p>
+        <button class="btn" id="startBtn">大仏づくりを 見に行く！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">大仏づくりに <b>かかわった 人</b>は、どれくらいだったと思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🧑</span><b>ア</b> 100人くらい</div>
+          <div class="vcard" data-v="1"><span class="vicon">👥</span><b>イ</b> 1万人くらい</div>
+          <div class="vcard" data-v="2"><span class="vicon">🌏</span><b>ウ</b> 260万人以上</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、工房で たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：なぜ大仏をつくったのか ---
+  m_riyu: {
+    enter() {
+      Object.assign(S, { scene: 'riyu', build: { level: 0, levelF: 0 }, scope: { type: 'idle' } });
+      updateLoc();
+      this.found = new Set();
+      setWish('😟', `${W.shoumu}が いきていた ころ、世の中は とても 不安定だったんだ。3つの できごとを 見てみよう。`);
+      say(`下の ボタンを ぜんぶ おして、当時 なにが 起きていたか 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons([
+        { label: '😷 病気' + (this.found.has(0) ? '✓' : ''), cb: el => this.reveal(0, `${ruby('病気', 'びょうき')}が 大はやり。多くの 人が なくなってしまった。`) },
+        { label: '🌾 ききん' + (this.found.has(1) ? '✓' : ''), cb: el => this.reveal(1, `作物が 育たない ${ruby('凶作', 'きょうさく')}や ききんも 続いた。`) },
+        { label: '⚔️ ' + ruby('反乱', 'はんらん') + (this.found.has(2) ? '✓' : ''), cb: el => this.reveal(2, `${ruby('貴族', 'きぞく')}による ${ruby('反乱', 'はんらん')}も 起きて、都は 何度も 引っこしした。`) },
+      ]);
+      if (this.found.size >= 3) {
+        setButtons([{ label: 'そこで 天皇は……', cb: () => this.ask() }]);
+      }
+    },
+    reveal(i, txt) {
+      sTap(); this.found.add(i);
+      say(txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`こまった 世の中を 見て、${W.shoumu}は 大仏を つくることに したんだ。それは なぜだと 思う？`);
+      setButtons(choiceRow(['ア みんなに じまんするため', 'イ 仏の力で 国を 守ろうとした', 'ウ 外国に プレゼントするため'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_riyu'); S.phase = 'done';
+        say(`せいかい！ ${W.shoumu}は 仏の力に すがって、病気や 争いの ない 世の中を 願ったんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.shoumu}は お坊さんの ${W.gyouki}にも 力を かりた。${W.gyouki}は 全国を まわって 人々に 協力を よびかけたんだよ。`);
+        setButtons([{ label: 'つぎへ（材料を 集めよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア みんなに じまんするため', 'イ 仏の力で 国を 守ろうとした', 'ウ 外国に プレゼントするため'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：材料を集めよう ---
+  m_zairyo: {
+    enter() {
+      Object.assign(S, { scene: 'zairyo', build: { level: 0, levelF: 0 }, scope: { type: 'gauge' }, zairyoFill: 0 });
+      updateLoc();
+      S.phase = 'guess';
+      setWish('🔨', `大仏づくりには、大量の 銅（どう）が 必要だったよ。全国から 銅や すずが 集められたんだ。`);
+      say(`大仏を つくるのに 必要だった 銅は、どれくらいの 重さだったと 思う？`);
+      setButtons(choiceRow(['ア 100トン', 'イ 500トン', 'ウ 1000トン'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el); hideWish();
+      const guessTon = [100, 500, 1000][n];
+      say(`たしかめてみよう……`);
+      setButtons([]);
+      S.zairyoFill = 0;
+      S.anim.zfilling = true; S.anim.zt = 0; S.anim.zTarget = guessTon;
+      setTimeout(() => this.reveal(n), 1000);
+    },
+    reveal(n) {
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_zairyo'); S.phase = 'done';
+        say(`せいかい！ 実さいに 集められた 銅は 熟銅（じゅくどう）やく74万斤、今の 重さで いうと <b>約500トン</b>。<br><br>💡 <b>たいせつポイント</b><br>10円玉（銅でできている）を ならべたら、なんと <b>約1億1千万まい分</b>！ それくらい たくさんの 銅が 全国から 集められたんだよ。`);
+        setButtons([{ label: 'つぎへ（銅を 流しこもう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        S.zairyoFill = 0;
+        say(`ちがったみたい……もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 100トン', 'イ 500トン', 'ウ 1000トン'], (i, el) => this.pick(i, el)));
+      }
+    },
+  },
+
+  // --- M3：鋳造を8段階で積み上げる ---
+  m_chuzo: {
+    enter() {
+      Object.assign(S, { scene: 'chuzo', build: { level: 0, levelF: 0 }, scope: { type: 'layer', n: 0 }, eyesPainted: false });
+      updateLoc();
+      S.phase = 'casting';
+      setWish('🔥', `いよいよ 大仏づくりの ヤマば。とけた 銅を <b>下から 上へ</b>、8回に わけて 流しこんでいくよ。①から じゅんばんに おそう！`);
+      say(`①のボタンを おして、さいしょの 段を 流しこもう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) {
+        const done = n <= S.build.level;
+        const next = n === S.build.level + 1;
+        list.push({ label: NUMS[n - 1] + (done ? '✓' : ''), cls: 'pos' + (done ? ' sel' : ''), disabled: !next, cb: () => this.pour(n) });
+      }
+      setControls(list);
+    },
+    pour(n) {
+      if (n !== S.build.level + 1 || S.anim.casting) return;
+      S.scope = { type: 'layer', n };
+      sClank();
+      setControls([]);
+      startCast(n, () => this.onPoured(n));
+    },
+    onPoured(n) {
+      if (n < 8) {
+        say(`${NUMS[n - 1]}の 段が 冷えて 固まった！ つぎは ${NUMS[n]}だよ。`);
+        this.refreshCtl();
+      } else {
+        S.phase = 'done'; sFanfare(); scopeBurst(); award('m_chuzo');
+        say(`✨ 大仏の かたちが ぜんぶ できた！ ✨<br><br>💡 <b>たいせつポイント</b><br>本物の大仏も、銅を <b>8回に わけて</b> 下から上へ 流しこんで 作られたんだよ。1回ずつ 冷やして かためながら、つぎの段へ すすんだんだ。`);
+        setButtons([{ label: 'つぎへ（開眼供養）', cb: nextStep }]);
+      }
+    },
+  },
+
+  // --- M4：開眼供養 ---
+  m_kaigen: {
+    enter() {
+      Object.assign(S, { scene: 'kaigen', build: { level: 8, levelF: 8 }, scope: { type: 'eye', painted: false }, eyesPainted: false });
+      updateLoc();
+      hideWish();
+      this.readyForEye = false;
+      S.phase = 'ask';
+      say(`大仏の すがたは できあがった。でも 最後に、目を 描きいれる 儀式「${W.kaigen}」が のこっているよ。<br>この 特別な役目に まねかれたのは、どこの お坊さんだったと思う？`);
+      setButtons(choiceRow(['ア 日本のお坊さん', 'イ 中国のお坊さん', 'ウ インドから来たお坊さん'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 2) {
+        sYes();
+        say(`せいかい！ インド出身の お坊さん「${W.bodai}」が、はるばる 海をこえて まねかれ、開眼の役目を つとめたんだ。<br>大仏の 顔を タップして、目を 描きいれてみよう！`);
+        setButtons([]);
+        this.readyForEye = true;
+      } else {
+        sHmm();
+        say(`ちがうよ。とても 遠くの国から まねかれたんだ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 日本のお坊さん', 'イ 中国のお坊さん', 'ウ インドから来たお坊さん'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+    paintEyes() {
+      if (S.eyesPainted || !this.readyForEye) return;
+      S.eyesPainted = true; S.scope = { type: 'eye', painted: true };
+      sFanfare(); scopeBurst(); award('m_kaigen'); S.phase = 'done';
+      say(`✨ 開眼！ 大仏に いのちが やどった ✨<br><br>💡 <b>たいせつポイント</b><br>752年の 開眼供養には たくさんの人が 集まった。目を 描く筆に むすんだ 糸を、みんなで いっしょに もって、完成を お祝いしたんだよ。`);
+      setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+    },
+  },
+
+  // --- はかせチャレンジ：正倉院とシルクロード ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'shosoin', scope: { type: 'treasure', item: null } });
+      updateLoc();
+      hideWish();
+      this.seen = new Set(); this.done = false;
+      say(`さいごは <b>はかせチャレンジ</b>！ 大仏づくりの ころ、日本には シルクロードを通って、はるか遠くの 国の 宝物も 届いていたんだ。それが しまわれている ${W.shosoin}を のぞいてみよう。`);
+      setButtons([{ label: 'たからものを 見る', cb: () => this.showTreasures() }]);
+    },
+    showTreasures() {
+      say(`2つの たからものを タップして、どこから 来たのか しらべてみよう。`);
+      setButtons([
+        { label: '🍷 ' + W.ruri, cb: el => this.pickItem('ruri') },
+        { label: '🎸 ' + W.biwa, cb: el => this.pickItem('biwa') },
+      ]);
+    },
+    pickItem(kind) {
+      sTap(); this.seen.add(kind);
+      S.scope = { type: 'treasure', item: kind };
+      scopeBurst();
+      if (kind === 'ruri') {
+        say(`${W.ruri}は ガラスの さかずき。とても 遠く、ペルシャ（今の イラン あたり）から 伝わったと 考えられているよ。`);
+      } else {
+        say(`${W.biwa}は 5本の 弦を もつ 琵琶（びわ）。5弦の 琵琶は 世界でも これ ただ 1つだけ 残っている、とても めずらしい 楽器なんだ。`);
+      }
+      if (this.seen.size >= 2 && !this.done) {
+        this.done = true;
+        setTimeout(() => {
+          award('hakase'); sFanfare(); scopeBurst();
+          say(`シルクロードを通って、遠い 国の めずらしい 品物が、はるばる 奈良まで 届いていたんだね。<br><br>💡 <b>たいせつポイント</b><br>大仏づくりは 国内だけの 話じゃない。当時から 日本は、世界と つながっていたんだよ。`);
+          setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        }, 1200);
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', build: { level: 8, levelF: 8 }, scope: { type: 'glow' }, eyesPainted: true });
+      updateLoc();
+      const votedRight = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ 大仏づくり工房 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 大仏づくりを 命じたのは（<span class="blankWord" data-a="聖武天皇">？？？</span>）。<br>
+        ② 銅は 8回に わけて、（<span class="blankWord" data-a="下から上">？？？</span>）へ 流しこまれた。<br>
+        ③ 大仏づくりに かかわった 人は、のべ（<span class="blankWord" data-a="260万人以上">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ 260万人以上</b> でした！ 当時の 日本の 人口の 約半分が かかわったと 言われているよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">大仏の 高さは 約15m（台座を ふくめると 約18m）。 道具の少ない 時代に、多くの人の 力で 大きな 大仏を 作りあげたんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>教科書や 資料集で、正倉院の 宝物を 1つ しらべてみよう。おうちの人に 大仏づくりの 話を してみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#6a4010'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'done', eyesPainted: true });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 大仏の すがたを 見くらべながら、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「大仏は 何段階で 作られた？」「開眼供養で まねかれたのは どこの お坊さん？」`);
+      setButtons([
+        { label: '🕳 型だけ（つくる前）', cls: 'sub', cb: () => this.show(0) },
+        { label: '🔥 とちゅう（④だんめ）', cls: 'sub', cb: () => this.show(4) },
+        { label: '✨ かんせい', cls: 'sub', cb: () => this.show(8) },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(level) {
+      S.build.level = level; S.build.levelF = level;
+      S.eyesPainted = level >= 8;
+      S.scope = level >= 8 ? { type: 'glow' } : { type: 'layer', n: level };
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_chuzo などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
