@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>みのりの村 — お米づくり たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef8ea 0%, #def0d0 55%, #f5e8ad 100%);
+    color: #33511f;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #4a8a1f; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a8a4a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e3f3d4; border: 2px solid #b8dba0;
+    font-size: clamp(16px, 1.8vw, 26px); color: #b8dba0;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe6a8, #7dc24a);
+    border-color: #4a8a1f; color: #2c5c14;
+    box-shadow: 0 0 14px rgba(120, 180, 40, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #eaf7e0 0%, #fdf6d8 100%);
+    border: 3px solid #7fbf5a;
+    box-shadow: inset 0 0 40px rgba(60, 120, 30, .12), 0 4px 18px rgba(40, 80, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #3f6a28; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #4a8a1f; color: #f8ffe8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(40, 80, 10, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(40, 80, 20, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #a8dd7a; cursor: pointer;
+    background: linear-gradient(180deg, #7dc24a, #4a9e2f); color: #fff;
+    box-shadow: 0 3px 0 #2c5c14; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #6a8ab0, #3d5f8a); border-color: #a0c0e0; box-shadow: 0 3px 0 #253d5c; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+  .ctl.time { background: linear-gradient(180deg, #6a8ab0, #3d5f8a); border-color: #a0c0e0; box-shadow: 0 3px 0 #253d5c; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #4a8a1f; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(40, 90, 20, .3), inset 0 0 24px rgba(40, 90, 20, .18);
+    flex-shrink: 0; background: #f2f8e2;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6a8a4a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #2c5c14; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fdfff5; border: 2px solid #cbe8a8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6a8a4a; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #33511f;
+    border: 1.5px solid #d8e8b8;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #4a8a1f; background: #ddf0a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fbf8e0, #eef0c0); color: #33511f;
+    border: 2px solid #4a8a1f; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #4a8a1f; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #7dc24a, #4a9e2f); color: #fff;
+    box-shadow: 0 3px 0 #2c5c14, 0 5px 12px rgba(40, 90, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #2c5c14; }
+  .btn.sub {
+    background: #e3f3d4; color: #3f6a28; box-shadow: 0 3px 0 #b8dba0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #33511f; box-shadow: 0 3px 0 #cbe8a8; font-weight: 400; border: 1.5px solid #d8e8b8; }
+  .btn.choice.picked { background: #eef8d0; outline: 3px solid #7dc24a; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(20, 40, 10, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fdfff5, #eef0b8);
+    border: 3px solid #7fbf5a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 60, 10, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #4a8a1f; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #4a8a1f; }
+  .panel .sub { color: #6a8a4a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #33511f; border: 1.5px solid #d8e8b8; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6a8a4a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #33511f; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d8e8b8; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #4a8a1f; background: #eef8d0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #4a8a1f; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #4a8a1f;
+    color: #2c5c14; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6a8a4a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e3f3d4; color: #3f6a28;
+    border: 1px solid #b8dba0; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #c8e0a0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🌾 みのりの村<small>— 田んぼと いっしょに 一年を すごそう —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_taue" title="田植え">★</div>
+    <div class="badge" id="bd_m_water" title="水の管理">★</div>
+    <div class="badge" id="bd_m_hiryo" title="肥料">★</div>
+    <div class="badge" id="bd_m_taifu" title="台風">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">🌾 たんぼ 〜 一年を とおして そだてよう 〜</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 みのりメガネ 〜 稲の ようすが 見える 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(60,90,20,.18)"/>
+            <!-- 稲穂の かみかざり -->
+            <g stroke="#c9a227" stroke-width="2.4" fill="none" stroke-linecap="round">
+              <path d="M48 14 Q42 2 34 -6"/>
+              <path d="M72 14 Q78 2 86 -6"/>
+            </g>
+            <g fill="#e8c34a" stroke="#c9a227" stroke-width=".8">
+              <ellipse cx="44" cy="4" rx="3" ry="4.2" transform="rotate(-30 44 4)"/>
+              <ellipse cx="39" cy="-2" rx="3" ry="4.2" transform="rotate(-30 39 -2)"/>
+              <ellipse cx="34" cy="-7" rx="3" ry="4.2" transform="rotate(-30 34 -7)"/>
+              <ellipse cx="76" cy="4" rx="3" ry="4.2" transform="rotate(30 76 4)"/>
+              <ellipse cx="81" cy="-2" rx="3" ry="4.2" transform="rotate(30 81 -2)"/>
+              <ellipse cx="86" cy="-7" rx="3" ry="4.2" transform="rotate(30 86 -7)"/>
+            </g>
+            <!-- あたま -->
+            <circle cx="60" cy="46" r="34" fill="#eef8d0" stroke="#4a8a1f" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="36" cy="52" rx="6" ry="4" fill="#ffd8a8" opacity=".5"/>
+            <ellipse cx="84" cy="52" rx="6" ry="4" fill="#ffd8a8" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="44" cy="44" rx="4.5" ry="6" fill="#33511f"/>
+              <ellipse cx="76" cy="44" rx="4.5" ry="6" fill="#33511f"/>
+              <circle cx="45.5" cy="41" r="1.4" fill="#fff"/>
+              <circle cx="77.5" cy="41" r="1.4" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M50 60 Q60 66 70 60" stroke="#2c5c14" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- からだ（着物ふう） -->
+            <path d="M30 122 Q26 90 34 78 Q60 68 86 78 Q94 90 90 122 Z" fill="#7dc24a" stroke="#4a8a1f" stroke-width="2.5"/>
+            <!-- おび -->
+            <rect x="30" y="96" width="60" height="9" fill="#c9a227"/>
+            <circle cx="60" cy="100" r="5" fill="#eef8d0" stroke="#4a8a1f" stroke-width="1.2"/>
+          </svg>
+          <div class="catname">たんぼの<ruby>精霊<rt>せいれい</rt></ruby> <ruby>イナホ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌾 お米づくりミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   みのりの村 — お米づくり（小5社会・協力型・1ファイル）
+   田植えの時期 → 水の管理（中干し） → 肥料の量 →
+   台風から稲を守る → はかせ（食料自給率）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeOutBack(x) {
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+}
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  taue: ruby('田植', 'たう') + 'え',
+  inekari: ruby('稲刈', 'いねか') + 'り',
+  nakaboshi: ruby('中干', 'なかぼ') + 'し',
+  hiryo: ruby('肥料', 'ひりょう'),
+  touhuku: ruby('倒伏', 'とうふく'),
+  jikyu: ruby('自給率', 'じきゅうりつ'),
+  nouka: ruby('農家', 'のうか'),
+  taihuu: ruby('台風', 'たいふう'),
+};
+
+// ---------- 田んぼごよみ ----------
+const NUMS = '①②③④⑤⑥⑦⑧';
+const MONTHS = ['4月', '5月', '6月', '7月', '8月', '9月', '10月'];
+
+// ---------- 判定ロジック ----------
+function judgeTaue(m) { // m: 1-7 （①4月 〜 ⑦10月）
+  let growth;
+  if (m === 2) growth = 1.0;
+  else if (m === 1) growth = 0.35;
+  else growth = Math.max(0.08, 1.0 - (m - 2) * 0.22);
+  const level = growth >= 0.9 ? 'good' : (m === 1 ? 'early' : 'late');
+  return { growth, level };
+}
+function judgeHiryo(n) { // n: 1-8
+  const table = [0.3, 0.5, 0.75, 1.0, 1.0, 0.8, 0.5, 0.28];
+  const growth = table[n - 1];
+  const lodged = n >= 7;
+  const level = (n === 4 || n === 5) ? 'good' : (n <= 2 ? 'low' : (lodged ? 'over' : 'okish'));
+  return { growth, lodged, level };
+}
+function seasonOf(month) {
+  if (month <= 2) return 'spring';
+  if (month <= 5) return 'summer';
+  return 'autumn';
+}
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  field: { month: 2, growth: 0, stage: 'seedling', lodged: false, flooded: true, wind: 0 },
+  scope: { type: 'none' },
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  anim: {},
+  chosenMonth: 2,
+  chosenHiryo: 4,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 田んぼの背景 ----------
+function drawSky(X, Y, sc, season, wind) {
+  const skies = {
+    spring: ['#c8ecf6', '#eef8ea'],
+    summer: ['#5cb8ec', '#d9f5cf'],
+    autumn: ['#f3d98a', '#fdeec0'],
+  };
+  const c = skies[season] || skies.spring;
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(340));
+  g.addColorStop(0, wind > 0.3 ? '#7a8a90' : c[0]);
+  g.addColorStop(1, wind > 0.3 ? '#b0bfc4' : c[1]);
+  gctx.fillStyle = g;
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 340 * sc);
+  gctx.fillStyle = 'rgba(70,120,60,.32)';
+  gctx.beginPath(); gctx.moveTo(X(0), Y(260));
+  gctx.quadraticCurveTo(X(180), Y(170), X(360), Y(260));
+  gctx.quadraticCurveTo(X(560), Y(190), X(760), Y(260));
+  gctx.quadraticCurveTo(X(900), Y(210), X(1000), Y(260));
+  gctx.lineTo(X(1000), Y(340)); gctx.lineTo(X(0), Y(340)); gctx.closePath(); gctx.fill();
+  if (wind > 0.3) {
+    gctx.fillStyle = 'rgba(90,100,110,.5)';
+    [[150, 60], [420, 45], [700, 70], [880, 50]].forEach(([cx, cy]) => {
+      gctx.beginPath(); gctx.ellipse(X(cx), Y(cy), 65 * sc, 26 * sc, 0, 0, TAU); gctx.fill();
+    });
+  } else {
+    gctx.fillStyle = 'rgba(255,214,120,.7)';
+    gctx.beginPath(); gctx.arc(X(880), Y(55), 42 * sc, 0, TAU); gctx.fill();
+  }
+}
+function drawGround(X, Y, sc, flooded) {
+  gctx.fillStyle = flooded ? '#a8cfe0' : '#c9ac72';
+  gctx.fillRect(X(20), Y(340), 960 * sc, 220 * sc);
+  if (flooded) {
+    gctx.strokeStyle = 'rgba(255,255,255,.45)'; gctx.lineWidth = 1.4 * sc;
+    for (let x = 60; x < 960; x += 95) { gctx.beginPath(); gctx.moveTo(X(x), Y(365)); gctx.lineTo(X(x + 45), Y(365)); gctx.stroke(); }
+  } else {
+    gctx.strokeStyle = 'rgba(110,80,40,.3)'; gctx.lineWidth = 1 * sc;
+    for (let x = 70; x < 950; x += 68) { gctx.beginPath(); gctx.moveTo(X(x), Y(355)); gctx.lineTo(X(x + 14), Y(392)); gctx.stroke(); }
+  }
+  gctx.fillStyle = '#8fa25a';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+  gctx.strokeStyle = 'rgba(90,110,50,.35)'; gctx.lineWidth = 1.5 * sc;
+  for (let x = 40; x < 1000; x += 130) { gctx.beginPath(); gctx.moveTo(X(x), Y(560)); gctx.lineTo(X(x), Y(640)); gctx.stroke(); }
+}
+function drawRainWind(X, Y, sc, t) {
+  gctx.strokeStyle = 'rgba(200,220,230,.5)'; gctx.lineWidth = 1.4 * sc;
+  for (let i = 0; i < 26; i++) {
+    const seedx = (i * 137.5) % 1000;
+    const x = (seedx + t * 400) % 1000;
+    const y = (i * 53) % 320 + 20;
+    gctx.beginPath(); gctx.moveTo(X(x), Y(y)); gctx.lineTo(X(x - 30), Y(y + 50)); gctx.stroke();
+  }
+}
+function drawRiceHill(X, Y, sc, cx, cy, growth, stage, lodged, windAmt, seed) {
+  if (growth <= 0.02) return;
+  const h = lerp(16, 74, growth);
+  const sway = lodged ? h * 0.9 : (windAmt > 0 ? Math.sin(performance.now() / 260 + seed) * windAmt * h * 0.35 : 0);
+  const ripe = stage === 'ripe';
+  const col = ripe ? '#e0b030' : (growth < 0.35 ? '#8fc95a' : '#3f9e2a');
+  gctx.strokeStyle = col; gctx.lineCap = 'round';
+  const blades = 5;
+  for (let i = 0; i < blades; i++) {
+    const off = (i - 2) * 3.4;
+    const bend = (i - 2) * 2.6 + sway;
+    gctx.lineWidth = Math.max(1, 2 * sc);
+    gctx.beginPath();
+    gctx.moveTo(X(cx + off), Y(cy));
+    gctx.quadraticCurveTo(X(cx + off + bend * 0.55), Y(cy - h * 0.55), X(cx + off + bend), Y(cy - h));
+    gctx.stroke();
+  }
+  if (ripe && growth > 0.5) {
+    gctx.fillStyle = '#f4c840';
+    const tipx = cx + sway, tipy = cy - h;
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 4 - 0.5) * 0.9;
+      const gx = tipx + Math.sin(a) * 7, gy = tipy + Math.abs(a) * 6 + i * 3;
+      gctx.beginPath(); gctx.ellipse(X(gx), Y(gy), 3.2 * sc, 2 * sc, a, 0, TAU); gctx.fill();
+    }
+  }
+}
+function drawRicePlants(X, Y, sc, f) {
+  if (f.growth <= 0.02) return;
+  const cols = 8, rows = 3;
+  for (let r = 0; r < rows; r++) {
+    const rowY = 380 + r * 60;
+    for (let c = 0; c < cols; c++) {
+      const cx = 100 + c * 110 + (r % 2) * 45;
+      drawRiceHill(X, Y, sc, cx, rowY, f.growth, f.stage, f.lodged, f.wind, r * cols + c);
+    }
+  }
+}
+function drawField(t, X, Y, sc) {
+  const f = S.field;
+  const season = f.month >= 1 ? seasonOf(f.month) : 'spring';
+  drawSky(X, Y, sc, season, f.wind);
+  drawGround(X, Y, sc, f.flooded);
+  drawRicePlants(X, Y, sc, f);
+  if (f.wind > 0.3) drawRainWind(X, Y, sc, t);
+}
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawField(t, X, Y, sc);
+}
+
+// ---------- みのりメガネ（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fdfff5'); grd.addColorStop(1, '#cbe8a8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'grow') {
+    const v = S.scope.value;
+    const barW = R * 0.5;
+    const bh = clamp(v, 0, 1) * R * 1.1;
+    sctx.strokeStyle = '#33511f'; sctx.lineWidth = R * 0.02; sctx.strokeRect(R - barW / 2, R * 0.15, barW, R * 1.65);
+    sctx.fillStyle = v >= 0.85 ? '#4a9e2f' : (v >= 0.5 ? '#e0a020' : '#d84a3a');
+    sctx.beginPath(); sctx.roundRect(R - barW / 2, h - R * 0.3 - bh, barW, bh, 8); sctx.fill();
+    label(`そだち具合 ${Math.round(clamp(v, 0, 1) * 100)}%`);
+  } else if (mode === 'root') {
+    sctx.strokeStyle = '#8a6a3a'; sctx.lineWidth = R * 0.03; sctx.lineCap = 'round';
+    const rx = R, ry = R * 0.55;
+    for (let i = -2; i <= 2; i++) {
+      sctx.beginPath(); sctx.moveTo(rx, ry);
+      sctx.quadraticCurveTo(rx + i * R * 0.12, ry + R * 0.35, rx + i * R * 0.22, ry + R * 0.7 * (S.scope.strong ? 1 : 0.5));
+      sctx.stroke();
+    }
+    sctx.fillStyle = '#4a9e2f'; sctx.beginPath(); sctx.arc(rx, ry, R * 0.08, 0, TAU); sctx.fill();
+    label(S.scope.strong ? 'しっかり 根が はった！' : 'まだ 根が よわい');
+  } else if (mode === 'wind') {
+    const v = S.scope.value;
+    sctx.strokeStyle = '#5a6a70'; sctx.lineWidth = R * 0.05; sctx.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const yy = R * 0.6 + i * R * 0.35;
+      sctx.beginPath(); sctx.moveTo(R * 0.25, yy);
+      sctx.quadraticCurveTo(R * (0.6 + v * 0.3), yy - R * 0.15, R * 1.75, yy);
+      sctx.stroke();
+    }
+    label(v > 0.6 ? 'つよい 風！' : 'かぜが ふいている');
+  } else if (mode === 'grain') {
+    sctx.fillStyle = '#f4c840';
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 6 - 0.5) * 1.1;
+      sctx.beginPath(); sctx.ellipse(R + Math.sin(a) * R * 0.32, R * 0.7 + Math.abs(a) * R * 0.4, R * 0.09, R * 0.14, a, 0, TAU); sctx.fill();
+    }
+    label('黄金の 稲穂！');
+  } else {
+    sctx.fillStyle = '#9ac06a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌾', R, R * 0.85);
+    label('タップして しらべよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2c5c14';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#4a8a1f', '#ffce54', '#7dc24a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 時間送り（田植え・肥料の結果を見る） ----------
+function startGrow(onDone) {
+  if (S.anim.growing) return;
+  S.field.stage = 'seedling'; S.field.growth = 0.04;
+  S.anim = { growing: true, t: 0, onDone };
+  sClank();
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  if (S.anim.growing) {
+    S.anim.t = clamp(S.anim.t + dt / 1.4, 0, 1);
+    S.field.growth = clamp(easeOutBack(S.anim.t), 0, 1) * 0.75;
+    if (S.anim.t >= 1) {
+      S.anim.growing = false;
+      const cb = S.anim.onDone;
+      S.anim = {};
+      if (cb) cb();
+    }
+  }
+
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const m = S.field.month;
+  $('locChip').textContent = (m >= 1 && m <= 7) ? ('いまここ：たんぼ（' + MONTHS[m - 1] + '）') : 'いまここ：たんぼ';
+  $('stageTitle').innerHTML = `🌾 たんぼ 〜 ${S.field.stage === 'ripe' ? 'みのりの ようす' : 'そだつ ようす'} 〜`;
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_taue', 'm_water', 'm_hiryo', 'm_taifu', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = {};
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { field: { month: 2, growth: 0, stage: 'seedling', lodged: false, flooded: true, wind: 0 }, scope: { type: 'none' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌱💧🌾🌀</div>
+        <h1>みのりの村</h1>
+        <div class="sub">〜 田んぼと いっしょに 一年を すごそう 〜</div>
+        <p class="talk">ようこそ、みのりの村へ！ わたしは たんぼの精霊 <b>イナホ</b>。この村では みんなで力を合わせて お米を そだてているの。<br>
+        お米づくりには、<b>1年をとおした たくさんの ひみつ</b>が あるんだよ。${ruby('今日', 'きょう')}は 田植えから ${W.inekari}まで、いっしょに たんぼを そだてながら、その ひみつを さがしていこう！</p>
+        <button class="btn" id="startBtn">見習い の ${W.nouka} に なる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🌾 よそうタイム</h2>
+        <p class="talk">日本で ふだん 食べている お米。<b>外国から きたお米</b>は、どれくらいだと思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🚢</span><b>ア</b> ほとんど 外国産</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌗</span><b>イ</b> 半分くらい</div>
+          <div class="vcard" data-v="2"><span class="vicon">🇯🇵</span><b>ウ</b> ほとんど 国産</div>
+        </div>
+        <div class="sub">思う ものに タッチ。おこめノート（シート）にも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、田んぼで たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：田植えの時期をさがそう ---
+  m_taue: {
+    enter() {
+      Object.assign(S, { field: { month: -1, growth: 0, stage: 'seedling', lodged: false, flooded: true, wind: 0 }, scope: { type: 'none' } });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🌱', `たんぼごよみ ①〜⑦（4月〜10月）の 中から、<b>${W.taue}</b>を する 月を えらんでね。10月の おわりに ${W.inekari}を するよ。`);
+      say(`いつ 田植えすると、いちばん よく そだつかな？ ボタンで 月を えらんで「田植えする」を おそう！`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 7; n++) list.push({ label: NUMS[n - 1] + ' ' + MONTHS[n - 1], cls: 'pos' + (S.chosenMonth === n ? ' sel' : ''), cb: () => { S.chosenMonth = n; this.refreshCtl(); } });
+      list.push({ label: '🌱 田植えする', cb: () => this.plant() });
+      setControls(list);
+    },
+    plant() {
+      if (S.anim.growing) return;
+      S.field.month = S.chosenMonth;
+      S.field.lodged = false;
+      S.scope = { type: 'none' };
+      S.phase = 'growing';
+      say(`${MONTHS[S.chosenMonth - 1]}に 田植え！ 時間を すすめて、10月の ${W.inekari}まで 見てみよう。`);
+      setControls([]);
+      startGrow(() => this.onGrowDone());
+    },
+    onGrowDone() {
+      const r = judgeTaue(S.chosenMonth);
+      S.field.growth = r.growth; S.field.stage = 'ripe';
+      S.scope = { type: 'grow', value: r.growth };
+      if (r.level === 'good') {
+        S.phase = 'done'; sYes(); scopeBurst(); award('m_taue');
+        say(`✨ たくさん みのった！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.taue}は <b>${MONTHS[1]}（②）</b>ごろが ちょうどよい。稲は 夏の間 太陽の光と 暖かさを たっぷり あびて、<b>約5か月</b>で 育つよ。`);
+        setButtons([{ label: 'つぎへ（水の 管理）', cb: nextStep }]);
+      } else {
+        sHmm();
+        const msg = r.level === 'early' ? 'まだ 寒くて、なえが うまく 育たなかった……' : 'そだつ 時間が たりなくて、あまり みのらなかった……';
+        say(`${msg}<br>もういちど 月を えらんで ためしてみよう！`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M2：水の管理（中干し） ---
+  m_water: {
+    enter() {
+      Object.assign(S, { field: { month: 4, growth: 0.55, stage: 'growing', lodged: false, flooded: true, wind: 0 }, scope: { type: 'none' } });
+      updateLoc();
+      this.stage = 0;
+      this.ask();
+    },
+    ask() {
+      if (this.stage === 0) {
+        S.field.month = 4; S.field.growth = 0.55; S.field.stage = 'growing'; S.field.flooded = true;
+        S.scope = { type: 'none' };
+        setWish('💧', `夏（6〜8月）、稲が ぐんぐん そだつ 時期だよ。`);
+        say(`この時期、たんぼの 水は どうする？`);
+        setButtons(choiceRow(['ア 水を はったままにする', 'イ 水を ぜんぶ 抜いておく'], (i, el) => this.pick1(i, el)));
+      } else {
+        S.field.month = 6; S.field.growth = 0.85; S.field.stage = 'ripe'; S.field.flooded = true;
+        S.scope = { type: 'root', strong: false };
+        setWish('🍂', `9月、${W.inekari}が 近づいてきたよ。`);
+        say(`${W.inekari}の 前、たんぼの 水は どうする？`);
+        setButtons(choiceRow(['ア 水を はったままにする', 'イ 水を 抜く（' + W.nakaboshi + '）'], (i, el) => this.pick2(i, el)));
+      }
+    },
+    pick1(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); S.field.flooded = true;
+        say(`せいかい！ 夏の間は <b>たっぷり 水を はる</b>のが 正解。稲は 水を すって ぐんぐん そだつよ。`);
+        setButtons([{ label: 'つぎへ', cb: () => { this.stage = 1; this.ask(); } }]);
+      } else {
+        sHmm(); S.field.flooded = false; S.field.growth *= 0.6;
+        say(`水が ないと 稲が かれてしまう……夏の間は 水が 大事だよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 水を はったままにする', 'イ 水を ぜんぶ 抜いておく'], (i, el2) => this.pick1(i, el2)));
+      }
+    },
+    pick2(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); S.field.flooded = false; S.scope = { type: 'root', strong: true };
+        award('m_water');
+        S.phase = 'done';
+        say(`せいかい！ ${W.inekari}前に 水を 抜く「${W.nakaboshi}」を すると、<b>根が しっかり 張って</b>、田んぼも 乾いて 稲刈りしやすくなるよ。<br><br>💡 <b>たいせつポイント</b><br>そだつ間は たっぷり水、${W.inekari}前は 水を 抜いて 土を かわかす。`);
+        setButtons([{ label: 'つぎへ（肥料の 量）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`水が 多いままだと 田んぼが ぬかるんで、稲刈りが むずかしくなるよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 水を はったままにする', 'イ 水を 抜く（' + W.nakaboshi + '）'], (i, el2) => this.pick2(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：肥料の量をさがそう ---
+  m_hiryo: {
+    enter() {
+      Object.assign(S, { field: { month: 3, growth: 0.5, stage: 'growing', lodged: false, flooded: true, wind: 0 }, scope: { type: 'none' } });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🌾', `${W.hiryo}は 稲の ごはん。多ければ 多いほど よく そだつと 思う？`);
+      say(`目もり①〜⑧で ${W.hiryo}の 量を えらんで、「${W.hiryo}を まく」を おそう！`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.chosenHiryo === n ? ' sel' : ''), cb: () => { S.chosenHiryo = n; this.refreshCtl(); } });
+      list.push({ label: '🌾 肥料を まく', cb: () => this.spread() });
+      setControls(list);
+    },
+    spread() {
+      if (S.anim.growing) return;
+      S.field.lodged = false;
+      S.scope = { type: 'none' };
+      say(`肥料 ${NUMS[S.chosenHiryo - 1]}を まいて、時間を すすめてみよう。`);
+      setControls([]);
+      startGrow(() => this.onGrowDone());
+    },
+    onGrowDone() {
+      const r = judgeHiryo(S.chosenHiryo);
+      S.field.growth = r.growth; S.field.stage = 'ripe'; S.field.lodged = r.lodged;
+      S.scope = { type: 'grow', value: r.growth };
+      if (r.level === 'good') {
+        S.phase = 'done'; sFanfare(); scopeBurst(); award('m_hiryo');
+        say(`✨ しっかり みのった！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.hiryo}は <b>多すぎても 少なすぎても だめ</b>。多すぎると 茎が のびすぎて ${W.touhuku}してしまう。ちょうどよい 量が いちばん よく みのるよ。`);
+        setButtons([{ label: 'つぎへ（台風から 稲を 守ろう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        const msg = r.lodged ? `${W.hiryo}が 多すぎて、稲が たおれて（${W.touhuku}して）しまった……` : `${W.hiryo}が たりなくて、あまり そだたなかった……`;
+        say(`${msg}<br>もういちど 量を えらんで ためしてみよう！`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：台風から稲を守ろう ---
+  m_taifu: {
+    enter() {
+      Object.assign(S, { field: { month: 5, growth: 0.9, stage: 'ripe', lodged: false, flooded: false, wind: 0 }, scope: { type: 'none' } });
+      updateLoc();
+      S.phase = 'ask';
+      hideWish();
+      say(`9月、大きな ${W.taihuu}が 村に 近づいている！ ${W.taihuu}が きたら、稲は どうなると思う？`);
+      setButtons(choiceRow(['ア 何も かわらない', 'イ たおれてしまう ことが ある', 'ウ もっと よく みのる'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      if (el) markPicked(el);
+      hideWish();
+      say(`実際に ${W.taihuu}を よんで、たしかめてみよう。あなたなら どう 対策する？`);
+      setButtons(choiceRow(['ア 何もしない', 'イ 早めに いねかりする', 'ウ 水を 抜いて 土を かためる'], (i, el2) => this.act(i, el2)));
+    },
+    act(n, el) {
+      markPicked(el);
+      S.field.wind = 1;
+      S.scope = { type: 'wind', value: 1 };
+      setControls([]); setButtons([]);
+      setTimeout(() => {
+        if (n === 0) {
+          S.field.lodged = true; S.field.growth *= 0.5;
+          sHmm();
+          say(`風で 稲が たおれて（${W.touhuku}して）しまった……せっかくの お米が 半分近く だめに なってしまったよ。`);
+          setButtons([{ label: 'もういちど 対策を えらぶ', cb: () => { S.field.wind = 0; S.field.lodged = false; S.field.growth = 0.9; S.scope = { type: 'none' }; this.pick(1, null); } }]);
+        } else {
+          S.field.lodged = false; S.field.wind = 0;
+          sYes(); scopeBurst(); award('m_taifu');
+          S.phase = 'done';
+          S.scope = { type: 'grain' };
+          say(`✨ 稲を まもれた！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.taihuu}は 稲を たおす（${W.touhuku}）ことが ある。じゅうぶん みのっていたら <b>早めの ${W.inekari}</b>、まだなら <b>水を抜いて 土を かためる</b>と 被害を へらせるよ。<br>${W.nouka}さんは 天気予報を見て 早めに そなえているんだ。`);
+          setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+        }
+      }, 900);
+    },
+  },
+
+  // --- はかせチャレンジ：食料自給率 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { field: { month: 6, growth: 1, stage: 'ripe', lodged: false, flooded: false, wind: 0 }, scope: { type: 'grain' } });
+      updateLoc();
+      hideWish();
+      const votedRight = S.votePicked.has(2);
+      say(`さいごは <b>はかせチャレンジ</b>！ さいしょの よそう、おぼえてる？<br>日本で 食べている お米は、<b>ほとんど 国産</b>なんだ。日本の お米の ${W.jikyu}は <b>ほぼ100%</b>！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+      setButtons([{ label: 'もっと くわしく', cb: () => this.more() }]);
+    },
+    more() {
+      say(`でも、日本ぜんたいの 食べ物の ${W.jikyu}は <b>やく38%</b>しかないんだ。野菜や 肉、麦などは 外国からの 輸入に たよっている ものが 多いんだよ。<br><br>それに、お米を つくる ${W.nouka}さんの 数は 年々 少なくなっていて、${ruby('高齢化', 'こうれいか')}も すすんでいる。<b>ほぼ 自給できる お米</b>は、日本にとって とても 大切な 作物なんだ。`);
+      setButtons([{ label: 'まとめへ すすむ', cb: () => { award('hakase'); sFanfare(); scopeBurst(); nextStep(); } }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      const votedOk = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ みのりの村 見習い ${W.nouka} にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.taue}は（<span class="blankWord" data-a="5月ごろ">？？？</span>）が ちょうどよい。<br>
+        ② ${W.inekari}の 前は 田んぼの 水を（<span class="blankWord" data-a="抜く（中干し）">？？？</span>）。<br>
+        ③ 日本の お米は、ほとんど（<span class="blankWord" data-a="国内（日本）">？？？</span>）で つくられている。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ ほとんど 国産</b> でした！ 日本の お米の 自給率は ほぼ100%です。${votedOk ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちに ある お米の ふくろを 見て、どこで つくられた お米か <b>さがしてみよう</b>。おうちの人と「ごはんを のこさず 食べよう」を やくそくしてみてね。<br>
+        🚨 やくそく：お米は たくさんの人の 手間と 時間を かけて そだてられた 大切な 食べ物です。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#2c5c14'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { field: { month: 6, growth: 1, stage: 'ripe', lodged: false, flooded: false, wind: 0 }, scope: { type: 'grain' } });
+      updateLoc();
+      S.phase = 'done';
+      say(`<b>じゆうモード</b>だよ！ たんぼの ようすを 見くらべながら、${ruby('友', 'とも')}だちと クイズを ${ruby('出', 'だ')}しあおう。<br>れい：「田植えは いつが いい？」「${W.inekari}前に 水を 抜くのは なぜ？」`);
+      setButtons([
+        { label: '🌱 なえの ころ', cls: 'sub', cb: () => this.show('seedling') },
+        { label: '🌾 みのった 稲', cls: 'sub', cb: () => this.show('ripe') },
+        { label: '🌀 台風の 稲', cls: 'sub', cb: () => this.show('lodged') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(kind) {
+      if (kind === 'seedling') Object.assign(S.field, { growth: 0.2, stage: 'seedling', lodged: false, wind: 0 });
+      else if (kind === 'ripe') Object.assign(S.field, { growth: 1, stage: 'ripe', lodged: false, wind: 0 });
+      else Object.assign(S.field, { growth: 0.9, stage: 'ripe', lodged: true, wind: 0.6 });
+      S.scope = { type: kind === 'seedling' ? 'grow' : 'grain', value: S.field.growth };
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_hiryo などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

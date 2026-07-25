@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>みのりの村 おこめノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2c5c14; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #dcefa0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #e3f3d4; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用おこめノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌾 みのりの村 おこめノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      日本で ふだん 食べている お米。<b>外国から きたお米</b>は、どれくらいだと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🚢 ほとんど 外国産</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🌗 半分くらい</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🇯🇵 ほとんど 国産</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．田植えの 時期を さがそう（たんぼごよみ）</span>
+    <div class="secBody">
+      <table class="expTable">
+        <tr><th>①4月</th><th>②5月</th><th>③6月</th><th>④7月</th><th>⑤8月</th><th>⑥9月</th><th>⑦10月</th></tr>
+        <tr><td colspan="7" style="font-size:8pt">↑ このどこかで田植え　→　10月の おわりに 稲刈り</td></tr>
+      </table>
+      よそう：いちばん よく そだつ 月は（　<span class="fillLine sm"></span>　）　→　けっか：じっさいに みのった 月は（　<span class="fillLine sm"></span>　）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．水の 管理</span>
+    <div class="secBody">
+      夏（6〜8月）、稲が ぐんぐん そだつ 時期。田んぼの 水は？　→（ ア 水を はったままにする ・ イ 水を ぜんぶ 抜く ）<br>
+      稲刈りの 前（9月ごろ）。田んぼの 水は？　→（ ア 水を はったままにする ・ イ 水を 抜く（中干し） ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．肥料の 量を さがそう</span>
+    <div class="secBody">
+      目もり①〜⑧の 中から、肥料の 量を えらぼう。多ければ 多いほど よく そだつかな？<br>
+      よそう：いちばん よく そだつ 目もりは（　<span class="fillLine sm"></span>　）　→　けっか：じっさいに よく みのった 目もりは（　<span class="fillLine sm"></span>　）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．台風から 稲を 守ろう</span>
+    <div class="secBody">
+      台風が きたら、稲は どうなると思う？　→（ ア 何も かわらない ・ イ たおれる ことが ある ・ ウ もっと よく みのる ）<br>
+      あなたなら どう 対策する？　→（ ア 何もしない ・ イ 早めに 稲刈りする ・ ウ 水を 抜いて 土を かためる ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ</span>
+    <div class="secBody">
+      日本の お米の 自給率は 約（<span class="fillLine sm"></span>）%　／　日本ぜんたいの 食料自給率は 約（<span class="fillLine sm"></span>）%
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 田植えは（<span class="fillLine" style="width:24mm"></span>）ごろが ちょうどよい。<br>
+      ② 稲刈りの 前は 田んぼの 水を（<span class="fillLine" style="width:30mm"></span>）。<br>
+      ③ 日本の お米は、ほとんど（<span class="fillLine" style="width:24mm"></span>）で つくられている。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション：お米の ふるさとを さがそう</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌾</span>
+        <div>
+          おうちに ある お米の ふくろを 見て、どこで つくられた お米か さがそう。おうちの人と「ごはんを のこさず 食べよう」を やくそくしよう。<br>
+          ☐ 見つけた お米の 産地：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　みのりの村 見習い農家、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】みのりの村 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「食料生産（お米づくり）」・学力幅あり・協力型／ 使うもの：「kome.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_hiryo</b> などで途中再開（m_taue／m_water／m_hiryo／m_taifu／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（はかせチャレンジで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🌱 田植えの 時期を さがそう</td><td>たんぼごよみ①〜⑦から月を選び、10月末の結果を見る。正解にたどりつくまで試せる</td></tr>
+      <tr><td class="min">11〜18分</td><td>💧 水の 管理</td><td>夏は水を張る／稲刈り前は中干し、の2択クイズ。誤答してもヒントで再挑戦</td></tr>
+      <tr><td class="min">18〜26分</td><td>🌾 肥料の 量を さがそう（<b>今日の見せ場</b>）</td><td>目もり①〜⑧から量を選び結果を見る。「多すぎても少なすぎてもダメ」＝倒伏の発見が山場</td></tr>
+      <tr><td class="min">26〜34分</td><td>🌀 台風から 稲を 守ろう</td><td>台風接近→対策を選ぶ。早めの稲刈り・排水で被害を防げることを体感</td></tr>
+      <tr><td class="min">34〜40分</td><td>🔬 はかせチャレンジ</td><td>お米の自給率ほぼ100%・食料自給率全体約38%・農家の減少高齢化を紹介</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。お米の産地さがし（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「水の管理」を右下「つぎ▶」でスキップ可（<b>肥料の量さがし と まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ ほとんど 国産</b>／田植えの 時期＝<b>②5月ごろ</b>／水の 管理＝夏は<b>張る</b>・稲刈り前は<b>抜く（中干し）</b>／
+      肥料の 量＝<b>④⑤（ちょうどよい）、⑦⑧は 倒伏</b>／台風の 対策＝<b>イ 早めの 稲刈り・ウ 排水して 土を かためる</b>／
+      はかせ＝お米の 自給率 <b>ほぼ100%</b>・食料自給率全体 約<b>38%</b>／まとめ＝①<b>5月ごろ</b>　②<b>抜く（中干し）</b>　③<b>国内（日本）</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の社会科です）</h2>
+    <ul>
+      <li>田植えは<b>5月ごろ</b>、稲刈りは<b>9〜10月ごろ</b>（地域差あり）。稲は 約5か月かけて育つ</li>
+      <li>「中干し」は 稲刈り前に 田んぼの水を抜く作業。根を強くし、田んぼを乾かして稲刈りしやすくする、実際の稲作で 行われている工程</li>
+      <li>肥料の与えすぎは 茎が伸びすぎる「倒伏」の原因になる。ちょうどよい量が 収穫を最大にする</li>
+      <li>台風などの気象災害に対し、農家は 天気予報を見て 早めの収穫や排水などの対策をとっている</li>
+      <li>日本のお米の食料自給率は<b>ほぼ100%</b>。一方、日本全体の食料自給率（カロリーベース）は<b>約38%</b>と 主要国の中でも低い水準。稲作農家の減少・高齢化も進んでいる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「肥料の量さがし」は今日いちばんの見せ場。①〜⑧を順番に試させてから正解にたどり着かせると、「多すぎても少なすぎてもダメ」の納得感が大きい</li>
+      <li>代表交代は1人1ミッション。見ている子は「今どの月・どの目もりを選んだか」を記録係に</li>
+      <li>おうちミッションはお米の産地を通じて、身近な食べ物への関心につなげる。無理に袋を探させる必要はなく、家族との会話のきっかけでよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「田植えは いつが いい？」「稲刈り前に 水を 抜くのは なぜ？」「肥料は 多いほど いい？」</li>
+      <li>教室で普段食べているお米の産地（給食のお米など）を確認すると、自分ごととして実感しやすい</li>
+      <li>他の作物（野菜・小麦など）の自給率や産地について調べる調べ学習にも発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
