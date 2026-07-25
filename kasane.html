@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>かさねの宮 — 貴族の くらしと 国風文化 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fdf1f7 0%, #f7dfe8 55%, #e8b9d0 100%);
+    color: #5a3a52;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #8a4a78; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #a56a94; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #f7e0ee; border: 2px solid #e0b8cf;
+    font-size: clamp(16px, 1.8vw, 26px); color: #e0b8cf;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffd6ec, #c94a8a);
+    border-color: #7a2a5a; color: #5a3a52;
+    box-shadow: 0 0 14px rgba(200, 74, 138, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #fff8fb 0%, #fdecf4 100%);
+    border: 3px solid #d98cb0;
+    box-shadow: inset 0 0 40px rgba(140, 60, 100, .12), 0 4px 18px rgba(100, 40, 70, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #6a3a5a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #8a4a78; color: #fff6fb; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(90, 30, 60, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(100, 40, 70, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #f0c0dc; cursor: pointer;
+    background: linear-gradient(180deg, #b06a9a, #8a4a78); color: #fff;
+    box-shadow: 0 3px 0 #4a1f42; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #6a8ab0, #3d5f8a); border-color: #a0c0e0; box-shadow: 0 3px 0 #253d5c; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #8a4a78; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(120, 40, 90, .3), inset 0 0 24px rgba(120, 40, 90, .18);
+    flex-shrink: 0; background: #fdf0f7;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #a56a94;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #6a3a5a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffaf9; border: 2px solid #e0b8cf; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #a56a94; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #5a3a52;
+    border: 1.5px solid #ecd0e0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #8a4a78; background: #ffd6ec; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #f7d0e8, #fdecf4); color: #5a3a52;
+    border: 2px solid #8a4a78; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #8a4a78; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #b06a9a, #8a4a78); color: #fff;
+    box-shadow: 0 3px 0 #4a1f42, 0 5px 12px rgba(120, 40, 90, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #4a1f42; }
+  .btn.sub {
+    background: #f7e0ee; color: #7a4a68; box-shadow: 0 3px 0 #e0b8cf;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #5a3a52; box-shadow: 0 3px 0 #e0b8cf; font-weight: 400; border: 1.5px solid #ecd0e0; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffd6ec; outline: 3px solid #b06a9a; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(50, 20, 40, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fffaf9, #fdecf4);
+    border: 3px solid #d98cb0; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(80, 30, 60, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #8a4a78; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #8a4a78; }
+  .panel .sub { color: #a56a94; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #5a3a52; border: 1.5px solid #ecd0e0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #a56a94; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #5a3a52; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ecd0e0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #8a4a78; background: #ffd6ec; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #8a4a78; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #8a4a78;
+    color: #6a3a5a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #a56a94;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #f7e0ee; color: #7a4a68;
+    border: 1px solid #e0b8cf; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #f0d0e4; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🌸 かさねの宮<small>— 貴族の くらしと 国風文化 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_dono" title="お屋敷たんけん">★</div>
+    <div class="badge" id="bd_m_kasane" title="色のかさね">★</div>
+    <div class="badge" id="bd_m_kana" title="かな文字">★</div>
+    <div class="badge" id="bd_m_sakusha" title="だれが書いた">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">貴族の くらし</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 いろあわせの窓 〜 見えない 色の かさなりを 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(90,40,70,.18)"/>
+            <!-- かさなる 衣のすそ（からだ） -->
+            <path d="M28 118 Q24 104 32 96 L88 96 Q96 104 92 118 Z" fill="#a56a94" stroke="#6a3a5a" stroke-width="2"/>
+            <path d="M32 98 Q28 86 35 79 L85 79 Q92 86 88 98 Z" fill="#e0a6c4" stroke="#6a3a5a" stroke-width="2"/>
+            <path d="M35 81 Q31 70 38 64 L82 64 Q89 70 85 81 Z" fill="#f3d9ea" stroke="#6a3a5a" stroke-width="2"/>
+            <path d="M38 66 Q35 57 41 52 L79 52 Q85 57 82 66 Z" fill="#cfe3dc" stroke="#6a3a5a" stroke-width="2"/>
+            <!-- あたま -->
+            <circle cx="60" cy="38" r="26" fill="#fbe8d8" stroke="#6a3a5a" stroke-width="2.5"/>
+            <!-- かんざし -->
+            <circle cx="78" cy="24" r="5" fill="#ffd6ec" stroke="#8a4a78" stroke-width="1.2"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="42" rx="5" ry="3.4" fill="#e08aa8" opacity=".5"/>
+            <ellipse cx="74" cy="42" rx="5" ry="3.4" fill="#e08aa8" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="36" rx="3.6" ry="5" fill="#5a3a52"/>
+              <ellipse cx="69" cy="36" rx="3.6" ry="5" fill="#5a3a52"/>
+              <circle cx="52.3" cy="33.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="33.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 50 Q60 55 67 50" stroke="#6a3a5a" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">いろの<ruby>精霊<rt>せいれい</rt></ruby> <ruby>かさね<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌸 かさねの宮ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   かさねの宮 — 貴族の暮らしと国風文化（小6社会・歴史・協力型・1ファイル）
+   十二単の枚数 → 寝殿造のお屋敷 → かさねの色目(四季) →
+   かな文字の誕生 → だれが書いた（源氏物語/枕草子） → はかせ（望月の歌）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  shinden: ruby('寝殿', 'しんでん'),
+  tainoya: ruby('対屋', 'たいのや'),
+  watadono: ruby('渡殿', 'わたどの'),
+  tsuridono: ruby('釣殿', 'つりどの'),
+  itsutsuginu: ruby('五衣', 'いつつぎぬ'),
+  manyougana: ruby('万葉仮名', 'まんようがな'),
+  onnade: ruby('女手', 'おんなで'),
+  genji: ruby('源氏物語', 'げんじものがたり'),
+  murasaki: ruby('紫式部', 'むらさきしきぶ'),
+  makura: ruby('枕草子', 'まくらのそうし'),
+  sei: ruby('清少納言', 'せいしょうなごん'),
+  michinaga: ruby('藤原道長', 'ふじわらのみちなが'),
+  sekkan: ruby('摂関政治', 'せっかんせいじ'),
+};
+
+const KANAS = 'あいうえ';
+
+// ---------- かさねの色目（四季） ----------
+const SEASONS = [
+  { key: 'sakura', name: '春', label: '桜襲（さくらがさね）', title: ruby('桜襲', 'さくらがさね'), omote: '#fff6f7', ura: '#e0607a', omoteName: '白', uraName: '紅',
+    desc: `春に合う 色は「${ruby('桜襲', 'さくらがさね')}」。表は 白、裏に 紅（くれない）を 重ねると、うすい 桜色に 見えるんだ。` },
+  { key: 'unohana', name: '夏', label: '卯の花襲（うのはながさね）', title: ruby('卯の花襲', 'うのはながさね'), omote: '#f5fbf9', ura: '#5fa88a', omoteName: '白', uraName: '青',
+    desc: `夏に合う 色は「${ruby('卯の花襲', 'うのはながさね')}」。表は 白、裏に 青を 重ねて、卯の花（うつぎの花）の すずしさを 表したよ。` },
+  { key: 'momiji', name: '秋', label: '紅葉襲（もみじがさね）', title: ruby('紅葉襲', 'もみじがさね'), omote: '#c9455a', ura: '#f0c030', omoteName: '紅', uraName: '黄',
+    desc: `秋に合う 色は「${ruby('紅葉襲', 'もみじがさね')}」。表は 紅（くれない）、裏に 黄を 重ねて、燃えるような 紅葉の 色を 表したよ。` },
+  { key: 'matsu', name: '冬', label: '松襲（まつがさね）', title: ruby('松襲', 'まつがさね'), omote: '#7a3b42', ura: '#8fc947', omoteName: '蘇芳', uraName: '萌黄',
+    desc: `冬に合う 色は「${ruby('松襲', 'まつがさね')}」。表は 蘇芳（すおう＝赤みの茶）、裏に 萌黄（もえぎ＝黄緑）を 重ねて、雪の中でも 色を 変えない 松を 表したよ。` },
+];
+
+// ---------- かな文字（万葉仮名 → 草書体 → ひらがな） ----------
+const KANA_STAGES = [
+  { label: '万葉仮名', ch: '安', note: `もとは「${ruby('安', 'あん')}」という 漢字。音だけを 借りて 使っていたよ。` },
+  { label: 'くずして 書く（草書体）', ch: '安', italic: true, note: `早く 書けるように、どんどん 字を くずして 書くように なったんだ。` },
+  { label: 'ひらがな', ch: 'あ', note: `くずした 形が さらに 簡単に なって、今の「あ」に なったよ。` },
+];
+
+// ---------- だれが書いた？ ----------
+const QUOTES = [
+  { lines: ['「春は あけぼの。', 'やうやう 白く なりゆく', '山ぎは……」'], book: W.makura, bookPlain: '枕草子（まくらのそうし）', author: W.sei, wrong: [W.murasaki, W.michinaga],
+    note: `これは ${W.sei} が 書いた ${W.makura}。四季おりおりの 美しさを つづった ずいひつ（エッセイ）だよ。` },
+  { lines: ['「いづれの 御時にか、', '女御・更衣 あまた', 'さぶらひける中に……」'], book: W.genji, bookPlain: '源氏物語（げんじものがたり）', author: W.murasaki, wrong: [W.sei, W.michinaga],
+    note: `これは ${W.murasaki} が 書いた ${W.genji}。54帖にも およぶ、世界的に 有名な 物語だよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'dono',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  kasaneDone: [],
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sPage = () => { tone(300, 0, 0.1, 'sine', 0.05); tone(420, 0.06, 0.14, 'sine', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 寝殿造のお屋敷 ----------
+const ROOMS = [
+  { key: 0, letter: 'あ', name: '寝殿', x: 500, y: 320, w: 220, h: 130 },
+  { key: 1, letter: 'い', name: '対屋', x: 800, y: 340, w: 130, h: 100 },
+  { key: 2, letter: 'う', name: '渡殿', x: 655, y: 330, w: 110, h: 26 },
+  { key: 3, letter: 'え', name: '釣殿', x: 500, y: 490, w: 140, h: 70 },
+];
+function drawDonoScene(X, Y, sc) {
+  gctx.fillStyle = '#f3ead9';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  // 池
+  gctx.fillStyle = '#bcd8e0';
+  gctx.beginPath(); gctx.ellipse(X(520), Y(560), 260 * sc, 66 * sc, 0, 0, TAU); gctx.fill();
+  gctx.fillStyle = 'rgba(180,150,90,.25)';
+  for (let x = 60; x < 960; x += 90) { gctx.beginPath(); gctx.ellipse(X(x), Y(120), 40 * sc, 10 * sc, 0, 0, TAU); gctx.fill(); }
+  // 建物
+  ROOMS.forEach(r => {
+    const done = S.donoFound && S.donoFound.has(r.key);
+    gctx.fillStyle = done ? '#f3d0e6' : 'rgba(243,208,230,.55)';
+    gctx.strokeStyle = '#8a4a78'; gctx.lineWidth = 2.4 * sc;
+    gctx.beginPath();
+    gctx.roundRect(X(r.x - r.w / 2), Y(r.y - r.h / 2), r.w * sc, r.h * sc, 6 * sc);
+    gctx.fill(); gctx.stroke();
+  });
+  // 西の対屋（かざり、ラベルなし）
+  gctx.fillStyle = 'rgba(243,208,230,.35)'; gctx.strokeStyle = 'rgba(138,74,120,.5)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.roundRect(X(200 - 65), Y(340 - 50), 130 * sc, 100 * sc, 6 * sc); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.roundRect(X(345 - 55), Y(330 - 13), 110 * sc, 26 * sc, 4 * sc); gctx.fill(); gctx.stroke();
+  // マーカー
+  ROOMS.forEach(r => {
+    const done = S.donoFound && S.donoFound.has(r.key);
+    const px = X(r.x), py = Y(r.y);
+    gctx.beginPath(); gctx.arc(px, py, 17 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#8a4a78' : '#fff6fb';
+    gctx.fill();
+    gctx.strokeStyle = '#6a3a5a'; gctx.lineWidth = 2 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#8a4a78';
+    gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(r.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- かさねの色目 ----------
+function drawKasaneScene(X, Y, sc, t) {
+  const round = S.kasaneRound || 0;
+  const bgColors = ['#fdeaf0', '#eaf6f2', '#fdf1e0', '#eef3fa'];
+  gctx.fillStyle = bgColors[Math.min(round, 3)];
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  // 木のかざり（季節ごとに変化）
+  const tx = 160, ty = 470;
+  gctx.strokeStyle = '#8a6a4a'; gctx.lineWidth = 10 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(tx), Y(ty + 90)); gctx.lineTo(X(tx), Y(ty)); gctx.stroke();
+  gctx.lineWidth = 6 * sc;
+  gctx.beginPath(); gctx.moveTo(X(tx), Y(ty + 30)); gctx.lineTo(X(tx - 60), Y(ty - 40)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(tx), Y(ty + 10)); gctx.lineTo(X(tx + 55), Y(ty - 50)); gctx.stroke();
+  const dotCols = ['#f2a0bc', '#bfe6cf', '#e8863a', '#ffffff'];
+  const dotAt = [[tx - 60, ty - 40], [tx + 55, ty - 50], [tx, ty - 70], [tx - 30, ty - 60], [tx + 20, ty - 80], [tx - 10, ty - 30]];
+  gctx.fillStyle = dotCols[Math.min(round, 3)];
+  dotAt.forEach(([dx, dy], i) => {
+    gctx.beginPath(); gctx.arc(X(dx + Math.sin(i) * 4), Y(dy), 9 * sc, 0, TAU); gctx.fill();
+  });
+  // 完成した色目のかさなり（ひな壇状に積み上げ）
+  const done = S.kasaneDone || [];
+  const baseX = 430, baseY = 560, stepW = 130, layerH = 46;
+  done.forEach((item, i) => {
+    const lx = baseX + i * stepW;
+    for (let l = 0; l < 3; l++) {
+      const ly = baseY - l * 14;
+      gctx.fillStyle = item.omote;
+      gctx.strokeStyle = 'rgba(90,50,70,.35)'; gctx.lineWidth = 1.4 * sc;
+      gctx.beginPath();
+      gctx.moveTo(X(lx - 55), Y(ly));
+      gctx.lineTo(X(lx + 55), Y(ly));
+      gctx.lineTo(X(lx + 48), Y(ly + 34));
+      gctx.lineTo(X(lx - 48), Y(ly + 34));
+      gctx.closePath(); gctx.fill(); gctx.stroke();
+      // 裏地がのぞく すそ
+      gctx.fillStyle = item.ura;
+      gctx.beginPath();
+      gctx.moveTo(X(lx - 48), Y(ly + 34));
+      gctx.lineTo(X(lx + 48), Y(ly + 34));
+      gctx.lineTo(X(lx + 44), Y(ly + 40));
+      gctx.lineTo(X(lx - 44), Y(ly + 40));
+      gctx.closePath(); gctx.fill();
+    }
+    gctx.fillStyle = '#5a3a52'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText(item.name, X(lx), Y(baseY + 20));
+  });
+}
+
+// ---------- かな文字 ----------
+function drawKanaScene(X, Y, sc) {
+  gctx.fillStyle = '#faf3e6';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.strokeStyle = 'rgba(138,90,60,.18)'; gctx.lineWidth = 1 * sc;
+  for (let x = 60; x < 960; x += 40) { gctx.beginPath(); gctx.moveTo(X(x), Y(60)); gctx.lineTo(X(x), Y(580)); gctx.stroke(); }
+  const stage = S.kanaStage || 0;
+  const info = KANA_STAGES[Math.max(0, Math.min(2, stage - 1))];
+  gctx.save();
+  gctx.translate(X(500), Y(310));
+  if (stage >= 1 && info && info.italic) gctx.transform(1, 0, -0.22, 1, 0, 0);
+  gctx.fillStyle = '#5a3a52';
+  gctx.font = `${210 * sc}px "Hiragino Mincho ProN","Yu Mincho",serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(stage >= 1 && info ? info.ch : '？', 0, 10 * sc);
+  gctx.restore();
+  gctx.fillStyle = '#8a5a3a'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(stage >= 1 && info ? info.label : 'なぞの 文字', X(500), Y(470));
+}
+
+// ---------- だれが書いた ----------
+function drawSakushaScene(X, Y, sc) {
+  gctx.fillStyle = '#fbf6ec';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  // まきもの
+  gctx.fillStyle = '#f3e6cf'; gctx.strokeStyle = '#8a5a3a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(260), Y(140), 480 * sc, 380 * sc, 10 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#c9a56a';
+  gctx.beginPath(); gctx.ellipse(X(260), Y(330), 22 * sc, 190 * sc, 0, 0, TAU); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(X(740), Y(330), 22 * sc, 190 * sc, 0, 0, TAU); gctx.fill();
+  const round = S.sakushaRound || 0;
+  const q = QUOTES[Math.min(round, QUOTES.length - 1)];
+  gctx.fillStyle = '#5a3a52'; gctx.font = `700 ${28 * sc}px "Hiragino Mincho ProN","Yu Mincho",serif`;
+  gctx.textAlign = 'center';
+  (q.lines || []).forEach((line, i) => {
+    gctx.fillText(line, X(500), Y(220 + i * 46));
+  });
+}
+
+// ---------- はかせ：望月の歌 ----------
+function drawHakaseScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#2a2050'); g.addColorStop(1, '#5a4a8a');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  // 星
+  gctx.fillStyle = 'rgba(255,255,255,.7)';
+  const starSeed = [[120, 90], [220, 160], [850, 100], [780, 200], [400, 70], [600, 130], [900, 260]];
+  starSeed.forEach(([sx, sy]) => { gctx.beginPath(); gctx.arc(X(sx), Y(sy), 2.4 * sc, 0, TAU); gctx.fill(); });
+  // 満月
+  const glow = gctx.createRadialGradient(X(760), Y(150), 0, X(760), Y(150), 130 * sc);
+  glow.addColorStop(0, 'rgba(255,240,200,.55)'); glow.addColorStop(1, 'rgba(255,240,200,0)');
+  gctx.fillStyle = glow; gctx.beginPath(); gctx.arc(X(760), Y(150), 130 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = '#fff6d8'; gctx.beginPath(); gctx.arc(X(760), Y(150), 68 * sc, 0, TAU); gctx.fill();
+  // 御殿シルエット
+  gctx.fillStyle = 'rgba(20,14,40,.85)';
+  gctx.beginPath(); gctx.roundRect(X(250), Y(430), 500 * sc, 130 * sc, 8 * sc); gctx.fill();
+  gctx.beginPath(); gctx.moveTo(X(250), Y(430)); gctx.lineTo(X(500), Y(370)); gctx.lineTo(X(750), Y(430)); gctx.closePath(); gctx.fill();
+  // 歌
+  if (S.hakasePhase === 'poem') {
+    gctx.fillStyle = 'rgba(255,255,255,.95)'; gctx.font = `700 ${24 * sc}px "Hiragino Mincho ProN","Yu Mincho",serif`;
+    gctx.textAlign = 'center';
+    ['この世をば わが世とぞ思ふ', '望月の 欠けたることも', 'なしと思へば'].forEach((line, i) => {
+      gctx.fillText(line, X(500), Y(250 + i * 40));
+    });
+  }
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'dono') drawDonoScene(X, Y, sc);
+  else if (S.scene === 'kasane') drawKasaneScene(X, Y, sc, t);
+  else if (S.scene === 'kana') drawKanaScene(X, Y, sc);
+  else if (S.scene === 'sakusha') drawSakushaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawKasaneScene(X, Y, sc, t);
+}
+
+// ---------- いろあわせの窓（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fff6fb'); grd.addColorStop(1, '#e8c9dc');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'room') {
+    sctx.fillStyle = '#8a4a78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🏯', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'swatch') {
+    const bw = R * 0.9, bh = R * 0.55;
+    sctx.fillStyle = S.scope.omote;
+    sctx.strokeStyle = '#6a3a5a'; sctx.lineWidth = R * 0.02;
+    sctx.beginPath(); sctx.roundRect(R - bw / 2, R * 0.55 - bh / 2, bw, bh, R * 0.06); sctx.fill(); sctx.stroke();
+    sctx.fillStyle = S.scope.ura;
+    sctx.beginPath(); sctx.roundRect(R - bw / 2, R * 0.55 + bh / 2 - R * 0.12, bw, R * 0.14, [0, 0, R * 0.06, R * 0.06]); sctx.fill();
+    sctx.strokeStyle = '#6a3a5a'; sctx.lineWidth = R * 0.015; sctx.strokeRect(R - bw / 2, R * 0.55 + bh / 2 - R * 0.12, bw, R * 0.14);
+    label(S.scope.name || '');
+  } else if (mode === 'glyph') {
+    sctx.fillStyle = '#5a3a52'; sctx.font = `${R * 0.7}px "Hiragino Mincho ProN","Yu Mincho",serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.ch || '？', R, R * 0.82);
+    label(S.scope.label || '');
+  } else if (mode === 'book') {
+    sctx.fillStyle = '#8a5a3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('📖', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'moon') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#fff6d8'); g2.addColorStop(1, 'rgba(255,246,216,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#fff2c8'; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.34, 0, TAU); sctx.fill();
+    label('望月（もちづき）');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffd6ec'); g2.addColorStop(1, 'rgba(255,214,236,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#8a4a78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌸', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#8a4a78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('👘', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#5a3a52';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#8a4a78', '#ffd6ec', '#e0607a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function swatchLabel(o, u, txt) {
+  return `<span class="swatch"><i style="background:${o}"></i><i style="background:${u}"></i></span>${txt}`;
+}
+function updateLoc() {
+  $('locChip').textContent = '平安時代（794〜1185年ごろ）';
+  const titles = {
+    dono: '🏯 お屋敷を たんけんしよう',
+    kasane: '👘 いろを かさねよう（きせつ当て）',
+    kana: '✒️ かな文字の たんじょう',
+    sakusha: '📖 だれが 書いた？',
+    hakase: '🌕 望月の うた',
+    done: '🌸 かさねの宮 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '貴族の くらし';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_dono', 'm_kasane', 'm_kana', 'm_sakusha', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = {};
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'dono', scope: { type: 'idle' }, donoFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌸👘📜</div>
+        <h1>かさねの宮</h1>
+        <div class="sub">〜 貴族の くらしと 国風文化の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 色の 重なりから 生まれた 精霊、<b>かさね</b>。今から 1000年ほど前、平安時代の 貴族たちが どんな くらしを していたか、<b>いっしょに たしかめに いこう！</b><br>
+        お屋敷、十二単の 色、かな文字、物語……いろんな「かさね」が ここに あるよ。</p>
+        <button class="btn" id="startBtn">かさねの宮へ 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk"><b>十二単</b>は、ほんとうに 12まい かさねて 着ていたと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🧵</span><b>ア</b> 12まい</div>
+          <div class="vcard" data-v="1"><span class="vicon">👘</span><b>イ</b> 5まいくらい</div>
+          <div class="vcard" data-v="2"><span class="vicon">🌀</span><b>ウ</b> 20まい以上</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、宮で たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：寝殿造のお屋敷探検 ---
+  m_dono: {
+    enter() {
+      Object.assign(S, { scene: 'dono', scope: { type: 'idle' }, donoFound: new Set() });
+      updateLoc();
+      setWish('🏯', `ここは 貴族の お屋敷、<b>寝殿造</b>だよ。4つの 場所を たんけんして、名前を おぼえよう。`);
+      say(`下の ボタンを ぜんぶ おして、それぞれの 場所を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const opts = [
+        { key: 0, label: 'あ の たてもの', txt: `真ん中に ある 一番 大きな たてもの。貴族が すわって 人と 会う 場所だよ。名前は ${W.shinden}。` },
+        { key: 1, label: 'い の たてもの', txt: `${W.shinden}の よこに ある たてもの。${W.tainoya}と いって、東と 西の 両方に 建てられることが 多いよ。` },
+        { key: 2, label: 'う の わたりろうか', txt: `たてもの同士を つなぐ ろうか。${W.watadono}と いうよ。` },
+        { key: 3, label: 'え の あずまや', txt: `池のそばに 建てられた、つりを したり 月見や 歌を たのしんだり する 場所。${W.tsuridono}と いうよ。` },
+      ];
+      setButtons(opts.map(o => ({ label: o.label + (S.donoFound.has(o.key) ? '✓' : ''), cb: () => this.reveal(o) })));
+      if (S.donoFound.size >= 4) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(o) {
+      sTap(); S.donoFound.add(o.key);
+      S.scope = { type: 'room', name: ROOMS[o.key].name };
+      scopeBurst();
+      say(o.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`この中で、貴族が すわって 人と 会う、一番 大きな たてものは どれ？`);
+      setButtons(choiceRow([`ア ${W.shinden}`, `イ ${W.tainoya}`, `ウ ${W.tsuridono}`], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_dono'); S.phase = 'done';
+        say(`せいかい！ 寝殿造は、真ん中の ${W.shinden}を 中心に、${W.tainoya}や ${W.tsuridono}を ${W.watadono}で つないだ 左右 対称の つくり。<br><br>💡 <b>たいせつポイント</b><br>南には 大きな 庭と 池が あり、船を 浮かべたり、歌会を 開いたり したんだよ。`);
+        setButtons([{ label: 'つぎへ（色を かさねよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow([`ア ${W.shinden}`, `イ ${W.tainoya}`, `ウ ${W.tsuridono}`], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：かさねの色目（四季） ---
+  m_kasane: {
+    enter() {
+      Object.assign(S, { scene: 'kasane', scope: { type: 'idle' }, kasaneRound: 0, kasaneDone: [] });
+      updateLoc();
+      setWish('👘', `十二単は、うすい絹を 重ねて 着るから、下の色が すけて 見えるんだ。季節に 合わせて、色の 組み合わせを 選んでみよう。`);
+      this.startRound();
+    },
+    startRound() {
+      const round = S.kasaneRound;
+      if (round >= SEASONS.length) { this.finishAll(); return; }
+      S.scope = { type: 'idle' };
+      const season = SEASONS[round];
+      say(`いまは <b>${season.name}</b>。この季節に 合う 色の かさねは、どれかな？`);
+      const opts = this.choicesFor(round);
+      setButtons(opts.map(o => ({
+        label: swatchLabel(o.omote, o.ura, o.label),
+        cls: 'choice',
+        cb: el => this.pick(o, el, season),
+      })));
+    },
+    choicesFor(round) {
+      const correct = SEASONS[round];
+      const others = SEASONS.filter((_, i) => i !== round);
+      const wrong = [others[round % others.length], others[(round + 1) % others.length]];
+      const list = [correct, ...wrong];
+      // 並び順をラウンドごとに ずらす
+      const order = [[0, 1, 2], [1, 2, 0], [2, 0, 1], [1, 0, 2]][round % 4];
+      return order.map(i => list[i]);
+    },
+    pick(chosen, el, season) {
+      markPicked(el);
+      if (chosen.key === season.key) {
+        sYes(); scopeBurst();
+        S.scope = { type: 'swatch', omote: chosen.omote, ura: chosen.ura, name: chosen.label };
+        S.kasaneDone.push({ name: season.name, omote: chosen.omote, ura: chosen.ura });
+        say(`せいかい！ ${chosen.desc}`);
+        S.kasaneRound++;
+        setButtons([{ label: S.kasaneRound < SEASONS.length ? 'つぎの 季節へ' : 'まとめる', cb: () => this.startRound() }]);
+      } else {
+        sHmm();
+        say(`ちがう 季節の 色みたい……もういちど かんがえてみよう。`);
+        const opts = this.choicesFor(S.kasaneRound);
+        setButtons(opts.map(o => ({
+          label: swatchLabel(o.omote, o.ura, o.label),
+          cls: 'choice',
+          cb: el2 => this.pick(o, el2, season),
+        })));
+      }
+    },
+    finishAll() {
+      award('m_kasane'); S.phase = 'done'; sFanfare(); scopeBurst();
+      hideWish();
+      say(`✨ 四季すべての かさねが そろった！ ✨<br><br>💡 <b>たいせつポイント</b><br>うすい 絹を 何まいも 重ねて、表と 裏の 色の 組み合わせで 季節を 表す……これが「かさねの色目」。100種類 以上も あるんだよ。`);
+      setButtons([{ label: 'つぎへ（かな文字の たんじょう）', cb: nextStep }]);
+    },
+  },
+
+  // --- M3：かな文字の誕生 ---
+  m_kana: {
+    enter() {
+      Object.assign(S, { scene: 'kana', scope: { type: 'idle' }, kanaStage: 0 });
+      updateLoc();
+      setWish('✒️', `ひらがなは、もともと 漢字から 生まれたんだよ。「${ruby('安', 'あん')}」という 字が、どう 変わって いったか 見てみよう。`);
+      say(`「つぎへ」を おして、字の 変化を 見てみよう。`);
+      setButtons([{ label: 'つぎへ ▶', cb: () => this.advance() }]);
+    },
+    advance() {
+      S.kanaStage = Math.min(3, (S.kanaStage || 0) + 1);
+      sPage(); scopeBurst();
+      const info = KANA_STAGES[S.kanaStage - 1];
+      S.scope = { type: 'glyph', ch: info.ch, label: info.label };
+      say(info.note);
+      if (S.kanaStage >= 3) {
+        setButtons([{ label: 'クイズへ', cb: () => this.ask() }]);
+      } else {
+        setButtons([{ label: 'つぎへ ▶', cb: () => this.advance() }]);
+      }
+    },
+    ask() {
+      hideWish();
+      say(`この「ひらがな」は、平安時代、主に だれが 使っていた 文字だったと 思う？`);
+      setButtons(choiceRow(['ア みんな 共通の 文字', `イ 貴族の 女性たち（${W.onnade}）`, 'ウ 兵士だけの 文字'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kana'); S.phase = 'done';
+        say(`せいかい！ ひらがなは ${W.onnade}とも 呼ばれ、貴族の 女性たちが よく 使ったよ。<br><br>💡 <b>たいせつポイント</b><br>このあと 出てくる ${W.genji}や ${W.makura}も、ひらがなで 書かれたからこそ 生まれた 名作なんだ。`);
+        setButtons([{ label: 'つぎへ（だれが書いた？）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア みんな 共通の 文字', `イ 貴族の 女性たち（${W.onnade}）`, 'ウ 兵士だけの 文字'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M4：だれが書いた？ ---
+  m_sakusha: {
+    enter() {
+      Object.assign(S, { scene: 'sakusha', scope: { type: 'idle' }, sakushaRound: 0 });
+      updateLoc();
+      setWish('📖', `ひらがなで 書かれた 有名な 作品を、2つ 見てみよう。だれが 書いたか 当てられるかな？`);
+      this.startRound();
+    },
+    startRound() {
+      const round = S.sakushaRound;
+      if (round >= QUOTES.length) { this.finishAll(); return; }
+      const q = QUOTES[round];
+      say(`この 文章を 書いたのは、だれだと 思う？`);
+      const authors = [q.author, ...q.wrong];
+      const shuffled = round === 0 ? [authors[1], authors[0], authors[2]] : [authors[0], authors[2], authors[1]];
+      setButtons(shuffled.map((a, i) => ({ label: '　' + a, cls: 'choice', cb: el => this.pick(a, el, q) })));
+    },
+    pick(picked, el, q) {
+      markPicked(el);
+      if (picked === q.author) {
+        sYes(); scopeBurst();
+        S.scope = { type: 'book', name: q.bookPlain };
+        say(q.note);
+        S.sakushaRound++;
+        setButtons([{ label: S.sakushaRound < QUOTES.length ? 'つぎの 文章へ' : 'まとめる', cb: () => this.startRound() }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        this.startRound();
+      }
+    },
+    finishAll() {
+      award('m_sakusha'); S.phase = 'done'; sFanfare(); scopeBurst();
+      hideWish();
+      say(`✨ 2つとも わかったね！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.murasaki}の ${W.genji}と、${W.sei}の ${W.makura}は、どちらも 平安時代を 代表する、ひらがなの 名作だよ。`);
+      setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+    },
+  },
+
+  // --- はかせチャレンジ：望月の歌 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'moon' }, hakasePhase: 'intro' });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.michinaga}という 貴族が、自分の 娘たちを 天皇の きさきに して、政治の 力を にぎったんだ。そのとき 詠んだ 有名な 歌を 見てみよう。`);
+      setButtons([{ label: '歌を 見る', cb: () => this.showPoem() }]);
+    },
+    showPoem() {
+      sPage();
+      S.hakasePhase = 'poem';
+      say(`「この世をば　わが世とぞ思ふ　望月の　欠けたることも　なしと思へば」<br>この 歌の 意味は、どれだと 思う？`);
+      setButtons(choiceRow(['ア 今夜は 月が きれいですね', 'イ 自分の 思い通りに ならないことは 何もない、満月のような 幸せだ', 'ウ 早く 月が 満ちて ほしい'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 1018年、${W.michinaga}の 娘が きさきに なった お祝いの 席で 詠まれた 歌。欠けたところが 何もない 満月のように、思い通りに いく 幸せを 表しているよ。<br><br>💡 <b>たいせつポイント</b><br>藤原氏は 娘を 天皇の きさきに し、生まれた 子を 次の 天皇に することで 力を にぎった。これを ${W.sekkan}と いうよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 今夜は 月が きれいですね', 'イ 自分の 思い通りに ならないことは 何もない、満月のような 幸せだ', 'ウ 早く 月が 満ちて ほしい'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ かさねの宮 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 十二単は、じっさいには 基本 （<span class="blankWord" data-a="五衣＝5まい">？？？</span>）だった。<br>
+        ② かさねの色目で、秋に合う色は （<span class="blankWord" data-a="紅葉襲（紅×黄）">？？？</span>）。<br>
+        ③ ひらがなは、主に （<span class="blankWord" data-a="貴族の女性たち">？？？</span>）が 使っていた。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 5まいくらい</b> でした！ 「十二単」という 名前は のちの時代に 生まれた よび名で、実さいの まい数を 表しては いないんだ。平安の前の頃には 20まい、30まいと 重ねることも あったけれど、のちに 5まい（${W.itsutsuginu}）に きまりが 定められたんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>家の 中で「ひらがな」を 1つ さがしてみよう。おうちの人と、季節に 合う 色を いっしょに 考えてみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#6a3a5a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'kasane', scope: { type: 'glow' }, kasaneDone: SEASONS.map(s => ({ name: s.name, omote: s.omote, ura: s.ura })) });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 四季の 色を 見くらべながら、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「秋に 合う 色の 名前は？」「望月の歌を 詠んだのは だれ？」`);
+      setButtons([
+        { label: '🏯 お屋敷の 図', cls: 'sub', cb: () => this.show('dono') },
+        { label: '👘 四季の 色', cls: 'sub', cb: () => this.show('kasane') },
+        { label: '🌕 望月の うた', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'hakase') S.hakasePhase = 'poem';
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kasane などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

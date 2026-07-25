@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>かさねの宮 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #6a3a5a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd6ec; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .roomRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .roomBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .roomBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .swatchRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .swatchBox { flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm; padding: 1mm 2mm; font-size: 8.4pt; line-height: 1.4; }
+  .swatchBox .chip { display: inline-block; width: 4mm; height: 4mm; border: .3mm solid #222; vertical-align: middle; margin-right: .8mm; }
+
+  .kanaRow { display: flex; gap: 3mm; align-items: center; margin-top: 1.2mm; }
+  .kanaCell { border: .5mm solid #222; border-radius: 2mm; width: 20mm; height: 16mm; display: flex; align-items: center; justify-content: center; font-size: 16pt; }
+  .kanaArrow { font-size: 12pt; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #f7d0e8; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌸 かさねの宮 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      <b>十二単</b>は、ほんとうに 12まい かさねて 着ていたと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🧵 12まい</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 👘 5まいくらい</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🌀 20まい以上</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．寝殿造の お屋敷を たんけん</span>
+    <div class="secBody">
+      あ・い・う・え の 名前を、下の 言葉から えらんで 線で むすぼう。
+      <div class="roomRow">
+        <div class="roomBox"><span class="rletter">あ</span>（　　　　　　）</div>
+        <div class="roomBox"><span class="rletter">い</span>（　　　　　　）</div>
+        <div class="roomBox"><span class="rletter">う</span>（　　　　　　）</div>
+        <div class="roomBox"><span class="rletter">え</span>（　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">寝殿（しんでん）</span>
+        <span class="wordBank">対屋（たいのや）</span>
+        <span class="wordBank">渡殿（わたどの）</span>
+        <span class="wordBank">釣殿（つりどの）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．かさねの色目（四季の色あわせ）</span>
+    <div class="secBody">
+      季節に 合う 色の組み合わせを、色を ぬって かくにんしよう。
+      <div class="swatchRow">
+        <div class="swatchBox"><span class="chip" style="background:#fff"></span><span class="chip" style="background:#e0607a"></span> 春＝桜襲（表白・裏紅）</div>
+        <div class="swatchBox"><span class="chip" style="background:#fff"></span><span class="chip" style="background:#5fa88a"></span> 夏＝卯の花襲（表白・裏青）</div>
+        <div class="swatchBox"><span class="chip" style="background:#c9455a"></span><span class="chip" style="background:#f0c030"></span> 秋＝紅葉襲（表紅・裏黄）</div>
+        <div class="swatchBox"><span class="chip" style="background:#7a3b42"></span><span class="chip" style="background:#8fc947"></span> 冬＝松襲（表蘇芳・裏萌黄）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．かな文字の たんじょう</span>
+    <div class="secBody">
+      漢字が どう 変わって いったか、じゅんばんを かくにんしよう。
+      <div class="kanaRow">
+        <div class="kanaCell">安</div><div class="kanaArrow">→</div>
+        <div class="kanaCell" style="font-style:italic">安</div><div class="kanaArrow">→</div>
+        <div class="kanaCell">あ</div>
+      </div>
+      ひらがなは、主に　だれが 使っていた？　→（ 　　　　　　　　　　 ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．だれが 書いた？</span>
+    <div class="secBody">
+      <table class="expTable">
+        <tr><th>作品</th><th>だれが 書いた？（〇を つけよう）</th></tr>
+        <tr><td class="item">枕草子（まくらのそうし）</td><td>紫式部　・　清少納言　・　藤原道長</td></tr>
+        <tr><td class="item">源氏物語（げんじものがたり）</td><td>紫式部　・　清少納言　・　藤原道長</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（望月の歌）</span>
+    <div class="secBody">
+      「この世をば　わが世とぞ思ふ　望月の　欠けたることも　なしと思へば」<br>
+      この歌の 意味は？　→（ ア 今夜は月がきれい　・　イ 思い通りにならないことは何もない　・　ウ 早く月が満ちてほしい ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 十二単は、じっさいには 基本（<span class="fillLine" style="width:28mm"></span>）だった。<br>
+      ② かさねの色目で、秋に合う色は（<span class="fillLine" style="width:28mm"></span>）。<br>
+      ③ ひらがなは、主に（<span class="fillLine" style="width:28mm"></span>）が 使っていた。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          家の中で「ひらがな」を 1つ さがしてみよう。おうちの人と、季節に合う色を いっしょに 考えてみよう。<br>
+          ☐ 見つけた ひらがな：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　かさねの宮 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】かさねの宮 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（平安時代・貴族の暮らしと国風文化）」・学力幅あり・協力型／ 使うもの：「kasane.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kasane</b> などで途中再開（m_dono／m_kasane／m_kana／m_sakusha／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🏯 お屋敷を たんけんしよう</td><td>4つの場所（寝殿・対屋・渡殿・釣殿）をボタンで確認 → クイズ。寝殿造の左右対称の配置を紹介</td></tr>
+      <tr><td class="min">11〜22分</td><td>👘 いろを かさねよう（<b>今日の見せ場</b>）</td><td>四季それぞれに合う色の組み合わせを3択で予想 → 正解で色見本が積み上がる。1人1季節ずつ交代させると全員参加できる</td></tr>
+      <tr><td class="min">22〜29分</td><td>✒️ かな文字の たんじょう</td><td>「つぎへ」で漢字→草書体→ひらがなの変化を確認 → 誰が使っていた文字かクイズ</td></tr>
+      <tr><td class="min">29〜36分</td><td>📖 だれが 書いた？</td><td>枕草子・源氏物語の一節から作者を2問クイズ</td></tr>
+      <tr><td class="min">36〜41分</td><td>🌕 はかせチャレンジ（望月の歌）</td><td>藤原道長の歌の意味を3択で予想。摂関政治のしくみを紹介</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。ひらがな探し（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「かな文字の たんじょう」を右下「つぎ▶」でスキップ可（<b>いろを かさねよう と まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 5まいくらい</b>／お屋敷＝<b>あ 寝殿・い 対屋・う 渡殿・え 釣殿</b>／
+      かさねの色目＝<b>春 桜襲・夏 卯の花襲・秋 紅葉襲・冬 松襲</b>／かな文字＝<b>貴族の女性たち（女手）</b>／
+      だれが書いた＝<b>枕草子＝清少納言、源氏物語＝紫式部</b>／望月の歌の意味＝<b>イ 思い通りにならないことは何もない</b>／
+      まとめ＝①<b>五衣（5まい）</b>　②<b>紅葉襲（紅×黄）</b>　③<b>貴族の女性たち</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>「十二単」という呼び名は後世（『源平盛衰記』）に生まれた俗称で、実際の枚数を表すものではない。平安初期には20〜30枚重ねることもあったが、後には五衣（いつつぎぬ）＝5枚に定められた</li>
+      <li>寝殿造は、中心の寝殿を対屋・渡殿・釣殿などで結んだ左右対称のつくり。南に庭と池があり、船遊びや歌会が行われた</li>
+      <li>かさねの色目は、薄い絹を重ねて表と裏の色の組み合わせで季節を表す配色。100種類以上が知られる。桜襲（表白・裏紅）、卯の花襲（表白・裏青）、紅葉襲（表紅・裏黄）、松襲（表蘇芳・裏萌黄）はいずれも実在する組み合わせ</li>
+      <li>ひらがなは万葉仮名（漢字の音を借りた表記）がくずされて生まれた文字で、女手（おんなで）とも呼ばれ、貴族の女性たちに広く使われた</li>
+      <li>清少納言は随筆「枕草子」、紫式部は物語「源氏物語」（54帖）を著した。どちらもひらがなによる平安文学の代表作</li>
+      <li>藤原道長は娘たちを次々に天皇の后とし、1018年、三女が后に立った祝いの席で「この世をば わが世とぞ思ふ 望月の 欠けたることも なしと思へば」と詠んだ。天皇の外戚として力を握る政治のしくみを摂関政治という</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「いろを かさねよう」は今日いちばんの見せ場。四季を1人ずつ交代で選ばせると、色見本が積み上がっていく様子を全員で共有できる</li>
+      <li>色の名前（桜襲・卯の花襲など）は読みにくいので、先生が音読して補うとよい</li>
+      <li>おうちミッションは家の中の表示物などで見つけてよい。無理に見つけさせる必要はなく、家族との会話のきっかけでよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「秋に合う色の名前は？」「望月の歌を詠んだのはだれ？」</li>
+      <li>教科書・資料集の十二単の写真や、源氏物語絵巻などを見て、実物の色合いを確かめると理解が深まる</li>
+      <li>摂関政治から、このあとの院政・武士の世の中の始まりへと発展できる（次回作：元寇と博多の防塁）</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
