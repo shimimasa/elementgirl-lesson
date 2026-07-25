@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>しおさいの湊 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #0c5b66; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cdeee8; }
+  .levelTable td.res { height: 7mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🎣 しおさいの湊 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      日本で とれる 魚や 貝の 量は、この40年くらいで どうなったと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 📈 ずっと 増えつづけている</div>
+        <div class="voteOpt"><span class="vnum">イ</span> ➡️ あまり 変わっていない</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 📉 ピーク時の 3分の1くらいまで 減った</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．好漁場を さがそう（潮目のひみつ）</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">暖流</span>
+        <span class="wordBank">寒流</span>
+        <span class="wordBank">大陸棚</span>
+      </div>
+      <div style="margin-top:1.2mm">暖流と寒流が ぶつかる 場所で 魚が 多く とれるのは なぜ？　ア 水が きれい ・ イ プランクトンが 多い ・ ウ 波が おだやか（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．漁業の 種類</span>
+    <div class="secBody">
+      日本で いちばん 漁獲量が 多いのは？（〇を つけよう）<br>
+      ア 沿岸漁業　・　イ 沖合漁業　・　ウ 遠洋漁業
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．資源を 守れ！ — 獲る量を ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 獲る量を えらんで 試してみよう。5年後も 魚が 元気だった 目もりに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．育てる漁業（栽培漁業）</span>
+    <div class="secBody">
+      栽培漁業と 養殖業の ちがいは？（〇を つけよう）<br>
+      ア どちらも 同じ　・　イ 栽培漁業は とちゅうで 海に 放し、養殖業は さいごまで いけす等で 育てる　・　ウ 栽培漁業の ほうが 魚が 大きい
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（これからの水産業）</span>
+    <div class="secBody">
+      魚を 食べつづけるために できることは？（〇を つけよう）<br>
+      ア 安い 外国の 魚だけ 食べる　・　イ 旬の魚を えらび、獲れすぎない 漁業を おうえんする　・　ウ 魚を 食べるのを やめる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 暖流と 寒流が ぶつかる 場所を（<span class="fillLine"></span>）という。<br>
+      ② 日本で いちばん 漁獲量が 多い 漁業は（<span class="fillLine"></span>）。<br>
+      ③ 稚魚を 海に 放して 大きくなったら とる 漁業を（<span class="fillLine"></span>）という。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          スーパーや 魚屋さんで、魚の パッケージに「養殖」「〇〇産」などの 表示を 1つ さがしてみよう。どこで、どうやって とれた（育てられた）魚か、おうちの人と 話してみよう。<br>
+          ☐ 見つけた もの：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　しおさいの湊 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】しおさいの湊 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「水産業（とる漁業と育てる漁業）」・学力幅あり・協力型／ 使うもの：「shiosai.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_shigen</b> などで途中再開（m_kaiiki／m_shurui／m_shigen／m_sodateru／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🌊 好漁場を さがそう</td><td>暖流・寒流・大陸棚の3手がかりをボタンで確認 → 潮目にプランクトンが集まる理由をクイズ</td></tr>
+      <tr><td class="min">11〜18分</td><td>🚢 漁業の 種類</td><td>沿岸・沖合・遠洋・養殖の4種をボタンで確認 → 日本でいちばん多いのは沖合漁業、とクイズで確認</td></tr>
+      <tr><td class="min">18〜28分</td><td>🐟 資源を 守れ！（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で獲る量を選び「5年間りょうをする」→魚がどうなるか確認。少なすぎ/多すぎだと失敗するので何度も挑戦させる。1人ずつ交代で目もりを選ばせるとよい</td></tr>
+      <tr><td class="min">28〜35分</td><td>🐣 育てる 漁業</td><td>たまご→稚魚→放流→漁のステップを「つぎへ」で確認 → 栽培漁業と養殖業のちがいをクイズ</td></tr>
+      <tr><td class="min">35〜41分</td><td>🛍️ はかせチャレンジ</td><td>これからも魚を食べつづけるためにできることをクイズ。資源管理とSDGsの話へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「養殖・〇〇産さがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「漁業の種類」を右下「つぎ▶」でスキップ可（<b>資源を守れ・育てる漁業・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ ピーク時の 3分の1くらいまで 減った</b>／好漁場＝<b>イ プランクトンが 多く 集まるから</b>／
+      漁業の種類＝<b>イ 沖合漁業</b>／資源を守れ＝<b>③〜⑥（獲る量を守って持続できる）</b>／
+      育てる漁業＝<b>イ 栽培漁業は とちゅうで 海に 放し、養殖業は さいごまで 育てる</b>／
+      はかせ＝<b>イ 旬の魚を えらび、獲れすぎない 漁業を おうえんする</b>／
+      まとめ＝①<b>潮目（しおめ）</b>　②<b>沖合漁業</b>　③<b>栽培漁業</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の水産業です）</h2>
+    <ul>
+      <li>日本の漁業・養殖業生産量は1984年が最多で約1282万トン。その後マイワシの漁獲減少や200海里水域の設定による遠洋漁業の縮小などにより急速に減少し、現在はピーク時の3分の1程度にまで落ち込んでいる（水産庁資料等）</li>
+      <li>好漁場ができる理由：暖流（黒潮など）と寒流（親潮など）がぶつかる「潮目（潮境）」はプランクトンが豊富になり魚が集まる。三陸沖・金華山沖は世界三大漁場のひとつ。大陸棚も日光が届きやすくプランクトンが豊富</li>
+      <li>漁業の区分：沿岸漁業＝陸地が見える程度の近海・小型船・日帰り／沖合漁業＝200海里（排他的経済水域）以内・数日がかり・日本の生産量の中心／遠洋漁業＝公海や外国の水域・大型船・数か月〜1年の航海／海面養殖業＝いけす等で「とる」のでなく「育てる」</li>
+      <li>栽培漁業＝卵から稚魚までの最も弱い時期を人の手で育て、海に放流し、大きくなってからとる「つくり育てる漁業」。養殖業（海面養殖業）との違いは、最後まで人の手で育てるかどうか</li>
+      <li>資源管理の工夫：網目の大きさの規制（小さい魚を海に返す）、産卵期の禁漁、魚の種類ごとに獲れる量の上限を決めるTAC制度（漁獲可能量制度）など。SDGs目標14「海の豊かさを守ろう」ともつながる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「資源を守れ！」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせると全員が参加できる</li>
+      <li>獲る量は「多ければ多いほど良い」わけではなく、少なすぎても漁師さんの生活が成り立たない、という設定にしてある。ちょうどよい量を何度も試す過程を大事にする</li>
+      <li>よそうタイムの答え（ウ：3分の1くらいまで減った）は、身近な魚が実は減っているという実感につながる。まとめで丁寧に振り返るとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「潮目って何？」「いちばん漁獲量が多い漁業は？」「栽培漁業と養殖業のちがいは？」</li>
+      <li>教科書・資料集の日本の漁業種類別生産量の推移グラフを見ると、遠洋漁業が1970年代以降に大きく減っていることが確認できる</li>
+      <li>お米づくり（みのりの村）に続き、食料生産・自給率の単元へと発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

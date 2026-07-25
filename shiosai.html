@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>しおさいの湊 — 水産業と、とる・そだてる 漁業 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eafbf8 0%, #c9f0ea 55%, #6cc3c9 100%);
+    color: #0d3d42;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #0c5b66; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4f9298; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #d7f3ee; border: 2px solid #a6dfd7;
+    font-size: clamp(16px, 1.8vw, 26px); color: #a6dfd7;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #0d3d42;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f5fdfb 0%, #d8f2ee 100%);
+    border: 3px solid #14818f;
+    box-shadow: inset 0 0 40px rgba(10, 80, 85, .12), 0 4px 18px rgba(10, 60, 65, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #0d3d42; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #0c5b66; color: #eafffb; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(10, 60, 65, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(10, 60, 65, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #bdeee6; cursor: pointer;
+    background: linear-gradient(180deg, #2fa8b8, #0c5b66); color: #fff;
+    box-shadow: 0 3px 0 #05343c; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #8a7550, #5c4a2e); border-color: #d9c79a; box-shadow: 0 3px 0 #3a2e1a; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #0c5b66; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(10, 80, 85, .3), inset 0 0 24px rgba(10, 80, 85, .18);
+    flex-shrink: 0; background: #eafbf8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #4f9298;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #0d3d42; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f7fefc; border: 2px solid #a6dfd7; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #4f9298; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #0d3d42;
+    border: 1.5px solid #bfe6e0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #0c5b66; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #cdeee8, #daf3ee); color: #0d3d42;
+    border: 2px solid #0c5b66; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #0c5b66; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #2fa8b8, #0c5b66); color: #fff;
+    box-shadow: 0 3px 0 #05343c, 0 5px 12px rgba(10, 80, 85, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #05343c; }
+  .btn.sub {
+    background: #d7f3ee; color: #12666f; box-shadow: 0 3px 0 #a6dfd7;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #0d3d42; box-shadow: 0 3px 0 #a6dfd7; font-weight: 400; border: 1.5px solid #bfe6e0; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #2fa8b8; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(8, 40, 42, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f7fefc, #daf3ee);
+    border: 3px solid #2fa8b8; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(8, 40, 42, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #0c5b66; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #0c5b66; }
+  .panel .sub { color: #4f9298; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #0d3d42; border: 1.5px solid #bfe6e0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #4f9298; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #0d3d42; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #bfe6e0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #0c5b66; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #0c5b66; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #0c5b66;
+    color: #0d3d42; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #4f9298;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #d7f3ee; color: #12666f;
+    border: 1px solid #a6dfd7; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #cdeee8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🎣 しおさいの湊<small>— 水産業と、とる・そだてる 漁業 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kaiiki" title="好漁場さがし">★</div>
+    <div class="badge" id="bd_m_shurui" title="漁業の種類">★</div>
+    <div class="badge" id="bd_m_shigen" title="資源を守れ">★</div>
+    <div class="badge" id="bd_m_sodateru" title="育てる漁業">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">日本の 海と 水産業</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 ものみの窓 〜 遠くの ようすを 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(10,60,66,.18)"/>
+            <!-- からだ：うずしお -->
+            <path d="M20 118 Q18 96 34 90 Q50 84 60 90 Q70 84 86 90 Q102 96 100 118 Z" fill="#0c5b66" stroke="#0d3d42" stroke-width="2"/>
+            <path d="M28 100 Q30 82 46 78 Q60 74 74 78 Q90 82 92 100 Z" fill="#1f96a0" stroke="#0d3d42" stroke-width="2"/>
+            <path d="M38 82 Q40 68 60 66 Q80 68 82 82 Z" fill="#5cc7c2" stroke="#0d3d42" stroke-width="2"/>
+            <!-- 波の渦もよう -->
+            <path d="M60 66 Q66 72 60 78 Q54 84 60 90" stroke="#0d3d42" stroke-width="1.4" fill="none" opacity=".4"/>
+            <!-- あたま -->
+            <circle cx="60" cy="40" r="25" fill="#f0d8b8" stroke="#0d3d42" stroke-width="2.5"/>
+            <!-- 貝がらの かみかざり -->
+            <path d="M35 30 Q60 4 85 30 Q78 20 60 18 Q42 20 35 30 Z" fill="#2fa8b8" stroke="#0d3d42" stroke-width="2"/>
+            <path d="M55 8 Q60 -2 65 8 Q60 4 55 8 Z" fill="#ffe9a8" stroke="#0d3d42" stroke-width="1.2"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <ellipse cx="74" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="38" rx="3.6" ry="5" fill="#0d3d42"/>
+              <ellipse cx="69" cy="38" rx="3.6" ry="5" fill="#0d3d42"/>
+              <circle cx="52.3" cy="35.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="35.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 52 Q60 57 67 52" stroke="#0d3d42" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">潮目の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>シオ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🎣 しおさいの湊ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   しおさいの湊 — 水産業と、とる漁業・育てる漁業（小5社会・協力型・1ファイル）
+   好漁場さがし(潮目) → 漁業の種類(遠洋/沖合/沿岸/養殖) → 資源を守れ(獲る量シミュレーション) →
+   育てる漁業(栽培漁業) → はかせ（これからの水産業）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  shiome: ruby('潮目', 'しおめ'),
+  danryuu: ruby('暖流', 'だんりゅう'),
+  kanryuu: ruby('寒流', 'かんりゅう'),
+  kuroshio: ruby('黒潮', 'くろしお'),
+  oyashio: ruby('親潮', 'おやしお'),
+  tairikudana: ruby('大陸棚', 'たいりくだな'),
+  engan: ruby('沿岸漁業', 'えんがんぎょぎょう'),
+  okiai: ruby('沖合漁業', 'おきあいぎょぎょう'),
+  enyou: ruby('遠洋漁業', 'えんようぎょぎょう'),
+  yousyoku: ruby('海面養殖業', 'かいめんようしょくぎょう'),
+  saibai: ruby('栽培漁業', 'さいばいぎょぎょう'),
+  chigyo: ruby('稚魚', 'ちぎょ'),
+  houryuu: ruby('放流', 'ほうりゅう'),
+  amime: ruby('網目', 'あみめ'),
+  kairi: ruby('海里', 'かいり'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 判定ロジック ----------
+function judgeShigen(n) { // n: 1-8　5年間の 獲る量
+  if (n <= 2) return { level: 'low', target: 92 };
+  if (n >= 7) return { level: 'high', target: 6 };
+  return { level: 'good', target: 60 };
+}
+
+// ---------- 好漁場さがし：手がかり ----------
+const KAIIKI_POINTS = [
+  { key: 0, letter: 'あ', name: 'あたたかい 暖流', x: 230, y: 480,
+    txt: `南から 流れてくる あたたかい 海の 流れを「${W.danryuu}」というよ。日本の 近くでは「${W.kuroshio}」が 有名だ。` },
+  { key: 1, letter: 'い', name: 'つめたい 寒流', x: 760, y: 190,
+    txt: `北から 流れてくる つめたい 海の 流れを「${W.kanryuu}」というよ。日本の 近くでは「${W.oyashio}」が 有名だ。` },
+  { key: 2, letter: 'う', name: '浅くて 広い 大陸棚', x: 500, y: 330,
+    txt: `岸から つづく 浅くて 広い 海底を「${W.tairikudana}」というよ。日光が とどきやすく、養分も 豊富なんだ。` },
+];
+
+// ---------- 漁業の種類さがし：4つのふね ----------
+const SHURUI_POINTS = [
+  { key: 0, letter: 'あ', name: '沿岸漁業', x: 180, y: 400,
+    txt: `${W.engan}は、陸地が 見える くらいの 近い海で 行う。小さな 船で 日帰りが ふつうだよ。` },
+  { key: 1, letter: 'い', name: '沖合漁業', x: 480, y: 280,
+    txt: `${W.okiai}は、岸から 200${W.kairi}くらいの 海(日本の きまりが およぶ 海)で 行う。数日がかりの 船旅で、日本の 漁業の 中心的な 存在だよ。` },
+  { key: 2, letter: 'う', name: '遠洋漁業', x: 830, y: 140,
+    txt: `${W.enyou}は、はるか 遠くの 公海や 外国の 海まで 出かける。大きな 船で 数か月〜1年も 航海するんだ。` },
+  { key: 3, letter: 'え', name: '海面養殖業', x: 340, y: 420,
+    txt: `${W.yousyoku}は、いけすなどで 魚や 貝を 育てる。とる漁業と ちがって「育てる」漁業だよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kaiiki',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  kaiikiFound: new Set(),
+  shuruiFound: new Set(),
+  shigenLevel: 4,
+  fishStock: 65,
+  sodateru: { stage: 0 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(points, X, Y, sc, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#0c5b66' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#0d3d42'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#0c5b66';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 好漁場さがし ----------
+function drawKaiikiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#bdeeed'); g.addColorStop(1, '#8fd6d2');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(120,150,90,.4)';
+  gctx.beginPath(); gctx.ellipse(X(860), Y(90), 200 * sc, 80 * sc, 0, 0, TAU); gctx.fill();
+
+  gctx.strokeStyle = '#e08a3a'; gctx.lineWidth = 10 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(120), Y(560)); gctx.quadraticCurveTo(X(360), Y(420), X(500), Y(330)); gctx.stroke();
+  gctx.strokeStyle = '#3d8fd6'; gctx.lineWidth = 10 * sc;
+  gctx.beginPath(); gctx.moveTo(X(880), Y(120)); gctx.quadraticCurveTo(X(650), Y(220), X(500), Y(330)); gctx.stroke();
+
+  gctx.fillStyle = 'rgba(255,255,255,.55)';
+  gctx.beginPath(); gctx.arc(X(500), Y(330), 34 * sc, 0, TAU); gctx.fill();
+
+  drawPoints(KAIIKI_POINTS, X, Y, sc, S.kaiikiFound);
+}
+
+// ---------- 漁業の種類さがし ----------
+function drawShuruiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(430));
+  g.addColorStop(0, '#bdeeed'); g.addColorStop(1, '#5fb8c2');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 430 * sc);
+  gctx.fillStyle = '#e8dcb8';
+  gctx.fillRect(X(0), Y(430), 1000 * sc, 210 * sc);
+
+  drawPoints(SHURUI_POINTS, X, Y, sc, S.shuruiFound);
+}
+
+// ---------- 資源を守れ！（メイン操作） ----------
+const FISH_POS = [
+  { x: 120, y: 520 }, { x: 200, y: 440 }, { x: 160, y: 340 }, { x: 280, y: 560 },
+  { x: 340, y: 460 }, { x: 260, y: 260 }, { x: 400, y: 380 }, { x: 460, y: 520 },
+  { x: 520, y: 300 }, { x: 600, y: 440 }, { x: 560, y: 560 }, { x: 680, y: 340 },
+  { x: 740, y: 480 }, { x: 800, y: 260 }, { x: 860, y: 420 }, { x: 820, y: 560 },
+  { x: 700, y: 220 }, { x: 380, y: 230 },
+];
+function drawShigenScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#bdeeed'); g.addColorStop(1, '#3f96a0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  const stock = clamp(S.fishStock || 0, 0, 100);
+  const count = Math.round(stock / 100 * FISH_POS.length);
+  gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  for (let i = 0; i < count; i++) {
+    const p = FISH_POS[i];
+    gctx.fillText(i % 2 === 0 ? '🐟' : '🐠', X(p.x), Y(p.y));
+  }
+
+  gctx.fillStyle = '#4a3a2a'; gctx.strokeStyle = '#0d3d42'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(460), Y(150)); gctx.lineTo(X(600), Y(150)); gctx.lineTo(X(580), Y(190)); gctx.lineTo(X(480), Y(190));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+}
+
+// ---------- 育てる漁業（栽培漁業） ----------
+function drawSodateruScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eafbf8'); g.addColorStop(1, '#bdeeed');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  const stage = (S.sodateru && S.sodateru.stage) || 0;
+
+  gctx.fillStyle = '#eafcff'; gctx.strokeStyle = '#0d3d42'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(120), Y(180), 340 * sc, 260 * sc, 14 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#0d3d42'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'alphabetic';
+  gctx.fillText('いけす（種苗生産）', X(290), Y(160));
+
+  gctx.fillStyle = 'rgba(63,150,160,.5)';
+  gctx.fillRect(X(560), Y(0), 440 * sc, 640 * sc);
+  gctx.fillStyle = '#0d3d42';
+  gctx.fillText('海', X(780), Y(160));
+
+  gctx.font = `${34 * sc}px sans-serif`; gctx.textBaseline = 'middle';
+  if (stage <= 1) {
+    const icon = stage === 0 ? '🥚' : '🐣';
+    for (let i = 0; i < 6; i++) gctx.fillText(icon, X(160 + (i % 3) * 100), Y(260 + Math.floor(i / 3) * 90));
+  }
+  if (stage >= 2) {
+    for (let i = 0; i < 6; i++) gctx.fillText('🐟', X(620 + (i % 3) * 110), Y(260 + Math.floor(i / 3) * 110));
+  }
+  if (stage >= 1 && stage < 3) {
+    gctx.strokeStyle = '#e0a020'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+    gctx.beginPath(); gctx.moveTo(X(470), Y(310)); gctx.lineTo(X(560), Y(310)); gctx.stroke();
+  }
+  if (stage >= 3) {
+    gctx.fillStyle = '#4a3a2a'; gctx.strokeStyle = '#0d3d42'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath();
+    gctx.moveTo(X(720), Y(140)); gctx.lineTo(X(840), Y(140)); gctx.lineTo(X(820), Y(175)); gctx.lineTo(X(740), Y(175));
+    gctx.closePath(); gctx.fill(); gctx.stroke();
+  }
+}
+
+// ---------- はかせ：これからの水産業 ----------
+function drawHakaseScene(X, Y, sc) {
+  gctx.fillStyle = '#eafbf8';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#f3ede0'; gctx.strokeStyle = '#8a5a3a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(260), Y(160), 480 * sc, 340 * sc, 10 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#0d3d42'; gctx.font = `${100 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🐟🛒', X(500), Y(330));
+  gctx.fillStyle = '#0c5b66'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('しゅんの さかな・国産の しるし', X(500), Y(460));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kaiiki') drawKaiikiScene(X, Y, sc);
+  else if (S.scene === 'shurui') drawShuruiScene(X, Y, sc);
+  else if (S.scene === 'shigen') drawShigenScene(X, Y, sc);
+  else if (S.scene === 'sodateru') drawSodateruScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawShigenScene(X, Y, sc);
+}
+
+// ---------- ものみの窓（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#eafbf8'); grd.addColorStop(1, '#a6dfd7');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#0c5b66'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'fish') {
+    const lvl = clamp(S.fishStock || 0, 0, 100);
+    const bw = R * 0.5, bh = R * 1.0, bx = R - bw / 2, by = R * 0.35;
+    sctx.strokeStyle = '#0d3d42'; sctx.lineWidth = R * 0.025;
+    sctx.strokeRect(bx, by, bw, bh);
+    const fillH = bh * (lvl / 100);
+    sctx.fillStyle = '#1f96a0';
+    sctx.fillRect(bx, by + bh - fillH, bw, fillH);
+    label(`しげん ${Math.round(lvl)}%`);
+  } else if (mode === 'flow') {
+    const stage = (S.sodateru && S.sodateru.stage) || 0;
+    const icons = ['🥚', '🐣', '🌊', '🐟'];
+    const labels = ['たまご', '稚魚', '放流', 'せいちょう'];
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(icons[stage] || '🥚', R, R * 0.85);
+    label(labels[stage] || '');
+  } else if (mode === 'shop') {
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🛒', R, R * 0.85);
+    label('えらぶ ちから');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe9a8'); g2.addColorStop(1, 'rgba(255,233,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#0c5b66'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🎣', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#0c5b66'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#0d3d42';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#0c5b66', '#ffe9a8', '#2fa8b8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '日本の 海';
+  const titles = {
+    kaiiki: '🌊 好漁場を さがそう',
+    shurui: '🚢 漁業の 種類',
+    shigen: '🐟 資源を 守れ！',
+    sodateru: '🐣 育てる 漁業',
+    hakase: '🛍️ これからの 水産業',
+    done: '🎣 しおさいの湊 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '日本の 海と 水産業';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kaiiki', 'm_shurui', 'm_shigen', 'm_sodateru', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kaiiki', scope: { type: 'idle' }, kaiikiFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🎣🌊🐟</div>
+        <h1>しおさいの湊</h1>
+        <div class="sub">〜 水産業と、とる漁業・育てる漁業の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 潮目（暖流と 寒流が ぶつかる 場所）から 生まれた 精霊、<b>シオ</b>。今から 日本の 海と、そこで はたらく 漁業の ひみつを <b>いっしょに たしかめに いこう！</b><br>
+        魚は どこで たくさん とれるのか、どうやって とるのか、そして これからも とりつづけるには どうしたら いいのか……見ていこう。</p>
+        <button class="btn" id="startBtn">湊を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">日本で とれる 魚や 貝の 量は、この40年くらいで どうなったと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">📈</span><b>ア</b> ずっと 増えつづけている</div>
+          <div class="vcard" data-v="1"><span class="vicon">➡️</span><b>イ</b> あまり 変わっていない</div>
+          <div class="vcard" data-v="2"><span class="vicon">📉</span><b>ウ</b> ピーク時の 3分の1くらいまで 減った</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：好漁場さがし ---
+  m_kaiiki: {
+    enter() {
+      Object.assign(S, { scene: 'kaiiki', scope: { type: 'idle' }, kaiikiFound: new Set() });
+      updateLoc();
+      setWish('🌊', `日本の まわりの 海には、魚が たくさん 集まる「好漁場」が あるんだ。3つの 手がかりを 調べて、その ひみつを たしかめよう。`);
+      say(`下の ボタンを ぜんぶ おして、手がかりを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KAIIKI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kaiikiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kaiikiFound.size >= KAIIKI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kaiikiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.danryuu}と ${W.kanryuu}が ぶつかる 場所「${W.shiome}」で、魚が 多く とれるのは なぜだろう？`);
+      setButtons(choiceRow(['ア 水が きれいだから', 'イ プランクトン（魚の えさ）が 多く 集まるから', 'ウ 波が おだやかだから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kaiiki'); S.phase = 'done';
+        say(`せいかい！ ${W.danryuu}と ${W.kanryuu}が ぶつかる ${W.shiome}（潮目）では、プランクトンが 豊富に なる。さらに 浅くて 広い ${W.tairikudana}にも 日光が とどきやすく、養分ゆたかな 海に なるんだ。<br><br>💡 <b>たいせつポイント</b><br>三陸沖の 金華山沖は、暖流「${W.kuroshio}」と 寒流「${W.oyashio}」が ぶつかる 世界三大漁場の ひとつだよ。`);
+        setButtons([{ label: 'つぎへ（漁業の種類）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 水が きれいだから', 'イ プランクトン（魚の えさ）が 多く 集まるから', 'ウ 波が おだやかだから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：漁業の種類さがし ---
+  m_shurui: {
+    enter() {
+      Object.assign(S, { scene: 'shurui', scope: { type: 'idle' }, shuruiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`ひとくちに 漁業と いっても、いろいろな 種類が ある。4つの ふねを 調べて、それぞれの ちがいを たしかめよう。下の ボタンを ぜんぶ おしてね。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHURUI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.shuruiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.shuruiFound.size >= SHURUI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.shuruiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`日本の 漁業の 中で、いちばん 漁獲量が 多いのは どれだろう？`);
+      setButtons(choiceRow(['ア 沿岸漁業', 'イ 沖合漁業', 'ウ 遠洋漁業'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_shurui'); S.phase = 'done';
+        say(`せいかい！ 日本の 漁業の 中心は ${W.okiai}（沖合漁業）。<br><br>💡 <b>たいせつポイント</b><br>1970年代に 世界の 国々が 200${W.kairi}の きまりを 決めてから、外国の 海で 自由に 漁が できなく なり、${W.enyou}（遠洋漁業）は 大きく 減ってしまったんだ。`);
+        setButtons([{ label: 'つぎへ（資源を守れ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 沿岸漁業', 'イ 沖合漁業', 'ウ 遠洋漁業'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：資源を守れ！（メイン操作） ---
+  m_shigen: {
+    enter() {
+      Object.assign(S, { scene: 'shigen', scope: { type: 'fish' }, fishStock: 65 });
+      updateLoc();
+      setWish('🐟', `海には かぎりの ある 魚（水産資源）が すんでいる。獲る量①〜⑧を えらんで、5年間 りょうを つづけると、魚は どうなるだろう？`);
+      say(`目もりを えらんで「5年間 りょうを する」ボタンを おそう。少なすぎても 多すぎても うまく いかないよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.shigenLevel === n ? ' sel' : ''), cb: () => { S.shigenLevel = n; this.refreshCtl(); } });
+      list.push({ label: '🎣 5年間 りょうを する', cb: () => this.build() });
+      setControls(list);
+    },
+    build() {
+      setControls([]);
+      say(`獲る量 ${NUMS[S.shigenLevel - 1]} で、5年間 りょうを つづける……`);
+      sClank();
+      const r = judgeShigen(S.shigenLevel);
+      startTween(S.fishStock, r.target, 1.4, v => { S.fishStock = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeShigen(S.shigenLevel);
+      if (r.level === 'good') {
+        sYes(); scopeBurst(); award('m_shigen'); S.phase = 'done';
+        say(`✨ 5年たっても、魚は 元気に くらしている！ ✨<br><br>💡 <b>たいせつポイント</b><br>獲る量を 守りながら 漁を する「資源管理」の 考え方だよ。${W.amime}の 大きさを 決めたり、産卵期を 禁漁に したり、国が 魚の しゅるいごとに 獲れる 量の 上限（TAC）を 決めているんだ。`);
+        setButtons([{ label: 'つぎへ（育てる漁業）', cb: nextStep }]);
+      } else if (r.level === 'low') {
+        sHmm(); S.fishStock = 65;
+        say(`獲る量が 少なすぎて、魚は 増えたけど……漁師さんが くらしていける 量を 獲れなかった。もういちど えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm(); S.fishStock = 65;
+        say(`獲りすぎて、魚が ほとんど いなくなってしまった……これを「乱獲」というよ。もういちど えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：育てる漁業（栽培漁業） ---
+  m_sodateru: {
+    enter() {
+      Object.assign(S, { scene: 'sodateru', scope: { type: 'flow' }, sodateru: { stage: 0 } });
+      updateLoc();
+      setWish('🐣', `魚を「とる」だけでなく「育てる」漁業も 広がっている。${W.saibai}の 3つの ステップを 見てみよう。`);
+      say(`「つぎへ」を おして、たまごから 稚魚が 育つ ようすを 見よう。`);
+      setButtons([{ label: 'つぎへ①', cb: () => this.step1() }]);
+    },
+    step1() {
+      S.sodateru.stage = 1;
+      say(`いけすや 池で、たまごを かえして ${W.chigyo}（稚魚）まで 大切に 育てる。いちばん 弱い 時期を 人の手で 守るんだ。`);
+      setButtons([{ label: 'つぎへ②（海に放流）', cb: () => this.step2() }]);
+    },
+    step2() {
+      S.sodateru.stage = 2;
+      sClank();
+      say(`育てた ${W.chigyo}を、海に ${W.houryuu}（放流）する！ ここからは 自然の 海で 大きく 育つよ。`);
+      setButtons([{ label: 'つぎへ③（大きくなったら）', cb: () => this.step3() }]);
+    },
+    step3() {
+      S.sodateru.stage = 3;
+      scopeBurst();
+      say(`大きく 育ったら、漁で とる。たまご→稚魚→放流→漁、これが「${W.saibai}」の しくみだよ。`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      say(`${W.saibai}（栽培漁業）と 養殖業の ちがいは 何だろう？`);
+      setButtons(choiceRow(['ア どちらも 同じ', 'イ 栽培漁業は とちゅうで 海に 放し、養殖業は さいごまで いけす等で 育てる', 'ウ 栽培漁業の ほうが 魚が 大きい'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_sodateru'); S.phase = 'done';
+        say(`せいかい！ ${W.saibai}は とちゅうまで 育てて 海に 放す。${W.yousyoku}（養殖業）は さいごまで いけすなどで 育てて とる。ぶり・たい・かき・のり・ほたてなど、いろいろな 魚や 貝が 養殖されているよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア どちらも 同じ', 'イ 栽培漁業は とちゅうで 海に 放し、養殖業は さいごまで いけす等で 育てる', 'ウ 栽培漁業の ほうが 魚が 大きい'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：これからの水産業 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'shop' } });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 水産資源（魚や貝）には かぎりが ある。これからも 魚を 食べつづけるために、わたしたちに できることは 何だろう？`);
+      setButtons([{ label: 'かんがえる', cb: () => this.ask() }]);
+    },
+    ask() {
+      sTap();
+      say(`つぎの 中で、いちばん よい 考え方は どれだろう？`);
+      setButtons(choiceRow(['ア 安い 外国の 魚だけ 食べる', 'イ 旬の魚を えらんだり、獲れすぎない 量を 守る 漁業を おうえんする', 'ウ 魚を 食べるのを やめる'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.amime}の 大きさを 決めたり、産卵期を 禁漁に したり、国が 魚の しゅるいごとに 獲れる 量の 上限（TAC）を 決めたり……「とる漁業」と「育てる漁業」を くみあわせて、海の めぐみを 守りながら 使う 工夫が 大切なんだ。<br><br>💡 <b>たいせつポイント</b><br>これは 世界共通の 目標「海の 豊かさを 守ろう」にも つながっているよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 安い 外国の 魚だけ 食べる', 'イ 旬の魚を えらんだり、獲れすぎない 量を 守る 漁業を おうえんする', 'ウ 魚を 食べるのを やめる'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, fishStock: 70 });
+      updateLoc();
+      const votedRight = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ しおさいの湊 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 暖流と 寒流が ぶつかる 場所を「（<span class="blankWord" data-a="潮目（しおめ）">？？？</span>）」という。<br>
+        ② 日本で いちばん 漁獲量が 多い 漁業は「（<span class="blankWord" data-a="沖合漁業">？？？</span>）」。<br>
+        ③ 稚魚を 海に 放して、大きくなったら とる 漁業を「（<span class="blankWord" data-a="栽培漁業">？？？</span>）」という。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ ピーク時の 3分の1くらいまで 減った</b> でした！ 日本の 漁業・養殖業の 生産量は 1984年が いちばん多く 約1282万トン。${W.enyou}（遠洋漁業）が 200${W.kairi}の きまりで 縮小したことなどが 大きな 理由だよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>スーパーや 魚屋さんで、魚の パッケージに「養殖」「〇〇産」などの 表示を 1つ さがしてみよう。どこで、どうやって とれた（育てられた）魚か、おうちの人と 話してみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#0d3d42'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'shigen', scope: { type: 'glow' }, fishStock: 70 });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 水産業について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「潮目って 何？」「いちばん 漁獲量が 多い 漁業は？」`);
+      setButtons([
+        { label: '🌊 好漁場の 図', cls: 'sub', cb: () => this.show('kaiiki') },
+        { label: '🚢 漁業の種類の 図', cls: 'sub', cb: () => this.show('shurui') },
+        { label: '🐟 資源メーターの 図', cls: 'sub', cb: () => this.show('shigen') },
+        { label: '🐣 育てる漁業の 図', cls: 'sub', cb: () => this.show('sodateru') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_shigen などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
