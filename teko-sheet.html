@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>てこの工房 てこノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #7a4315; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #f0d090; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #f3e0c0; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .twoCol { display: flex; gap: 4mm; align-items: flex-start; }
+  .twoCol .diagram { flex-shrink: 0; text-align: center; font-size: 8.5pt; }
+  .twoCol .diagram svg { border: .35mm solid #999; border-radius: 2mm; background: #fbf6ec; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用てこノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🔧 てこの工房 てこノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      てこで <b>支点から とおい ところ</b>を 持って 同じ 重さの ものを うごかすと、近い ところを 持つ ときと くらべて どう 感じる？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🪶 軽く 感じる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🪨 重く 感じる</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> ➖ かわらない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．支点・力点・作用点を さがそう（くぎぬき）</span>
+    <div class="secBody">
+      <div class="twoCol">
+        <div class="diagram">
+          <svg width="60mm" height="30mm" viewBox="0 0 240 120">
+            <line x1="200" y1="20" x2="60" y2="90" stroke="#888" stroke-width="10" stroke-linecap="round"/>
+            <polygon points="90,110 120,110 105,86" fill="#a0521f"/>
+            <line x1="60" y1="90" x2="30" y2="70" stroke="#888" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="200" cy="20" r="9" fill="#fff" stroke="#222" stroke-width="1.4"/>
+            <circle cx="105" cy="90" r="9" fill="#fff" stroke="#222" stroke-width="1.4"/>
+            <circle cx="60" cy="90" r="9" fill="#fff" stroke="#222" stroke-width="1.4"/>
+            <text x="200" y="10" font-size="9" text-anchor="middle">Ａ</text>
+            <text x="105" y="112" font-size="9" text-anchor="middle">Ｂ</text>
+            <text x="45" y="105" font-size="9" text-anchor="middle">Ｃ</text>
+          </svg>
+        </div>
+        <div class="secBody">
+          Ａ・Ｂ・Ｃは それぞれ どれ？　線で むすぶか、記号を 書こう。<br>
+          支点（てこを ささえる点）＝（　<span class="fillLine sm"></span>　）<br>
+          力点（力を 入れる点）＝（　<span class="fillLine sm"></span>　）<br>
+          作用点（物に 力が はたらく点）＝（　<span class="fillLine sm"></span>　）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．うでの長さと つり合い</span>
+    <div class="secBody">
+      ひだり：20g・支点から <b>⑥めもり</b>。みぎ：20gの おもりを どこに 置くと つり合う？<br>
+      よそう：めもり（　<span class="fillLine sm"></span>　）　→　けっか：めもり（　<span class="fillLine sm"></span>　）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．おもさ × めもりの かけ算</span>
+    <div class="secBody">
+      ひだり：10g・支点から <b>⑥めもり</b>。みぎ：30gの おもりを どこに 置くと つり合う？<br>
+      よそう：めもり（　<span class="fillLine sm"></span>　）　→　けっか：めもり（　<span class="fillLine sm"></span>　）<br>
+      しき：10g ×（　<span class="fillLine sm"></span>　）＝ 30g ×（　<span class="fillLine sm"></span>　）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．3しゅるいの てこ さがし</span>
+    <div class="secBody">
+      それぞれ <b>まん中</b>に あるのは 支点・力点・作用点の どれ？
+      <table class="expTable">
+        <tr><th style="width:28%">どうぐ</th><th style="width:36%">まん中に あるのは</th><th style="width:36%">なかま</th></tr>
+        <tr><td class="item">✂️ はさみ</td><td>支点 ・ 力点 ・ 作用点</td><td>１しゅるい ・ ２しゅるい ・ ３しゅるい</td></tr>
+        <tr><td class="item">🍾 せんぬき</td><td>支点 ・ 力点 ・ 作用点</td><td>１しゅるい ・ ２しゅるい ・ ３しゅるい</td></tr>
+        <tr><td class="item">🥢 ピンセット</td><td>支点 ・ 力点 ・ 作用点</td><td>１しゅるい ・ ２しゅるい ・ ３しゅるい</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ</span>
+    <div class="secBody">
+      力点を 支点から とおざけると、必要な 力は どうなる？（１つに 〇）→（ Ａ もっと 小さい 力で すむ ・ Ｂ もっと 大きい 力が いる ・ Ｃ かわらない ）<br>
+      けっか：①めもり＝ 約（<span class="fillLine sm"></span>）g　④めもり＝ 約（<span class="fillLine sm"></span>）g　⑧めもり＝ 約（<span class="fillLine sm"></span>）g
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① てこには（<span class="fillLine" style="width:34mm"></span>）の 3つの 点が ある。<br>
+      ② 重さ × 支点からの めもりが（<span class="fillLine" style="width:14mm"></span>）だと つり合う。<br>
+      ③ 力点を 支点から とおざけると、力は（<span class="fillLine" style="width:20mm"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション：てこの どうぐを さがそう</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🔧</span>
+        <div>
+          おうちに ある「てこ」の どうぐを <b>3つ</b> さがして、支点・力点・作用点が どこか おうちの 人と 話そう（はさみ・くぎぬき・せんぬき・ピンセットなど）。<br>
+          ☐ 見つけた どうぐ：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span><br>
+          <span style="font-size:8.5pt">※するどい どうぐは 大人と いっしょに あつかおう。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　てこの工房 見習い はっけんいん、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】てこの工房 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「てこのはたらき」・学力幅あり・協力型／ 使うもの：「teko.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_balance</b> などで途中再開（m_point／m_balance／m_multiply／m_type／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（はかせチャレンジで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🔩 支点・力点・作用点さがし</td><td>くぎぬきの絵をタップして3点を発見。代表交代で全員がタップを体験</td></tr>
+      <tr><td class="min">11〜19分</td><td>⚖️ うでの長さとつり合い</td><td>同じ重さで支点からの距離を合わせるとつり合うことを発見。①〜⑧ボタンで位置を選び「もちあげる」</td></tr>
+      <tr><td class="min">19〜27分</td><td>🔢 おもさ×めもりの かけ算（<b>今日の見せ場</b>）</td><td>重さが違うとどこでつり合うか探す。「10g×6＝30g×2」の式が見えた瞬間が山場</td></tr>
+      <tr><td class="min">27〜35分</td><td>🧰 3しゅるいの てこさがし</td><td>はさみ・せんぬき・ピンセットで「まん中はどれ？」。身近な道具への接続</td></tr>
+      <tr><td class="min">35〜41分</td><td>🔬 はかせチャレンジ</td><td>力点を支点から遠くすると必要な力が小さくなる（反比例）を①④⑧で体感</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。おうちの道具さがし（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「3しゅるいの てこさがし」を右下「つぎ▶」でスキップ可（<b>おもさ×めもり と まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ア 軽く感じる</b>／支点・力点・作用点さがし＝支点→力点→作用点の順に発見／うでの長さとつり合い＝<b>めもり⑥</b>／
+      おもさ×めもり＝<b>めもり②</b>（10g×6＝30g×2＝60）／3しゅるい＝はさみ<b>1しゅるい</b>・せんぬき<b>2しゅるい</b>・ピンセット<b>3しゅるい</b>／
+      はかせ＝<b>Ａ もっと小さい力ですむ</b>／まとめ＝①<b>支点・力点・作用点</b>　②<b>同じ</b>　③<b>小さくてすむ</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>てこの3点＝<b>支点・力点・作用点</b>、つり合いの条件＝<b>力点の重さ×支点からの距離＝作用点の重さ×支点からの距離</b>は教科書共通の内容</li>
+      <li>てこの3種類：<b>1種てこ</b>（支点が中央：はさみ・くぎぬき・シーソー）／<b>2種てこ</b>（作用点が中央：せんぬき・空き缶つぶし・一輪車）／<b>3種てこ</b>（力点が中央：ピンセット・トング・ホッチキス）</li>
+      <li>力点を支点から遠ざけるほど必要な力は小さくなる（反比例）。てこの原理を使った道具は、身の回りの「重い物を楽に動かす」工夫の代表例</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「おもさ×めもりのかけ算」は今日いちばんの見せ場。①〜⑧を順番に試させてから正解にたどり着かせると、式が見えた瞬間の納得感が大きい</li>
+      <li>代表交代は1人1ミッション。見ている子は「支点・力点・作用点の色（赤・青・緑）」を記録係に</li>
+      <li>おうちミッションは<b>安全最優先</b>：はさみ・くぎぬきなど するどい道具は大人と一緒に扱う</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「はさみの支点はどこ？」「力点を遠くするとなぜ楽？」「せんぬきは何しゅるいのてこ？」</li>
+      <li>教室に実物の輪ゴム鉄砲・くぎぬき・トングなどを用意し、実際に支点・力点・作用点を指で確かめさせるとさらに実感が深まる</li>
+      <li>上皿てんびん・シーソー・一輪車など、身の回りの「てこの仲間」を探すフィールドワークにも発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

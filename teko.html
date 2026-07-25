@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>てこの工房 — 楽に うごかす ひみつ たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fdf3e4 0%, #f7e2bd 55%, #ecc793 100%);
+    color: #5a3a1a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #a0521f; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8a6a42; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #f3ddb8; border: 2px solid #dcb87e;
+    font-size: clamp(16px, 1.8vw, 26px); color: #dcb87e;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe6a8, #e0863f);
+    border-color: #a0521f; color: #6a3a10;
+    box-shadow: 0 0 14px rgba(200, 120, 30, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f3e2c4 0%, #fbf3e2 100%);
+    border: 3px solid #c9843f;
+    box-shadow: inset 0 0 40px rgba(120, 70, 20, .12), 0 4px 18px rgba(80, 45, 10, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #7a4a1a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #a0521f; color: #fff6e6; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(80, 40, 10, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(90, 55, 15, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #f0b878; cursor: pointer;
+    background: linear-gradient(180deg, #e0863f, #b5651d); color: #fff;
+    box-shadow: 0 3px 0 #7a4315; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #6a8ab0, #3d5f8a); border-color: #a0c0e0; box-shadow: 0 3px 0 #253d5c; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a06010; color: #5a3a10; }
+  .ctl.time { background: linear-gradient(180deg, #6a8ab0, #3d5f8a); border-color: #a0c0e0; box-shadow: 0 3px 0 #253d5c; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #a0521f; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(90, 50, 10, .3), inset 0 0 24px rgba(90, 50, 10, .18);
+    flex-shrink: 0; background: #f7ecd8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #8a6a42;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #7a4315; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffaf0; border: 2px solid #e8cd9c; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #8a6a42; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #5a3a1a;
+    border: 1.5px solid #f0dcb8;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #a0521f; background: #f7e0b0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fff6e2, #f5e0b8); color: #5a3a1a;
+    border: 2px solid #a0521f; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #a0521f; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #e0863f, #b5651d); color: #fff;
+    box-shadow: 0 3px 0 #7a4315, 0 5px 12px rgba(90, 50, 10, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #7a4315; }
+  .btn.sub {
+    background: #f3ddb8; color: #7a4a1a; box-shadow: 0 3px 0 #dcb87e;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #5a3a1a; box-shadow: 0 3px 0 #e8cd9c; font-weight: 400; border: 1.5px solid #f0dcb8; }
+  .btn.choice.picked { background: #fbeecb; outline: 3px solid #e0863f; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(50, 30, 10, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fffaf0, #f3ddb0);
+    border: 3px solid #c9843f; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(60, 30, 5, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #a0521f; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #a0521f; }
+  .panel .sub { color: #8a6a42; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #5a3a1a; border: 1.5px solid #f0dcb8; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8a6a42; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #5a3a1a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #f0dcb8; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #a0521f; background: #fbeecb; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #a0521f; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #a0521f;
+    color: #7a4315; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #8a6a42;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #f3ddb8; color: #7a4a1a;
+    border: 1px solid #dcb87e; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ecd0a0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🔧 てこの工房<small>— 楽に うごかす どうぐの けんきゅうしょ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_point" title="3つの点">★</div>
+    <div class="badge" id="bd_m_balance" title="つり合い">★</div>
+    <div class="badge" id="bd_m_multiply" title="かけ算">★</div>
+    <div class="badge" id="bd_m_type" title="てこの種類">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">🔧 じっけんだい 〜 さわって たしかめよう 〜</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 しくみメガネ 〜 力の ひみつが 見える 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(90,60,20,.18)"/>
+            <!-- アンテナ -->
+            <line x1="60" y1="18" x2="60" y2="4" stroke="#8a6a42" stroke-width="3"/>
+            <circle cx="60" cy="4" r="5" fill="#ffce54" stroke="#a0521f" stroke-width="1.2"/>
+            <!-- あたま -->
+            <circle cx="60" cy="46" r="34" fill="#e0863f" stroke="#a0521f" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="36" cy="52" rx="6" ry="4" fill="#fff0d8" opacity=".5"/>
+            <ellipse cx="84" cy="52" rx="6" ry="4" fill="#fff0d8" opacity=".5"/>
+            <!-- め（歯車） -->
+            <g class="eyes">
+              <g transform="translate(44,44)">
+                <path d="M0,-10 L2.4,-9 L2.6,-6.4 L5.6,-5.2 L7.6,-7.2 L9.4,-5.4 L7.4,-3.4 L8.6,-0.4 L11.2,-0.2 L11.2,2.2 L8.6,2.4 L7.4,5.4 L9.4,7.4 L7.6,9.2 L5.6,7.2 L2.6,8.4 L2.4,11 L0,11 L-0.2,8.4 L-3.2,7.2 L-5.2,9.2 L-7,7.4 L-5,5.4 L-6.2,2.4 L-8.8,2.2 L-8.8,-0.2 L-6.2,-0.4 L-5,-3.4 L-7,-5.4 L-5.2,-7.2 L-3.2,-5.2 L-0.2,-6.4 Z" fill="#f4e8d0" stroke="#a0521f" stroke-width="1"/>
+                <circle r="3.2" fill="#3a2a1a"/>
+              </g>
+              <g transform="translate(76,44)">
+                <path d="M0,-10 L2.4,-9 L2.6,-6.4 L5.6,-5.2 L7.6,-7.2 L9.4,-5.4 L7.4,-3.4 L8.6,-0.4 L11.2,-0.2 L11.2,2.2 L8.6,2.4 L7.4,5.4 L9.4,7.4 L7.6,9.2 L5.6,7.2 L2.6,8.4 L2.4,11 L0,11 L-0.2,8.4 L-3.2,7.2 L-5.2,9.2 L-7,7.4 L-5,5.4 L-6.2,2.4 L-8.8,2.2 L-8.8,-0.2 L-6.2,-0.4 L-5,-3.4 L-7,-5.4 L-5.2,-7.2 L-3.2,-5.2 L-0.2,-6.4 Z" fill="#f4e8d0" stroke="#a0521f" stroke-width="1"/>
+                <circle r="3.2" fill="#3a2a1a"/>
+              </g>
+            </g>
+            <!-- くち -->
+            <path d="M50 60 Q60 66 70 60" stroke="#7a4315" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- からだ -->
+            <rect x="30" y="76" width="60" height="46" rx="18" fill="#f0a860" stroke="#a0521f" stroke-width="2.5"/>
+            <!-- 工具ベルト -->
+            <rect x="30" y="96" width="60" height="10" fill="#7a4315"/>
+            <circle cx="60" cy="101" r="5" fill="#ffce54" stroke="#a0521f" stroke-width="1.2"/>
+          </svg>
+          <div class="catname">見習<ruby>ロボ<rt></rt></ruby> <ruby>ギア<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🔧 てこミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   てこの工房 — てこのはたらき（小6理科・協力型・1ファイル）
+   支点・力点・作用点の3点発見 → うでの長さとつり合い →
+   おもさ×めもりの かけ算のつり合い発見 → 3種類のてこ探し →
+   はかせ（遠くを持つほど楽になる＝反比例）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeOutBack(x) {
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+}
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  shiten: ruby('支点', 'してん'),
+  rikiten: ruby('力点', 'りきてん'),
+  sayouten: ruby('作用点', 'さようてん'),
+  tsuriai: ruby('釣', 'つ') + 'り合い',
+  omosa: ruby('重', 'おも') + 'さ',
+  kyori: ruby('距離', 'きょり'),
+  jikken: ruby('実験', 'じっけん'),
+  kankei: ruby('関係', 'かんけい'),
+  hatsumei: ruby('発明', 'はつめい'),
+  douguya: ruby('道具屋', 'どうぐや'),
+};
+
+// ---------- 道具の3点データ（tool モード） ----------
+const NUMS = '①②③④⑤⑥⑦⑧';
+const TOOLS = {
+  bar: {
+    name: 'くぎぬき（バール）', kind: 1,
+    effort: { x: 700, y: 190 }, fulcrum: { x: 470, y: 330 }, load: { x: 330, y: 470 },
+  },
+  scissors: {
+    name: 'はさみ', kind: 1,
+    load: { x: 560, y: 170 }, fulcrum: { x: 500, y: 330 }, effort: { x: 430, y: 490 },
+  },
+  opener: {
+    name: 'せんぬき', kind: 2,
+    fulcrum: { x: 350, y: 400 }, load: { x: 480, y: 400 }, effort: { x: 690, y: 260 },
+  },
+  tweezers: {
+    name: 'ピンセット', kind: 3,
+    fulcrum: { x: 500, y: 190 }, effort: { x: 500, y: 320 }, load: { x: 500, y: 480 },
+  },
+};
+const PT_LABEL = { fulcrum: W.shiten, effort: W.rikiten, load: W.sayouten };
+const PT_COLOR = { fulcrum: '#d84a3a', effort: '#3d7fd8', load: '#3fa04a' };
+const KIND_NAME = { 1: '1しゅるい（支点が 真ん中）', 2: '2しゅるい（作用点が 真ん中）', 3: '3しゅるい（力点が 真ん中）' };
+
+// ---------- シーソー実験（seesaw モード） ----------
+const PIVOT = { x: 500, y: 400 };
+const SCALE_PX = 32; // 1めもり
+const MISSIONS = {
+  m_balance: { leftW: 20, leftPos: 6, rightW: 20, correctPos: 6, unit: false },
+  m_multiply: { leftW: 10, leftPos: 6, rightW: 30, correctPos: 2, unit: false },
+};
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  stageMode: 'tool',   // tool / seesaw
+  tool: null, mission: null,
+  hitPts: {}, // {fulcrum:true, effort:true, load:true}
+  askKey: '',
+  rightPos: 1,
+  tiltAngle: 0, tiltT: 0,
+  scope: { type: 'none' },
+  tapEnabled: false,
+  phase: '', pick: -1,
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 背景（道具工房） ----------
+function drawWorkshopBG(t, X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(560));
+  g.addColorStop(0, '#f7e9d2'); g.addColorStop(1, '#fbf3e2');
+  gctx.fillStyle = g;
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 560 * sc);
+  // 木の板かべ
+  gctx.strokeStyle = 'rgba(160,110,60,.18)'; gctx.lineWidth = 2 * sc;
+  for (let y = 40; y <= 420; y += 70) { gctx.beginPath(); gctx.moveTo(X(0), Y(y)); gctx.lineTo(X(1000), Y(y)); gctx.stroke(); }
+  // まどからの ひざし
+  gctx.fillStyle = 'rgba(255,224,150,.5)';
+  gctx.beginPath(); gctx.arc(X(900), Y(70), 50 * sc, 0, TAU); gctx.fill();
+  // 道具だな（かざり・すみ）
+  gctx.strokeStyle = '#a0521f'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(10), Y(30)); gctx.lineTo(X(130), Y(30)); gctx.stroke();
+  const tools = ['🔧', '🔨', '🪛', '⚙️'];
+  tools.forEach((ic, i) => {
+    gctx.font = `${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText(ic, X(30 + i * 32), Y(16));
+  });
+  // ほしずくの お店への とびら（世界観の つながり）
+  gctx.save();
+  gctx.translate(X(945), Y(20));
+  gctx.fillStyle = '#c9843f'; gctx.strokeStyle = '#7a4315'; gctx.lineWidth = 1.6 * sc;
+  gctx.beginPath(); gctx.roundRect(-22 * sc, 0, 44 * sc, 56 * sc, 6); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#fff6e2'; gctx.font = `700 ${9 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('ほしずく', 0, 14 * sc);
+  gctx.fillText('の 店へ', 0, 24 * sc);
+  gctx.restore();
+  // さぎょうだい（あし場）
+  gctx.fillStyle = '#c9a06a';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+  gctx.strokeStyle = 'rgba(140,100,50,.35)'; gctx.lineWidth = 1.5 * sc;
+  for (let x = 60; x < 1000; x += 130) { gctx.beginPath(); gctx.moveTo(X(x), Y(560)); gctx.lineTo(X(x), Y(640)); gctx.stroke(); }
+}
+
+// ---------- 道具の絵（tool モード） ----------
+function drawToolShape(key, X, Y, sc) {
+  const tl = TOOLS[key];
+  gctx.lineCap = 'round'; gctx.lineJoin = 'round';
+  if (key === 'bar') {
+    gctx.strokeStyle = '#8a8a90'; gctx.lineWidth = 20 * sc;
+    gctx.beginPath(); gctx.moveTo(X(tl.effort.x), Y(tl.effort.y)); gctx.lineTo(X(tl.load.x), Y(tl.load.y)); gctx.stroke();
+    // 支点(台)
+    gctx.fillStyle = '#7a4315';
+    gctx.beginPath(); gctx.moveTo(X(tl.fulcrum.x - 30), Y(tl.fulcrum.y + 34)); gctx.lineTo(X(tl.fulcrum.x + 30), Y(tl.fulcrum.y + 34)); gctx.lineTo(X(tl.fulcrum.x), Y(tl.fulcrum.y)); gctx.closePath(); gctx.fill();
+    // つめ(作用点)
+    gctx.strokeStyle = '#8a8a90'; gctx.lineWidth = 12 * sc;
+    gctx.beginPath(); gctx.moveTo(X(tl.load.x), Y(tl.load.y)); gctx.lineTo(X(tl.load.x - 30), Y(tl.load.y - 26)); gctx.stroke();
+    gctx.fillStyle = '#5a3a1a'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText('くぎ', X(tl.load.x - 40), Y(tl.load.y - 30));
+  } else if (key === 'scissors') {
+    gctx.strokeStyle = 'rgba(140,140,150,.55)'; gctx.lineWidth = 14 * sc;
+    gctx.beginPath(); gctx.moveTo(X(500 - (tl.load.x - 500)), Y(tl.load.y)); gctx.lineTo(X(tl.fulcrum.x), Y(tl.fulcrum.y)); gctx.lineTo(X(500 - (tl.effort.x - 500)), Y(tl.effort.y)); gctx.stroke();
+    gctx.strokeStyle = '#8a8a90'; gctx.lineWidth = 14 * sc;
+    gctx.beginPath(); gctx.moveTo(X(tl.load.x), Y(tl.load.y)); gctx.lineTo(X(tl.fulcrum.x), Y(tl.fulcrum.y)); gctx.lineTo(X(tl.effort.x), Y(tl.effort.y)); gctx.stroke();
+    gctx.fillStyle = '#c9843f'; gctx.beginPath(); gctx.arc(X(tl.fulcrum.x), Y(tl.fulcrum.y), 12 * sc, 0, TAU); gctx.fill();
+    [tl.effort.x, 500 - (tl.effort.x - 500)].forEach(ex => {
+      gctx.strokeStyle = '#5a3a1a'; gctx.lineWidth = 5 * sc; gctx.beginPath();
+      gctx.arc(X(ex), Y(tl.effort.y + 20), 20 * sc, 0, TAU); gctx.stroke();
+    });
+  } else if (key === 'opener') {
+    gctx.strokeStyle = '#8a8a90'; gctx.lineWidth = 16 * sc;
+    gctx.beginPath(); gctx.moveTo(X(tl.fulcrum.x), Y(tl.fulcrum.y)); gctx.lineTo(X(tl.effort.x), Y(tl.effort.y)); gctx.stroke();
+    gctx.beginPath(); gctx.moveTo(X(tl.fulcrum.x), Y(tl.fulcrum.y)); gctx.lineTo(X(tl.fulcrum.x + 18), Y(tl.fulcrum.y - 30)); gctx.stroke();
+    gctx.fillStyle = '#5a3a1a'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText('びんの ふち', X(tl.fulcrum.x - 30), Y(tl.fulcrum.y + 30));
+    gctx.strokeStyle = '#c9843f'; gctx.lineWidth = 10 * sc;
+    gctx.beginPath(); gctx.moveTo(X(tl.load.x), Y(tl.load.y + 20)); gctx.lineTo(X(tl.load.x), Y(tl.load.y - 20)); gctx.stroke();
+    gctx.fillStyle = '#5a3a1a';
+    gctx.fillText('キャップ', X(tl.load.x), Y(tl.load.y + 46));
+  } else if (key === 'tweezers') {
+    gctx.strokeStyle = '#8a8a90'; gctx.lineWidth = 10 * sc;
+    [-1, 1].forEach(dir => {
+      gctx.beginPath();
+      gctx.moveTo(X(tl.fulcrum.x), Y(tl.fulcrum.y));
+      gctx.quadraticCurveTo(X(tl.fulcrum.x + dir * 40), Y(tl.effort.y), X(tl.fulcrum.x + dir * 14), Y(tl.load.y));
+      gctx.stroke();
+    });
+    gctx.fillStyle = '#c9843f';
+    gctx.beginPath(); gctx.ellipse(X(tl.fulcrum.x), Y(tl.fulcrum.y), 16 * sc, 10 * sc, 0, 0, TAU); gctx.fill();
+  }
+}
+function drawToolPoints(X, Y, sc, showAll) {
+  ['fulcrum', 'effort', 'load'].forEach(k => {
+    const p = TOOLS[S.tool][k];
+    const known = showAll || S.hitPts[k];
+    gctx.beginPath(); gctx.arc(X(p.x), Y(p.y), 22 * sc, 0, TAU);
+    gctx.fillStyle = known ? PT_COLOR[k] : 'rgba(255,255,255,.85)';
+    gctx.fill();
+    gctx.strokeStyle = known ? '#3a2a1a' : '#c9a06a'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    if (known) {
+      gctx.fillStyle = '#fff'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+      gctx.fillText(PT_LABEL[k].replace(/<[^>]+>/g, '')[0], X(p.x), Y(p.y));
+    }
+    if (S.askKey === k && !S.hitPts[k]) {
+      gctx.strokeStyle = `rgba(200,120,30,${0.6 + 0.35 * Math.sin(performance.now() / 180)})`;
+      gctx.lineWidth = 3; gctx.setLineDash([8, 6]);
+      gctx.beginPath(); gctx.arc(X(p.x), Y(p.y), 32 * sc, 0, TAU); gctx.stroke();
+      gctx.setLineDash([]);
+    }
+  });
+}
+function drawTool(t, X, Y, sc) {
+  drawWorkshopBG(t, X, Y, sc);
+  if (!S.tool) return;
+  drawToolShape(S.tool, X, Y, sc);
+  drawToolPoints(X, Y, sc, S.phase === 'reveal' || S.phase === 'quiz2');
+  gctx.fillStyle = '#5a3a1a'; gctx.font = `700 ${Math.max(13, 19 * sc)}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(TOOLS[S.tool].name, X(500), Y(560));
+}
+
+// ---------- シーソー実験の絵（seesaw モード） ----------
+function weightRadius(w) { return 16 + w * 0.55; }
+function drawSeesaw(t, X, Y, sc) {
+  drawWorkshopBG(t, X, Y, sc);
+  if (!S.mission) return;
+  const px = PIVOT.x, py = PIVOT.y;
+  // 台座
+  gctx.fillStyle = '#7a4315';
+  gctx.beginPath(); gctx.moveTo(X(px - 42), Y(py + 60)); gctx.lineTo(X(px + 42), Y(py + 60)); gctx.lineTo(X(px), Y(py)); gctx.closePath(); gctx.fill();
+  gctx.strokeStyle = '#5a3010'; gctx.lineWidth = 2 * sc; gctx.stroke();
+
+  gctx.save();
+  gctx.translate(X(px), Y(py));
+  gctx.rotate(S.tiltAngle);
+  const armLen = 8 * SCALE_PX;
+  // 棒
+  gctx.strokeStyle = '#c9843f'; gctx.lineWidth = 14 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(-armLen * sc, 0); gctx.lineTo(armLen * sc, 0); gctx.stroke();
+  gctx.strokeStyle = '#a0521f'; gctx.lineWidth = 2 * sc; gctx.stroke();
+  // めもり
+  for (let n = 1; n <= 8; n++) {
+    [-1, 1].forEach(dir => {
+      const mx = dir * n * SCALE_PX * sc;
+      gctx.strokeStyle = '#7a4315'; gctx.lineWidth = 2 * sc;
+      gctx.beginPath(); gctx.moveTo(mx, -10 * sc); gctx.lineTo(mx, 10 * sc); gctx.stroke();
+      gctx.fillStyle = '#5a3a1a'; gctx.font = `700 ${11 * sc}px sans-serif`; gctx.textAlign = 'center';
+      gctx.fillText(NUMS[n - 1], mx, 26 * sc);
+    });
+  }
+  // 支点マーク
+  gctx.fillStyle = '#d84a3a'; gctx.beginPath(); gctx.arc(0, 0, 9 * sc, 0, TAU); gctx.fill();
+
+  // おもり
+  function weight(pos, w, color, label) {
+    const wx = -pos * SCALE_PX * sc;
+    const r = weightRadius(w) * sc;
+    gctx.fillStyle = color; gctx.strokeStyle = '#3a2a1a'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.roundRect(wx - 3 * sc, -r - 14 * sc, 6 * sc, 14 * sc, 2); gctx.fill();
+    gctx.beginPath(); gctx.arc(wx, -r - 14 * sc, r, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.fillStyle = '#fff'; gctx.font = `700 ${Math.max(11, 14 * sc)}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(label, wx, -r - 14 * sc);
+  }
+  weight(S.mission.leftPos, S.mission.leftW, '#3d7fd8', S.mission.leftW + 'g');
+  if (S.mission.rightPlaced) weight(S.rightPos, S.mission.rightW, '#3fa04a', S.mission.rightW + 'g');
+  gctx.restore();
+
+  if (S.mission.rightPlaced && (S.phase === 'ask' || S.phase === 'pending')) {
+    gctx.fillStyle = 'rgba(160,82,31,.9)'; gctx.font = `700 ${Math.max(13, 18 * sc)}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText('めもり ' + NUMS[S.rightPos - 1] + ' に セット中', X(px), Y(py + 110));
+  }
+}
+
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.stageMode === 'tool') drawTool(t, X, Y, sc);
+  else drawSeesaw(t, X, Y, sc);
+}
+
+// ---------- しくみメガネ（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fbf3e2'); grd.addColorStop(1, '#e8cd9c');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    const k = S.scope.key;
+    sctx.fillStyle = PT_COLOR[k];
+    sctx.beginPath(); sctx.arc(R, R * 0.92, R * 0.26, 0, TAU); sctx.fill();
+    sctx.strokeStyle = '#3a2a1a'; sctx.lineWidth = R * 0.03; sctx.stroke();
+    label(PT_LABEL[k].replace(/<[^>]+>/g, ''));
+  } else if (mode === 'torque') {
+    // 左右の力のおおきさを棒グラフで比較
+    const l = S.scope.left, r = S.scope.right;
+    const maxV = Math.max(l, r, 1);
+    const barW = R * 0.34;
+    [['ひだり', l, R * 0.55, '#3d7fd8'], ['みぎ', r, R * 1.45, '#3fa04a']].forEach(([lb, v, cx, col]) => {
+      const bh = (v / maxV) * R * 0.85;
+      sctx.fillStyle = col;
+      sctx.beginPath(); sctx.roundRect(cx - barW / 2, h - R * 0.32 - bh, barW, bh, 6); sctx.fill();
+      sctx.fillStyle = '#5a3a1a'; sctx.font = `700 ${R * 0.09}px sans-serif`; sctx.textAlign = 'center';
+      sctx.fillText(lb, cx, h - R * 0.14);
+    });
+    label(Math.abs(l - r) < 0.01 ? 'つり合ってる！' : (l > r ? 'ひだりが おもい' : 'みぎが おもい'));
+  } else if (mode === 'kind') {
+    const kind = S.scope.kind;
+    const y0 = R * 0.55;
+    sctx.strokeStyle = '#a0521f'; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(R * 0.35, y0); sctx.lineTo(R * 1.65, y0); sctx.stroke();
+    const order = kind === 1 ? ['effort', 'fulcrum', 'load'] : kind === 2 ? ['fulcrum', 'load', 'effort'] : ['fulcrum', 'effort', 'load'];
+    const xs = [R * 0.35, R, R * 1.65];
+    order.forEach((k, i) => {
+      sctx.fillStyle = PT_COLOR[k];
+      sctx.beginPath(); sctx.arc(xs[i], y0, R * 0.11, 0, TAU); sctx.fill();
+      sctx.strokeStyle = '#3a2a1a'; sctx.lineWidth = R * 0.02; sctx.stroke();
+    });
+    label(KIND_NAME[kind]);
+  } else {
+    sctx.fillStyle = '#c9a06a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔧', R, R * 0.85);
+    label('タップして しらべよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#7a4315';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#a0521f', '#ffce54', '#e0863f', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  if (S.anim.tilting) {
+    S.tiltT = clamp(S.tiltT + dt / 1.1, 0, 1);
+    S.tiltAngle = lerp(S.anim.fromAngle, S.anim.toAngle, easeInOut(S.tiltT));
+    if (S.tiltT >= 1) {
+      S.anim.tilting = false;
+      const step = STEPS[FLOW[S.stepIndex]];
+      if (step.onTiltDone) step.onTiltDone();
+    }
+  }
+
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+// ---------- タッチ（道具の点を しらべる） ----------
+stageCv.addEventListener('pointerdown', ev => {
+  ac();
+  if (!S.tapEnabled || S.stageMode !== 'tool' || !S.tool) return;
+  const r = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(r.width, r.height);
+  const mx = (ev.clientX - r.left - ox) / sc, my = (ev.clientY - r.top - oy) / sc;
+  ['fulcrum', 'effort', 'load'].forEach(k => {
+    const p = TOOLS[S.tool][k];
+    if (Math.hypot(mx - p.x, my - p.y) < 34) {
+      sTap();
+      const step = STEPS[FLOW[S.stepIndex]];
+      if (step.onPointTap) step.onPointTap(k);
+    }
+  });
+});
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function posButtons(cb) {
+  const list = [];
+  for (let n = 1; n <= 8; n++) {
+    list.push({ label: NUMS[n - 1], cls: 'pos' + (S.rightPos === n ? ' sel' : ''), cb: () => cb(n) });
+  }
+  return list;
+}
+function updateLoc() {
+  if (S.stageMode === 'tool') {
+    $('locChip').textContent = 'いまここ：どうぐを しらべる だい';
+    $('stageTitle').innerHTML = `🔧 ${TOOLS[S.tool] ? TOOLS[S.tool].name : 'どうぐ'} 〜 3つの 点を さがそう 〜`;
+  } else {
+    $('locChip').textContent = 'いまここ：てんびん じっけんそうち';
+    $('stageTitle').innerHTML = `⚖️ てんびん じっけんそうち 〜 つり合いを さがそう 〜`;
+  }
+}
+function startTilt(toAngle) {
+  if (S.anim.tilting) return;
+  S.anim = { tilting: true, fromAngle: S.tiltAngle, toAngle }; S.tiltT = 0;
+  sClank();
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_point', 'm_balance', 'm_multiply', 'm_type', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.anim = {}; S.tapEnabled = false; S.hitPts = {}; S.tiltAngle = 0; S.tiltT = 0;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { stageMode: 'tool', tool: 'bar', mission: null, scope: { type: 'none' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🔧⚖️🔩🧰</div>
+        <h1>てこの工房</h1>
+        <div class="sub">〜 楽に うごかす どうぐを いっしょに 発明しよう 〜</div>
+        <p class="talk">ようこそ！ ぼくは 見習<ruby>ロボ<rt></rt></ruby>の <b>ギア</b>。となりの まほう薬屋 ${ruby('ほしずく', '')}の ルナに しょうかいされて、この <ruby>工房<rt>こうぼう</rt></ruby>で ${W.hatsumei}を している んだ。<br>
+        <b>重い ものを 小さな 力で うごかす</b> どうぐには、じつは ${ruby('共通', 'きょうつう')}の ひみつが あるんだ。それが <b>「てこ」</b>。${ruby('今日', 'きょう')}は くぎぬきや はさみを しらべながら、その ひみつを いっしょに さがそう！</p>
+        <button class="btn" id="startBtn">見習い はっけんいんに なる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🔧 よそうタイム</h2>
+        <p class="talk">てこで <b>${W.shiten}から とおい ところ</b>を 持って 同じ 重さの ものを うごかすと、近い ところを 持つ ときと くらべて どう ${ruby('感', 'かん')}じると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🪶</span><b>ア</b> 軽く ${ruby('感', 'かん')}じる</div>
+          <div class="vcard" data-v="1"><span class="vicon">🪨</span><b>イ</b> 重く ${ruby('感', 'かん')}じる</div>
+          <div class="vcard" data-v="2"><span class="vicon">➖</span><b>ウ</b> かわらない</div>
+        </div>
+        <div class="sub">思う ものに タッチ。てこノート（シート）にも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、じっけんで たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：支点・力点・作用点を さがそう ---
+  m_point: {
+    enter() {
+      Object.assign(S, { stageMode: 'tool', tool: 'bar', hitPts: {}, scope: { type: 'none' } });
+      updateLoc();
+      this.order = ['fulcrum', 'effort', 'load'];
+      this.idx = 0;
+      S.tapEnabled = true;
+      S.phase = 'quiz';
+      setWish('🔩', `くぎぬき（バール）で くぎを 抜くよ。てこには <b>3つの 大事な 点</b>が あるんだ。`);
+      this.ask();
+    },
+    ask() {
+      const k = this.order[this.idx];
+      S.askKey = k;
+      const q = k === 'fulcrum' ? `てこを ${ruby('支', 'ささ')}える ところ（<b>${W.shiten}</b>）は どこかな？ タップして さがそう！`
+        : k === 'effort' ? `手で 力を 入れる ところ（<b>${W.rikiten}</b>）は どこかな？`
+        : `力が はたらいて 物を うごかす ところ（<b>${W.sayouten}</b>）は どこかな？`;
+      say(q);
+      setButtons([]);
+    },
+    onPointTap(k) {
+      if (S.phase !== 'quiz') return;
+      const want = this.order[this.idx];
+      if (k !== want) { sHmm(); say('ちがう みたい……もう一度 さがしてみよう！'); return; }
+      S.hitPts[k] = true; sYes();
+      S.scope = { type: 'point', key: k };
+      scopeBurst();
+      $('stateName').innerHTML = `${PT_LABEL[k]}を はっけん！`;
+      this.idx++;
+      if (this.idx < this.order.length) {
+        setTimeout(() => this.ask(), 700);
+      } else {
+        S.phase = 'done'; S.tapEnabled = false; S.askKey = '';
+        award('m_point');
+        say(`✨ 3つとも はっけん！ ✨<br><br>💡 <b>たいせつポイント</b><br>てこには いつも <b>${W.shiten}・${W.rikiten}・${W.sayouten}</b>の 3つが ある。くぎぬきは ${W.shiten}が まん中に ある なかまだよ。`);
+        setButtons([{ label: 'つぎへ（うでの 長さと つり合い）', cb: nextStep }]);
+      }
+    },
+  },
+
+  // --- M2：うでの長さと つり合い ---
+  m_balance: {
+    enter() {
+      Object.assign(S, { stageMode: 'seesaw', mission: { ...MISSIONS.m_balance, rightPlaced: false }, rightPos: 1, scope: { type: 'none' } });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('⚖️', `ひだりに <b>20gの おもり</b>を めもり<b>⑥</b>に 置いたよ。みぎにも 同じ 20gの おもりを 使うよ。どこに 置いたら <b>つり合う</b>と 思う？`);
+      say(`めもり①〜⑧の <b>ボタン</b>で みぎの おもりの 場所を えらんで、<b>もちあげる</b>ボタンで たしかめよう！`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setControls([...posButtons(n => { S.rightPos = n; S.mission.rightPlaced = true; this.refreshCtl(); }), { label: '⚖️ もちあげる', cb: () => this.lift() }]);
+    },
+    lift() {
+      if (!S.mission.rightPlaced || S.anim.tilting) return;
+      const m = S.mission;
+      const torque = (m.rightW * S.rightPos) - (m.leftW * m.leftPos);
+      const angle = clamp(torque / 120, -1, 1) * 0.26;
+      S.scope = { type: 'torque', left: m.leftW * m.leftPos, right: m.rightW * S.rightPos };
+      startTilt(angle);
+      S.phase = 'lifted';
+    },
+    onTiltDone() {
+      if (S.phase !== 'lifted') return;
+      const ok = S.rightPos === S.mission.correctPos;
+      if (ok) {
+        S.phase = 'done'; sYes(); scopeBurst(); award('m_balance');
+        say(`✨ ぴったり つり合った！ ✨<br><br>💡 <b>たいせつポイント</b><br>同じ ${W.omosa}の おもりは、${W.shiten}から <b>同じ ${W.kyori}（めもり⑥ と ⑥）</b>に 置くと つり合う。`);
+        setControls([]);
+        setButtons([{ label: 'つぎへ（おもさ×めもりの ひみつ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`かたむいちゃった……もう一度 場所を えらんで <b>もちあげる</b>を おしてみよう！`);
+      }
+    },
+  },
+
+  // --- M3：おもさ×めもりの かけ算のつり合い ---
+  m_multiply: {
+    enter() {
+      Object.assign(S, { stageMode: 'seesaw', mission: { ...MISSIONS.m_multiply, rightPlaced: false }, rightPos: 1, scope: { type: 'none' } });
+      updateLoc();
+      S.phase = 'predict';
+      setWish('🔢', `こんどは ひだりが <b>10g</b>、めもり<b>⑥</b>。みぎは <b>30g</b>の おもりだよ。${W.omosa}が ちがうと、どこで つり合う？`);
+      say(`めもり①〜⑧から えらんで、<b>もちあげる</b>で たしかめよう！`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setControls([...posButtons(n => { S.rightPos = n; S.mission.rightPlaced = true; this.refreshCtl(); }), { label: '⚖️ もちあげる', cb: () => this.lift() }]);
+    },
+    lift() {
+      if (!S.mission.rightPlaced || S.anim.tilting) return;
+      const m = S.mission;
+      const torque = (m.rightW * S.rightPos) - (m.leftW * m.leftPos);
+      const angle = clamp(torque / 120, -1, 1) * 0.26;
+      S.scope = { type: 'torque', left: m.leftW * m.leftPos, right: m.rightW * S.rightPos };
+      startTilt(angle);
+      S.phase = 'lifted';
+    },
+    onTiltDone() {
+      if (S.phase !== 'lifted') return;
+      const ok = S.rightPos === S.mission.correctPos;
+      if (ok) {
+        S.phase = 'done'; sFanfare(); scopeBurst(); award('m_multiply');
+        const m = S.mission;
+        say(`✨ つり合った！ ✨<br><br>💡 <b>たいせつポイント</b><br><b>${m.leftW}g × ⑥めもり = ${m.leftW * m.leftPos}</b>　と　<b>${m.rightW}g × ${NUMS[S.rightPos - 1]}めもり = ${m.rightW * S.rightPos}</b>。<br>${ruby('数', 'かず')}が 同じに なると つり合う！ これが <b>「おもさ × めもりの かけ算」</b>の ひみつだよ。`);
+        setControls([]);
+        setButtons([{ label: 'つぎへ（3しゅるいの てこさがし）', cb: nextStep }]);
+      } else {
+        sHmm();
+        const m = S.mission;
+        say(`かたむいちゃった……ヒント：<b>${m.leftW}g × ⑥ = ${m.leftW * m.leftPos}</b> と 同じ 数に なる 場所は？`);
+      }
+    },
+  },
+
+  // --- M4：3しゅるいの てこさがし ---
+  m_type: {
+    enter() {
+      this.order = ['scissors', 'opener', 'tweezers'];
+      this.idx = 0;
+      this.go();
+    },
+    go() {
+      const key = this.order[this.idx];
+      Object.assign(S, { stageMode: 'tool', tool: key, hitPts: {}, scope: { type: 'none' } });
+      updateLoc();
+      S.phase = 'ask';
+      const tl = TOOLS[key];
+      setWish('🧰', `${tl.name}の ${W.shiten}・${W.rikiten}・${W.sayouten}は もう ぜんぶ 色で 見えているよ。`);
+      S.tapEnabled = false;
+      say(`${tl.name}では、<b>まん中</b>に あるのは どれかな？`);
+      setButtons(choiceRow(['ア 支点（赤）', 'イ 力点（青）', 'ウ 作用点（緑）'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      const key = this.order[this.idx];
+      const kind = TOOLS[key].kind;
+      const wantIdx = kind === 1 ? 0 : kind === 2 ? 2 : 1;
+      const ok = n === wantIdx;
+      S.scope = { type: 'kind', kind };
+      if (ok) { sYes(); scopeBurst(); } else { sHmm(); }
+      say(`${ok ? 'せいかい！' : 'おしい！'} <b>${TOOLS[key].name}</b>は <b>${KIND_NAME[kind]}</b>の なかまだよ。`);
+      setButtons([{ label: this.idx < this.order.length - 1 ? 'つぎの どうぐへ' : 'つぎへ（はかせチャレンジ）', cb: () => {
+        this.idx++;
+        if (this.idx < this.order.length) { this.go(); }
+        else { award('m_type'); nextStep(); }
+      } }]);
+    },
+  },
+
+  // --- はかせチャレンジ：遠くを持つほど 楽になる ---
+  hakase: {
+    enter() {
+      Object.assign(S, { stageMode: 'tool', tool: 'bar', hitPts: { fulcrum: true, effort: true, load: true }, scope: { type: 'none' } });
+      updateLoc();
+      S.phase = 'ask';
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ おおきな 石を くぎぬきで 持ち上げたい。${W.rikiten}を ${W.shiten}から <b>とおざける</b>と、力は どうなると 思う？`);
+      setButtons(choiceRow(['Ａ もっと 小さい 力で すむ', 'Ｂ もっと 大きい 力が いる', 'Ｃ かわらない'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      S.pick = n;
+      say(`実際に ためして みよう！ <b>力点の 場所</b>を えらんで、必要な 力を くらべてみよう。`);
+      S.phase = 'try';
+      this.showTry();
+    },
+    showTry() {
+      const positions = [1, 4, 8];
+      setControls(positions.map(p => ({ label: '力点：めもり' + NUMS[p - 1], cb: () => this.tryPos(p) })));
+    },
+    tryPos(p) {
+      sTap();
+      const base = 600; // 支点から作用点までの固定モーメント
+      const force = Math.round(base / p);
+      S.scope = { type: 'torque', left: force, right: base };
+      say(`力点を ${W.shiten}から <b>${NUMS[p - 1]}</b>の 場所に すると、必要な 力は およそ <b>${force}g分</b>！<br>${p === 8 ? `🎉 ${W.shiten}から とおざけるほど、ぐっと 楽に なる！` : 'ほかの 場所も くらべてみよう。'}`);
+      if (p === 8) {
+        award('hakase'); sFanfare(); scopeBurst();
+        setControls([]);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      const votedOk = S.votePicked.has(0);
+      showOverlay(`
+        <h2>⭐ てこの工房 見習い はっけんいん にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① てこには（<span class="blankWord" data-a="支点・力点・作用点">？？？</span>）の 3つの 点が ある。<br>
+        ② ${W.omosa} × ${W.shiten}からの めもりが（<span class="blankWord" data-a="同じ">？？？</span>）だと つり合う。<br>
+        ③ ${W.rikiten}を ${W.shiten}から とおざけると、力は（<span class="blankWord" data-a="小さくて すむ">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ア 軽く感じる</b> でした！ ${W.shiten}から とおい ところを 持つほど、小さな 力で すみます。${votedOk ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちに ある「てこ」の どうぐを <b>3つ</b> さがしてみよう（はさみ・くぎぬき・せんぬき・ピンセットなど）。それぞれの ${W.shiten}・${W.rikiten}・${W.sayouten}が どこか、おうちの 人と 話してみてね。<br>
+        🚨 やくそく：はさみや くぎぬきは するどい どうぐ。使う ときは 大人と いっしょに。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#7a4315'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { stageMode: 'tool', tool: 'bar', hitPts: { fulcrum: true, effort: true, load: true }, scope: { type: 'point', key: 'fulcrum' } });
+      updateLoc();
+      S.tapEnabled = false; S.phase = 'done';
+      say(`<b>じゆうモード</b>だよ！ どうぐを えらんで しらべながら、${ruby('友', 'とも')}だちと クイズを ${ruby('出', 'だ')}しあおう。<br>れい：「はさみの 支点は どこ？」「力点を 遠くすると なぜ 楽？」`);
+      setButtons([
+        { label: '🔩 くぎぬきを 見る', cls: 'sub', cb: () => this.show('bar') },
+        { label: '✂️ はさみを 見る', cls: 'sub', cb: () => this.show('scissors') },
+        { label: '🍾 せんぬきを 見る', cls: 'sub', cb: () => this.show('opener') },
+        { label: '🥢 ピンセットを 見る', cls: 'sub', cb: () => this.show('tweezers') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(key) {
+      Object.assign(S, { tool: key, hitPts: { fulcrum: true, effort: true, load: true }, scope: { type: 'kind', kind: TOOLS[key].kind } });
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_balance などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
