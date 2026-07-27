@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ぎんしゃの庭 — 金閣・銀閣と 室町の 文化 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f6f2e2 0%, #dcd8b8 55%, #a8b088 100%);
+    color: #2f3826;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #3e4a2e; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #7d8a5c; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e6e0c8; border: 2px solid #bcc89c;
+    font-size: clamp(16px, 1.8vw, 26px); color: #bcc89c;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #2f3826;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f8f5ea 0%, #e8e2c4 100%);
+    border: 3px solid #6f8a48;
+    box-shadow: inset 0 0 40px rgba(46, 58, 30, .12), 0 4px 18px rgba(40, 48, 26, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #262e1a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #3e4a2e; color: #f4f0e0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(40, 48, 26, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(40, 48, 26, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #cdd4a8; cursor: pointer;
+    background: linear-gradient(180deg, #6f8a48, #3e4a2e); color: #fff;
+    box-shadow: 0 3px 0 #1c2410; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #96935a, #5c5e30); border-color: #d0cd9c; box-shadow: 0 3px 0 #40481f; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #e8c25a, #c99a28); border-color: #f2e6b0; box-shadow: 0 3px 0 #8a6e1a; color: #3e3410; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #3e4a2e; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(46, 58, 30, .3), inset 0 0 24px rgba(46, 58, 30, .18);
+    flex-shrink: 0; background: #f6f2e2;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #7d8a5c;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #262e1a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f9f6ec; border: 2px solid #bcc89c; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #7d8a5c; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2f3826;
+    border: 1.5px solid #ccd6ac;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #3e4a2e; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #dedcb8, #e8e2c4); color: #2f3826;
+    border: 2px solid #3e4a2e; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #3e4a2e; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #6f8a48, #3e4a2e); color: #fff;
+    box-shadow: 0 3px 0 #1c2410, 0 5px 12px rgba(46, 58, 30, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1c2410; }
+  .btn.sub {
+    background: #e6e0c8; color: #566b38; box-shadow: 0 3px 0 #bcc89c;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2f3826; box-shadow: 0 3px 0 #bcc89c; font-weight: 400; border: 1.5px solid #ccd6ac; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #6f8a48; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(30, 34, 18, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f9f6ec, #e8e2c4);
+    border: 3px solid #6f8a48; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 34, 18, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #3e4a2e; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #3e4a2e; }
+  .panel .sub { color: #7d8a5c; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2f3826; border: 1.5px solid #ccd6ac; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #7d8a5c; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #2f3826; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ccd6ac; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #3e4a2e; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #3e4a2e; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #3e4a2e;
+    color: #262e1a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #7d8a5c;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e6e0c8; color: #566b38;
+    border: 1px solid #bcc89c; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #dedcb8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🏯 ぎんしゃの庭<small>— 金閣・銀閣と 室町の 文化 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kinkaku" title="金閣">★</div>
+    <div class="badge" id="bd_m_shoin" title="書院造さがし">★</div>
+    <div class="badge" id="bd_m_ginkaku" title="銀閣">★</div>
+    <div class="badge" id="bd_m_noh" title="能面ミッション">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">室町の やしき</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 まほうの めがね 〜 近くで よく見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(40,48,26,.18)"/>
+            <!-- 盛り砂の からだ（銀沙灘の しま模様） -->
+            <path d="M20 118 Q16 102 26 94 L94 94 Q104 102 100 118 Z" fill="#d8d0a8" stroke="#3e4a2e" stroke-width="2"/>
+            <path d="M26 96 Q22 82 32 74 L88 74 Q98 82 94 96 Z" fill="#e6ddb8" stroke="#3e4a2e" stroke-width="2"/>
+            <path d="M32 76 Q28 64 37 57 L83 57 Q92 64 88 76 Z" fill="#f2ead0" stroke="#3e4a2e" stroke-width="2"/>
+            <!-- 砂の すじもよう -->
+            <path d="M30 92 Q60 86 90 92 M35 96 Q60 91 85 96" stroke="#3e4a2e" stroke-width="1.2" opacity=".3" fill="none"/>
+            <path d="M36 74 Q60 69 84 74" stroke="#3e4a2e" stroke-width="1.2" opacity=".3" fill="none"/>
+            <!-- あたま -->
+            <circle cx="60" cy="40" r="25" fill="#f4eed8" stroke="#3e4a2e" stroke-width="2.5"/>
+            <!-- 頭かざり：向月台をイメージした ちいさな砂山 -->
+            <path d="M44 22 Q60 4 76 22 Z" fill="#e6ddb8" stroke="#3e4a2e" stroke-width="2"/>
+            <path d="M60 4 L60 -3" stroke="#c99a28" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="60" cy="-5" r="3" fill="#c99a28"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <ellipse cx="74" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="38" rx="3.6" ry="5" fill="#2f3826"/>
+              <ellipse cx="69" cy="38" rx="3.6" ry="5" fill="#2f3826"/>
+              <circle cx="52.3" cy="35.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="35.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 52 Q60 57 67 52" stroke="#262e1a" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">砂の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ギンシャ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🏯 ぎんしゃの庭ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ぎんしゃの庭 — 室町文化・金閣と銀閣（小6社会・歴史・協力型・1ファイル）
+   よそう(銀閣は銀ぱく？) → 金閣(発見) → 書院造さがし(発見) →
+   銀閣(予想の回収・なぜ銀ぱくを貼らなかったか) → 能面(角度で表情がかわる体験) →
+   はかせ（金閣vs銀閣・見栄より本質）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  yoshimitsu: ruby('足利義満', 'あしかがよしみつ'),
+  yoshimasa: ruby('足利義政', 'あしかがよしまさ'),
+  kinkaku: ruby('金閣', 'きんかく'),
+  ginkaku: ruby('銀閣', 'ぎんかく'),
+  rokuonji: ruby('鹿苑寺', 'ろくおんじ'),
+  jishoji: ruby('慈照寺', 'じしょうじ'),
+  kitayama: ruby('北山文化', 'きたやまぶんか'),
+  higashiyama: ruby('東山文化', 'ひがしやまぶんか'),
+  shoin: ruby('書院造', 'しょいんづくり'),
+  touguudou: ruby('東求堂同仁斎', 'とうぐどうどうじんさい'),
+  ounin: ruby('応仁の乱', 'おうにんのらん'),
+  sesshu: ruby('雪舟', 'せっしゅう'),
+  ginshadan: ruby('銀沙灘', 'ぎんしゃだん'),
+  kougetsudai: ruby('向月台', 'こうげつだい'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 手がかりデータ ----------
+const KINKAKU_POINTS = [
+  { key: 0, letter: 'あ', name: '金ぱく', x: 240, y: 210,
+    txt: `2かいと 3かいの かべには、ほんものの <b>金ぱく</b>が はられている。太陽の 光を うけて、キラキラと 輝くんだ。` },
+  { key: 1, letter: 'い', name: '3かいの つくり', x: 500, y: 130,
+    txt: `${W.kinkaku}は 3かいだて。1かい=寝殿造(貴族ふう)、2かい=武家造(武士ふう)、3かい=禅宗様(お寺ふう)。ひとつの たてものに 3つの 世界が 重なっているんだ。` },
+  { key: 2, letter: 'う', name: '足利義満', x: 760, y: 470,
+    txt: `建てたのは 室町幕府 3代将軍 ${W.yoshimitsu}。将軍の 位を 息子に ゆずったあと、ここを 自分の すまい・べっそう「北山第(きたやまてい)」として 建てたんだよ。` },
+];
+
+const SHOIN_POINTS = [
+  { key: 0, num: '①', name: '畳', x: 300, y: 500,
+    txt: `部屋いちめんに <b>畳</b>が しきつめられている。むかしは 座る場所にだけ 畳を おくのが ふつうだったんだよ。` },
+  { key: 1, num: '②', name: '障子', x: 140, y: 250,
+    txt: `${ruby('障子', 'しょうじ')}は 木の わくに うすい紙を はった たてぐ。光を やわらかく 部屋に 入れてくれる。` },
+  { key: 2, num: '③', name: '違い棚', x: 790, y: 200,
+    txt: `${ruby('違い棚', 'ちがいだな')}は 高さの ちがう 2まいの 棚。かざりものを 見せるための くふうだよ。` },
+  { key: 3, num: '④', name: '床の間', x: 500, y: 210,
+    txt: `${ruby('床の間', 'とこのま')}は 部屋の いちばん おくの とくべつな くぼみ。かけじくや 花を かざる、いまの和室にも のこる場所。` },
+  { key: 4, num: '⑤', name: 'ふすま', x: 870, y: 400,
+    txt: `${ruby('襖', 'ふすま')}は 布や 紙を はった 引き戸。部屋の 仕切りを 自由に かえられるんだ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kinkaku',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  kinkakuFound: new Set(),
+  shoinFound: new Set(),
+  nohAngle: 0,
+  nohTried: new Set(),
+  nohAsked: false,
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sChime = () => { tone(880, 0, 0.3, 'sine', 0.09); tone(1108.7, 0.1, 0.35, 'sine', 0.08); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイント（共通描画） ----------
+function drawPoints(pts, foundSet, X, Y, sc, labelKey) {
+  pts.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#3e4a2e' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#262e1a'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#3e4a2e';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p[labelKey], px, py + 1 * sc);
+  });
+}
+
+// ---------- 金閣シーン ----------
+function drawKinkakuScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(460));
+  g.addColorStop(0, '#eaf2de'); g.addColorStop(1, '#cfe0bc');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(120,150,170,.35)';
+  gctx.fillRect(X(0), Y(460), 1000 * sc, 180 * sc);
+  gctx.fillStyle = '#7a9060';
+  gctx.beginPath(); gctx.ellipse(X(120), Y(340), 90 * sc, 150 * sc, 0, 0, TAU); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(X(880), Y(340), 90 * sc, 150 * sc, 0, 0, TAU); gctx.fill();
+
+  const bx = 500;
+  gctx.fillStyle = '#f2ead0'; gctx.strokeStyle = '#3e4a2e'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath(); gctx.rect(X(bx - 165), Y(360), 330 * sc, 110 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#e8c25a';
+  gctx.beginPath(); gctx.rect(X(bx - 120), Y(260), 240 * sc, 100 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#f0d878';
+  gctx.beginPath(); gctx.rect(X(bx - 85), Y(175), 170 * sc, 85 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3e4a2e';
+  gctx.beginPath(); gctx.moveTo(X(bx - 100), Y(175)); gctx.lineTo(X(bx), Y(130)); gctx.lineTo(X(bx + 100), Y(175)); gctx.closePath(); gctx.fill();
+  gctx.fillStyle = '#c99a28'; gctx.font = `${24 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🦅', X(bx), Y(122));
+  // 池の反射
+  gctx.save(); gctx.globalAlpha = 0.22;
+  gctx.fillStyle = '#e8c25a'; gctx.fillRect(X(bx - 120), Y(470), 240 * sc, 60 * sc);
+  gctx.restore();
+
+  drawPoints(KINKAKU_POINTS, S.kinkakuFound, X, Y, sc, 'letter');
+}
+
+// ---------- 書院造シーン ----------
+function drawShoinScene(X, Y, sc) {
+  gctx.fillStyle = '#f6f2e2';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#e2dcc0';
+  gctx.fillRect(X(0), Y(430), 1000 * sc, 210 * sc);
+  gctx.strokeStyle = 'rgba(62,74,46,.35)'; gctx.lineWidth = 1.2 * sc;
+  for (let lx = 60; lx < 960; lx += 90) { gctx.beginPath(); gctx.moveTo(X(lx), Y(430)); gctx.lineTo(X(lx), Y(640)); gctx.stroke(); }
+  gctx.fillStyle = '#8a6e1a';
+  [70, 500, 930].forEach(cx => { gctx.fillRect(X(cx - 12), Y(60), 24 * sc, 380 * sc); });
+  // 障子(格子窓)
+  gctx.fillStyle = '#f4f0e0'; gctx.strokeStyle = '#8a6e1a'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(90), Y(140), 140 * sc, 220 * sc); gctx.fill(); gctx.stroke();
+  for (let i = 1; i < 4; i++) { gctx.beginPath(); gctx.moveTo(X(90), Y(140 + i * 55)); gctx.lineTo(X(230), Y(140 + i * 55)); gctx.stroke(); }
+  gctx.beginPath(); gctx.moveTo(X(160), Y(140)); gctx.lineTo(X(160), Y(360)); gctx.stroke();
+  // 床の間(掛け軸+花瓶)
+  gctx.fillStyle = '#eee6cc'; gctx.strokeStyle = '#8a6e1a';
+  gctx.beginPath(); gctx.rect(X(420), Y(90), 160 * sc, 200 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#c99a28'; gctx.fillRect(X(460), Y(110), 80 * sc, 120 * sc);
+  gctx.fillStyle = '#6f8a48'; gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🌸', X(500), Y(260));
+  // 違い棚
+  gctx.fillStyle = '#c9b892'; gctx.strokeStyle = '#3e4a2e'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(720), Y(150), 150 * sc, 14 * sc); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.rect(X(760), Y(190), 110 * sc, 14 * sc); gctx.fill(); gctx.stroke();
+  // ふすま
+  gctx.fillStyle = '#e6ddb8'; gctx.strokeStyle = '#8a6e1a';
+  gctx.beginPath(); gctx.rect(X(810), Y(160), 140 * sc, 220 * sc); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(880), Y(160)); gctx.lineTo(X(880), Y(380)); gctx.stroke();
+  gctx.fillStyle = '#6f8a48'; gctx.font = `${26 * sc}px sans-serif`;
+  gctx.fillText('🎋', X(845), Y(260)); gctx.fillText('🎋', X(915), Y(260));
+  // 畳
+  gctx.strokeStyle = 'rgba(62,74,46,.5)'; gctx.lineWidth = 1.6 * sc;
+  gctx.strokeRect(X(200), Y(460), 200 * sc, 140 * sc);
+  gctx.strokeRect(X(400), Y(460), 200 * sc, 140 * sc);
+
+  drawPoints(SHOIN_POINTS, S.shoinFound, X, Y, sc, 'num');
+}
+
+// ---------- 銀閣シーン ----------
+function drawGinkakuScene(X, Y, sc) {
+  const revealed = !!S.ginkakuRevealed;
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(460));
+  g.addColorStop(0, '#eef0e0'); g.addColorStop(1, '#d8dcc4');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#8a9a72';
+  gctx.beginPath(); gctx.ellipse(X(130), Y(320), 90 * sc, 160 * sc, 0, 0, TAU); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(X(870), Y(320), 90 * sc, 160 * sc, 0, 0, TAU); gctx.fill();
+
+  const bx = 460;
+  const wallColor = revealed ? '#c9b892' : '#d8d4c0';
+  gctx.fillStyle = wallColor; gctx.strokeStyle = '#3e4a2e'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath(); gctx.rect(X(bx - 140), Y(330), 280 * sc, 110 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = revealed ? '#b8a878' : '#e6ddb8';
+  gctx.beginPath(); gctx.rect(X(bx - 100), Y(230), 200 * sc, 100 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3e4a2e';
+  gctx.beginPath(); gctx.moveTo(X(bx - 115), Y(230)); gctx.lineTo(X(bx), Y(190)); gctx.lineTo(X(bx + 115), Y(230)); gctx.closePath(); gctx.fill();
+  if (!revealed) {
+    gctx.fillStyle = 'rgba(180,190,200,.5)'; gctx.font = `${22 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('？？？', X(bx), Y(280));
+  }
+
+  // 銀沙灘(白砂)と向月台
+  gctx.fillStyle = '#eee6cc';
+  gctx.fillRect(X(0), Y(500), 1000 * sc, 100 * sc);
+  gctx.strokeStyle = 'rgba(62,74,46,.35)'; gctx.lineWidth = 1.4 * sc;
+  for (let i = 0; i < 5; i++) {
+    gctx.beginPath(); gctx.moveTo(X(20), Y(520 + i * 15)); gctx.lineTo(X(680), Y(520 + i * 15)); gctx.stroke();
+  }
+  gctx.fillStyle = '#e6ddb8'; gctx.strokeStyle = '#3e4a2e'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(X(770), Y(560)); gctx.lineTo(X(810), Y(495)); gctx.lineTo(X(850), Y(560)); gctx.closePath(); gctx.fill(); gctx.stroke();
+
+  if (revealed) {
+    gctx.fillStyle = '#3e4a2e'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText('銀ぱくが ない……木の いろのまま', X(bx), Y(400));
+  }
+}
+
+// ---------- 能面シーン ----------
+function drawNohScene(X, Y, sc) {
+  gctx.fillStyle = '#e6e0c8';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  const angle = S.nohAngle || 0;
+  const cx = 500, cy = 330;
+  gctx.save();
+  gctx.translate(X(cx), Y(cy));
+  gctx.rotate(-angle * 0.08);
+  gctx.translate(-X(cx), -Y(cy));
+
+  gctx.fillStyle = '#f2e8ce'; gctx.strokeStyle = '#3e4a2e'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.ellipse(X(cx), Y(cy), 135 * sc, 175 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+
+  const shade = clamp(-angle, -2, 2);
+  gctx.fillStyle = `rgba(60,58,38,${0.08 + Math.max(0, shade) * 0.09})`;
+  gctx.beginPath(); gctx.ellipse(X(cx), Y(cy + 95), 120 * sc, 55 * sc, 0, 0, TAU); gctx.fill();
+  gctx.fillStyle = `rgba(255,250,230,${0.05 + Math.max(0, -shade) * 0.12})`;
+  gctx.beginPath(); gctx.ellipse(X(cx), Y(cy - 60), 110 * sc, 50 * sc, 0, 0, TAU); gctx.fill();
+
+  const browY = cy - 66 - angle * 4;
+  gctx.strokeStyle = '#262e1a'; gctx.lineWidth = 3 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(cx - 62), Y(browY + 6)); gctx.lineTo(X(cx - 16), Y(browY)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(cx + 16), Y(browY)); gctx.lineTo(X(cx + 62), Y(browY + 6)); gctx.stroke();
+
+  const eyeY = cy - 20 - angle * 3;
+  gctx.beginPath(); gctx.moveTo(X(cx - 55), Y(eyeY + 4)); gctx.lineTo(X(cx - 18), Y(eyeY - 2)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(cx + 18), Y(eyeY - 2)); gctx.lineTo(X(cx + 55), Y(eyeY + 4)); gctx.stroke();
+
+  gctx.fillStyle = '#c9455a';
+  gctx.beginPath(); gctx.ellipse(X(cx - 45), Y(cy + 20), 10 * sc, 6 * sc, 0, 0, TAU); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(X(cx + 45), Y(cy + 20), 10 * sc, 6 * sc, 0, 0, TAU); gctx.fill();
+
+  gctx.strokeStyle = '#8a2a2a'; gctx.lineWidth = 3 * sc; gctx.lineCap = 'round';
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 34), Y(cy + 78 - angle * 5));
+  gctx.quadraticCurveTo(X(cx), Y(cy + 88 + angle * 9), X(cx + 34), Y(cy + 78 - angle * 5));
+  gctx.stroke();
+
+  gctx.restore();
+
+  const labels = { '-2': '曇らす（うつむき）', '-1': 'すこし 曇らす', '0': '正面', '1': 'すこし 照らす', '2': '照らす（見上げ）' };
+  gctx.fillStyle = '#3e4a2e'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(labels[String(angle)] || '', X(cx), Y(540));
+}
+
+// ---------- はかせ：金閣と銀閣くらべ ----------
+function drawMiniBuilding(X, Y, sc, cx, baseY, colorA, colorB) {
+  gctx.fillStyle = colorA; gctx.strokeStyle = '#3e4a2e'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(cx - 110), Y(baseY - 90), 220 * sc, 90 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = colorB;
+  gctx.beginPath(); gctx.rect(X(cx - 75), Y(baseY - 160), 150 * sc, 75 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3e4a2e';
+  gctx.beginPath(); gctx.moveTo(X(cx - 90), Y(baseY - 160)); gctx.lineTo(X(cx), Y(baseY - 198)); gctx.lineTo(X(cx + 90), Y(baseY - 160)); gctx.closePath(); gctx.fill();
+}
+function drawHakaseScene(X, Y, sc) {
+  gctx.fillStyle = '#f6f2e2';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(120,150,170,.25)';
+  gctx.fillRect(X(0), Y(520), 1000 * sc, 120 * sc);
+
+  drawMiniBuilding(X, Y, sc, 260, 480, '#e8c25a', '#f0d878');
+  drawMiniBuilding(X, Y, sc, 740, 480, '#c9b892', '#e6ddb8');
+
+  gctx.fillStyle = '#3e4a2e'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('金閣・北山文化', X(260), Y(560));
+  gctx.fillText('銀閣・東山文化', X(740), Y(560));
+  gctx.font = `${16 * sc}px sans-serif`; gctx.fillStyle = '#7d8a5c';
+  gctx.fillText('金ぱく・はでやか', X(260), Y(590));
+  gctx.fillText('わび・さび・しずけさ', X(740), Y(590));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kinkaku') drawKinkakuScene(X, Y, sc);
+  else if (S.scene === 'shoin') drawShoinScene(X, Y, sc);
+  else if (S.scene === 'ginkaku') drawGinkakuScene(X, Y, sc);
+  else if (S.scene === 'noh') drawNohScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- まほうのめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f8f5ea'); grd.addColorStop(1, '#bcc89c');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#3e4a2e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#f2e6b0'); g2.addColorStop(1, 'rgba(242,230,176,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#3e4a2e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🏯', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#3e4a2e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2f3826';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3e4a2e', '#f2e6b0', '#6f8a48', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '室町時代（1397〜1489年ごろ）';
+  const titles = {
+    kinkaku: '🏯 金閣（北山文化）',
+    shoin: '🏠 書院造の 部屋さがし',
+    ginkaku: '🌕 銀閣（東山文化）',
+    noh: '🎭 能面の ひみつ',
+    hakase: '📜 金閣と 銀閣、くらべてみると',
+    done: '🏯 ぎんしゃの庭 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '室町の やしき';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kinkaku', 'm_shoin', 'm_ginkaku', 'm_noh', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kinkaku', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🏯🌕🎭</div>
+        <h1>ぎんしゃの庭</h1>
+        <div class="sub">〜 金閣・銀閣と 室町の 文化 〜</div>
+        <p class="talk">ようこそ！ わたしは ${ruby('銀沙灘', 'ぎんしゃだん')}の 砂から 生まれた 精霊、<b>ギンシャ</b>。今から 約600年前、室町時代に 花ひらいた 文化を <b>いっしょに たしかめに いこう！</b><br>
+        金と 銀、ふたつの かがやきの ちがいを 見にいこう。</p>
+        <button class="btn" id="startBtn">庭を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">${W.ginkaku}は 本当に 銀ぱくで ピカピカ 光っていたと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">✨</span><b>ア</b> 銀ぱくで ピカピカ 光っていた</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌫️</span><b>イ</b> 銀ぱくは はられていない</div>
+          <div class="vcard" data-v="2"><span class="vicon">🌕</span><b>ウ</b> じつは 金ぱくだった</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：金閣を見る ---
+  m_kinkaku: {
+    enter() {
+      Object.assign(S, { scene: 'kinkaku', scope: { type: 'idle' }, kinkakuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`キラキラ 輝く たてものが 見えてきた。3つの 手がかりを 調べて、${W.kinkaku}の ひみつを たしかめよう。下の ボタンを ぜんぶ おしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KINKAKU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kinkakuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kinkakuFound.size >= KINKAKU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kinkakuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.kinkaku}は 何の ために 建てられたのだろう？`);
+      setButtons(choiceRow(['ア 戦いの ための とりで', 'イ 義満の すまい・べっそう', 'ウ はじめから お寺として'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kinkaku'); S.phase = 'done';
+        say(`せいかい！ ${W.kinkaku}は もともと ${W.yoshimitsu}の すまい・べっそう「北山第」だった。<br><br>💡 <b>たいせつポイント</b><br>義満の 死後、息子の 義持が ここを お寺（${W.rokuonji}）に した。3層に 3つの 世界が 重なるくらい、義満の 力は 大きかったんだ。これが ${W.kitayama}だよ。`);
+        setButtons([{ label: 'つぎへ（書院造さがし）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 戦いの ための とりで', 'イ 義満の すまい・べっそう', 'ウ はじめから お寺として'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：書院造さがし ---
+  m_shoin: {
+    enter() {
+      Object.assign(S, { scene: 'shoin', scope: { type: 'idle' }, shoinFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`室町時代に 生まれた 新しい 部屋の つくり「${W.shoin}」。5つの 目印を 見つけて、番号で おぼえよう。下の ボタンを ぜんぶ おしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHOIN_POINTS.map(p => ({
+        label: p.num + ' ' + p.name + (S.shoinFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.shoinFound.size >= SHOIN_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.shoinFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.shoin}は、今の どんな 部屋の もとに なったのだろう？`);
+      setButtons(choiceRow(['ア 洋室（ようしつ）', 'イ 和室（わしつ）', 'ウ 台所'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_shoin'); S.phase = 'done';
+        say(`せいかい！ 畳・床の間・障子・ふすまが そろった ${W.shoin}は、今の <b>和室</b>の もとに なったんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.ginkaku}の中に ある「${W.touguudou}」は、今 のこる 中で いちばん古い 書院造 と いわれているよ。`);
+        setButtons([{ label: 'つぎへ（銀閣を 見る）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 洋室（ようしつ）', 'イ 和室（わしつ）', 'ウ 台所'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：銀閣を見る（よそうタイムの回収） ---
+  m_ginkaku: {
+    enter() {
+      Object.assign(S, { scene: 'ginkaku', scope: { type: 'idle' }, ginkakuRevealed: false });
+      updateLoc();
+      setWish('🌕', `さいしょの よそうタイムで 考えた ${W.ginkaku}を、じっさいに 見に 行ってみよう。`);
+      say(`「銀閣を 見る」を おしてみよう。`);
+      setButtons([{ label: '銀閣を 見る', cb: () => this.reveal() }]);
+    },
+    reveal() {
+      hideWish();
+      S.ginkakuRevealed = true; scopeBurst();
+      say(`あれ……？ ${W.ginkaku}には <b>銀ぱくが はられていない</b>！ 木そのままの 色を しているね。`);
+      setButtons([{ label: 'なぜ 銀ぱくを はらなかったの？', cb: () => this.ask() }]);
+    },
+    ask() {
+      say(`なぜ 銀ぱくを はらなかったのだろう？`);
+      setButtons(choiceRow(['ア お金が なくて 貼れなかったから', 'イ そもそも 銀ぱくを 貼る 計画では なかったから', 'ウ 銀が どこにも 売っていなかったから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_ginkaku'); S.phase = 'done';
+        const right = S.votePicked.has(1);
+        say(`せいかい！ 銀ぱくを 貼った 下地の あとが 見つからないことから、<b>もともと 銀ぱくを 貼る 計画では なかった</b>と いう 説が 今は 有力なんだ。<br><br>💡 <b>たいせつポイント</b><br>建てたのは ${W.yoshimasa}。${W.ounin}という 11年も つづいた 戦乱の あとで、幕府の お金は 苦しかったのも 事実。でも 義政は もともと はでさより ${ruby('静けさ', 'しずけさ')}を えらんだ 人だったんだ。${right ? '（よそう、ばっちりだったね！）' : ''}`);
+        setButtons([{ label: 'つぎへ（能面の ひみつ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア お金が なくて 貼れなかったから', 'イ そもそも 銀ぱくを 貼る 計画では なかったから', 'ウ 銀が どこにも 売っていなかったから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M4：能面の ひみつ ---
+  m_noh: {
+    enter() {
+      Object.assign(S, { scene: 'noh', scope: { type: 'idle' }, nohAngle: 0, nohTried: new Set([0]), nohAsked: false });
+      updateLoc();
+      hideWish();
+      say(`室町時代に さかんに なった 「能」で つかう 面「小面（こおもて）」。この 面を <b>下に むける</b>と、表情は どう 見えると 思う？`);
+      this.predict();
+    },
+    predict() {
+      setButtons(choiceRow(['ア 明るく 見える', 'イ 悲しく・暗く 見える', 'ウ 変わらない'], (i, el) => this.pickPredict(i, el)));
+    },
+    pickPredict(n, el) {
+      markPicked(el);
+      S.nohPredict = n; hideWish();
+      say(`よし、じっさいに 角度を かえて たしかめてみよう！`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const labels = ['① 下向き', '② すこし下', '③ 正面', '④ すこし上', '⑤ 上向き'];
+      setButtons(labels.map((label, i) => ({
+        label, cls: 'pos' + (S.nohAngle === (i - 2) ? ' sel' : ''), cb: () => this.setAngle(i - 2),
+      })));
+      if (S.nohTried.size >= 5) {
+        setButtons([...labels.map((label, i) => ({
+          label, cls: 'pos' + (S.nohAngle === (i - 2) ? ' sel' : ''), cb: () => this.setAngle(i - 2),
+        })), { label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    setAngle(a) {
+      S.nohAngle = a; S.nohTried.add(a); scopeBurst();
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`同じ 面なのに、なぜ 表情が 変わって 見えるのだろう？`);
+      setButtons(choiceRow(['ア 面を そのつど 彫り直しているから', 'イ 光の 当たり方（かげの でき方）が 変わるから', 'ウ 役者の 演技だけで 変わって見えるから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_noh'); S.phase = 'done';
+        say(`せいかい！ 面は 変わらないのに、上に むけると 明るく（<b>照らす</b>）、下に むけると 悲しく（<b>曇らす</b>）見える。光の 当たり方・かげの でき方だけで、表情が 変わって 見えるんだ。<br><br>💡 <b>たいせつポイント</b><br>能を 大成させたのは 観阿弥・世阿弥の 親子。ひとつの 面で いろいろな 感情を 表現する、室町時代からの 知恵なんだよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 面を そのつど 彫り直しているから', 'イ 光の 当たり方（かげの でき方）が 変わるから', 'ウ 役者の 演技だけで 変わって見えるから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：金閣と銀閣くらべ ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' } });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.kinkaku}と ${W.ginkaku}を ならべて くらべてみよう。`);
+      setButtons([{ label: 'くらべて見る', cb: () => this.ask() }]);
+    },
+    ask() {
+      sTap();
+      say(`${W.kinkaku}は 金色で はなやかな ${W.kitayama}。${W.ginkaku}は 銀ぱくを やめて しずかな ${W.higashiyama}。この ちがいから、東山文化が いちばん 大切に した ものは 何だろう？`);
+      setButtons(choiceRow(['ア はでで 目立つこと', 'イ 見た目より 心や 静けさ', 'ウ お金を かけること'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.higashiyama}は 見た目の はでさより、<b>わび・さび</b>という しずかで ふかい 美しさを 大切に したんだ。<br><br>💡 <b>たいせつポイント</b><br>この時代、${W.sesshu}は 墨の こさ・うすさだけで 山や 川を えがく「水墨画」を 完成させた。色を つかわないのに、ゆたかな 世界が 見える——これも 東山文化の わび・さびと 同じ 考え方だよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア はでで 目立つこと', 'イ 見た目より 心や 静けさ', 'ウ お金を かけること'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ぎんしゃの庭 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.ginkaku}に 銀ぱくは（<span class="blankWord" data-a="はられていない">？？？</span>）。<br>
+        ② ${W.shoin}の 部屋は 今の（<span class="blankWord" data-a="和室">？？？</span>）の もとに なった。<br>
+        ③ ${W.higashiyama}が 大切に したのは 見た目より（<span class="blankWord" data-a="心・静けさ（わびさび）">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 銀ぱくは はられていない</b> でした！ ${votedRight ? '（みんなの よそう、ばっちり！）' : ''} 金と 銀、はでさと しずけさ……ちがう 美しさが どちらも 本物だったんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>家や 近所で「渋さ・わびさび」を 感じる ものを 1つ さがしてみよう。おうちの人と 話してみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#262e1a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 室町文化について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「銀閣に 銀ぱくは あった？」「書院造は 今の 何の もと？」`);
+      setButtons([
+        { label: '🏯 金閣の 図', cls: 'sub', cb: () => this.show('kinkaku') },
+        { label: '🏠 書院造の 図', cls: 'sub', cb: () => this.show('shoin') },
+        { label: '🌕 銀閣の 図', cls: 'sub', cb: () => this.show('ginkaku') },
+        { label: '🎭 能面の 図', cls: 'sub', cb: () => this.show('noh') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'ginkaku') S.ginkakuRevealed = true;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_ginkaku などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
