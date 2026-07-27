@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ヒナワの陣 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f4a5c; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cfe6ea; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cfe6ea; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⚔️ ヒナワの陣 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      長篠の戦いで、信長は 鉄砲隊を 3つの 組に 分けて 交代で 撃ち続けたと 言われているけど、本当だと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> ✅ 本当に あった</div>
+        <div class="voteOpt"><span class="vnum">イ</span> ❓ 実は 後世の 作り話の 可能性が 高い</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🚫 鉄砲は 使っていない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．鉄砲と キリスト教の 伝来</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">鉄砲の伝来</span>
+        <span class="wordBank">キリスト教の伝来</span>
+      </div>
+      <div style="margin-top:1.2mm">鉄砲が 伝わったのは どこ？　ア 種子島 ・ イ 長崎 ・ ウ 大阪（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．桶狭間の戦い（1560年）</span>
+    <div class="secBody">
+      人数で 劣る 信長が、なぜ 勝てた？（〇を つけよう）<br>
+      ア 休んでいた 今川の 本陣に 奇襲を しかけたから　・　イ 信長の 兵の 方が 強かったから　・　ウ 義元が みずから 降参したから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．長篠の戦い（1575年）— 馬防柵の 高さを ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 高さを えらんで 築いてみよう。うまく いった 高さに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．信長の政策</span>
+    <div class="secBody">
+      楽市楽座の 目的は？（〇を つけよう）<br>
+      ア 商人から 多くの 税を 取るため　・　イ 商人が 自由に 商売できるようにし 城下町を 栄えさせるため　・　ウ 武士だけが 得を するため
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（秀吉の 天下統一）</span>
+    <div class="secBody">
+      太閤検地と 刀狩によって 何が 進んだ？（〇を つけよう）<br>
+      ア 武士と 農民の 身分が、はっきり 分かれた　・　イ 農民が だれでも 武士に なれるように なった　・　ウ 身分の ちがいが なくなった
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 鉄砲は 1543年に（<span class="fillLine"></span>）に 伝わった。<br>
+      ② 長篠の戦いで 武田の 騎馬隊を 防いだのは 馬防柵と（<span class="fillLine"></span>）。<br>
+      ③ 太閤検地と 刀狩で、武士と 農民の 身分が（<span class="fillLine"></span>）した。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          教科書や 図書館で、信長・秀吉・家康の うち 気になる 武将を 1人 調べてみよう。おうちの人と 話してみよう。<br>
+          ☐ 調べた 武将：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ヒナワの陣 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ヒナワの陣 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（戦国時代・鉄砲伝来〜長篠の戦い）」・学力幅あり・協力型／ 使うもの：「sengoku.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_nagashino</b> などで途中再開（m_denrai／m_okehazama／m_nagashino／m_seisaku／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。三段撃ちは本当か予想。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>⛵ 鉄砲と キリスト教の伝来</td><td>2つの手がかり（鉄砲・キリスト教）をボタンで確認 → クイズ。種子島に伝わったことを紹介</td></tr>
+      <tr><td class="min">10〜17分</td><td>⚔️ 桶狭間の戦い（1560年）</td><td>信長・今川の軍勢をボタンで確認 → なぜ少数の信長が勝てたかクイズ</td></tr>
+      <tr><td class="min">17〜27分</td><td>🔫 長篠の戦い（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で馬防柵の高さを選び「柵を築く」→騎馬隊の突撃を防げるか判定。低い/高いと失敗するので何度も挑戦させる。1人ずつ交代で高さを選ばせるとよい</td></tr>
+      <tr><td class="min">27〜34分</td><td>🏯 信長の政策</td><td>楽市楽座・関所の廃止をボタンで確認 → 目的をクイズ。本能寺の変で信長が倒れる話へ</td></tr>
+      <tr><td class="min">34〜41分</td><td>📜 はかせチャレンジ（秀吉の天下統一）</td><td>太閤検地・刀狩で何が進んだかクイズ。兵農分離の話へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「武将しらべ」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「信長の政策」を右下「つぎ▶」でスキップ可（<b>長篠の戦い・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 実は 後世の 作り話の 可能性が 高い</b>／鉄砲の伝来＝<b>ア 種子島</b>／
+      桶狭間の戦い＝<b>ア 奇襲を しかけたから</b>／長篠の戦い＝<b>③〜⑥（ちょうどよい 高さ）</b>／
+      信長の政策＝<b>イ 商人が 自由に 商売できるようにし 城下町を 栄えさせるため</b>／
+      はかせチャレンジ＝<b>ア 武士と 農民の 身分が、はっきり 分かれた</b>／
+      まとめ＝①<b>種子島</b>　②<b>鉄砲</b>　③<b>兵農分離</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>1543年、種子島に漂着した中国船に乗っていたポルトガル人が鉄砲を伝えた。領主・種子島時堯は威力に驚き2丁を購入。1549年にはフランシスコ・ザビエルが鹿児島に上陸しキリスト教を伝えた</li>
+      <li>1560年の桶狭間の戦いでは、約4000人の織田信長軍が約25000人の今川義元軍を、休んでいた本陣への奇襲で撃破。この勝利で信長は尾張を統一し天下統一への一歩を踏み出した</li>
+      <li>1575年の長篠の戦いでは、織田・徳川連合軍（約3万8千人・鉄砲約3000挺）が馬防柵と鉄砲で武田軍（約1万5千人・鉄砲約500挺）の騎馬隊を防いだ。「鉄砲隊を3組に分けて交代で撃つ三段撃ち」は、信長の一代記『信長公記』に記述がなく、30年ほど後の文芸作品『甫庵信長記』が初出。近年の研究では後世の創作の可能性が高いとされている</li>
+      <li>信長は楽市楽座で商人の自由な商売を認め、関所を廃止して城下町の経済を活性化させた。1582年、家来の明智光秀に背かれ本能寺の変で倒れた</li>
+      <li>信長の後を継いだ豊臣秀吉は、太閤検地（田畑を統一基準で測量）と刀狩（農民から武器を没収）を行い、武士と農民の身分がはっきり分かれる「兵農分離」を進めて全国統一を成し遂げた</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「長篠の戦い」が今日いちばんの見せ場。1人ずつ交代で高さを選ばせ、「柵を築く」ボタンを押させると全員が参加できる</li>
+      <li>馬防柵は「高ければ高いほど良い」わけではなく、高すぎると鉄砲が撃ちにくくなる、という設定にしてある。ちょうどよい高さを何度も試す過程を大事にする</li>
+      <li>よそうタイムの答え（イ：三段撃ちは後世の作り話の可能性が高い）は、教科書でおなじみの話が最新の研究で見直されているという、歴史の見方を学ぶ良い機会になる。鉄砲そのものが戦いを変えたことは事実なので、そこは丁寧に伝えるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「鉄砲はどこに伝わった？」「長篠の戦いで何を使った？」「楽市楽座って何？」</li>
+      <li>教科書・資料集の長篠合戦図屏風を見て、馬防柵と鉄砲隊の配置を確認すると理解が深まる</li>
+      <li>秀吉の全国統一・兵農分離から、徳川家康・江戸幕府の成立へと発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
