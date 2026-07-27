@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ボルトの町工場 — 自動車を つくる 工業 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f3f1e8 0%, #ddd5bf 55%, #a89c82 100%);
+    color: #2e2b26;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #3d3a34; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #7d7468; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e6e0cd; border: 2px solid #c7c2b0;
+    font-size: clamp(16px, 1.8vw, 26px); color: #c7c2b0;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #2e2b26;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f8f6ec 0%, #e8e2cf 100%);
+    border: 3px solid #8a7560;
+    box-shadow: inset 0 0 40px rgba(58, 48, 36, .12), 0 4px 18px rgba(46, 38, 30, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #24211d; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #3d3a34; color: #f4f0e0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(46, 38, 30, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(46, 38, 30, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #d4cfbc; cursor: pointer;
+    background: linear-gradient(180deg, #8a7560, #3d3a34); color: #fff;
+    box-shadow: 0 3px 0 #17140f; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #c17a2c, #8a4a14); border-color: #e0ad6c; box-shadow: 0 3px 0 #5c3410; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #f0a838, #c9821e); border-color: #f5ddb0; box-shadow: 0 3px 0 #8a5a10; color: #3a2a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #3d3a34; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(58, 48, 36, .3), inset 0 0 24px rgba(58, 48, 36, .18);
+    flex-shrink: 0; background: #f3f1e8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #7d7468;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #24211d; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f9f7ee; border: 2px solid #c7c2b0; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #7d7468; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2e2b26;
+    border: 1.5px solid #d4cfbc;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #3d3a34; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ded6bc, #e8e2cf); color: #2e2b26;
+    border: 2px solid #3d3a34; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #3d3a34; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #8a7560, #3d3a34); color: #fff;
+    box-shadow: 0 3px 0 #17140f, 0 5px 12px rgba(58, 48, 36, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #17140f; }
+  .btn.sub {
+    background: #e6e0cd; color: #5c5140; box-shadow: 0 3px 0 #c7c2b0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2e2b26; box-shadow: 0 3px 0 #c7c2b0; font-weight: 400; border: 1.5px solid #d4cfbc; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #8a7560; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(26, 22, 16, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f9f7ee, #e8e2cf);
+    border: 3px solid #8a7560; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(26, 22, 16, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #3d3a34; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #3d3a34; }
+  .panel .sub { color: #7d7468; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2e2b26; border: 1.5px solid #d4cfbc; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #7d7468; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #2e2b26; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d4cfbc; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #3d3a34; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #3d3a34; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #3d3a34;
+    color: #24211d; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #7d7468;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e6e0cd; color: #5c5140;
+    border: 1px solid #c7c2b0; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ded6bc; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🔧 ボルトの町工場<small>— 自動車を つくる 工業 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kotei" title="工程さがし">★</div>
+    <div class="badge" id="bd_m_buntan" title="ロボットと人">★</div>
+    <div class="badge" id="bd_m_jit" title="ジャストインタイム">★</div>
+    <div class="badge" id="bd_m_kensa" title="出荷前けんさ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">くみたてライン</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 けんさスコープ 〜 近くで よく見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(46,38,30,.18)"/>
+            <!-- 六角ボルトの からだ -->
+            <path d="M60 60 L90 78 L90 106 L60 124 L30 106 L30 78 Z" fill="#9a968a" stroke="#2e2b26" stroke-width="2"/>
+            <path d="M60 66 L84 80 L84 104 L60 118 L36 104 L36 80 Z" fill="#b8b4a6" stroke="#2e2b26" stroke-width="1.4" opacity=".6"/>
+            <!-- ネジ山のライン -->
+            <path d="M32 88 L88 88 M32 96 L88 96" stroke="#2e2b26" stroke-width="1.4" opacity=".3"/>
+            <!-- 安全ベルト -->
+            <path d="M30 92 L90 92" stroke="#f0a838" stroke-width="6" opacity=".85"/>
+            <!-- あたま -->
+            <circle cx="60" cy="40" r="25" fill="#f0d8b8" stroke="#2e2b26" stroke-width="2.5"/>
+            <!-- 安全ヘルメット -->
+            <path d="M33 32 Q60 4 87 32 L87 38 Q60 24 33 38 Z" fill="#f0a838" stroke="#2e2b26" stroke-width="2"/>
+            <circle cx="60" cy="14" r="3" fill="#c9821e"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <ellipse cx="74" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="38" rx="3.6" ry="5" fill="#2e2b26"/>
+              <ellipse cx="69" cy="38" rx="3.6" ry="5" fill="#2e2b26"/>
+              <circle cx="52.3" cy="35.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="35.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 52 Q60 57 67 52" stroke="#24211d" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">ボルトの<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ボルト<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🔧 ボルトの町工場ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ボルトの町工場 — 自動車をつくる工業（小5社会・協力型・1ファイル）
+   工程さがし(発見) → ロボットと人の分担(発見) →
+   ジャストインタイム(①〜⑧で搬入タイミングを試す・メイン操作) →
+   出荷前けんさ(発見) → はかせ（環境・輸出）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  press: ruby('プレス', 'プレス'),
+  yousetsu: ruby('溶接', 'ようせつ'),
+  tosou: ruby('塗装', 'とそう'),
+  kumitate: ruby('組み立て', 'くみたて'),
+  kensa: ruby('検査', 'けんさ'),
+  kanren: ruby('関連工場', 'かんれんこうじょう'),
+  jit: 'ジャストインタイム',
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 手がかりデータ ----------
+const KOTEI_POINTS = [
+  { key: 0, letter: 'あ', name: 'プレス', x: 200, y: 200,
+    txt: `厚い <b>鋼板（こうはん）</b>を、大きな 型で ギュッと おす。これが「${W.press}」。ドアや ボンネットの 形が ここで 生まれるよ。` },
+  { key: 1, letter: 'い', name: '溶接', x: 420, y: 460,
+    txt: `${W.press}で できた 部品どうしを、熱で とかして つなぎ合わせる。これで 車の からだ（ボディ）が できあがる。ここは ロボットが 大かつやくする 工程だよ。` },
+  { key: 2, letter: 'う', name: '塗装', x: 640, y: 200,
+    txt: `できあがった ボディに、色を ぬる。さびを 防ぐ 役目も あるんだ。何回も 色を かさねて、つやつやに 仕上げるよ。` },
+  { key: 3, letter: 'え', name: '組み立て', x: 800, y: 460,
+    txt: `エンジン・シート・タイヤ・まどガラスなど、たくさんの 部品を つぎつぎに 取りつけていく。ここで はじめて「車のかたち」が そろうんだ。` },
+  { key: 4, letter: 'お', name: '検査', x: 500, y: 330,
+    txt: `さいごに、きずが ないか・きちんと 動くか、じっくり ${W.kensa}する。ここを 通らないと 出荷されないよ。` },
+];
+
+const BUNTAN_POINTS = [
+  { key: 0, letter: 'あ', name: 'ロボットの しごと', x: 300, y: 300,
+    txt: `溶接や 色をぬる 作業は、同じ 動きを 正確に、ものすごい speedで くり返せる <b>ロボット</b>が おこなう。力も 強く、休まず 働けるよ。` },
+  { key: 1, letter: 'い', name: '人の しごと', x: 700, y: 300,
+    txt: `細かい 配線を つなぐ 作業や、さいごの 見た目・音の 確認は、<b>人の 目と 手</b>が たより。まわりの ようすを 見て、その場で 判断する力は 人ならでは なんだ。` },
+];
+
+const KENSA_POINTS = [
+  { key: 0, letter: 'あ', name: 'ドアの すきま', x: 260, y: 300,
+    txt: `ドアと 車体の すきまが 均等か、目で じっくり 確かめる。すきまが ずれていると、雨水が 入ったり 音が 鳴ったり するよ。` },
+  { key: 1, letter: 'い', name: '塗装の むら', x: 620, y: 220,
+    txt: `色の むら・小さな キズが ないか、光を 当てて 何度も 確かめる。とても 細かい 違いも 見のがさない。` },
+  { key: 2, letter: 'う', name: '配線と ライト', x: 780, y: 380,
+    txt: `ヘッドライトが きちんと つくか、配線が つながっているか、じっさいに スイッチを 入れて 確かめるよ。` },
+];
+
+// ---------- 判定ロジック ----------
+function judgeJIT(n) { // n: 1-8 部品がとどくタイミング
+  if (n <= 2) return { level: 'low' };
+  if (n >= 7) return { level: 'high' };
+  return { level: 'good' };
+}
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kotei',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  koteiFound: new Set(),
+  buntanFound: new Set(),
+  kensaFound: new Set(),
+  jitLevel: 4,
+  jitTries: new Set(),
+  jit: { levelF: 0 },
+  tryT: 0,
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+const sHonk = () => { tone(300, 0, 0.2, 'square', 0.08); tone(300, 0.22, 0.2, 'square', 0.08); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイント（共通描画） ----------
+function drawPoints(pts, foundSet, X, Y, sc) {
+  pts.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#3d3a34' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#24211d'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#3d3a34';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 工程さがしシーン ----------
+function drawKoteiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#e2e0d6'); g.addColorStop(1, '#cac6b8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  // 工場の柱・梁
+  gctx.strokeStyle = 'rgba(46,38,30,.25)'; gctx.lineWidth = 3 * sc;
+  for (let lx = 100; lx < 950; lx += 150) { gctx.beginPath(); gctx.moveTo(X(lx), Y(0)); gctx.lineTo(X(lx), Y(640)); gctx.stroke(); }
+  // ライン(ベルトコンベア)
+  gctx.fillStyle = '#8a7560';
+  gctx.fillRect(X(60), Y(560), 880 * sc, 30 * sc);
+  gctx.strokeStyle = 'rgba(46,38,30,.4)'; gctx.lineWidth = 1.6 * sc;
+  for (let lx = 90; lx < 950; lx += 40) { gctx.beginPath(); gctx.moveTo(X(lx), Y(560)); gctx.lineTo(X(lx), Y(590)); gctx.stroke(); }
+
+  drawPoints(KOTEI_POINTS, S.koteiFound, X, Y, sc);
+}
+
+// ---------- ロボットと人 シーン ----------
+function drawBuntanScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#e2e0d6'); g.addColorStop(1, '#cac6b8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  // 左：ロボットアーム
+  gctx.strokeStyle = '#8a7560'; gctx.lineWidth = 14 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(300), Y(500)); gctx.lineTo(X(300), Y(400)); gctx.lineTo(X(380), Y(340)); gctx.stroke();
+  gctx.fillStyle = '#f0a838';
+  gctx.beginPath(); gctx.arc(X(300), Y(500), 16 * sc, 0, TAU); gctx.fill();
+  gctx.beginPath(); gctx.arc(X(380), Y(340), 10 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = 'rgba(240,168,56,.5)';
+  gctx.beginPath(); gctx.arc(X(380), Y(340), 22 * sc, 0, TAU); gctx.fill();
+
+  // 右：人（作業員）
+  gctx.fillStyle = '#2e2b26';
+  gctx.beginPath(); gctx.arc(X(700), Y(320), 18 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = '#8a7560';
+  gctx.fillRect(X(688), Y(340), 24 * sc, 60 * sc);
+  gctx.fillStyle = '#f0a838';
+  gctx.fillRect(X(684), Y(345), 32 * sc, 8 * sc);
+
+  drawPoints(BUNTAN_POINTS, S.buntanFound, X, Y, sc);
+}
+
+// ---------- ジャストインタイム シーン ----------
+function drawJitScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(300));
+  g.addColorStop(0, '#e2e0d6'); g.addColorStop(1, '#cac6b8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#b8b4a6';
+  gctx.fillRect(X(0), Y(300), 1000 * sc, 340 * sc);
+
+  // 倉庫(在庫の高さで満杯度を表現)
+  const baseY = 560, unitH = 13;
+  const hpx = ((S.jit && S.jit.levelF) || 0) * unitH;
+  const bx = 350, bw = 260;
+  gctx.strokeStyle = '#2e2b26'; gctx.lineWidth = 2.4 * sc;
+  gctx.strokeRect(X(bx - bw / 2), Y(baseY - 8 * unitH), bw * sc, 8 * unitH * sc);
+  gctx.fillStyle = hpx > 7 * unitH ? '#c9455a' : '#f0a838';
+  gctx.fillRect(X(bx - bw / 2), Y(baseY - hpx), bw * sc, hpx * sc);
+  gctx.fillStyle = '#2e2b26'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('部品そうこ', X(bx), Y(baseY - 8 * unitH - 12));
+
+  // トラック(関連工場からの搬入)
+  const tryT = S.tryT || 0;
+  if (tryT > 0) {
+    const tx = lerp(880, 620, Math.min(tryT, 0.85));
+    gctx.fillStyle = '#3d3a34'; gctx.strokeStyle = '#2e2b26'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath();
+    gctx.rect(X(tx - 45), Y(430), 90 * sc, 50 * sc); gctx.fill(); gctx.stroke();
+    gctx.fillStyle = '#f0a838';
+    gctx.beginPath(); gctx.arc(X(tx - 28), Y(486), 10 * sc, 0, TAU); gctx.fill();
+    gctx.beginPath(); gctx.arc(X(tx + 22), Y(486), 10 * sc, 0, TAU); gctx.fill();
+  }
+
+  // くみたてライン(倉庫が空だと止まる表現)
+  gctx.fillStyle = hpx <= 0 ? 'rgba(201,69,90,.35)' : '#8a7560';
+  gctx.fillRect(X(600), Y(560), 350 * sc, 30 * sc);
+}
+
+// ---------- 出荷前けんさ シーン ----------
+function drawKensaScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#e8e6da'); g.addColorStop(1, '#cac6b8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  // 完成車のシルエット
+  const bx = 500;
+  gctx.fillStyle = '#8a9aa0'; gctx.strokeStyle = '#2e2b26'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(bx - 220), Y(400));
+  gctx.lineTo(X(bx - 180), Y(320));
+  gctx.lineTo(X(bx - 60), Y(300));
+  gctx.lineTo(X(bx + 60), Y(300));
+  gctx.lineTo(X(bx + 180), Y(320));
+  gctx.lineTo(X(bx + 220), Y(400));
+  gctx.lineTo(X(bx + 220), Y(440));
+  gctx.lineTo(X(bx - 220), Y(440));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#e8e6da';
+  gctx.beginPath(); gctx.arc(X(bx - 130), Y(440), 34 * sc, 0, TAU); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.arc(X(bx + 130), Y(440), 34 * sc, 0, TAU); gctx.fill(); gctx.stroke();
+
+  drawPoints(KENSA_POINTS, S.kensaFound, X, Y, sc);
+}
+
+// ---------- はかせ：かんきょうと ゆしゅつ シーン ----------
+function drawHakaseScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(460));
+  g.addColorStop(0, '#dfeef0'); g.addColorStop(1, '#cac6b8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(120,150,170,.4)';
+  gctx.fillRect(X(0), Y(460), 1000 * sc, 180 * sc);
+
+  // 船(輸出)
+  gctx.fillStyle = '#3d3a34'; gctx.strokeStyle = '#2e2b26'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(300), Y(470)); gctx.lineTo(X(700), Y(470)); gctx.lineTo(X(650), Y(520)); gctx.lineTo(X(350), Y(520));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#f0a838';
+  for (let i = 0; i < 5; i++) { gctx.fillRect(X(340 + i * 70), Y(430), 50 * sc, 40 * sc); }
+
+  // 葉っぱ(環境)
+  gctx.fillStyle = '#6a8f4a'; gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🌱', X(180), Y(200));
+  gctx.fillText('🔋', X(500), Y(180));
+  gctx.fillText('♻️', X(820), Y(200));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kotei') drawKoteiScene(X, Y, sc);
+  else if (S.scene === 'buntan') drawBuntanScene(X, Y, sc);
+  else if (S.scene === 'jit') drawJitScene(X, Y, sc);
+  else if (S.scene === 'kensa') drawKensaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- けんさスコープ ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f9f7ee'); grd.addColorStop(1, '#c7c2b0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#3d3a34'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const lvl = (S.jit && S.jit.levelF) || 0;
+    const bw = R * 0.5, bh = R * 1.0, bx = R - bw / 2, by = R * 0.35;
+    sctx.strokeStyle = '#2e2b26'; sctx.lineWidth = R * 0.025;
+    sctx.strokeRect(bx, by, bw, bh);
+    const fillH = bh * clamp(lvl / 8, 0, 1);
+    sctx.fillStyle = '#8a7560';
+    sctx.fillRect(bx, by + bh - fillH, bw, fillH);
+    label(`タイミング ${NUMS[clamp(Math.round(lvl) - 1, 0, 7)] || ''}`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#f2e6b0'); g2.addColorStop(1, 'rgba(242,230,176,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#3d3a34'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚗', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#3d3a34'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2e2b26';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3d3a34', '#f0a838', '#8a7560', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '自動車工場（くみたてライン）';
+  const titles = {
+    kotei: '🏭 工程さがし',
+    buntan: '🤖 ロボットと 人の しごと',
+    jit: '🚚 ジャストインタイム',
+    kensa: '🔍 出荷前 けんさ',
+    hakase: '🌏 かんきょうと ゆしゅつ',
+    done: '🔧 ボルトの町工場 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'くみたてライン';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kotei', 'm_buntan', 'm_jit', 'm_kensa', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kotei', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🔧🤖🚚</div>
+        <h1>ボルトの町工場</h1>
+        <div class="sub">〜 自動車を つくる 工業 〜</div>
+        <p class="talk">ようこそ！ わたしは 工場の ボルトから 生まれた 精霊、<b>ボルト</b>。1台の 車が できるまでの ひみつを <b>いっしょに たしかめに いこう！</b><br>
+        たくさんの 部品・ロボットと 人の 力・工場どうしの つながり……見ていこう。</p>
+        <button class="btn" id="startBtn">工場を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">1台の 車には、部品が どれくらい 使われていると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🔩</span><b>ア</b> 約300こ</div>
+          <div class="vcard" data-v="1"><span class="vicon">⚙️</span><b>イ</b> 約3000こ</div>
+          <div class="vcard" data-v="2"><span class="vicon">🚗</span><b>ウ</b> 約3万こ</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：工程さがし ---
+  m_kotei: {
+    enter() {
+      Object.assign(S, { scene: 'kotei', scope: { type: 'idle' }, koteiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`工場の 中を 見てみよう。車が できるまでの 5つの 工程を、下の ボタンで ぜんぶ 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KOTEI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.koteiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.koteiFound.size >= KOTEI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.koteiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`5つの 工程の 中で、いちばん さいしょに 行うのは どれだろう？`);
+      setButtons(choiceRow(['ア 溶接', 'イ プレス', 'ウ 検査'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kotei'); S.phase = 'done';
+        say(`せいかい！ さいしょは ${W.press}。鋼板を 型で おして、部品の 形を 作るところから すべてが 始まるんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.press}→${W.yousetsu}→${W.tosou}→${W.kumitate}→${W.kensa}の 順番で、1台の 車が 少しずつ かんせいに 近づいていくよ。`);
+        setButtons([{ label: 'つぎへ（ロボットと 人）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 溶接', 'イ プレス', 'ウ 検査'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：ロボットと人の分担 ---
+  m_buntan: {
+    enter() {
+      Object.assign(S, { scene: 'buntan', scope: { type: 'idle' }, buntanFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`工場では、ロボットと 人が 力を 合わせて 働いている。2つの 持ち場を 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(BUNTAN_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.buntanFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.buntanFound.size >= BUNTAN_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.buntanFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`なぜ、ロボットと 人とで 仕事を 分けているのだろう？`);
+      setButtons(choiceRow(['ア 人が サボりたいから', 'イ ロボットは 力仕事・正確な くり返しが 得意、人は その場の 判断が 得意だから', 'ウ ロボットの 方が 何でも できるから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_buntan'); S.phase = 'done';
+        say(`せいかい！ ロボットと 人、それぞれの 得意な ことを 生かして、力を 合わせているんだ。<br><br>💡 <b>たいせつポイント</b><br>同じ 作業を 正確に 何回も くり返すのは ロボットが 得意。細かい 確認や とっさの 判断は、今も 人の 目と 手が たよりに されている。`);
+        setButtons([{ label: 'つぎへ（ジャストインタイム）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 人が サボりたいから', 'イ ロボットは 力仕事・正確な くり返しが 得意、人は その場の 判断が 得意だから', 'ウ ロボットの 方が 何でも できるから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：ジャストインタイム（メイン操作） ---
+  m_jit: {
+    enter() {
+      Object.assign(S, { scene: 'jit', scope: { type: 'gauge' }, jit: { levelF: 0 }, jitTries: new Set(), tryT: 0 });
+      updateLoc();
+      hideWish();
+      say(`ドアや エンジンなどの 部品は、${W.kanren}から とどく。目もり①〜⑧で「どれくらい 早く 部品を あつめておくか」を えらんで、うまく いくか ためしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.jitLevel === n ? ' sel' : ''), cb: () => { S.jitLevel = n; this.refreshCtl(); } });
+      list.push({ label: '🚚 部品を 運ぶ', cb: () => this.run() });
+      setControls(list);
+    },
+    run() {
+      setControls([]);
+      say(`目もり ${NUMS[S.jitLevel - 1]} の タイミングで、${W.kanren}から 部品を 運んでもらう……`);
+      sClank();
+      startTween(0, S.jitLevel, 1.0, v => { S.jit.levelF = v; }, () => this.deliver());
+    },
+    deliver() {
+      say(`くみたてラインに 部品を とどける！`);
+      startTween(0, 1, 1.1, v => { S.tryT = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeJIT(S.jitLevel);
+      S.jitTries.add(S.jitLevel);
+      if (r.level === 'good') {
+        sYes(); scopeBurst(); award('m_jit'); S.phase = 'done';
+        say(`✨ ちょうど よい タイミングで、ラインが 止まらず 進んだ！ ✨<br><br>💡 <b>たいせつポイント</b><br>これが「${W.jit}」方式。必要な 部品を、必要な 時に、必要な 分だけ とどけることで、そうこを 大きくせずに すむんだ。`);
+        setButtons([{ label: 'つぎへ（出荷前けんさ）', cb: nextStep }]);
+      } else if (r.level === 'low') {
+        sHonk(); S.tryT = 0;
+        say(`早く 集めすぎて、そうこが 部品で パンパンに なってしまった……もういちど タイミングを えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHonk(); S.tryT = 0;
+        say(`おそすぎて、部品が 間に合わず ラインが 止まってしまった……もういちど タイミングを えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：出荷前けんさ ---
+  m_kensa: {
+    enter() {
+      Object.assign(S, { scene: 'kensa', scope: { type: 'idle' }, kensaFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`できあがった 車を、出荷する 前に もう一度 調べる。3つの チェックポイントを ボタンで 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KENSA_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kensaFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kensaFound.size >= KENSA_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kensaFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`機械での 検査だけでなく、人の 目でも 検査するのは なぜだろう？`);
+      setButtons(choiceRow(['ア 機械だけでは 気づけない 細かい所も あるから', 'イ 人が ひまだから', 'ウ 機械が こわれやすいから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_kensa'); S.phase = 'done';
+        say(`せいかい！ 機械では 気づきにくい 見た目の むらや、ちょっとした 違和感は、人の 目や 手、耳が たよりに されているんだ。<br><br>💡 <b>たいせつポイント</b><br>ここを 通った 車だけが、出荷されて お店や お客さんの もとへ 運ばれるよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 機械だけでは 気づけない 細かい所も あるから', 'イ 人が ひまだから', 'ウ 機械が こわれやすいから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：かんきょうと ゆしゅつ ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' } });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 車は 国内だけでなく、船に のせて 外国にも 運ばれる（ゆしゅつ）。そして 今、車づくりには「かんきょうへの くふう」も 広がっているよ。`);
+      setButtons([{ label: 'くわしく 見る', cb: () => this.ask() }]);
+    },
+    ask() {
+      sTap();
+      say(`なぜ、車を 少しでも 軽く 作る くふうを するのだろう？`);
+      setButtons(choiceRow(['ア 軽い 方が かっこいいから', 'イ 使う 燃料が 少なくて すみ、かんきょうに やさしいから', 'ウ 運びやすいから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 車を 軽くすると、使う 燃料が 少なくてすみ、はい気ガスも へる。<br><br>💡 <b>たいせつポイント</b><br>電気と ガソリンを 使い分ける ハイブリッドカーや、使い終わった 部品を リサイクルする くふうも 広がっている。日本で 作られた 車は、世界中の 国ぐにへも ゆしゅつされているんだよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 軽い 方が かっこいいから', 'イ 使う 燃料が 少なくて すみ、かんきょうに やさしいから', 'ウ 運びやすいから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ ボルトの町工場 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 1台の 車には 約（<span class="blankWord" data-a="3万">？？？</span>）この 部品が 使われている。<br>
+        ② 必要な 部品を 必要な 時に とどける しくみを（<span class="blankWord" data-a="ジャストインタイム">？？？</span>）と いう。<br>
+        ③ 車を 軽く 作るのは、燃料を へらして（<span class="blankWord" data-a="かんきょう">？？？</span>）に やさしくするため。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ 約3万こ</b> でした！ ${votedRight ? '（みんなの よそう、ばっちり！）' : ''} 小さな ネジまで 数えると、1台の 車には それだけ たくさんの 部品と 人の 力が 集まっているんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>家や 近所で 見かける 車を 1台 見て、どんな 部品で できているか おうちの人と 話してみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#24211d'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 自動車工業について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「車の 部品は 何こくらい？」「ジャストインタイムって 何？」`);
+      setButtons([
+        { label: '🏭 工程の 図', cls: 'sub', cb: () => this.show('kotei') },
+        { label: '🤖 ロボットと人の 図', cls: 'sub', cb: () => this.show('buntan') },
+        { label: '🚚 部品そうこの 図', cls: 'sub', cb: () => this.show('jit') },
+        { label: '🔍 けんさの 図', cls: 'sub', cb: () => this.show('kensa') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_jit などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>

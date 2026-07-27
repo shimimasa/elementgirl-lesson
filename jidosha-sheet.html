@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ボルトの町工場 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f4a5c; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cfe6ea; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cfe6ea; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🔧 ボルトの町工場 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      1台の 車には、部品が どれくらい 使われていると 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🔩 約300こ</div>
+        <div class="voteOpt"><span class="vnum">イ</span> ⚙️ 約3000こ</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🚗 約3万こ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．工程さがし</span>
+    <div class="secBody">
+      5つの 工程を 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div class="clueRow" style="margin-top:1mm">
+        <div class="clueBox"><span class="rletter">え</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">お</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">プレス</span>
+        <span class="wordBank">溶接</span>
+        <span class="wordBank">塗装</span>
+        <span class="wordBank">組み立て</span>
+        <span class="wordBank">検査</span>
+      </div>
+      <div style="margin-top:1.2mm">いちばん さいしょに 行うのは？　ア 溶接 ・ イ プレス ・ ウ 検査（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．ロボットと 人の しごと</span>
+    <div class="secBody">
+      なぜ ロボットと 人とで 仕事を 分けている？（〇を つけよう）<br>
+      ア 人が サボりたいから　・　イ ロボットは 力仕事・くり返しが 得意、人は 判断が 得意だから　・　ウ ロボットが 何でも できるから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．ジャストインタイム — タイミングを ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 部品が とどく タイミングを えらんで 試してみよう。うまく いった 目もりに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．出荷前 けんさ</span>
+    <div class="secBody">
+      機械での 検査だけでなく、人の 目でも 検査するのは なぜ？（〇を つけよう）<br>
+      ア 機械だけでは 気づけない 細かい所も あるから　・　イ 人が ひまだから　・　ウ 機械が こわれやすいから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（かんきょうと ゆしゅつ）</span>
+    <div class="secBody">
+      なぜ 車を 軽く 作る くふうを する？（〇を つけよう）<br>
+      ア 軽い方が かっこいいから　・　イ 燃料が 少なくて すみ かんきょうに やさしいから　・　ウ 運びやすいから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 1台の 車には 約（<span class="fillLine"></span>）この 部品が 使われている。<br>
+      ② 必要な 部品を 必要な 時に とどける しくみを（<span class="fillLine"></span>）と いう。<br>
+      ③ 車を 軽く 作るのは、燃料を へらして（<span class="fillLine"></span>）に やさしくするため。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          家や 近所で 見かける 車を 1台 見て、どんな 部品で できているか おうちの人と 話してみよう。<br>
+          ☐ 見つけた 車：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ボルトの町工場 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ボルトの町工場 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「自動車をつくる工業」・学力幅あり・協力型／ 使うもの：「jidosha.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_jit</b> などで途中再開（m_kotei／m_buntan／m_jit／m_kensa／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。部品の数を予想。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🏭 工程さがし</td><td>プレス・溶接・塗装・組み立て・検査の5工程をボタンで確認 → クイズ。最初はプレスであることを紹介</td></tr>
+      <tr><td class="min">11〜18分</td><td>🤖 ロボットと人の しごと</td><td>ロボットと人、2つの持ち場をボタンで確認 → なぜ分担するのかクイズ</td></tr>
+      <tr><td class="min">18〜28分</td><td>🚚 ジャストインタイム（<b>今日の見せ場</b>）</td><td>目もり①〜⑧でタイミングを選び「部品を運ぶ」→うまくいくか判定。早すぎ/遅すぎは失敗するので何度も挑戦させる。1人ずつ交代で目もりを選ばせるとよい</td></tr>
+      <tr><td class="min">28〜35分</td><td>🔍 出荷前けんさ</td><td>3つのチェックポイントをボタンで確認 → 人の目でも検査する理由をクイズ</td></tr>
+      <tr><td class="min">35〜41分</td><td>🌏 はかせチャレンジ（かんきょうと ゆしゅつ）</td><td>車を軽く作る理由をクイズ。ハイブリッドカー・リサイクル・輸出の話へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「近所の車さがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「ロボットと人の しごと」を右下「つぎ▶」でスキップ可（<b>ジャストインタイム・出荷前けんさ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ 約3万こ</b>／工程さがし＝<b>イ プレス</b>／
+      ロボットと人＝<b>イ ロボットは力仕事・くり返しが得意、人は判断が得意だから</b>／ジャストインタイム＝<b>③〜⑥（ちょうどよいタイミング）</b>／
+      出荷前けんさ＝<b>ア 機械だけでは気づけない細かい所もあるから</b>／
+      はかせチャレンジ＝<b>イ 燃料が少なくてすみ、かんきょうにやさしいから</b>／
+      まとめ＝①<b>3万</b>　②<b>ジャストインタイム</b>　③<b>かんきょう</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の情報です）</h2>
+    <ul>
+      <li>1台の車は、小さなネジまで数えると約2万〜3万個の部品からできている。工程はプレス（鋼板を型で成形）→溶接（部品を接合してボディを作る）→塗装→組み立て（エンジン・シートなどを取り付け）→検査の順に進み、1台が完成するまで約17〜18時間かかる</li>
+      <li>ドアやエンジンなど多くの部品は、組み立て工場のまわりに多数ある「関連工場」で作られ、そこから届けられる。必要な部品を必要な時に必要な量だけ届ける仕組みを「ジャストインタイム」方式と呼び、倉庫のスペースやコストを節約できる</li>
+      <li>溶接や塗装など同じ動きを正確に繰り返す作業はロボットが得意で、細かい配線の確認や最終的な判断は人の目と手が頼りにされている</li>
+      <li>完成した車は出荷前に検査され、機械では気づきにくい塗装のムラやドアの隙間などは人の目で最終確認される</li>
+      <li>車を軽く作ると燃料が少なくて済み排気ガスも減る。電気とガソリンを使い分けるハイブリッドカーや部品のリサイクルなど、環境への配慮が広がっている。日本で作られた車は世界中へ輸出されている</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「ジャストインタイム」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせ、「部品を運ぶ」ボタンを押させると全員が参加できる</li>
+      <li>タイミングは「早ければ早いほど良い」わけではなく、早すぎると倉庫がいっぱいになる、という設定にしてある。ちょうどよいタイミングを何度も試す過程を大事にする</li>
+      <li>よそうタイムの答え（ウ：約3万個）は意外に感じる子が多いので、身近な車を例に「小さなネジまで数えると」という点を丁寧に補足するとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「車の部品は何こくらい？」「ジャストインタイムって何？」「人の検査は何を見る？」</li>
+      <li>教科書・資料集の自動車工場の写真を見て、プレス・溶接・塗装・組み立ての場面を確認すると理解が深まる</li>
+      <li>関連工場のつながりから、他の工業（食品・機械など）や貿易・輸出入の学習へ発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
