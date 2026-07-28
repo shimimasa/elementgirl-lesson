@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ケムリの港 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2a3550; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cfe6ea; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cfe6ea; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🚢 ケムリの港 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      黒船が やってきた時、江戸の 人々は どんな ようすだったと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 😌 落ち着いて、いつもどおりに くらしていた</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 😱 とても おどろいて、大さわぎに なった</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🎉 喜んで 歓迎した</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．黒船の正体</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">船の 数と 人数</span>
+        <span class="wordBank">大砲の 力</span>
+        <span class="wordBank">煙を ふく 船</span>
+      </div>
+      <div style="margin-top:1.2mm">江戸の 人々は なぜ おどろいた？　ア 見たことも ない 力だったから　・　イ 船の 色　・　ウ 旗（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．なぜ 開国を せまったのか</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">燃料・食料の 補給地</span>
+        <span class="wordBank">貿易を したい</span>
+      </div>
+      <div style="margin-top:1.2mm">幕府の 返事は？　ア ぜんぶ 認めた　・　イ 貿易は 断ったが 港は 開いた　・　ウ 無視した（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．開港地さがし</span>
+    <div class="secBody">
+      日米和親条約で 開かれた 2つの 港は？（　　　　　）と（　　　　　）<br>
+      日米和親条約で 認められた ことは？（〇を つけよう）<br>
+      ア 自由な 貿易　・　イ 燃料・食料・石炭の 補給と、遭難した 船員の 保護　・　ウ 領土の 一部を ゆずり わたすこと
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．見えない不平等 — 天びんで たしかめよう</span>
+    <div class="secBody">
+      日米修好通商条約（1858年）の 2つの ひみつを 調べよう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">裁判権（治外法権）</span>
+        <span class="wordBank">関税を 決める権利</span>
+      </div>
+      <div style="margin-top:1.2mm">なぜ「不平等条約」と よばれる？（〇を つけよう）<br>
+      ア 日本に 都合の よいことばかりだったから　・　イ 裁判権も 関税を 決める権利も 外国側に あったから　・　ウ アメリカが 得を する ことが なかったから</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（条約改正への みちのり）</span>
+    <div class="secBody">
+      日本が 不平等条約を 改正するために、いちばん 力を 入れたのは？（〇を つけよう）<br>
+      ア 外国と 戦争を して 無理やり 変えさせた　・　イ 近代的な 制度を整え、対等な 国だと 認めてもらえるよう 努力した　・　ウ 何も せずに そのままに した
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① ペリーひきいる 黒船は、あわせて（<span class="fillLine sm"></span>）来航した。<br>
+      ② 日米和親条約で 開かれた 2つの 港は、下田と（<span class="fillLine"></span>）。<br>
+      ③ 不平等条約で 日本に なかったのは、治外法権が 認められた ことと（<span class="fillLine"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの人に「もし 急に 見たことも ない できごとが 起きたら、どう する？」と 聞いてみよう。むかしの 人たちの おどろきを、いっしょに 想像してみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ケムリの港 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ケムリの港 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（幕末・黒船来航と開国）」・学力幅あり・協力型／ 使うもの：「kurofune.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kaikou</b> などで途中再開（m_kurofune／m_riyu／m_kaikou／m_joyaku／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>⚓ 黒船の 正体</td><td>3つの手がかり（船の数と人数・大砲の力・煙をふく船）をボタンで確認 → クイズ。狂歌「太平の眠りを覚ます上喜撰」を紹介</td></tr>
+      <tr><td class="min">10〜16分</td><td>✉️ なぜ 開国を せまったのか</td><td>2つの手がかり（燃料・食料の補給地・貿易）を確認 → クイズ。日米和親条約の特徴（貿易は断ったが港は開いた）を紹介</td></tr>
+      <tr><td class="min">16〜25分</td><td>🗺️ 開港地さがし（<b>今日の見せ場①</b>）</td><td>日本地図の中から下田・箱館をタッチで発見 → クイズ。1人ずつ交代でタッチさせるとよい</td></tr>
+      <tr><td class="min">25〜36分</td><td>⚖️ 見えない 不平等（<b>今日の見せ場②</b>）</td><td>裁判権（治外法権）・関税を決める権利の2つを発見 → 天びんが外国側に傾く演出 → クイズ</td></tr>
+      <tr><td class="min">36〜41分</td><td>📜 はかせチャレンジ（条約改正）</td><td>不平等条約がその後どうなったかクイズ。陸奥宗光・小村寿太郎による条約改正への努力を紹介</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「なぜ 開国を せまったのか」を右下「つぎ▶」でスキップ可（<b>開港地さがし・見えない不平等・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ とても おどろいて 大さわぎに なった</b>／黒船の正体＝<b>ア 見たことも ない 力だったから</b>／
+      なぜ開国＝<b>イ 貿易は 断ったが 港は 開いた</b>／開港地＝<b>下田・箱館（函館）／イ 燃料・食料・石炭の補給と 遭難した船員の保護</b>／
+      見えない不平等＝<b>イ 裁判権も 関税を決める権利も 外国側に あったから</b>／
+      はかせ＝<b>イ 近代的な 制度を整え 対等な国だと 認めてもらう 努力を した</b>／
+      まとめ＝①<b>4せき</b>　②<b>箱館（函館）</b>　③<b>関税自主権</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>1853年（嘉永6年）、ペリー率いる黒船4隻（蒸気船2・帆船2）、乗組員約1000名が浦賀沖に来航。日本の大砲より射程の長い最新式カノン砲を搭載していた</li>
+      <li>「太平の眠りを覚ます上喜撰　たった四杯で夜も眠れず」という狂歌が有名。上喜撰はお茶の銘柄で蒸気船とかけた洒落、四杯は四隻ともかけている</li>
+      <li>1854年（嘉永7年）、日米和親条約を締結。下田は即時、箱館（函館）は1年後に開港。貿易は認めず、燃料・食料・石炭の補給と漂着民の保護のみが認められた</li>
+      <li>1858年（安政5年）、日米修好通商条約を締結。大老・井伊直弼が天皇の勅許を得ないまま調印。治外法権（領事裁判権）と関税自主権の欠如という2点が不平等とされ、函館・横浜・新潟・神戸・長崎の5港が開港された</li>
+      <li>明治時代になり、陸奥宗光が1894年に治外法権の撤廃、小村寿太郎が1911年に関税自主権の回復に成功。黒船来航から条約改正まで半世紀以上かかった</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「開港地さがし」と「見えない不平等」が今日いちばんの見せ場。1人ずつ交代でタッチさせると全員が参加できる</li>
+      <li>天びんが傾く演出そのものに意味がある。「治外法権」「関税自主権」は難しい言葉なので、「裁判できる権利」「税金を決める権利」という言い換えを繰り返すとよい</li>
+      <li>よそうタイムの答え（イ）は、見たこともない力に対する当時の人々の驚きへの共感につながる。「もし自分だったら」の視点で振り返るとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「黒船は何せき来た？」「開かれた港はどこと どこ？」「不平等条約の2つのひみつは？」</li>
+      <li>教科書・資料集の黒船の絵・錦絵を見ると理解が深まる</li>
+      <li>条約改正への努力から、明治維新・文明開化・日清日露戦争へと発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
