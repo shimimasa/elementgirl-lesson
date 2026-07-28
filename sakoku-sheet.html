@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>オウギの島 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #16303c; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox.wide { min-width: 42mm; }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cfe0e4; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cfe0e4; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🏝️ オウギの島 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      鎖国の あいだ、日本は 外国と まったく 関わりが なかった？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🚫 まったく 関わりが なかった</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🗺️ 四つの 窓口を 通じて 関わりが 続いていた</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> ⚔️ 戦いを して 外国と 関わっていた</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．キリスト教禁止と 島原の乱</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">島原の乱</span>
+        <span class="wordBank">禁教令の強化</span>
+      </div>
+      <div style="margin-top:1.2mm">乱の あと、幕府が きびしく 取りしまった 理由は？　ア 信仰が 一揆の 力に なることを おそれた ・ イ 絵が 気に 入らなかった ・ ウ 外国語の 勉強が 禁止されていた（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．四つの窓口</span>
+    <div class="secBody">
+      4つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox wide"><span class="rletter">あ</span>（　　　　　　　　　）</div>
+        <div class="clueBox wide"><span class="rletter">い</span>（　　　　　　　　　）</div>
+      </div>
+      <div class="clueRow" style="margin-top:1mm">
+        <div class="clueBox wide"><span class="rletter">う</span>（　　　　　　　　　）</div>
+        <div class="clueBox wide"><span class="rletter">え</span>（　　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">長崎（オランダ・清）</span>
+        <span class="wordBank">対馬藩（朝鮮）</span>
+        <span class="wordBank">薩摩藩（琉球）</span>
+        <span class="wordBank">松前藩（アイヌ）</span>
+      </div>
+      <div style="margin-top:1.2mm">窓口は いくつ あった？　ア 1つ ・ イ 2つ ・ ウ 4つ（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．出島の貿易量を ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 貿易量を えらんで 始めてみよう。ちょうどよい 貿易量に なった 目もりに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．出島の貿易品</span>
+    <div class="secBody">
+      日本から 海外へ 運び出されていた ものは？（〇を つけよう）<br>
+      ア 銀や 銅　・　イ 米や 野菜　・　ウ たたみ
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（鎖国の中の 蘭学）</span>
+    <div class="secBody">
+      鎖国の あいだ、外国の 知識は 入ってきた？（〇を つけよう）<br>
+      ア まったく 入らなかった　・　イ オランダを 通じて 学ばれていた　・　ウ 中国からだけ 入った
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 1637年、重い 年貢と キリスト教弾圧に 反発して 起きた 一揆を（<span class="fillLine"></span>）と いう。<br>
+      ② 鎖国中、日本は 長崎・対馬・薩摩・（<span class="fillLine"></span>）の 四つの 窓口を 通じて 外国と 関わっていた。<br>
+      ③ 鎖国の 中で オランダ語を 通じて 学ばれた 西洋の 学問を（<span class="fillLine"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          鎖国時代の 四つの 窓口（長崎・対馬・薩摩・松前）が、今の どの 都道府県に あたるか、おうちの人と 地図で しらべてみよう。<br>
+          ☐ 見つけた 都道府県：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　オウギの島 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】オウギの島 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（鎖国と貿易統制）」・学力幅あり・協力型／ 使うもの：「sakoku.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_boueki</b> などで途中再開（m_kinsei／m_madoguchi／m_boueki／m_dejima／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。鎖国中の外国との関わりを予想。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>⚔️ キリスト教禁止と 島原の乱</td><td>2つの手がかり（島原の乱・禁教令の強化）をボタンで確認 → 幕府がきびしく取りしまった理由をクイズ</td></tr>
+      <tr><td class="min">10〜18分</td><td>🗺️ 四つの窓口（<b>よそう回収</b>）</td><td>長崎・対馬・薩摩・松前をボタンで確認 → 窓口の数をクイズ。よそうタイムの答えがここで見えてくる</td></tr>
+      <tr><td class="min">18〜28分</td><td>🏝️ 出島の貿易量（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で貿易量を選び「貿易を始める」→統制と必要な品のバランスを判定。少なすぎ/多すぎだと失敗するので何度も挑戦させる。1人ずつ交代で貿易量を選ばせるとよい</td></tr>
+      <tr><td class="min">28〜35分</td><td>📦 出島の貿易品</td><td>輸入品・輸出品をボタンで確認 → 日本から輸出されていたものをクイズ</td></tr>
+      <tr><td class="min">35〜41分</td><td>📚 はかせチャレンジ（鎖国の中の蘭学）</td><td>外国の知識が入ってきたかクイズ。蘭学・解体新書の話へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「四つの窓口さがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「出島の貿易品」を右下「つぎ▶」でスキップ可（<b>出島の貿易量・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 四つの 窓口を 通じて 関わりが 続いていた</b>／キリスト教禁止と島原の乱＝<b>ア 信仰が 一揆を まとめる 力に なることを おそれたから</b>／
+      四つの窓口＝<b>ウ 4つ</b>／出島の貿易量＝<b>③〜⑥（ちょうどよい 貿易量）</b>／
+      出島の貿易品＝<b>ア 銀や 銅</b>／
+      はかせチャレンジ＝<b>イ オランダを 通じて 学ばれていた</b>／
+      まとめ＝①<b>島原の乱</b>　②<b>松前</b>　③<b>蘭学</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>1637〜38年、重い年貢とキリスト教への弾圧に苦しんだ島原・天草地方の人々が、天草四郎を大将に一揆を起こした（島原の乱）。幕府は大軍を送ってようやくしずめた</li>
+      <li>幕府は、信仰で心を一つにした人々が一揆をまとめる力になることをおそれ、禁教令を強化。絵踏みなどでキリシタンをきびしく取りしまった</li>
+      <li>「鎖国」は国を完全に閉ざしたのではなく、幕府がコントロールしながら外国とつきあうしくみだった。長崎（出島でオランダ・清と貿易）、対馬藩（朝鮮、朝鮮通信使が来日）、薩摩藩（琉球王国）、松前藩（アイヌの人々）の「四つの窓口」を通じて交流が続いていた</li>
+      <li>出島にはオランダ商館が置かれ、生糸・絹織物・砂糖・薬・書物などが輸入され、銀・銅・陶磁器などが輸出された。当時日本は世界でも有数の銀の産地だった</li>
+      <li>オランダ商館からは「オランダ風説書」という海外情勢の報告書が幕府に届けられ、海外の情報も入っていた。オランダ語を通じて学ばれた西洋の学問を「蘭学」といい、杉田玄白らはオランダ語の医学書を翻訳して「解体新書」を著した</li>
+      <li>鎖国は、大名統制のしくみ（参勤交代など）と並んで、江戸幕府が260年におよぶ安定を保つための重要な政策の一つだった</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「出島の貿易量」が今日いちばんの見せ場。1人ずつ交代で貿易量を選ばせ、「貿易を始める」ボタンを押させると全員が参加できる</li>
+      <li>貿易量は「多ければ多いほど良い」わけではなく、多すぎると統制が効かなくなる、という設定にしてある。ちょうどよい量を何度も試す過程を大事にする</li>
+      <li>よそうタイムの答え（イ：四つの窓口を通じて関わりが続いていた）は、「鎖国＝完全に国を閉ざした」と誤解しがちな子どもの発想を裏切る発見。国を閉ざすのではなく管理しながら外国とつきあう、というしくみの理解につなげるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「四つの窓口はどこ？」「出島から何が輸出された？」「鎖国の中で学ばれた学問は？」</li>
+      <li>教科書・資料集の出島の絵図や、四つの窓口の位置を地図帳で確認すると理解が深まる</li>
+      <li>安定した鎖国のしくみは、この後ペリー来航による開国・明治維新へと大きく揺らいでいく。次回はその転換点へ発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
