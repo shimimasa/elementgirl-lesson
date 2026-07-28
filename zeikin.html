@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マルの蔵 — 税金とくらし たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef8ef 0%, #a8d4b0 55%, #1f5c3a 100%);
+    color: #143d24;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #10291a; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4a7256; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #cfe4d4; border: 2px solid #9cc2a8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #9cc2a8;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #c97a1e);
+    border-color: #8a5a0a; color: #143d24;
+    box-shadow: 0 0 14px rgba(201, 122, 30, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f0f8f0 0%, #cde8d2 100%);
+    border: 3px solid #1f5c3a;
+    box-shadow: inset 0 0 40px rgba(20, 61, 36, .12), 0 4px 18px rgba(15, 42, 24, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #0f2a18; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #143d24; color: #f0f8f0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15, 42, 24, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 42, 24, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #b8d8c0; cursor: pointer;
+    background: linear-gradient(180deg, #3d8a5a, #143d24); color: #fff;
+    box-shadow: 0 3px 0 #0a2414; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #2e8b4f, #164d2c); border-color: #a8e0b8; box-shadow: 0 3px 0 #0a2e18; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #e8a838, #c97a1e); border-color: #f5ddb0; box-shadow: 0 3px 0 #8a5a10; color: #3a2a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #143d24; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(20, 61, 36, .3), inset 0 0 24px rgba(20, 61, 36, .18);
+    flex-shrink: 0; background: #f0f8f0;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #4a7256;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #0f2a18; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f2f9f3; border: 2px solid #9cc2a8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #4a7256; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #143d24;
+    border: 1.5px solid #c8e4cc;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #10291a; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #b8d8c0, #cde8d2); color: #143d24;
+    border: 2px solid #143d24; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #10291a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #3d8a5a, #143d24); color: #fff;
+    box-shadow: 0 3px 0 #0a2414, 0 5px 12px rgba(20, 61, 36, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0a2414; }
+  .btn.sub {
+    background: #cfe4d4; color: #2e5640; box-shadow: 0 3px 0 #9cc2a8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #143d24; box-shadow: 0 3px 0 #9cc2a8; font-weight: 400; border: 1.5px solid #c8e4cc; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #3d8a5a; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(15, 46, 26, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f2f9f3, #cfe4d4);
+    border: 3px solid #1f5c3a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(15, 46, 26, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #10291a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #10291a; }
+  .panel .sub { color: #4a7256; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #143d24; border: 1.5px solid #c8e4cc; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #4a7256; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #143d24; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #c8e4cc; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #143d24; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #143d24; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #143d24;
+    color: #0f2a18; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #4a7256;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #cfe4d4; color: #2e5640;
+    border: 1px solid #9cc2a8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #b8d8c0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🪙 マルの蔵<small>— 税金と くらし —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_shurui" title="税金の種類さがし">★</div>
+    <div class="badge" id="bd_m_nakattara" title="もし税金がなかったら">★</div>
+    <div class="badge" id="bd_m_yosan" title="予算をくばろう">★</div>
+    <div class="badge" id="bd_m_kokkai" title="予算は誰が決める">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">まちの くらし</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 マルの め 〜 お金の ゆくえを 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,61,36,.18)"/>
+            <!-- からだ（大きな金貨） -->
+            <circle cx="60" cy="97" r="30" fill="#e8a838" stroke="#143d24" stroke-width="2.5"/>
+            <circle cx="60" cy="97" r="20" fill="none" stroke="#143d24" stroke-width="2" opacity=".5"/>
+            <circle cx="60" cy="97" r="7" fill="#f2f9f3" stroke="#143d24" stroke-width="1.6"/>
+            <path d="M60 81 L60 77 M60 117 L60 121 M44 97 L40 97 M80 97 L84 97 M49 86 L46 83 M71 86 L74 83 M49 108 L46 111 M71 108 L74 111" stroke="#143d24" stroke-width="2" stroke-linecap="round"/>
+            <!-- あたま -->
+            <circle cx="60" cy="38" r="24" fill="#f0d8b8" stroke="#143d24" stroke-width="2.5"/>
+            <!-- かみかざり（金の光の輪） -->
+            <path d="M30 30 A30 30 0 0 1 90 30 L82 22 A22 22 0 0 0 38 22 Z" fill="#ffe9a8" stroke="#143d24" stroke-width="2"/>
+            <path d="M40 24 L40 14 M50 19 L51 9 M60 17 L60 7 M70 19 L69 9 M80 24 L80 14" stroke="#c97a1e" stroke-width="1.6" stroke-linecap="round"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <ellipse cx="74" cy="44" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="38" rx="3.6" ry="5" fill="#143d24"/>
+              <ellipse cx="69" cy="38" rx="3.6" ry="5" fill="#143d24"/>
+              <circle cx="52.3" cy="35.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="35.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 52 Q60 57 67 52" stroke="#0f2a18" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">硬貨の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>マル<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🪙 マルの蔵ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   マルの蔵 — 税金とくらし（小6社会・公民・協力型・1ファイル）
+   よそう(税金がなかったら くらしは？) → 税金の種類さがし(発見) →
+   もし税金がなかったら(発見・よそう回収) → 予算をくばろう(①〜⑧で試す・メイン操作) →
+   予算は誰が決める(発見) → はかせ（社会保障が最大・国債への依存）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  kokuzei: ruby('国税', 'こくぜい'),
+  chihouzei: ruby('地方税', 'ちほうぜい'),
+  chokusetsuzei: ruby('直接税', 'ちょくせつぜい'),
+  kansetsuzei: ruby('間接税', 'かんせつぜい'),
+  shohizei: ruby('消費税', 'しょうひぜい'),
+  shotokuzei: ruby('所得税', 'しょとくぜい'),
+  yosan: ruby('予算', 'よさん'),
+  naikaku: ruby('内閣', 'ないかく'),
+  kokkai: ruby('国会', 'こっかい'),
+  shingi: ruby('審議', 'しんぎ'),
+  giketsu: ruby('議決', 'ぎけつ'),
+  shakaihoshou: ruby('社会保障関係費', 'しゃかいほしょうかんけいひ'),
+  kousaihi: ruby('国債費', 'こくさいひ'),
+  kokusai: ruby('国債', 'こくさい'),
+  shoushikoureika: ruby('少子高齢化', 'しょうしこうれいか'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 手がかりデータ ----------
+const SHURUI_POINTS = [
+  { key: 0, letter: 'あ', name: '国税', x: 730, y: 210,
+    txt: `国に 納める 税を ${W.kokuzei}と いうよ。防衛や 外交、社会保障など、国全体の 仕事に 使われるんだ。` },
+  { key: 1, letter: 'い', name: '地方税', x: 250, y: 400,
+    txt: `都道府県や 市区町村に 納める 税を ${W.chihouzei}と いうよ。学校・ごみ処理・消防など、身近な 仕事に 使われるんだ。` },
+  { key: 2, letter: 'う', name: '直接税', x: 500, y: 560,
+    txt: `税を 納める 人と、実さいに 負担する 人が 同じ 税を ${W.chokusetsuzei}と いうよ。給料から 引かれる ${W.shotokuzei}が その 一つだよ。` },
+  { key: 3, letter: 'え', name: '間接税', x: 800, y: 470,
+    txt: `税を 納める 人と、実さいに 負担する 人が ちがう 税を ${W.kansetsuzei}と いうよ。買い物の ときに 払う ${W.shohizei}は、お店が 納めるけど 払うのは わたしたちなんだ。` },
+];
+
+const NAKATTARA_POINTS = [
+  { key: 0, letter: 'あ', name: '学校', x: 225, y: 220,
+    txt: `もし 税金が なかったら、学校の 授業料を ぜんぶ 自分で 払わなければ ならず、通えない 子が 出て しまうかもしれない。` },
+  { key: 1, letter: 'い', name: '救急車', x: 620, y: 240,
+    txt: `もし 税金が なかったら、救急車を 呼ぶ たびに 高い お金が かかり、すぐ 呼べない 人が 出て しまうかもしれない。` },
+  { key: 2, letter: 'う', name: '道路', x: 400, y: 470,
+    txt: `もし 税金が なかったら、道路が こわれても 直せず、みんなが 困って しまうかもしれない。` },
+  { key: 3, letter: 'え', name: '消防', x: 810, y: 420,
+    txt: `もし 税金が なかったら、火事の とき お金を 払える 人しか 助けて もらえなく なるかもしれない。` },
+];
+
+const KOKKAI_POINTS = [
+  { key: 0, letter: 'あ', name: '内閣', x: 320, y: 300,
+    txt: `${W.naikaku}は、来年 どれだけの お金を 何に 使うか という ${W.yosan}の 案を つくるよ。` },
+  { key: 1, letter: 'い', name: '国会', x: 680, y: 300,
+    txt: `${W.kokkai}では、わたしたちが 選挙で 選んだ 代表(議員)が 集まり、予算案を 話し合い(${W.shingi})、決める(${W.giketsu})んだ。` },
+];
+
+// ---------- 予算の内わけ（はかせチャレンジ用） ----------
+const YOSAN_DATA = [
+  { name: '社会保障', pct: 32, col: '#2e8b4f' },
+  { name: '国債費', pct: 26, col: '#c97a1e' },
+  { name: '地方交付税', pct: 17, col: '#3d8a5a' },
+  { name: '防衛', pct: 7, col: '#8a7048' },
+  { name: '公共事業', pct: 5, col: '#9cc2a8' },
+  { name: '文教・科学', pct: 5, col: '#e8a838' },
+  { name: 'その他', pct: 8, col: '#cfe4d4' },
+];
+
+// ---------- 判定ロジック ----------
+function judgeYosan(n) { // n: 1-8　公共事業への配分レベル
+  if (n <= 2) return { level: 'low' };
+  if (n >= 7) return { level: 'high' };
+  return { level: 'good' };
+}
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'shurui',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  shuruiFound: new Set(),
+  nakattaraFound: new Set(),
+  kokkaiFound: new Set(),
+  yosanLevel: 4,
+  yosanTries: new Set(),
+  yosan: { levelF: 0 },
+  tryT: 0,
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイント（共通描画） ----------
+function drawPoints(pts, foundSet, X, Y, sc) {
+  pts.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#143d24' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#0f2a18'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#143d24';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 税金の種類さがし シーン ----------
+function drawShuruiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eef8ef'); g.addColorStop(1, '#cde8d2');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(46,139,79,.16)';
+  gctx.fillRect(X(0), Y(580), 1000 * sc, 60 * sc);
+
+  // 国の建物(あ・国税の近く、塔のあるビル)
+  gctx.fillStyle = '#cfe4d4'; gctx.strokeStyle = '#143d24'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(650), Y(130), 150 * sc, 150 * sc); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(690), Y(130)); gctx.lineTo(X(725), Y(80)); gctx.lineTo(X(760), Y(130)); gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#e8a838';
+  gctx.beginPath(); gctx.arc(X(725), Y(70), 8 * sc, 0, TAU); gctx.fill();
+
+  // 市役所(い・地方税の近く、小さめの建物)
+  gctx.fillStyle = '#cfe4d4'; gctx.strokeStyle = '#143d24'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(170), Y(320), 130 * sc, 120 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3d8a5a';
+  gctx.beginPath(); gctx.rect(X(220), Y(390), 30 * sc, 50 * sc); gctx.fill();
+
+  drawPoints(SHURUI_POINTS, S.shuruiFound, X, Y, sc);
+}
+
+// ---------- もし税金がなかったら シーン ----------
+function drawNakattaraScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f0f8f0'); g.addColorStop(1, '#cde8d2');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  // 学校(あ)
+  gctx.fillStyle = '#f5ddb0'; gctx.strokeStyle = '#143d24'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath(); gctx.rect(X(160), Y(160), 140 * sc, 110 * sc); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(160), Y(160)); gctx.lineTo(X(230), Y(115)); gctx.lineTo(X(300), Y(160)); gctx.closePath(); gctx.fill(); gctx.stroke();
+
+  // 救急車(い)
+  gctx.fillStyle = '#fff'; gctx.strokeStyle = '#143d24'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath(); gctx.rect(X(560), Y(190), 120 * sc, 60 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#c94a3a';
+  gctx.fillRect(X(600), Y(205), 34 * sc, 8 * sc); gctx.fillRect(X(614), Y(193), 8 * sc, 34 * sc);
+  gctx.fillStyle = '#143d24';
+  [X(580), X(660)].forEach(px => { gctx.beginPath(); gctx.arc(px, Y(258), 10 * sc, 0, TAU); gctx.fill(); });
+
+  // 道路(う・ひび割れた道)
+  gctx.fillStyle = '#9cc2a8';
+  gctx.fillRect(X(260), Y(420), 420 * sc, 60 * sc);
+  gctx.strokeStyle = '#f2f9f3'; gctx.lineWidth = 4 * sc; gctx.setLineDash([16 * sc, 10 * sc]);
+  gctx.beginPath(); gctx.moveTo(X(260), Y(450)); gctx.lineTo(X(680), Y(450)); gctx.stroke();
+  gctx.setLineDash([]);
+  gctx.strokeStyle = '#143d24'; gctx.lineWidth = 1.6 * sc;
+  gctx.beginPath(); gctx.moveTo(X(340), Y(420)); gctx.lineTo(X(360), Y(480)); gctx.moveTo(X(520), Y(430)); gctx.lineTo(X(500), Y(470)); gctx.stroke();
+
+  // 消防(え・簡易な建物+はしご)
+  gctx.fillStyle = '#e8a838'; gctx.strokeStyle = '#143d24'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath(); gctx.rect(X(770), Y(330), 140 * sc, 110 * sc); gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = '#143d24'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(790), Y(330)); gctx.lineTo(X(880), Y(260)); gctx.stroke();
+
+  drawPoints(NAKATTARA_POINTS, S.nakattaraFound, X, Y, sc);
+}
+
+// ---------- 予算をくばろう シーン ----------
+function drawYosanScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(320));
+  g.addColorStop(0, '#eef8ef'); g.addColorStop(1, '#dcecdc');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  const lvl = clamp((S.yosan && S.yosan.levelF) || 0, 0, 8);
+
+  // 道路帯(下部)：直った割合をlvlで表現
+  gctx.fillStyle = '#9cc2a8';
+  gctx.fillRect(X(0), Y(440), 1000 * sc, 120 * sc);
+  const fixedW = 1000 * clamp(lvl / 8, 0, 1);
+  gctx.fillStyle = '#3d8a5a';
+  gctx.fillRect(X(0), Y(440), fixedW * sc, 120 * sc);
+  gctx.strokeStyle = '#f2f9f3'; gctx.lineWidth = 5 * sc; gctx.setLineDash([20 * sc, 14 * sc]);
+  gctx.beginPath(); gctx.moveTo(X(0), Y(500)); gctx.lineTo(X(1000), Y(500)); gctx.stroke();
+  gctx.setLineDash([]);
+
+  // 工事クレーンの数(lvlに応じて配置)
+  const n = Math.round(lvl);
+  for (let i = 0; i < n; i++) {
+    const px = 70 + i * 110, py = 380;
+    gctx.strokeStyle = '#e8a838'; gctx.lineWidth = 4 * sc;
+    gctx.beginPath(); gctx.moveTo(X(px), Y(py + 60)); gctx.lineTo(X(px), Y(py)); gctx.lineTo(X(px + 60), Y(py + 10)); gctx.stroke();
+    gctx.fillStyle = '#143d24';
+    gctx.beginPath(); gctx.arc(X(px + 60), Y(py + 10), 5 * sc, 0, TAU); gctx.fill();
+  }
+  gctx.fillStyle = '#143d24'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('こうきょう じぎょう（どうろ・はし）', X(500), Y(560));
+}
+
+// ---------- 予算は誰が決める シーン ----------
+function drawKokkaiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eef8ef'); g.addColorStop(1, '#cde8d2');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  // 議事堂本体
+  gctx.fillStyle = '#cfe4d4'; gctx.strokeStyle = '#143d24'; gctx.lineWidth = 2.6 * sc;
+  gctx.beginPath(); gctx.rect(X(250), Y(280), 500 * sc, 200 * sc); gctx.fill(); gctx.stroke();
+  // 中央の塔
+  gctx.beginPath(); gctx.rect(X(460), Y(150), 80 * sc, 150 * sc); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(450), Y(150)); gctx.lineTo(X(500), Y(95)); gctx.lineTo(X(550), Y(150)); gctx.closePath(); gctx.fill(); gctx.stroke();
+  // 柱
+  gctx.strokeStyle = '#9cc2a8'; gctx.lineWidth = 3 * sc;
+  for (let i = 0; i < 6; i++) { const px = 290 + i * 80; gctx.beginPath(); gctx.moveTo(X(px), Y(300)); gctx.lineTo(X(px), Y(460)); gctx.stroke(); }
+
+  drawPoints(KOKKAI_POINTS, S.kokkaiFound, X, Y, sc);
+}
+
+// ---------- はかせ：日本の予算の内わけ シーン ----------
+function drawHakaseScene(X, Y, sc) {
+  gctx.fillStyle = '#f0f8f0';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  const cx = X(330), cy = Y(330), r = 190 * sc;
+  let ang = -Math.PI / 2;
+  YOSAN_DATA.forEach(d => {
+    const a2 = ang + TAU * d.pct / 100;
+    gctx.fillStyle = d.col; gctx.strokeStyle = '#143d24'; gctx.lineWidth = 1.6 * sc;
+    gctx.beginPath(); gctx.moveTo(cx, cy); gctx.arc(cx, cy, r, ang, a2); gctx.closePath(); gctx.fill(); gctx.stroke();
+    ang = a2;
+  });
+
+  // 凡例
+  let ly = 110;
+  YOSAN_DATA.forEach(d => {
+    gctx.fillStyle = d.col; gctx.fillRect(X(660), Y(ly), 22 * sc, 22 * sc);
+    gctx.strokeStyle = '#143d24'; gctx.lineWidth = 1.2 * sc; gctx.strokeRect(X(660), Y(ly), 22 * sc, 22 * sc);
+    gctx.fillStyle = '#143d24'; gctx.font = `700 ${15 * sc}px sans-serif`; gctx.textAlign = 'left';
+    gctx.fillText(`${d.name} ${d.pct}%`, X(692), Y(ly + 16));
+    ly += 34;
+  });
+  gctx.fillStyle = '#143d24'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('日本の 予算（歳出）の 内わけ', X(330), Y(580));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'shurui') drawShuruiScene(X, Y, sc);
+  else if (S.scene === 'nakattara') drawNakattaraScene(X, Y, sc);
+  else if (S.scene === 'yosan') drawYosanScene(X, Y, sc);
+  else if (S.scene === 'kokkai') drawKokkaiScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawKokkaiScene(X, Y, sc);
+}
+
+// ---------- マルのめ（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f2f9f3'); grd.addColorStop(1, '#9cc2a8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#143d24'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const lvl = (S.yosan && S.yosan.levelF) || 0;
+    const bw = R * 0.5, bh = R * 1.0, bx = R - bw / 2, by = R * 0.35;
+    sctx.strokeStyle = '#143d24'; sctx.lineWidth = R * 0.025;
+    sctx.strokeRect(bx, by, bw, bh);
+    const fillH = bh * clamp(lvl / 8, 0, 1);
+    sctx.fillStyle = '#2e8b4f';
+    sctx.fillRect(bx, by + bh - fillH, bw, fillH);
+    label(`配分 ${NUMS[clamp(Math.round(lvl) - 1, 0, 7)] || ''}`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe9a8'); g2.addColorStop(1, 'rgba(255,233,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#143d24'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🪙', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#143d24'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#143d24';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#143d24', '#c9a227', '#2e8b4f', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = 'いまの 日本';
+  const titles = {
+    shurui: '🏙️ 税金の 種類さがし',
+    nakattara: '❓ もし 税金が なかったら',
+    yosan: '🚧 予算を くばろう',
+    kokkai: '🏛️ 予算は 誰が 決める？',
+    hakase: '📊 日本の 予算の 内わけ',
+    done: '🪙 マルの蔵 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'まちの くらし';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_shurui', 'm_nakattara', 'm_yosan', 'm_kokkai', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'shurui', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🪙🏙️🏛️</div>
+        <h1>マルの蔵</h1>
+        <div class="sub">〜 税金と くらし 〜</div>
+        <p class="talk">ようこそ！ わたしは 硬貨の 重なりから 生まれた 精霊、<b>マル</b>。みんなが 払っている「税金」は、まちの くらしを ささえる 大切な お金なんだ。<b>いっしょに たしかめに いこう！</b><br>
+        もし 税金が なかったら、まちの くらしは どう なるだろう……見ていこう。</p>
+        <button class="btn" id="startBtn">税金の ひみつを たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">もし 税金が なかったら、みんなの くらしは どうなると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">😀</span><b>ア</b> 今と 変わらない</div>
+          <div class="vcard" data-v="1"><span class="vicon">😢</span><b>イ</b> 学校や 病院、道路などで 困る 人が でてくる</div>
+          <div class="vcard" data-v="2"><span class="vicon">💰</span><b>ウ</b> みんな もっと お金を 自由に 使えて 便利に なる</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：税金の種類さがし ---
+  m_shurui: {
+    enter() {
+      Object.assign(S, { scene: 'shurui', scope: { type: 'idle' }, shuruiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`税金には いろいろな 種類が あるんだ。4つの 手がかりを 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHURUI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.shuruiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.shuruiFound.size >= SHURUI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.shuruiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`買い物の ときに 払う ${W.shohizei}は、直接税と 間接税の どちら？`);
+      setButtons(choiceRow(['ア 直接税', 'イ 間接税', 'ウ どちらでも ない'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_shurui'); S.phase = 'done';
+        say(`せいかい！ 消費税は お店が 納めるけど、実さいに 払っているのは わたしたち。納める 人と 負担する 人が ちがうから ${W.kansetsuzei}なんだ。<br><br>💡 <b>たいせつポイント</b><br>税金には、納め先で 分ける ${W.kokuzei}と ${W.chihouzei}、納め方で 分ける ${W.chokusetsuzei}と ${W.kansetsuzei}が あるんだね。`);
+        setButtons([{ label: 'つぎへ（もし税金がなかったら）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 直接税', 'イ 間接税', 'ウ どちらでも ない'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：もし税金がなかったら（よそうタイム回収） ---
+  m_nakattara: {
+    enter() {
+      Object.assign(S, { scene: 'nakattara', scope: { type: 'idle' }, nakattaraFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`もし 税金が なかったら、まちは どうなって しまうだろう？ 4つの 手がかりを 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(NAKATTARA_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.nakattaraFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.nakattaraFound.size >= NAKATTARA_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.nakattaraFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`税金には、どんな 役わりが あるだろう？`);
+      setButtons(choiceRow(['ア 一部の 人だけが 得を する', 'イ みんなで お金を 出し合って、みんなが 使える サービスを ささえる', 'ウ ただ 集めて ためて おくだけ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_nakattara'); S.phase = 'done';
+        say(`せいかい！ 学校・救急車・道路・消防……税金が なかったら、これらは お金を 払える 人しか 使えなく なって しまうかもしれない。<br><br>💡 <b>たいせつポイント</b><br>税金は、みんなで 出し合って、みんなが 使える サービスを ささえる しくみなんだね。`);
+        setButtons([{ label: 'つぎへ（予算をくばろう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 一部の 人だけが 得を する', 'イ みんなで お金を 出し合って、みんなが 使える サービスを ささえる', 'ウ ただ 集めて ためて おくだけ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：予算をくばろう（メイン操作） ---
+  m_yosan: {
+    enter() {
+      Object.assign(S, { scene: 'yosan', scope: { type: 'gauge' }, yosan: { levelF: 0 }, yosanTries: new Set(), tryT: 0 });
+      updateLoc();
+      hideWish();
+      say(`道路や 橋を 直す「公共事業」に、予算を どれだけ 回すか 決めよう。目もり①〜⑧で えらんで、ちょうどよいか ためそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.yosanLevel === n ? ' sel' : ''), cb: () => { S.yosanLevel = n; this.refreshCtl(); } });
+      list.push({ label: '💰 予算を 決める', cb: () => this.build() });
+      setControls(list);
+    },
+    build() {
+      setControls([]);
+      say(`目もり ${NUMS[S.yosanLevel - 1]} の 配分で、予算を くばる……`);
+      sClank();
+      startTween(0, S.yosanLevel, 1.1, v => { S.yosan.levelF = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeYosan(S.yosanLevel);
+      S.yosanTries.add(S.yosanLevel);
+      if (r.level === 'good') {
+        sYes(); scopeBurst(); award('m_yosan'); S.phase = 'done';
+        say(`✨ 道路や 橋も 直り、社会保障や 教育にも じゅうぶんな 予算が 回せる、ちょうどよい 配分に なった！ ✨<br><br>💡 <b>たいせつポイント</b><br>予算には 限りが あるから、どこかに 多く 使えば、どこかが 少なく なる。バランスを 考えて 配分することが 大切なんだ。`);
+        setButtons([{ label: 'つぎへ（予算は誰が決める）', cb: nextStep }]);
+      } else if (r.level === 'low') {
+        sHmm(); S.tryT = 0;
+        say(`予算が 少なすぎて、こわれた 道路や 橋が 直せず、みんなが 困って しまいそうだ……もういちど 配分を えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm(); S.tryT = 0;
+        say(`予算を かけすぎて、社会保障や 教育に 回す お金が 足りなくなり、別の ところで 困る 人が 出て しまいそうだ……もういちど 配分を えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：予算は誰が決める ---
+  m_kokkai: {
+    enter() {
+      Object.assign(S, { scene: 'kokkai', scope: { type: 'idle' }, kokkaiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`予算の 使いみちは、誰が 決めているのだろう？ 2つの 手がかりを 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KOKKAI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kokkaiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kokkaiFound.size >= KOKKAI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kokkaiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`予算の 使いみちを 最終的に 決めるのは？`);
+      setButtons(choiceRow(['ア 内閣だけで 決める', 'イ 国会（みんなが 選んだ 代表）で 話し合って 決める', 'ウ 税務署が 決める'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kokkai'); S.phase = 'done';
+        say(`せいかい！ ${W.naikaku}が つくった 予算案を、わたしたちが 選挙で 選んだ ${W.kokkai}議員が 話し合い（${W.shingi}）、決める（${W.giketsu}）んだ。<br><br>💡 <b>たいせつポイント</b><br>税金の 使いみちは、みんなの 代表が 話し合って 決めている。だから 選挙で 誰を えらぶかも 大切なんだね。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 内閣だけで 決める', 'イ 国会（みんなが 選んだ 代表）で 話し合って 決める', 'ウ 税務署が 決める'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：日本の予算の内わけ ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' } });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 日本の 予算（歳出）は 全部で 約122兆円。円グラフで 内わけを 見てみよう。`);
+      setButtons([{ label: 'くわしく 見る', cb: () => this.ask() }]);
+    },
+    ask() {
+      sTap();
+      say(`日本の 予算で、いちばん 多く 使われているのは どれだろう？`);
+      setButtons(choiceRow(['ア 防衛関係費', 'イ 社会保障関係費', 'ウ 公共事業関係費'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 年金・医療・介護などに 使われる ${W.shakaihoshou}が 予算の 約3分の1で いちばん 多いんだ。${W.shoushikoureika}が 進む 日本では、この 金がくは これからも 増え続けると 言われているよ。また、税金だけでは 足りず、${W.kokusai}という 国の 借金にも たよっているんだ。<br><br>💡 <b>たいせつポイント</b><br>予算の バランスを どう とるかは、これからの 日本の 大きな 課題なんだね。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 防衛関係費', 'イ 社会保障関係費', 'ウ 公共事業関係費'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'kokkai', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ マルの蔵 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 国に 納める 税を（<span class="blankWord" data-a="国税">？？？</span>）、都道府県や 市区町村に 納める 税を（<span class="blankWord" data-a="地方税">？？？</span>）と いう。<br>
+        ② 消費税のように、納める 人と 負担する 人が ちがう 税を（<span class="blankWord" data-a="間接税">？？？</span>）と いう。<br>
+        ③ 予算の 使いみちは（<span class="blankWord" data-a="国会">？？？</span>）で 話し合って 決められる。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 学校や 病院、道路などで 困る 人が でてくる</b> でした！ ${votedRight ? '（みんなの よそう、ばっちり！）' : ''} 税金は、みんなで 出し合って、みんなが 使える サービスを ささえる しくみだったんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>買い物の レシートを 見て、消費税が いくら 書かれているか さがしてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#0f2a18'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'shurui', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 税金の しくみについて、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「消費税は 直接税？間接税？」「予算は 誰が 決める？」`);
+      setButtons([
+        { label: '🏙️ 税金の 種類の 図', cls: 'sub', cb: () => this.show('shurui') },
+        { label: '❓ もし税金がなかったらの 図', cls: 'sub', cb: () => this.show('nakattara') },
+        { label: '🚧 予算をくばろうの 図', cls: 'sub', cb: () => this.show('yosan') },
+        { label: '🏛️ 国会の 図', cls: 'sub', cb: () => this.show('kokkai') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_yosan などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

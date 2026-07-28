@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>マルの蔵 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #143d24; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox.wide { min-width: 42mm; }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cde8d2; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cde8d2; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🪙 マルの蔵 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      もし 税金が なかったら、みんなの くらしは どうなると 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 😀 今と 変わらない</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 😢 学校や 病院、道路などで 困る 人が でてくる</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 💰 みんな もっと お金を 自由に 使えて 便利に なる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．税金の種類さがし</span>
+    <div class="secBody">
+      4つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox wide"><span class="rletter">あ</span>（　　　　　　　　　）</div>
+        <div class="clueBox wide"><span class="rletter">い</span>（　　　　　　　　　）</div>
+      </div>
+      <div class="clueRow" style="margin-top:1mm">
+        <div class="clueBox wide"><span class="rletter">う</span>（　　　　　　　　　）</div>
+        <div class="clueBox wide"><span class="rletter">え</span>（　　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">国税</span>
+        <span class="wordBank">地方税</span>
+        <span class="wordBank">直接税</span>
+        <span class="wordBank">間接税</span>
+      </div>
+      <div style="margin-top:1.2mm">買い物の ときに 払う 消費税は？　ア 直接税 ・ イ 間接税 ・ ウ どちらでも ない（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．もし税金がなかったら</span>
+    <div class="secBody">
+      4つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div class="clueRow" style="margin-top:1mm">
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">え</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">学校</span>
+        <span class="wordBank">救急車</span>
+        <span class="wordBank">道路</span>
+        <span class="wordBank">消防</span>
+      </div>
+      <div style="margin-top:1.2mm">税金には どんな 役わりが ある？　ア 一部の 人だけが 得を する ・ イ みんなで お金を 出し合って、みんなが 使える サービスを ささえる ・ ウ ただ 集めて ためて おくだけ（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．予算をくばろう</span>
+    <div class="secBody">
+      目もり①〜⑧で 公共事業への 配分を えらんで 始めてみよう。ちょうどよい 配分に なった 目もりに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．予算は誰が決める</span>
+    <div class="secBody">
+      予算の 使いみちを 最終的に 決めるのは？（〇を つけよう）<br>
+      ア 内閣だけで 決める　・　イ 国会（みんなが 選んだ 代表）で 話し合って 決める　・　ウ 税務署が 決める
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（日本の予算の内わけ）</span>
+    <div class="secBody">
+      日本の 予算(約122兆円)で、いちばん 多く 使われているのは？（〇を つけよう）<br>
+      ア 防衛関係費　・　イ 社会保障関係費　・　ウ 公共事業関係費
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 国に 納める 税を（<span class="fillLine"></span>）、都道府県や 市区町村に 納める 税を（<span class="fillLine"></span>）と いう。<br>
+      ② 消費税のように、納める 人と 負担する 人が ちがう 税を（<span class="fillLine"></span>）と いう。<br>
+      ③ 予算の 使いみちは（<span class="fillLine"></span>）で 話し合って 決められる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          買い物の レシートを 見て、消費税が いくら 書かれているか さがしてみよう。<br>
+          ☐ 見つけた 消費税：<span style="border-bottom:.4mm solid #222;display:inline-block;width:30mm">　</span> 円
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　マルの蔵 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】マルの蔵 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「公民（税金とくらし）」・学力幅あり・協力型／ 使うもの：「zeikin.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_yosan</b> などで途中再開（m_shurui／m_nakattara／m_yosan／m_kokkai／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。税金がなかったらくらしがどうなるか予想。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🏙️ 税金の種類さがし</td><td>4つの手がかり（国税・地方税・直接税・間接税）をボタンで確認 → 消費税は直接税/間接税どちらかクイズ</td></tr>
+      <tr><td class="min">11〜18分</td><td>❓ もし税金がなかったら（<b>よそう回収</b>）</td><td>学校・救急車・道路・消防をボタンで確認 → 税金の役わりをクイズ。よそうタイムの答えがここで見えてくる</td></tr>
+      <tr><td class="min">18〜28分</td><td>🚧 予算をくばろう（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で公共事業への配分を選び「予算を決める」→少なすぎ/多すぎのバランスを判定。何度も挑戦させる。1人ずつ交代で配分を選ばせるとよい</td></tr>
+      <tr><td class="min">28〜35分</td><td>🏛️ 予算は誰が決める</td><td>内閣・国会をボタンで確認 → 予算の使いみちを最終的に決めるのは誰かクイズ</td></tr>
+      <tr><td class="min">35〜41分</td><td>📊 はかせチャレンジ（日本の予算の内わけ）</td><td>円グラフで歳出の内わけを確認 → いちばん多い費目をクイズ。借金（国債）への依存の話へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「レシートで消費税さがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「予算は誰が決める」を右下「つぎ▶」でスキップ可（<b>予算をくばろう・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 学校や 病院、道路などで 困る 人が でてくる</b>／税金の種類さがし＝<b>イ 間接税</b>／
+      もし税金がなかったら＝<b>イ みんなで お金を 出し合って、みんなが 使える サービスを ささえる</b>／
+      予算をくばろう＝<b>③〜⑥（ちょうどよい 配分）</b>／予算は誰が決める＝<b>イ 国会で 話し合って 決める</b>／
+      はかせチャレンジ＝<b>イ 社会保障関係費</b>／
+      まとめ＝①<b>国税・地方税</b>　②<b>間接税</b>　③<b>国会</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の税制です）</h2>
+    <ul>
+      <li>税金は納め先で「国税」（国に納める。防衛・外交など国全体の仕事に使われる）と「地方税」（都道府県・市区町村に納める。教育・ごみ処理・消防など身近な仕事に使われる）に分かれる</li>
+      <li>税金は納め方で「直接税」（納める人と負担する人が同じ。所得税など）と「間接税」（納める人と負担する人がちがう。消費税はお店が納めるが実際に払うのは買い物客）に分かれる</li>
+      <li>2026年度（令和8年度）の日本の一般会計予算は約122兆円。歳出のうち社会保障関係費が約32%で最大、次いで国債費（借金の返済）が約26%、地方交付税交付金等が約17%、防衛関係費が約7%、公共事業関係費・文教及び科学振興費がそれぞれ約5%（財務省資料に基づく概数）</li>
+      <li>少子高齢化により社会保障費は今後も増え続けると見込まれ、税収だけでは足りず国債（借金）にも頼っているのが日本の財政の現状</li>
+      <li>予算は内閣が案（予算案）をつくり、国民が選挙で選んだ代表が集まる国会で話し合い（審議）、決める（議決）という流れで決められる（財政民主主義）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「予算をくばろう」が今日いちばんの見せ場。1人ずつ交代で配分レベルを選ばせ、「予算を決める」ボタンを押させると全員が参加できる</li>
+      <li>配分は「多ければ多いほど良い」わけではなく、多すぎると他の分野（社会保障や教育）に回すお金が足りなくなる、という設定にしてある。ちょうどよい配分を何度も試す過程を大事にする</li>
+      <li><b>【重要・政治的中立性】</b>このミッションはあくまで公共事業への配分という架空のシミュレーションであり、増税・減税や特定の政策の是非を論じるものではない。実在の政党・政策論争が話題に出た場合は中立に受け止め深入りせず、「税金の集め方・使われ方のしくみ」の理解にとどめること（ひとつぶ村・テンビンの間と同じ配慮）</li>
+      <li>よそうタイムの答え（イ：学校や病院、道路などで困る人がでてくる）は、税金の存在を当たり前に感じている子どもの発想に、その意味をあらためて気づかせる発見</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「消費税は直接税？間接税？」「予算は誰が決める？」「日本の予算でいちばん多いのは？」</li>
+      <li>家庭のレシートを見て消費税の金額を確かめると、税金が生活のすぐそばにあることが実感できる</li>
+      <li>公民分野は「ひとつぶ村」（選挙）→「テンビンの間」（三権分立）→「マルの蔵」（税金）で3作完成。次回は日本国憲法や国際社会など、さらに視野を広げるテーマへ発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
