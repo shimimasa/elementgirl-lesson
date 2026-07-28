@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ドグウの丘 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2e3620; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #d8e0bc; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #d8e0bc; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🏺 ドグウの丘 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      縄文時代と 弥生時代、むらとむらの あらそいが 多かったのは どっちだと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🏕️ 縄文時代</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🌾 弥生時代</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🤝 どちらも 同じくらい</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．発掘たいけん</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">縄文土器</span>
+        <span class="wordBank">弥生土器</span>
+      </div>
+      <div style="margin-top:1.2mm">うすくて かたく、高い 温度で 焼かれた 土器は？　ア 縄文土器 ・ イ 弥生土器（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．くらしの変化</span>
+    <div class="secBody">
+      高床倉庫に ねずみ返しが ついているのは なぜ？（〇を つけよう）<br>
+      ア 大切な 米を ねずみから 守るため　・　イ 家を 高く見せるため　・　ウ 雨の音を 防ぐため
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．米づくりと蓄え — 田を たがやす 人数を ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 人数を えらんで 田植えを してみよう。ちょうどよい 蓄えに なった 人数に 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．むらから くにへ</span>
+    <div class="secBody">
+      むらの まわりに 濠や 柵、物見やぐらを つくるように なったのは なぜ？（〇を つけよう）<br>
+      ア 蓄えた 米や 土地を めぐる 争いに 備えるため　・　イ けしきを 良くするため　・　ウ 雨水を ためるため
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（卑弥呼と 邪馬台国）</span>
+    <div class="secBody">
+      卑弥呼は どうやって くにを 治めたと 言われている？（〇を つけよう）<br>
+      ア まじない（占い）に よって　・　イ 大きな 軍隊の 力に よって　・　ウ くじ引きに よって
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 縄文土器より うすくて かたいのが（<span class="fillLine"></span>）。<br>
+      ② 稲作が 広まり、蓄えを めぐって（<span class="fillLine"></span>）が 起きるように なった。<br>
+      ③ むらを 守る 濠や 柵の ある 集落を（<span class="fillLine"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          近くの 資料館や 図書館で、縄文土器・弥生土器の 写真を さがしてみよう。おうちの人と どちらが どっちか あててみよう。<br>
+          ☐ 見つけた 場所：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ドグウの丘 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ドグウの丘 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（縄文・弥生時代・むらからくにへ）」・学力幅あり・協力型／ 使うもの：「jomon.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kome</b> などで途中再開（m_hakkutsu／m_kurashi／m_kome／m_mura／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。あらそいが多かったのはどっちか予想。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>⛏️ 発掘たいけん</td><td>2つの手がかり（縄文土器・弥生土器）をボタンで確認 → クイズ。土器のちがいを紹介</td></tr>
+      <tr><td class="min">10〜17分</td><td>🏠 くらしの変化</td><td>たて穴住居・高床倉庫をボタンで確認 → ねずみ返しの意味をクイズ</td></tr>
+      <tr><td class="min">17〜27分</td><td>🌾 米づくりと蓄え（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で田をたがやす人数を選び「田植えをする」→蓄えがどうなるか判定。少なすぎ/多すぎだと失敗するので何度も挑戦させる。1人ずつ交代で人数を選ばせるとよい</td></tr>
+      <tr><td class="min">27〜34分</td><td>🏯 むらからくにへ</td><td>環濠・物見やぐらをボタンで確認 → なぜ濠や柵をつくるようになったかクイズ</td></tr>
+      <tr><td class="min">34〜41分</td><td>📜 はかせチャレンジ（卑弥呼と邪馬台国）</td><td>卑弥呼がどうやってくにを治めたかクイズ。魏志倭人伝の話へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「土器さがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「むらからくにへ」を右下「つぎ▶」でスキップ可（<b>米づくりと蓄え・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 弥生時代</b>／発掘たいけん＝<b>イ 弥生土器</b>／
+      くらしの変化＝<b>ア 大切な 米を ねずみから 守るため</b>／米づくりと蓄え＝<b>③〜⑥（ちょうどよい 人数）</b>／
+      むらからくにへ＝<b>ア 蓄えた 米や 土地を めぐる 争いに 備えるため</b>／
+      はかせチャレンジ＝<b>ア まじない（占い）に よって</b>／
+      まとめ＝①<b>弥生土器</b>　②<b>あらそい</b>　③<b>環濠集落</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>縄文時代は約1万3千年前から約2300年前まで、1万年以上続いた。縄文土器は縄目の文様が特徴で、厚手・低温焼成で黒褐色。木の実の煮炊きや保存に使われた</li>
+      <li>弥生時代は稲作が大陸から伝わったことで始まる（約2300年前ごろ）。弥生土器は縄文土器よりうすくて硬く、高温で焼かれ赤褐色で文様は少ない</li>
+      <li>稲作によって収穫した米を保存するため、高床倉庫がつくられるようになった。柱にはねずみ返し（板を傾けてねずみが登れないようにする工夫）がつけられている</li>
+      <li>稲作で蓄え（余剰生産物）が生まれると、それをめぐってむら同士の争いが起きるようになった。むらは周囲を濠で囲み柵や物見やぐらを設ける「環濠集落」で身を守った。代表例は佐賀県の吉野ヶ里遺跡で、矢じりが刺さった人骨も出土しており実際の争いの証拠とされている</li>
+      <li>力の強いむらが周りのむらをまとめ、小さな「くに」が生まれていった。その中の邪馬台国を治めたのが女王・卑弥呼。まじない（占い）によって人々を治めたとされ、中国の魏に使いを送り「親魏倭王」の称号と金印を授かった。このことは中国の歴史書『魏志倭人伝』に記されている</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「米づくりと蓄え」が今日いちばんの見せ場。1人ずつ交代で人数を選ばせ、「田植えをする」ボタンを押させると全員が参加できる</li>
+      <li>蓄えは「多ければ多いほど良い」わけではなく、多すぎると隣のむらに狙われる、という設定にしてある。この後の「むらからくにへ」で争いが起きる理由につながる伏線になっている</li>
+      <li>よそうタイムの答え（イ：弥生時代の方が争いが多かった）は、のんびりした原始時代というイメージを裏切る発見。稲作で蓄えが生まれたことが争いの原因になった、という因果関係を丁寧に伝えるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「弥生土器は縄文土器とくらべてどうちがう？」「卑弥呼はどこのくにを治めた？」「環濠集落って何？」</li>
+      <li>教科書・資料集の吉野ヶ里遺跡の復元図を見て、環濠・物見やぐら・高床倉庫の配置を確認すると理解が深まる</li>
+      <li>邪馬台国・卑弥呼の話から、この後の古墳時代・大和朝廷の成立へと発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

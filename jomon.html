@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ドグウの丘 — むらから くにへ たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef0d6 0%, #cdd9a0 55%, #8a9a5c 100%);
+    color: #2e3620;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #24301c; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a7a56; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dbe0c0; border: 2px solid #b8c090;
+    font-size: clamp(16px, 1.8vw, 26px); color: #b8c090;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #c97a1e);
+    border-color: #8a5a0a; color: #2e3620;
+    box-shadow: 0 0 14px rgba(201, 122, 30, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f4f0dc 0%, #dbe0c0 100%);
+    border: 3px solid #6b7a42;
+    box-shadow: inset 0 0 40px rgba(46, 54, 32, .12), 0 4px 18px rgba(30, 36, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #202a16; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #2e3620; color: #f4f0dc; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(30, 36, 20, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(30, 36, 20, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #c8d0a8; cursor: pointer;
+    background: linear-gradient(180deg, #6b7a42, #2e3620); color: #fff;
+    box-shadow: 0 3px 0 #14200c; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #b8562a, #7a3818); border-color: #e0a888; box-shadow: 0 3px 0 #4a2210; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #e8a838, #c97a1e); border-color: #f5ddb0; box-shadow: 0 3px 0 #8a5a10; color: #3a2a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #2e3620; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(46, 54, 32, .3), inset 0 0 24px rgba(46, 54, 32, .18);
+    flex-shrink: 0; background: #f4f0dc;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6a7a56;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #202a16; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f7f4e4; border: 2px solid #b8c090; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6a7a56; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2e3620;
+    border: 1.5px solid #d4dcbc;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #2a2420; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #d4dcae, #e0e4c4); color: #2e3620;
+    border: 2px solid #2e3620; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #2a2420; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #6b7a42, #2e3620); color: #fff;
+    box-shadow: 0 3px 0 #14200c, 0 5px 12px rgba(46, 54, 32, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #14200c; }
+  .btn.sub {
+    background: #dbe0c0; color: #4a5a34; box-shadow: 0 3px 0 #b8c090;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2e3620; box-shadow: 0 3px 0 #b8c090; font-weight: 400; border: 1.5px solid #d4dcbc; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #6b7a42; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(18, 22, 12, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f7f4e4, #dbe0c0);
+    border: 3px solid #6b7a42; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(18, 22, 12, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #24301c; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #24301c; }
+  .panel .sub { color: #6a7a56; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2e3620; border: 1.5px solid #d4dcbc; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6a7a56; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #2e3620; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d4dcbc; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #2e3620; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #2e3620; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #2e3620;
+    color: #202a16; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6a7a56;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dbe0c0; color: #4a5a34;
+    border: 1px solid #b8c090; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #cdd9a0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🏺 ドグウの丘<small>— むらから くにへ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_hakkutsu" title="発掘体験">★</div>
+    <div class="badge" id="bd_m_kurashi" title="くらしの変化">★</div>
+    <div class="badge" id="bd_m_kome" title="米づくりと蓄え">★</div>
+    <div class="badge" id="bd_m_mura" title="むらからくにへ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">むかしの 世</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 ドグウの め 〜 むかしの ようすを 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(46,54,32,.18)"/>
+            <!-- からだ（縄目もよう） -->
+            <path d="M60 60 Q94 66 90 96 Q86 118 60 118 Q34 118 30 96 Q26 66 60 60 Z" fill="#c9a227" stroke="#2e3620" stroke-width="2.5"/>
+            <path d="M36 78 Q60 87 84 78" stroke="#8a5a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M34 92 Q60 101 86 92" stroke="#8a5a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M37 106 Q60 113 83 106" stroke="#8a5a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <!-- あたま（ハート型） -->
+            <path d="M60 20 C46 8 25 18 29 37 C32 52 50 62 60 70 C70 62 88 52 91 37 C95 18 74 8 60 20 Z" fill="#e8c878" stroke="#2e3620" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="42" cy="46" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <ellipse cx="78" cy="46" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <!-- め（大きな丸い め） -->
+            <g class="eyes">
+              <ellipse cx="46" cy="35" rx="8" ry="6.4" fill="#2e3620"/>
+              <ellipse cx="74" cy="35" rx="8" ry="6.4" fill="#2e3620"/>
+              <circle cx="48.4" cy="32.6" r="1.6" fill="#fff"/>
+              <circle cx="76.4" cy="32.6" r="1.6" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M52 52 Q60 57 68 52" stroke="#202a16" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">土偶の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ドグウ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🏺 ドグウの丘ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ドグウの丘 — 縄文・弥生時代・むらからくにへ（小6社会・歴史・協力型・1ファイル）
+   よそう(争いが多かったのはどっち？) → 発掘体験(発見) →
+   くらしの変化(発見) → 米づくりと蓄え(①〜⑧で人数を試す・メイン操作) →
+   むらからくにへ(発見) → はかせ（卑弥呼と邪馬台国）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  jomon: ruby('縄文時代', 'じょうもんじだい'),
+  yayoi: ruby('弥生時代', 'やよいじだい'),
+  jomondoki: ruby('縄文土器', 'じょうもんどき'),
+  yayoidoki: ruby('弥生土器', 'やよいどき'),
+  tateana: ruby('たて穴住居', 'たてあなじゅうきょ'),
+  takayuka: ruby('高床倉庫', 'たかゆかそうこ'),
+  nezumigaeshi: ruby('ねずみ返し', 'ねずみがえし'),
+  inasaku: ruby('稲作', 'いなさく'),
+  kangou: ruby('環濠集落', 'かんごうしゅうらく'),
+  yoshinogari: ruby('吉野ヶ里遺跡', 'よしのがりいせき'),
+  monomi: ruby('物見やぐら', 'ものみやぐら'),
+  himiko: ruby('卑弥呼', 'ひみこ'),
+  yamataikoku: ruby('邪馬台国', 'やまたいこく'),
+  gishiwajinden: ruby('魏志倭人伝', 'ぎしわじんでん'),
+  shingiwao: ruby('親魏倭王', 'しんぎわおう'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 手がかりデータ ----------
+const HAKKUTSU_POINTS = [
+  { key: 0, letter: 'あ', name: '縄文土器', x: 260, y: 340,
+    txt: `縄目の もようが つけられた、厚手の 土器。低い 温度で 焼かれていて、黒っぽい 茶色を しているよ。${W.jomon}の 人たちが、木の実を 煮たり 食べ物を 保存したり するのに 使っていたんだ。` },
+  { key: 1, letter: 'い', name: '弥生土器', x: 700, y: 340,
+    txt: `${W.jomondoki}より うすくて かたい 土器。高い 温度で 焼かれていて、赤っぽい 色を している。もようは 少なく、シンプルな 形を しているよ。` },
+];
+
+const KURASHI_POINTS = [
+  { key: 0, letter: 'あ', name: 'たて穴住居', x: 260, y: 360,
+    txt: `地面を 少し 掘り下げて 柱を 立て、草や 木で 屋根を ふいた 住まい。${W.jomon}から ${W.yayoi}まで、長い間 使われていたんだ。` },
+  { key: 1, letter: 'い', name: '高床倉庫', x: 700, y: 300,
+    txt: `床を 高く 上げて つくった 倉庫。柱には「${W.nezumigaeshi}」という 板が つけられていて、ねずみが 米を 食べに 登ってこられないように くふうされているよ。` },
+];
+
+const MURA_POINTS = [
+  { key: 0, letter: 'あ', name: '環濠', x: 260, y: 340,
+    txt: `むらの まわりを ぐるっと 掘った 濠（ほり）。敵が むらに 攻めこんでくるのを 防ぐ ための ものだよ。佐賀県の ${W.yoshinogari}で、大きな 環濠が 見つかっているんだ。` },
+  { key: 1, letter: 'い', name: '物見やぐら', x: 700, y: 260,
+    txt: `高く 組んだ やぐら。遠くまで 見わたして、敵が 近づいてきていないか 見張る ための ものだよ。矢じりが ささった 人の骨も 見つかっていて、当時 本当に 争いが あったことが わかっているんだ。` },
+];
+
+// ---------- 判定ロジック ----------
+function judgeKome(n) { // n: 1-8　田を たがやす 人数
+  if (n <= 2) return { level: 'low' };
+  if (n >= 7) return { level: 'high' };
+  return { level: 'good' };
+}
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'hakkutsu',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  hakkutsuFound: new Set(),
+  kurashiFound: new Set(),
+  muraFound: new Set(),
+  komeLevel: 4,
+  komeTries: new Set(),
+  kome: { levelF: 0 },
+  tryT: 0,
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sBoom = () => { tone(90, 0, 0.32, 'sawtooth', 0.18); tone(60, 0.05, 0.4, 'sawtooth', 0.14); };
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイント（共通描画） ----------
+function drawPoints(pts, foundSet, X, Y, sc) {
+  pts.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#2e3620' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#202a16'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#2e3620';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 発掘体験 シーン ----------
+function drawHakkutsuScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#e6dcae'); g.addColorStop(1, '#8a6f42');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(90,70,40,.35)';
+  gctx.fillRect(X(0), Y(430), 1000 * sc, 210 * sc);
+
+  // 発掘あな(縄文)
+  gctx.fillStyle = '#5c4a2e'; gctx.strokeStyle = 'rgba(32,24,14,.5)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.ellipse(X(260), Y(430), 130 * sc, 50 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  // 縄文土器(でこぼこ壺)
+  gctx.fillStyle = '#4a3520'; gctx.strokeStyle = '#1c140c'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(210), Y(400)); gctx.quadraticCurveTo(X(190), Y(340), X(230), Y(310));
+  gctx.lineTo(X(290), Y(310)); gctx.quadraticCurveTo(X(330), Y(340), X(310), Y(400));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = 'rgba(230,220,190,.5)'; gctx.lineWidth = 2 * sc;
+  for (let ly = 330; ly < 395; ly += 16) { gctx.beginPath(); gctx.moveTo(X(220), Y(ly)); gctx.lineTo(X(300), Y(ly)); gctx.stroke(); }
+
+  // 発掘あな(弥生)
+  gctx.fillStyle = '#5c4a2e'; gctx.strokeStyle = 'rgba(32,24,14,.5)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.ellipse(X(700), Y(430), 130 * sc, 50 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  // 弥生土器(すっきり壺)
+  gctx.fillStyle = '#b8562a'; gctx.strokeStyle = '#3a2210'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(660), Y(400)); gctx.lineTo(X(670), Y(330)); gctx.quadraticCurveTo(X(700), Y(300), X(730), Y(330));
+  gctx.lineTo(X(740), Y(400)); gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = 'rgba(60,30,14,.4)'; gctx.lineWidth = 1.6 * sc;
+  gctx.beginPath(); gctx.moveTo(X(672), Y(345)); gctx.lineTo(X(728), Y(345)); gctx.stroke();
+
+  drawPoints(HAKKUTSU_POINTS, S.hakkutsuFound, X, Y, sc);
+}
+
+// ---------- くらしの変化 シーン ----------
+function drawKurashiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(460));
+  g.addColorStop(0, '#cfe0c4'); g.addColorStop(1, '#a8c088');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#8a9a5c';
+  gctx.fillRect(X(0), Y(460), 1000 * sc, 180 * sc);
+
+  // たて穴住居
+  gctx.fillStyle = '#7a6038'; gctx.strokeStyle = '#2e2216'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(150), Y(430)); gctx.lineTo(X(260), Y(310)); gctx.lineTo(X(370), Y(430)); gctx.closePath();
+  gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#4a3820';
+  gctx.beginPath(); gctx.ellipse(X(260), Y(430), 30 * sc, 12 * sc, 0, 0, TAU); gctx.fill();
+
+  // 高床倉庫
+  gctx.fillStyle = '#5c6b3a'; gctx.strokeStyle = '#202a16'; gctx.lineWidth = 2.4 * sc;
+  [640, 760].forEach(lx => { gctx.beginPath(); gctx.rect(X(lx - 8), Y(390), 16 * sc, 60 * sc); gctx.fill(); gctx.stroke(); });
+  // ねずみ返し(柱の途中の板)
+  gctx.fillStyle = '#c9a227';
+  [640, 760].forEach(lx => { gctx.beginPath(); gctx.ellipse(X(lx), Y(410), 20 * sc, 6 * sc, 0, 0, TAU); gctx.fill(); });
+  gctx.fillStyle = '#8a5a1a'; gctx.strokeStyle = '#2e2216'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(610), Y(320), 180 * sc, 70 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#b8562a';
+  gctx.beginPath(); gctx.moveTo(X(600), Y(320)); gctx.lineTo(X(700), Y(280)); gctx.lineTo(X(800), Y(320)); gctx.closePath(); gctx.fill();
+
+  drawPoints(KURASHI_POINTS, S.kurashiFound, X, Y, sc);
+}
+
+// ---------- 米づくりと蓄え シーン ----------
+function drawKomeScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(280));
+  g.addColorStop(0, '#cfe0e2'); g.addColorStop(1, '#dcecee');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  // 田んぼ(格子)
+  const lvl = clamp((S.kome && S.kome.levelF) || 0, 0, 8);
+  gctx.fillStyle = lvl > 0 ? '#a8c86a' : '#8a9a72';
+  gctx.fillRect(X(120), Y(300), 480 * sc, 300 * sc);
+  gctx.strokeStyle = 'rgba(46,54,32,.4)'; gctx.lineWidth = 1.6 * sc;
+  for (let lx = 120; lx <= 600; lx += 48) { gctx.beginPath(); gctx.moveTo(X(lx), Y(300)); gctx.lineTo(X(lx), Y(600)); gctx.stroke(); }
+  for (let ly = 300; ly <= 600; ly += 50) { gctx.beginPath(); gctx.moveTo(X(120), Y(ly)); gctx.lineTo(X(600), Y(ly)); gctx.stroke(); }
+  // 稲(段階に応じて生える本数が増える)
+  const rows = Math.round(lvl);
+  gctx.strokeStyle = '#c9a227'; gctx.lineWidth = 2.4 * sc;
+  for (let i = 0; i < rows; i++) {
+    const rx = 150 + (i % 8) * 56, ry = 330 + Math.floor(i / 8) * 55;
+    gctx.beginPath(); gctx.moveTo(X(rx), Y(ry + 26)); gctx.lineTo(X(rx), Y(ry)); gctx.stroke();
+    gctx.beginPath(); gctx.moveTo(X(rx - 8), Y(ry + 6)); gctx.lineTo(X(rx), Y(ry)); gctx.lineTo(X(rx + 8), Y(ry + 6)); gctx.stroke();
+  }
+
+  // 高床倉庫(蓄えゲージ)
+  gctx.fillStyle = '#7a5a30'; gctx.strokeStyle = '#2e2216'; gctx.lineWidth = 2.4 * sc;
+  [740, 860].forEach(lx => { gctx.beginPath(); gctx.rect(X(lx - 8), Y(430), 16 * sc, 90 * sc); gctx.fill(); gctx.stroke(); });
+  gctx.fillStyle = '#8a5a1a'; gctx.strokeStyle = '#2e2216'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(680), Y(330), 220 * sc, 100 * sc); gctx.fill(); gctx.stroke();
+  // 米俵(蓄えの量に応じて増える)
+  const bales = clamp(Math.round(lvl), 0, 8);
+  gctx.fillStyle = '#e8c878'; gctx.strokeStyle = '#8a5a1a'; gctx.lineWidth = 1.6 * sc;
+  for (let i = 0; i < bales; i++) {
+    const bx = 700 + (i % 4) * 46, by = 400 - Math.floor(i / 4) * 26;
+    gctx.beginPath(); gctx.ellipse(X(bx), Y(by), 18 * sc, 11 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  }
+}
+
+// ---------- むらからくにへ シーン ----------
+function drawMuraScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#cfe0be'); g.addColorStop(1, '#8a9a5c');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  // 環濠(むらを囲む濠)
+  gctx.strokeStyle = '#5c7a8a'; gctx.lineWidth = 20 * sc;
+  gctx.beginPath(); gctx.ellipse(X(460), Y(400), 300 * sc, 200 * sc, 0, 0, TAU); gctx.stroke();
+  gctx.fillStyle = '#e6dcae';
+  gctx.beginPath(); gctx.ellipse(X(460), Y(400), 260 * sc, 170 * sc, 0, 0, TAU); gctx.fill();
+  // むらの中の家(たて穴住居のシルエット)
+  gctx.fillStyle = '#7a6038'; gctx.strokeStyle = '#2e2216'; gctx.lineWidth = 1.8 * sc;
+  [[380, 380], [460, 340], [540, 400], [420, 450]].forEach(([hx, hy]) => {
+    gctx.beginPath();
+    gctx.moveTo(X(hx - 26), Y(hy + 20)); gctx.lineTo(X(hx), Y(hy - 22)); gctx.lineTo(X(hx + 26), Y(hy + 20)); gctx.closePath();
+    gctx.fill(); gctx.stroke();
+  });
+
+  drawPoints(MURA_POINTS, S.muraFound, X, Y, sc);
+}
+
+// ---------- はかせ：卑弥呼と邪馬台国 シーン ----------
+function drawHakaseScene(X, Y, sc) {
+  gctx.fillStyle = '#e8ddc4';
+  gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  // まつりの祭壇
+  gctx.fillStyle = '#8a5a1a'; gctx.strokeStyle = '#2e2216'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(160), Y(360), 240 * sc, 100 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#2e3620'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('まじないで くにを 治めた', X(280), Y(340));
+
+  // 中国(魏)への船
+  gctx.fillStyle = '#5c4a3a'; gctx.strokeStyle = '#1a1614'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(620), Y(430)); gctx.lineTo(X(820), Y(430)); gctx.lineTo(X(790), Y(480)); gctx.lineTo(X(650), Y(480));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#e8dcc4';
+  gctx.beginPath(); gctx.moveTo(X(680), Y(430)); gctx.lineTo(X(680), Y(350)); gctx.lineTo(X(760), Y(400)); gctx.lineTo(X(680), Y(415)); gctx.closePath(); gctx.fill();
+  gctx.fillStyle = '#2e3620'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('中国(魏)への 使い', X(720), Y(500));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'hakkutsu') drawHakkutsuScene(X, Y, sc);
+  else if (S.scene === 'kurashi') drawKurashiScene(X, Y, sc);
+  else if (S.scene === 'kome') drawKomeScene(X, Y, sc);
+  else if (S.scene === 'mura') drawMuraScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawMuraScene(X, Y, sc);
+}
+
+// ---------- ドグウのめ（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f7f4e4'); grd.addColorStop(1, '#b8c090');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#2e3620'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const lvl = (S.kome && S.kome.levelF) || 0;
+    const bw = R * 0.5, bh = R * 1.0, bx = R - bw / 2, by = R * 0.35;
+    sctx.strokeStyle = '#2e3620'; sctx.lineWidth = R * 0.025;
+    sctx.strokeRect(bx, by, bw, bh);
+    const fillH = bh * clamp(lvl / 8, 0, 1);
+    sctx.fillStyle = '#c9a227';
+    sctx.fillRect(bx, by + bh - fillH, bw, fillH);
+    label(`蓄え ${NUMS[clamp(Math.round(lvl) - 1, 0, 7)] || ''}`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#f5ddb0'); g2.addColorStop(1, 'rgba(245,221,176,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#2e3620'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🏺', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#2e3620'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2e3620';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#2e3620', '#c9a227', '#b8562a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '縄文・弥生時代（約1万年前〜1700年前ごろ）';
+  const titles = {
+    hakkutsu: '⛏️ 発掘たいけん',
+    kurashi: '🏠 くらしの 変化',
+    kome: '🌾 米づくりと 蓄え',
+    mura: '🏯 むらから くにへ',
+    hakase: '📜 卑弥呼と 邪馬台国',
+    done: '🏺 ドグウの丘 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'むかしの 世';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_hakkutsu', 'm_kurashi', 'm_kome', 'm_mura', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'hakkutsu', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🏺🌾🏯</div>
+        <h1>ドグウの丘</h1>
+        <div class="sub">〜 むらから くにへ 〜</div>
+        <p class="talk">ようこそ！ わたしは 土偶から 生まれた 精霊、<b>ドグウ</b>。今から 1万年以上も 前、この 島に 住んでいた 人たちの くらしが、どう 変わっていったのか <b>いっしょに たしかめに いこう！</b><br>
+        土器、住まい、米づくり……くらしが 変わると、むらの 形も 変わっていくんだ。</p>
+        <button class="btn" id="startBtn">丘を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">${W.jomon}と ${W.yayoi}、むらとむらの あらそいが 多かったのは どっちだと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🏕️</span><b>ア</b> 縄文時代</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌾</span><b>イ</b> 弥生時代</div>
+          <div class="vcard" data-v="2"><span class="vicon">🤝</span><b>ウ</b> どちらも 同じくらい</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：発掘たいけん ---
+  m_hakkutsu: {
+    enter() {
+      Object.assign(S, { scene: 'hakkutsu', scope: { type: 'idle' }, hakkutsuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`丘の 地面を 掘ると、むかしの 土器が 出てきた。2つの 手がかりを 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKKUTSU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakkutsuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakkutsuFound.size >= HAKKUTSU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakkutsuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`うすくて かたく、高い 温度で 焼かれた 土器は どっちだろう？`);
+      setButtons(choiceRow(['ア 縄文土器', 'イ 弥生土器'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_hakkutsu'); S.phase = 'done';
+        say(`せいかい！ ${W.yayoidoki}は ${W.jomondoki}より うすくて かたく、高い 温度で 焼かれているよ。<br><br>💡 <b>たいせつポイント</b><br>土器の つくりが 変わったのは、くらしそのものが 変わっていった しるしでも あるんだ。`);
+        setButtons([{ label: 'つぎへ（くらしの変化）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 縄文土器', 'イ 弥生土器'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：くらしの変化 ---
+  m_kurashi: {
+    enter() {
+      Object.assign(S, { scene: 'kurashi', scope: { type: 'idle' }, kurashiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`むらの 中を 見てみよう。住まいと 建物、2つの 手がかりを 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KURASHI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kurashiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kurashiFound.size >= KURASHI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kurashiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`${W.takayuka}に ${W.nezumigaeshi}が ついているのは なぜだろう？`);
+      setButtons(choiceRow(['ア 大切な 米を ねずみから 守るため', 'イ 家を 高く見せるため', 'ウ 雨の音を 防ぐため'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_kurashi'); S.phase = 'done';
+        say(`せいかい！ ${W.inasaku}が 広まると、収穫した 米を 保存する ${W.takayuka}が つくられるように なった。<br><br>💡 <b>たいせつポイント</b><br>米という「たくわえ」が 生まれたことが、この あとの むらの 変化に 大きく 関わってくるんだ。`);
+        setButtons([{ label: 'つぎへ（米づくりと蓄え）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 大切な 米を ねずみから 守るため', 'イ 家を 高く見せるため', 'ウ 雨の音を 防ぐため'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：米づくりと蓄え（メイン操作） ---
+  m_kome: {
+    enter() {
+      Object.assign(S, { scene: 'kome', scope: { type: 'gauge' }, kome: { levelF: 0 }, komeTries: new Set(), tryT: 0 });
+      updateLoc();
+      hideWish();
+      say(`${W.inasaku}が 広まり、むらの みんなで 田んぼを たがやすように なった。目もり①〜⑧で 田を たがやす 人数を えらんで、蓄えが どう なるか ためそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.komeLevel === n ? ' sel' : ''), cb: () => { S.komeLevel = n; this.refreshCtl(); } });
+      list.push({ label: '🌾 田植えを する', cb: () => this.build() });
+      setControls(list);
+    },
+    build() {
+      setControls([]);
+      say(`目もり ${NUMS[S.komeLevel - 1]} の 人数で、田んぼを たがやしていく……`);
+      sClank();
+      startTween(0, S.komeLevel, 1.1, v => { S.kome.levelF = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeKome(S.komeLevel);
+      S.komeTries.add(S.komeLevel);
+      if (r.level === 'good') {
+        sYes(); scopeBurst(); award('m_kome'); S.phase = 'done';
+        say(`✨ ちょうどよい 蓄えが できた！ むらは 豊かに なっていく ✨<br><br>💡 <b>たいせつポイント</b><br>${W.inasaku}で 蓄えが 生まれると、むらの 中の くらしは 安定していく。でも……蓄えは 別の 問題も 生み出すことに なるんだ。次を たしかめよう。`);
+        setButtons([{ label: 'つぎへ（むらからくにへ）', cb: nextStep }]);
+      } else if (r.level === 'low') {
+        sHmm(); S.tryT = 0;
+        say(`人数が 少なすぎて、じゅうぶんな 収穫が 得られなかった……蓄えが 足りず、むらは 苦しい 冬を むかえてしまいそうだ。もういちど 人数を えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm(); S.tryT = 0;
+        say(`大豊作！ でも 蓄えが 多すぎて、隣の むらに 目を つけられてしまうかもしれない……もういちど 人数を えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：むらからくにへ ---
+  m_mura: {
+    enter() {
+      Object.assign(S, { scene: 'mura', scope: { type: 'idle' }, muraFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`蓄えが 増えると、それを ねらって むら同士の 争いが 起きるように なった。むらを 守る くふうを 2つ 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(MURA_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.muraFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.muraFound.size >= MURA_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.muraFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`むらの まわりに 濠や 柵、${W.monomi}を つくるように なったのは なぜだろう？`);
+      setButtons(choiceRow(['ア 蓄えた 米や 土地を めぐる 争いに 備えるため', 'イ けしきを 良くするため', 'ウ 雨水を ためるため'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_mura'); S.phase = 'done';
+        say(`せいかい！ 蓄えを めぐる 争いに 備えて、むらは 濠や 柵、${W.monomi}で 守りを 固めるように なった。これを「${W.kangou}」と いうよ。<br><br>💡 <b>たいせつポイント</b><br>やがて 力の 強い むらが 周りの むらを まとめ、小さな「くに」が 生まれていくことに なるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 蓄えた 米や 土地を めぐる 争いに 備えるため', 'イ けしきを 良くするため', 'ウ 雨水を ためるため'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：卑弥呼と邪馬台国 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' } });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 小さな くにが まとまり、大きな くにが 生まれていった。その 中の ひとつ「${W.yamataikoku}」を 治めたのが、女王「${W.himiko}」だよ。`);
+      setButtons([{ label: 'くわしく 見る', cb: () => this.ask() }]);
+    },
+    ask() {
+      sTap();
+      say(`${W.himiko}は どうやって くにを 治めたと 言われているだろう？`);
+      setButtons(choiceRow(['ア まじない（占い）に よって', 'イ 大きな 軍隊の 力に よって', 'ウ くじ引きに よって'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.himiko}は まじないの 力で 人々の 心を まとめ、${W.yamataikoku}を 治めたと 言われている。<br><br>💡 <b>たいせつポイント</b><br>${W.himiko}は 中国の 魏に 使いを 送り、「${W.shingiwao}」の 称号と 金印を 授かった。この ことは 中国の 歴史書「${W.gishiwajinden}」に 記されているんだ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア まじない（占い）に よって', 'イ 大きな 軍隊の 力に よって', 'ウ くじ引きに よって'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, kome: { levelF: 6 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ドグウの丘 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 縄文土器より うすくて かたいのが（<span class="blankWord" data-a="弥生土器">？？？</span>）。<br>
+        ② 稲作が 広まり、蓄えを めぐって（<span class="blankWord" data-a="あらそい">？？？</span>）が 起きるように なった。<br>
+        ③ むらを 守る 濠や 柵の ある 集落を（<span class="blankWord" data-a="環濠集落">？？？</span>）と いう。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 弥生時代</b> でした！ ${votedRight ? '（みんなの よそう、ばっちり！）' : ''} のんびりした 原始時代の イメージと ちがって、稲作で 蓄えが 生まれた 弥生時代の 方が、むらとむらの 争いが 増えたと 考えられているんだね。</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>近くの 資料館や 図書館で、縄文土器・弥生土器の 写真を さがしてみよう。おうちの人と どちらが どっちか あててみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#202a16'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'mura', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 縄文・弥生時代について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「弥生土器は 縄文土器と くらべて どう ちがう？」「卑弥呼は どこの くにを 治めた？」`);
+      setButtons([
+        { label: '⛏️ 発掘の 図', cls: 'sub', cb: () => this.show('hakkutsu') },
+        { label: '🏠 くらしの 図', cls: 'sub', cb: () => this.show('kurashi') },
+        { label: '🌾 米づくりの 図', cls: 'sub', cb: () => this.show('kome') },
+        { label: '🏯 むらの 図', cls: 'sub', cb: () => this.show('mura') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kome などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
