@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>テンビンの間 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #3a1f6e; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 24mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .yajiTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .yajiTable th, .yajiTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .yajiTable th { background: #e4d9f5; text-align: center; }
+  .yajiTable td.letter { text-align: center; font-weight: 700; width: 8mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⚖️ テンビンの間 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      国会・内閣・裁判所は、それぞれ ばらばらに 自分の 仕事を しているだけだと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🧩 その通り、ばらばら</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🔗 おたがいに チェックしあっている</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 👑 国会が いちばん偉い</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．三権の やくわり発見</span>
+    <div class="secBody">
+      国会・内閣・裁判所の 仕事を、下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">①</span>国会（　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">②</span>内閣（　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">③</span>裁判所（　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">法律を つくる</span>
+        <span class="wordBank">法律にもとづき 政治を 進める</span>
+        <span class="wordBank">争いを さばく・憲法に 違反していないか 判断する</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．チェックの やじるし（a〜f）</span>
+    <div class="secBody">
+      6つの やじるしを 調べて、どんな チェックか 線で むすぶか、記号で 書こう。
+      <table class="yajiTable">
+        <tr><th>記号</th><th>やじるし</th><th>チェックの ないよう（せんたく）</th></tr>
+        <tr><td class="letter">a</td><td>国会→内閣</td><td rowspan="6" style="vertical-align:top">
+          ・総理大臣の 指名／内閣不信任の 決議　・衆議院の 解散<br>
+          ・弾劾裁判所の 設置　・違憲審査（法律が 憲法に 違反していないか）<br>
+          ・長官の 指名・裁判官の 任命　・命令や 処分の 違憲審査<br>
+          → a〜fに あう ものを ①〜⑥で（　）に 書こう
+        </td></tr>
+        <tr><td class="letter">b</td><td>内閣→国会</td></tr>
+        <tr><td class="letter">c</td><td>国会→裁判所</td></tr>
+        <tr><td class="letter">d</td><td>裁判所→国会</td></tr>
+        <tr><td class="letter">e</td><td>内閣→裁判所</td></tr>
+        <tr><td class="letter">f</td><td>裁判所→内閣</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．国民の 3つの 力</span>
+    <div class="secBody">
+      国会・内閣・裁判所への 国民の 力を、線で むすぼう。<br>
+      選挙　・　世論　・　国民審査　　—　　国会　・　内閣　・　裁判所
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．もし バランスが くずれたら</span>
+    <div class="secBody">
+      力を 1つの 機関に 集めず、3つに 分けている いちばんの 目的は？（〇を つけよう）<br>
+      ア 仕事を 早く 終わらせるため　・　イ 力が 集まりすぎるのを 防ぐため　・　ウ たてものを 3つ 使うため
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（むかしと今）</span>
+    <div class="secBody">
+      力を 1つに 集める やり方と、3つに 分ける やり方、権力の 暴走を 防ぎやすいのは？（〇を つけよう）<br>
+      ア 1つに 集める　・　イ 3つに 分ける　・　ウ どちらも 同じ
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 国会は（<span class="fillLine"></span>）を つくる。<br>
+      ② 内閣は（<span class="fillLine"></span>）を 進める。<br>
+      ③ 裁判所は（<span class="fillLine"></span>）を 判断する。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの 人に「三権分立って、何の ために あると 思う？」と 聞いてみよう。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　テンビンの間 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】テンビンの間 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「公民（国の政治のしくみ・三権分立）」・学力幅あり・協力型／ 使うもの：「sanken.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_yaji</b> などで途中再開（m_yakuwari／m_yaji／m_kokumin／m_kuzureru／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🏛️ 三権の やくわり</td><td>国会・内閣・裁判所の3つの建物をボタンで確認 → 「法律をつくるのはどこ？」クイズ</td></tr>
+      <tr><td class="min">11〜21分</td><td>🔗 チェックの やじるし（<b>今日の見せ場</b>）</td><td>a〜fの6つの矢印を順番にタップして発見 → 「違憲審査権はどこの力？」クイズ。1人ずつ交代で押させるとよい</td></tr>
+      <tr><td class="min">21〜28分</td><td>🧑‍🤝‍🧑 国民の3つの力</td><td>選挙・世論・国民審査の3つを発見 → 「国民審査とは？」クイズ</td></tr>
+      <tr><td class="min">28〜37分</td><td>⚖️ もし バランスが くずれたら</td><td>①そのまま／②裁判所チェックなし／③国会チェックなしを試し、天びんの傾きを確認 → 「3つに分ける目的は？」クイズ</td></tr>
+      <tr><td class="min">37〜41分</td><td>📜 はかせチャレンジ</td><td>大日本帝国憲法と日本国憲法を比較 → 「暴走を防ぎやすいのは？」クイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「家族に三権分立の目的を聞く」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「国民の3つの力」を右下「つぎ▶」でスキップ可（<b>チェックのやじるし・バランスがくずれたら・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ おたがいにチェックしあっている</b>／三権のやくわり＝<b>ア 国会（法律をつくる）</b>／
+      チェックのやじるし＝<b>ウ 裁判所（違憲審査権）</b>／国民の力＝<b>ウ 国民審査</b>／
+      バランスがくずれたら＝<b>イ 力が集まりすぎて国民の自由や権利が守られなくなるのを防ぐため</b>／
+      はかせ＝<b>イ 3つに分けるやり方</b>／
+      まとめ＝①<b>法律（ほうりつ）</b>　②<b>法律にもとづいた政治（せいじ）</b>　③<b>法律が憲法に違反していないか</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（憲法・制度の本物の知識です）</h2>
+    <ul>
+      <li>三権分立：日本国憲法のもと、国の権力を「立法権（国会・第41条）」「行政権（内閣・第65条）」「司法権（裁判所・第76条）」の3つに分け、おたがいにチェックしあう(抑制と均衡)しくみ。1つの機関に権力が集中して国民の自由や権利がおびやかされるのを防ぐことが目的</li>
+      <li>国会⇄内閣：内閣総理大臣の指名（第67条）・内閣不信任決議（第69条）、衆議院の解散（第7条・第69条）</li>
+      <li>国会⇄裁判所：弾劾裁判所の設置（第64条、ふさわしくない裁判官をやめさせるべきか判断）、違憲立法審査権（第81条、法律が憲法に違反していないか裁判所が審査）</li>
+      <li>内閣⇄裁判所：最高裁判所長官の指名・その他裁判官の任命（第6条2項・第79条1項）、内閣の命令・規則・処分の違憲審査（第81条）</li>
+      <li>国民との関わり：選挙で国会議員を選ぶ、世論が内閣の政治に影響、国民審査（第79条2項、最高裁判所裁判官がふさわしいか衆議院議員総選挙のときに審査）</li>
+      <li>大日本帝国憲法（1889年施行）第4条は「天皇ハ国ノ元首ニシテ統治権ヲ総攬シ」とし、統治権を天皇が一手にあつめる形だった。日本国憲法（1947年施行）は国民主権のもと権力を3つに分ける三権分立を採用した、という歴史的な対比は教科書・史料にもとづく事実</li>
+      <li>「テンビンの間」の登場人物・団体はすべて架空の説明用キャラクターで、特定の政党・政治家・時事的な政治issueを扱うものではない</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「チェックのやじるし」が今日いちばんの見せ場。1人ずつ交代でa〜fを押させると全員が参加できる</li>
+      <li>本単元は現実の統治機構（国会・内閣・裁判所）をそのまま扱うが、実在の政党・政治家・時事issueは一切登場しない。授業中にそうした話題が出た場合は、価値判断を示さず中立に受け止め、深入りしない</li>
+      <li>「もしバランスがくずれたら」は権力集中の危うさを伝える体験だが、特定の国・時代・政権を名指しせず、しくみそのものの説明にとどめている</li>
+      <li>天皇の歴史的な位置づけ（大日本帝国憲法）は史実の説明であり、現在の天皇の政治的地位についての意見表明ではない点に留意</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「裁判所がもつ力は？」「三権分立の目的は？」「国民審査って何？」</li>
+      <li>社会シリーズは公民分野2作目（第17弾「ひとつぶ村」＝選挙のしくみに続く）。次回は税金と暮らし・国際社会と日本の役割などへの発展が考えられる</li>
+      <li>教科書・資料集の三権分立の図（矢印つき三角形）と本作の「チェックのやじるし」図を見比べると理解が深まる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

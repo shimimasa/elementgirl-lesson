@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テンビンの間 — 国の政治のしくみ たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f3eefb 0%, #e4d9f5 55%, #b6a0d8 100%);
+    color: #2a1a4a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #3a1f6e; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6f5c96; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ebe3f9; border: 2px solid #c9b9ea;
+    font-size: clamp(16px, 1.8vw, 26px); color: #c9b9ea;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #2a1a4a;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #faf7ff 0%, #e8e0f8 100%);
+    border: 3px solid #3a1f6e;
+    box-shadow: inset 0 0 40px rgba(50, 20, 80, .12), 0 4px 18px rgba(40, 15, 70, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #2a1a4a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #3a1f6e; color: #f3eefb; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(40, 15, 70, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(40, 15, 70, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #d9cdf5; cursor: pointer;
+    background: linear-gradient(180deg, #7d4fc4, #3a1f6e); color: #fff;
+    box-shadow: 0 3px 0 #22103e; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #8a7550, #5c4a2e); border-color: #d9c79a; box-shadow: 0 3px 0 #3a2e1a; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #3a1f6e; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(40, 15, 70, .3), inset 0 0 24px rgba(40, 15, 70, .18);
+    flex-shrink: 0; background: #f3eefb;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6f5c96;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #2a1a4a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #faf7ff; border: 2px solid #c9b9ea; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6f5c96; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2a1a4a;
+    border: 1.5px solid #d9cdf5;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #3a1f6e; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #e4d9f5, #ece3fa); color: #2a1a4a;
+    border: 2px solid #3a1f6e; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #3a1f6e; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #7d4fc4, #3a1f6e); color: #fff;
+    box-shadow: 0 3px 0 #22103e, 0 5px 12px rgba(40, 15, 70, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #22103e; }
+  .btn.sub {
+    background: #ebe3f9; color: #40296e; box-shadow: 0 3px 0 #c9b9ea;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2a1a4a; box-shadow: 0 3px 0 #c9b9ea; font-weight: 400; border: 1.5px solid #d9cdf5; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #7d4fc4; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(30, 10, 45, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #faf7ff, #ece3fa);
+    border: 3px solid #7d4fc4; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 10, 45, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #3a1f6e; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #3a1f6e; }
+  .panel .sub { color: #6f5c96; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2a1a4a; border: 1.5px solid #d9cdf5; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6f5c96; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #2a1a4a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d9cdf5; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #3a1f6e; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #3a1f6e; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #3a1f6e;
+    color: #2a1a4a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6f5c96;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ebe3f9; color: #40296e;
+    border: 1px solid #c9b9ea; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #e4d9f5; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">⚖️ テンビンの間<small>— 国の政治のしくみ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_yakuwari" title="三権のやくわり">★</div>
+    <div class="badge" id="bd_m_yaji" title="チェックのやじるし">★</div>
+    <div class="badge" id="bd_m_kokumin" title="国民の3つの力">★</div>
+    <div class="badge" id="bd_m_kuzureru" title="もしバランスがくずれたら">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">テンビンの間と 三権分立のひみつ</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">⚖️ きんこうの まど 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(40,20,80,.18)"/>
+            <!-- からだ：裁判官のローブ -->
+            <path d="M30 118 L26 78 Q26 70 34 68 L86 68 Q94 70 94 78 L90 118 Z" fill="#3a1f6e" stroke="#2a1a4a" stroke-width="2"/>
+            <path d="M50 70 L52 118 M70 70 L68 118" stroke="#ffe9a8" stroke-width="2" opacity=".6"/>
+            <!-- 天びん：頭上にうかぶ -->
+            <line x1="60" y1="6" x2="60" y2="18" stroke="#2a1a4a" stroke-width="2.5"/>
+            <line x1="34" y1="18" x2="86" y2="18" stroke="#2a1a4a" stroke-width="3" stroke-linecap="round"/>
+            <line x1="34" y1="18" x2="30" y2="30" stroke="#2a1a4a" stroke-width="1.6"/>
+            <line x1="86" y1="18" x2="90" y2="30" stroke="#2a1a4a" stroke-width="1.6"/>
+            <path d="M22 30 Q30 40 38 30" fill="none" stroke="#2a1a4a" stroke-width="1.6"/>
+            <path d="M82 30 Q90 40 98 30" fill="none" stroke="#2a1a4a" stroke-width="1.6"/>
+            <circle cx="60" cy="18" r="3.4" fill="#d4a017" stroke="#2a1a4a" stroke-width="1.2"/>
+            <!-- あたま -->
+            <circle cx="60" cy="46" r="25" fill="#f6e6c8" stroke="#2a1a4a" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="50" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <ellipse cx="74" cy="50" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="44" rx="3.6" ry="5" fill="#2a1a4a"/>
+              <ellipse cx="69" cy="44" rx="3.6" ry="5" fill="#2a1a4a"/>
+              <circle cx="52.3" cy="41.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="41.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 58 Q60 63 67 58" stroke="#2a1a4a" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">天びんの<ruby>精霊<rt>せいれい</rt></ruby> <ruby>テンビン<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">⚖️ テンビンの間ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   テンビンの間 — 国の政治のしくみ・三権分立（小6社会公民・協力型・1ファイル）
+   三権のやくわり → チェックのやじるし → 国民の3つの力 →
+   もしバランスがくずれたら → はかせ（むかしと今の憲法）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  rippou: ruby('立法権', 'りっぽうけん'),
+  gyousei: ruby('行政権', 'ぎょうせいけん'),
+  shihou: ruby('司法権', 'しほうけん'),
+  ihou: ruby('違憲審査権', 'いけんしんさけん'),
+  dangai: ruby('弾劾裁判', 'だんがいさいばん'),
+  kaisan: ruby('解散', 'かいさん'),
+  shinsa: ruby('国民審査', 'こくみんしんさ'),
+  yoron: ruby('世論', 'よろん'),
+  kinkou: ruby('抑制と均衡', 'よくせいときんこう'),
+};
+
+// ---------- 三権のやくわり（3つの建物） ----------
+const SANKEN = [
+  { key: 'kokkai', name: '国会', icon: '🏛️', x: 220, y: 210, letter: '①',
+    txt: `国会は、国民の<ruby>選挙<rt>せんきょ</rt></ruby>で えらばれた 国会議員が 集まる ところ。<b>法律を つくる</b>、<b>予算(国の お金の 使いみち)を 決める</b>、<b>内閣総理大臣を 指名する</b>、この3つが おもな 仕事。この 力を ${W.rippou}と いうよ。` },
+  { key: 'naikaku', name: '内閣', icon: '🏢', x: 500, y: 470, letter: '②',
+    txt: `内閣は、内閣総理大臣と 国務大臣が 集まる ところ。国会が 決めた <b>法律や 予算に もとづいて、実さいに 国の 仕事を 進める</b>。この 力を ${W.gyousei}と いうよ。` },
+  { key: 'saibansho', name: '裁判所', icon: '⚖️', x: 780, y: 210, letter: '③',
+    txt: `裁判所は、<b>法律に もとづいて あらそいごとを さばく</b> ところ。さらに、<b>法律や 政治が 憲法に 違反していないかを 判断する</b> 役目も もっている。この 力を ${W.shihou}と いうよ。` },
+];
+function sankenByKey(k) { return SANKEN.find(s => s.key === k); }
+
+// ---------- チェックのやじるし（6つ） ----------
+const YAJI = [
+  { key: 'a', from: 'kokkai', to: 'naikaku', letter: 'a',
+    txt: `国会 → 内閣：国会は <b>内閣総理大臣を 指名する</b>。また、内閣の 仕事ぶりを 信頼できない ときは「<b>内閣不信任の 決議</b>」を することが できる。` },
+  { key: 'b', from: 'naikaku', to: 'kokkai', letter: 'b',
+    txt: `内閣 → 国会：内閣は <b>衆議院を ${W.kaisan}</b> して、国民に もう一度 選挙で えらんでもらうことが できる。` },
+  { key: 'c', from: 'kokkai', to: 'saibansho', letter: 'c',
+    txt: `国会 → 裁判所：国会は、やめさせるべきか 判断する「<b>${W.dangai}所</b>」を もうけて、ふさわしくない 裁判官を チェックする。` },
+  { key: 'd', from: 'saibansho', to: 'kokkai', letter: 'd',
+    txt: `裁判所 → 国会：裁判所は、国会が つくった <b>法律が 憲法に 違反していないか</b> を 調べる（${W.ihou}）。` },
+  { key: 'e', from: 'naikaku', to: 'saibansho', letter: 'e',
+    txt: `内閣 → 裁判所：内閣は、<b>最高裁判所の 長官を 指名</b> し、そのほかの 裁判官を <b>任命する</b>。` },
+  { key: 'f', from: 'saibansho', to: 'naikaku', letter: 'f',
+    txt: `裁判所 → 内閣：裁判所は、<b>内閣の 出す 命令や 処分が 憲法に 違反していないか</b> を 調べる。` },
+];
+function yajiByKey(k) { return YAJI.find(y => y.key === k); }
+
+// ---------- 国民の3つの力 ----------
+const KOKUMIN = [
+  { key: 'senkyo', to: 'kokkai', icon: '🗳️', name: '選挙', letter: 'あ',
+    txt: `国民は <b>選挙</b> で、国会議員を えらぶ。国会を うごかす いちばん 大きな 力だよ。` },
+  { key: 'yoron', to: 'naikaku', icon: '📢', name: W.yoron, letter: 'い',
+    txt: `国民の 意見や 考え（${W.yoron}）は、内閣が どんな 政治を 進めるかに 大きく えいきょうする。` },
+  { key: 'shinsa', to: 'saibansho', icon: '✅', name: W.shinsa, letter: 'う',
+    txt: `国民は、最高裁判所の 裁判官が その 仕事に ふさわしいかどうかを、衆議院議員 総選挙の ときに 直接 審査する（${W.shinsa}）。` },
+];
+
+// ---------- もしバランスがくずれたら（天びんシナリオ） ----------
+const KUZURE = [
+  { key: 'normal', label: '① そのまま（三権分立）', tilt: 0,
+    txt: `三権分立の ままなら、もし 内閣が 思うままに 政治を 進めようとしても、国会や 裁判所が チェックできる。てんびんは 水平の まま、力の バランスが とれているね。` },
+  { key: 'noSaiban', label: '② 裁判所の チェックを なくす', tilt: -1,
+    txt: `裁判所が チェックできなく なると……もし 法律や 政治が 憲法に 違反していても、だれも 止められなく なってしまう！ てんびんが かたむいたよ。` },
+  { key: 'noKokkai', label: '③ 国会の チェックを なくす', tilt: 1,
+    txt: `国会が チェックできなく なると……内閣が 思うままに 政治を 進めても、だれも 止められなく なってしまう！ てんびんが かたむいたよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'seiden',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  yakuwariFound: new Set(),
+  yakuwariPick: null,
+  yajiFound: new Set(),
+  yajiPick: null,
+  kokuminFound: new Set(),
+  kuzureKey: 'normal',
+  kuzureTilt: 0,
+  kuzureTried: new Set(),
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 背景 ----------
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f3eefb'); g.addColorStop(1, '#cdbbe8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(points, X, Y, sc, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#3a1f6e' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#2a1a4a'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#3a1f6e';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 政治のひろば（intro/vote/doneの背景） ----------
+function drawSeidenScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  gctx.fillStyle = '#e2d6f2';
+  gctx.beginPath(); gctx.ellipse(X(500), Y(430), 380 * sc, 190 * sc, 0, 0, TAU); gctx.fill();
+
+  gctx.font = `${100 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('⚖️', X(500), Y(300));
+  gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${18 * sc}px sans-serif`;
+  gctx.fillText('テンビンの間', X(500), Y(420));
+
+  const spots = [
+    { cx: 220, cy: 240, icon: '🏛️', name: '国会' }, { cx: 780, cy: 240, icon: '⚖️', name: '裁判所' },
+    { cx: 500, cy: 500, icon: '🏢', name: '内閣' },
+  ];
+  spots.forEach(sp => {
+    gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(sp.icon, X(sp.cx), Y(sp.cy));
+    gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText(sp.name, X(sp.cx), Y(sp.cy + 34));
+  });
+}
+
+function drawDoneScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, cy = 330;
+  drawBalance(X, Y, sc, cx, cy, 0, 1);
+  gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('三権が おたがいを チェックしあう「三権分立」完成！', X(500), Y(560));
+}
+
+// ---------- 三権のやくわり（3つの建物発見） ----------
+function drawYakuwariScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  drawPoints(SANKEN.map(s => ({ key: s.key, letter: s.letter, x: s.x, y: s.y })), X, Y, sc, S.yakuwariFound);
+  SANKEN.forEach(s => {
+    gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.globalAlpha = S.yakuwariFound.has(s.key) ? 1 : 0.55;
+    gctx.fillText(s.icon, X(s.x), Y(s.y - 46));
+    gctx.globalAlpha = 1;
+    gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${15 * sc}px sans-serif`;
+    gctx.fillText(s.name, X(s.x), Y(s.y + 40));
+  });
+}
+
+// ---------- チェックのやじるし（三角形＋矢印） ----------
+function triPos(key) {
+  const p = { kokkai: [220, 210], naikaku: [500, 470], saibansho: [780, 210] };
+  return p[key];
+}
+function drawArrow(X, Y, sc, fromKey, toKey, done) {
+  let [x1, y1] = triPos(fromKey), [x2, y2] = triPos(toKey);
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+  const ux = dx / len, uy = dy / len;
+  const curve = 26;
+  const nx = -uy * curve, ny = ux * curve;
+  const sx = x1 + ux * 46 + nx, sy = y1 + uy * 46 + ny;
+  const ex = x2 - ux * 46 + nx, ey = y2 - uy * 46 + ny;
+  const mx = (sx + ex) / 2 + nx, my = (sy + ey) / 2 + ny;
+  gctx.strokeStyle = done ? '#3a1f6e' : '#b6a0d8';
+  gctx.lineWidth = (done ? 4.5 : 3) * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(sx), Y(sy));
+  gctx.quadraticCurveTo(X(mx), Y(my), X(ex), Y(ey));
+  gctx.stroke();
+  const ang = Math.atan2(Y(ey) - Y(my), X(ex) - X(mx));
+  gctx.fillStyle = done ? '#3a1f6e' : '#b6a0d8';
+  gctx.save(); gctx.translate(X(ex), Y(ey)); gctx.rotate(ang);
+  gctx.beginPath(); gctx.moveTo(0, 0); gctx.lineTo(-12 * sc, -6 * sc); gctx.lineTo(-12 * sc, 6 * sc); gctx.closePath(); gctx.fill();
+  gctx.restore();
+  return { mx, my };
+}
+function drawYajiScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  YAJI.forEach(y => {
+    const done = S.yajiFound.has(y.key);
+    const { mx, my } = drawArrow(X, Y, sc, y.from, y.to, done);
+    const px = X(mx), py = Y(my);
+    gctx.beginPath(); gctx.arc(px, py, 16 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#d4a017' : '#fff';
+    gctx.fill(); gctx.strokeStyle = '#2a1a4a'; gctx.lineWidth = 2 * sc; gctx.stroke();
+    gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(y.letter, px, py + 1 * sc);
+  });
+  SANKEN.forEach(s => {
+    gctx.font = `${38 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(s.icon, X(s.x), Y(s.y));
+    gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText(s.name, X(s.x), Y(s.y + 40));
+  });
+}
+
+// ---------- 国民の3つの力 ----------
+function drawKokuminScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const kx = 500, ky = 590;
+  SANKEN.forEach(s => {
+    gctx.strokeStyle = '#d9cdf5'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.moveTo(X(kx), Y(ky)); gctx.lineTo(X(s.x), Y(s.y)); gctx.stroke();
+  });
+  SANKEN.forEach(s => {
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(s.icon, X(s.x), Y(s.y - 20));
+    gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(s.name, X(s.x), Y(s.y + 16));
+  });
+  KOKUMIN.forEach(k => {
+    const to = sankenByKey(k.to);
+    const mx = (kx + to.x) / 2, my = (ky + to.y) / 2;
+    const done = S.kokuminFound.has(k.key);
+    const px = X(mx), py = Y(my);
+    gctx.beginPath(); gctx.arc(px, py, 20 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#d4a017' : '#fff';
+    gctx.fill(); gctx.strokeStyle = '#2a1a4a'; gctx.lineWidth = 2.2 * sc; gctx.stroke();
+    gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(k.letter, px, py + 1 * sc);
+  });
+  gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🧑‍🤝‍🧑', X(kx), Y(ky));
+  gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${15 * sc}px sans-serif`;
+  gctx.fillText('国民', X(kx), Y(ky + 34));
+}
+
+// ---------- もしバランスがくずれたら（天びん） ----------
+function drawBalance(X, Y, sc, cx, cy, tilt, glow) {
+  const armLen = 220, armAngle = tilt * 0.22;
+  gctx.strokeStyle = '#2a1a4a'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(cx), Y(cy)); gctx.lineTo(X(cx), Y(cy + 140)); gctx.stroke();
+  gctx.fillStyle = '#2a1a4a';
+  gctx.beginPath(); gctx.moveTo(X(cx - 40), Y(cy + 140)); gctx.lineTo(X(cx + 40), Y(cy + 140)); gctx.lineTo(X(cx + 30), Y(cy + 156)); gctx.lineTo(X(cx - 30), Y(cy + 156)); gctx.closePath(); gctx.fill();
+
+  const lx = cx - Math.cos(armAngle) * armLen, ly = cy - Math.sin(armAngle) * armLen;
+  const rx = cx + Math.cos(armAngle) * armLen, ry = cy + Math.sin(armAngle) * armLen;
+  gctx.strokeStyle = glow ? '#d4a017' : '#2a1a4a'; gctx.lineWidth = (glow ? 6 : 5) * sc;
+  gctx.beginPath(); gctx.moveTo(X(lx), Y(ly)); gctx.lineTo(X(rx), Y(ry)); gctx.stroke();
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), 7 * sc, 0, TAU); gctx.fillStyle = '#d4a017'; gctx.fill();
+
+  [[lx, ly, '政治の力', '🏛️'], [rx, ry, 'チェックの力', '⚖️']].forEach(([px, py, label, icon]) => {
+    const dy = 34;
+    gctx.strokeStyle = '#2a1a4a'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.moveTo(X(px), Y(py)); gctx.lineTo(X(px), Y(py + dy)); gctx.stroke();
+    gctx.fillStyle = '#fff'; gctx.strokeStyle = '#2a1a4a'; gctx.lineWidth = 2.5 * sc;
+    gctx.beginPath(); gctx.ellipse(X(px), Y(py + dy + 20), 46 * sc, 16 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(icon, X(px), Y(py + dy + 18));
+    gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(label, X(px), Y(py + dy + 46));
+  });
+}
+function drawKuzureScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  drawBalance(X, Y, sc, 500, 250, S.kuzureTilt, false);
+  gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('てんびんの かたむきを たしかめよう', X(500), Y(560));
+}
+
+// ---------- はかせ：むかしと今の憲法 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  gctx.fillStyle = '#faf7ff'; gctx.strokeStyle = '#2a1a4a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(150), Y(110), 330 * sc, 400 * sc, 14 * sc); gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.roundRect(X(520), Y(110), 330 * sc, 400 * sc, 14 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'alphabetic';
+  gctx.fillText('大日本帝国憲法(1889)', X(315), Y(140));
+  gctx.fillText('日本国憲法(1947)', X(685), Y(140));
+
+  gctx.font = `${60 * sc}px sans-serif`; gctx.textBaseline = 'middle';
+  gctx.fillText('👑', X(315), Y(260));
+  gctx.font = `700 ${14 * sc}px sans-serif`;
+  gctx.fillText('力が 天皇に', X(315), Y(320));
+  gctx.fillText('あつめられていた', X(315), Y(344));
+
+  const tri = [[685, 220], [640, 320], [730, 320]];
+  gctx.strokeStyle = '#3a1f6e'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(tri[0][0]), Y(tri[0][1]));
+  gctx.lineTo(X(tri[1][0]), Y(tri[1][1])); gctx.lineTo(X(tri[2][0]), Y(tri[2][1])); gctx.closePath(); gctx.stroke();
+  const icons = ['🏛️', '🏢', '⚖️'];
+  tri.forEach((p, i) => {
+    gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(icons[i], X(p[0]), Y(p[1]));
+  });
+  gctx.fillStyle = '#2a1a4a'; gctx.font = `700 ${14 * sc}px sans-serif`;
+  gctx.fillText('3つに 分けて', X(685), Y(370));
+  gctx.fillText('おたがいチェック', X(685), Y(394));
+
+  gctx.font = `${40 * sc}px sans-serif`;
+  gctx.fillText('➡️', X(500), Y(300));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'seiden') drawSeidenScene(X, Y, sc);
+  else if (S.scene === 'yakuwari') drawYakuwariScene(X, Y, sc);
+  else if (S.scene === 'yaji') drawYajiScene(X, Y, sc);
+  else if (S.scene === 'kokumin') drawKokuminScene(X, Y, sc);
+  else if (S.scene === 'kuzure') drawKuzureScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawDoneScene(X, Y, sc);
+}
+
+// ---------- きんこうの まど（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#faf7ff'); grd.addColorStop(1, '#c9b9ea');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'yakuwari') {
+    const s = sankenByKey(S.scope.key);
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(s.icon, R, R * 0.8);
+    label(s.name);
+  } else if (mode === 'yaji') {
+    const y = yajiByKey(S.scope.key);
+    const f = sankenByKey(y.from), t2 = sankenByKey(y.to);
+    sctx.font = `${R * 0.3}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(f.icon + ' → ' + t2.icon, R, R * 0.8);
+    label(f.name + ' → ' + t2.name);
+  } else if (mode === 'kokumin') {
+    const k = KOKUMIN.find(x => x.key === S.scope.key);
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(k.icon, R, R * 0.8);
+    label(k.name);
+  } else if (mode === 'tilt') {
+    const deg = Math.round(S.kuzureTilt * 12);
+    sctx.font = `700 ${R * 0.26}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#2a1a4a';
+    sctx.fillText((deg > 0 ? '+' : '') + deg + '°', R, R * 0.7);
+    label('てんびんの かたむき');
+  } else if (mode === 'stat') {
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('📜', R, R * 0.85);
+    label('けんぽうの データ');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe9a8'); g2.addColorStop(1, 'rgba(255,233,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#2a1a4a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('⚖️', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#2a1a4a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2a1a4a';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3a1f6e', '#ffe9a8', '#7d4fc4', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = 'テンビンの間';
+  const titles = {
+    seiden: '⚖️ テンビンの間',
+    yakuwari: '🏛️ 三権の やくわり',
+    yaji: '🔗 チェックの やじるし',
+    kokumin: '🧑‍🤝‍🧑 国民の 3つの 力',
+    kuzure: '⚖️ もし バランスが くずれたら',
+    hakase: '📜 むかしと 今',
+    done: '⚖️ テンビンの間 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'テンビンの間と 三権分立のひみつ';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_yakuwari', 'm_yaji', 'm_kokumin', 'm_kuzureru', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'seiden', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">⚖️🏛️✨</div>
+        <h1>テンビンの間</h1>
+        <div class="sub">〜 国の 政治の しくみ・三権分立 〜</div>
+        <p class="talk">ようこそ！ わたしは 天びんから 生まれた 精霊、<b>テンビン</b>。国の 政治は、<b>国会</b>・<b>内閣</b>・<b>裁判所</b>の 3つが 力を 分けあって 進めているんだ。<br>
+        でも、なぜ わざわざ 3つに 分けているんだろう？ <b>いっしょに たしかめに いこう！</b></p>
+        <button class="btn" id="startBtn">テンビンの間を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">国会・内閣・裁判所は、それぞれ ばらばらに 自分の 仕事を しているだけだと思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🧩</span><b>ア</b> その通り、ばらばら</div>
+          <div class="vcard" data-v="1"><span class="vicon">🔗</span><b>イ</b> いいえ、おたがいに チェックしあっている</div>
+          <div class="vcard" data-v="2"><span class="vicon">👑</span><b>ウ</b> 国会が いちばん偉くて、他の2つに 命令している</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：三権のやくわり発見 ---
+  m_yakuwari: {
+    enter() {
+      Object.assign(S, { scene: 'yakuwari', scope: { type: 'idle' }, yakuwariFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`国会・内閣・裁判所は、それぞれ どんな 仕事を しているんだろう？ 3つの たてものを タップして 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SANKEN.map(s => ({
+        label: s.letter + ' ' + s.name + (S.yakuwariFound.has(s.key) ? '✓' : ''),
+        cb: () => this.reveal(s),
+      })));
+      if (S.yakuwariFound.size >= SANKEN.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(s) {
+      sTap(); S.yakuwariFound.add(s.key);
+      S.scope = { type: 'yakuwari', key: s.key };
+      scopeBurst();
+      say(s.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`法律を つくる 力を もっているのは どこ？`);
+      setButtons(choiceRow(['ア 国会', 'イ 内閣', 'ウ 裁判所'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_yakuwari'); S.phase = 'done';
+        say(`せいかい！ 国会が もつ「法律を つくる 力」を ${W.rippou}と いうよ。内閣は 法律にもとづいて 政治を 進める ${W.gyousei}、裁判所は 争いを さばく ${W.shihou}を もっているね。`);
+        setButtons([{ label: 'つぎへ（チェックのやじるし）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 国会', 'イ 内閣', 'ウ 裁判所'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：チェックのやじるしをつなぐ ---
+  m_yaji: {
+    enter() {
+      Object.assign(S, { scene: 'yaji', scope: { type: 'idle' }, yajiFound: new Set() });
+      updateLoc();
+      setWish('🔗', `国会・内閣・裁判所は、おたがいの 仕事を チェックしあっている。6つの やじるしを 順番に タップして、どんな チェックか 調べよう。`);
+      say(`やじるしの ○を タップしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(YAJI.map(y => ({
+        label: y.letter + (S.yajiFound.has(y.key) ? '✓' : ''),
+        cb: () => this.reveal(y),
+      })));
+      if (S.yajiFound.size >= YAJI.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(y) {
+      sClank(); S.yajiFound.add(y.key);
+      S.scope = { type: 'yaji', key: y.key };
+      scopeBurst();
+      say(y.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`国会が つくった 法律が、憲法に 違反していないかを 調べるのは どこ？`);
+      setButtons(choiceRow(['ア 国会 じしん', 'イ 内閣', 'ウ 裁判所'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 2) {
+        sYes(); scopeBurst(); award('m_yaji'); S.phase = 'done';
+        say(`せいかい！ 裁判所が もつ「法律が 憲法に 違反していないか 調べる 力」を ${W.ihou}と いうよ。3つの 機関が こうして おたがいを チェックしあうことを「${W.kinkou}」と いうんだ。`);
+        setButtons([{ label: 'つぎへ（国民の力）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 国会 じしん', 'イ 内閣', 'ウ 裁判所'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：国民の3つの力 ---
+  m_kokumin: {
+    enter() {
+      Object.assign(S, { scene: 'kokumin', scope: { type: 'idle' }, kokuminFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`国会・内閣・裁判所を チェックしているのは、じつは 国民も 同じ。3つの ○を タップして 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KOKUMIN.map(k => ({
+        label: k.letter + ' ' + k.name + (S.kokuminFound.has(k.key) ? '✓' : ''),
+        cb: () => this.reveal(k),
+      })));
+      if (S.kokuminFound.size >= KOKUMIN.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(k) {
+      sTap(); S.kokuminFound.add(k.key);
+      S.scope = { type: 'kokumin', key: k.key };
+      scopeBurst();
+      say(k.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`最高裁判所の 裁判官が ふさわしいかどうかを、国民が 直接 確かめる しくみを 何と いう？`);
+      setButtons(choiceRow(['ア 選挙', 'イ 世論', 'ウ 国民審査'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 2) {
+        sYes(); scopeBurst(); award('m_kokumin'); S.phase = 'done';
+        say(`せいかい！ ${W.shinsa}だよ。国民は 選挙・${W.yoron}・${W.shinsa}の 3つの 力で、国会・内閣・裁判所を 見守っているんだ。`);
+        setButtons([{ label: 'つぎへ（バランスがくずれたら）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 選挙', 'イ 世論', 'ウ 国民審査'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M4：もしバランスがくずれたら ---
+  m_kuzureru: {
+    enter() {
+      Object.assign(S, { scene: 'kuzure', scope: { type: 'tilt' }, kuzureKey: 'normal', kuzureTilt: 0, kuzureTried: new Set() });
+      updateLoc();
+      setWish('⚖️', `もし 3つの 力の うち どれかの チェックが なくなったら、どうなるだろう？ ボタンを えらんで、てんびんの かたむきを たしかめよう。`);
+      say(`ボタンを えらんでみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setControls(KUZURE.map(k => ({
+        label: k.label, cls: 'pos' + (S.kuzureKey === k.key ? ' sel' : ''),
+        cb: () => this.try(k),
+      })));
+    },
+    try(k) {
+      setControls([]);
+      sClank();
+      S.kuzureKey = k.key;
+      S.kuzureTried.add(k.key);
+      startTween(S.kuzureTilt, k.tilt, 0.9, v => { S.kuzureTilt = v; }, () => this.result(k));
+    },
+    result(k) {
+      scopeBurst();
+      if (k.tilt !== 0) sHmm(); else sYes();
+      say(k.txt);
+      if (S.kuzureTried.size >= 2) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      } else {
+        setTimeout(() => this.refreshCtl(), 10);
+      }
+    },
+    ask() {
+      hideWish();
+      say(`力を 1つの 機関に 集めず、3つに 分けている いちばんの 目的は なんだろう？`);
+      setButtons(choiceRow(['ア 仕事を 早く 終わらせるため', 'イ 力が 集まりすぎて、国民の 自由や 権利が 守られなくなるのを 防ぐため', 'ウ たてものを 3つ 使うため'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kuzureru'); S.phase = 'done';
+        startTween(S.kuzureTilt, 0, 0.6, v => { S.kuzureTilt = v; });
+        say(`せいかい！ 力を 3つに 分けて おたがいに チェックしあう「三権分立」は、1つの 機関が 暴走して 国民の 自由や 権利を おびやかすのを 防ぐ しくみなんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 仕事を 早く 終わらせるため', 'イ 力が 集まりすぎて、国民の 自由や 権利が 守られなくなるのを 防ぐため', 'ウ たてものを 3つ 使うため'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：むかしと今 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'stat' } });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ むかしの 憲法と 今の 憲法を くらべてみよう。`);
+      setButtons([{ label: 'くらべて 見る', cb: () => this.show() }]);
+    },
+    show() {
+      sTap();
+      say(`1889年の 大日本帝国憲法では、国を 治める 力（統治権）は 天皇に あつめられていた。1947年に できた 今の 日本国憲法では、国民が 主役（国民主権）と なり、国の 力を 国会・内閣・裁判所の 3つに 分けて、おたがいに チェックしあう「三権分立」の しくみに かわったんだ。`);
+      setButtons([{ label: 'かんがえる', cb: () => this.ask() }]);
+    },
+    ask() {
+      say(`力を 1つに 集める やり方と、3つに 分ける やり方、権力の 使いすぎ（暴走）を 防ぎやすいのは どっち？`);
+      setButtons(choiceRow(['ア 1つに 集める やり方', 'イ 3つに 分ける やり方', 'ウ どちらも 同じ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 力を 分けて おたがいに 見張りあうほど、1つの 機関だけの 思いどおりには なりにくい。テンビンのように バランスを とることが、みんなの 自由や 権利を 守ることに つながるんだ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 1つに 集める やり方', 'イ 3つに 分ける やり方', 'ウ どちらも 同じ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ テンビンの間 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 国会は「（<span class="blankWord" data-a="法律（ほうりつ）">？？？</span>）」を つくる。<br>
+        ② 内閣は「（<span class="blankWord" data-a="法律にもとづいた政治（せいじ）">？？？</span>）」を 進める。<br>
+        ③ 裁判所は「（<span class="blankWord" data-a="法律が憲法に違反していないか">？？？</span>）」を 判断する。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ おたがいに チェックしあっている</b> でした！ 3つの 機関が 力を 分けあい、見張りあうことで、国民の 自由や 権利が 守られているんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちの 人に「三権分立って、何の ために あると 思う？」と 聞いてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#2a1a4a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'yaji', scope: { type: 'glow' } });
+      S.yajiFound = new Set(YAJI.map(y => y.key));
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 三権分立について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「裁判所が もつ 力は？」「三権分立の 目的は？」`);
+      setButtons([
+        { label: '🏛️ 三権の やくわり図', cls: 'sub', cb: () => this.show('yakuwari') },
+        { label: '🔗 チェックの やじるし図', cls: 'sub', cb: () => this.show('yaji') },
+        { label: '🧑‍🤝‍🧑 国民の力の図', cls: 'sub', cb: () => this.show('kokumin') },
+        { label: '⚖️ てんびんシミュ', cls: 'sub', cb: () => this.show('kuzure') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_yaji などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
