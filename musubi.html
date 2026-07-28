@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ムスビの丘 — 国際社会とSDGs たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6f7 0%, #cfe9ee 55%, #6db8c8 100%);
+    color: #0f2a3a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #1a5c7a; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4f7f8f; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dff2f5; border: 2px solid #8ec8d8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #8ec8d8;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #0f2a3a;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f2fafb 0%, #cfe9ee 100%);
+    border: 3px solid #1a5c7a;
+    box-shadow: inset 0 0 40px rgba(20, 50, 65, .12), 0 4px 18px rgba(15, 40, 55, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #0f2a3a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #1a5c7a; color: #eaf6f7; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15, 40, 55, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 40, 55, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #a8d8e0; cursor: pointer;
+    background: linear-gradient(180deg, #2f9ab8, #1a5c7a); color: #fff;
+    box-shadow: 0 3px 0 #0a2530; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #8a7550, #5c4a2e); border-color: #d9c79a; box-shadow: 0 3px 0 #3a2e1a; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #1a5c7a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(15, 40, 55, .3), inset 0 0 24px rgba(15, 40, 55, .18);
+    flex-shrink: 0; background: #eaf6f7;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #4f7f8f;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #0f2a3a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f2fafb; border: 2px solid #8ec8d8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #4f7f8f; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #0f2a3a;
+    border: 1.5px solid #a8d8e0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1a5c7a; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #cfe9ee, #d5edf0); color: #0f2a3a;
+    border: 2px solid #1a5c7a; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #1a5c7a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #2f9ab8, #1a5c7a); color: #fff;
+    box-shadow: 0 3px 0 #0a2530, 0 5px 12px rgba(15, 40, 55, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0a2530; }
+  .btn.sub {
+    background: #dff2f5; color: #1d5468; box-shadow: 0 3px 0 #8ec8d8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #0f2a3a; box-shadow: 0 3px 0 #8ec8d8; font-weight: 400; border: 1.5px solid #a8d8e0; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #2f9ab8; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(12, 32, 45, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f2fafb, #d5edf0);
+    border: 3px solid #2f9ab8; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(12, 32, 45, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #1a5c7a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #1a5c7a; }
+  .panel .sub { color: #4f7f8f; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #0f2a3a; border: 1.5px solid #a8d8e0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #4f7f8f; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #0f2a3a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #a8d8e0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #1a5c7a; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #1a5c7a; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #1a5c7a;
+    color: #0f2a3a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #4f7f8f;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dff2f5; color: #1d5468;
+    border: 1px solid #8ec8d8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #cfe9ee; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🌏 ムスビの丘<small>— 国際社会と SDGs —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kokuren" title="国連のしくみさがし">★</div>
+    <div class="badge" id="bd_m_sdgs" title="SDGs17の目標さがし">★</div>
+    <div class="badge" id="bd_m_tsunagari" title="井戸プロジェクトのつながり">★</div>
+    <div class="badge" id="bd_m_kyouryoku" title="日本の国際協力さがし">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ムスビの丘と 世界のつながり</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🌏 ムスビの まど 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(15,40,55,.18)"/>
+            <!-- からだ：糸もようの ころも -->
+            <path d="M30 118 L26 78 Q26 70 34 68 L86 68 Q94 70 94 78 L90 118 Z" fill="#1a5c7a" stroke="#0f2a3a" stroke-width="2"/>
+            <path d="M40 70 Q50 90 40 118 M60 70 Q70 90 60 118 M80 70 Q70 90 80 118" stroke="#ffe9a8" stroke-width="2" opacity=".6" fill="none"/>
+            <!-- 世界をむすぶ糸：頭上にうかぶ3つの国と糸 -->
+            <circle cx="40" cy="10" r="3.2" fill="#ffe9a8" stroke="#0f2a3a" stroke-width="1.2"/>
+            <circle cx="80" cy="10" r="3.2" fill="#ffe9a8" stroke="#0f2a3a" stroke-width="1.2"/>
+            <circle cx="60" cy="25" r="3.4" fill="#d4a017" stroke="#0f2a3a" stroke-width="1.2"/>
+            <line x1="40" y1="10" x2="80" y2="10" stroke="#0f2a3a" stroke-width="1.6"/>
+            <line x1="40" y1="10" x2="60" y2="25" stroke="#0f2a3a" stroke-width="1.6"/>
+            <line x1="80" y1="10" x2="60" y2="25" stroke="#0f2a3a" stroke-width="1.6"/>
+            <!-- あたま -->
+            <circle cx="60" cy="46" r="25" fill="#f6e6c8" stroke="#0f2a3a" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="50" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <ellipse cx="74" cy="50" rx="5" ry="3.4" fill="#e0876a" opacity=".5"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="44" rx="3.6" ry="5" fill="#0f2a3a"/>
+              <ellipse cx="69" cy="44" rx="3.6" ry="5" fill="#0f2a3a"/>
+              <circle cx="52.3" cy="41.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="41.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 58 Q60 63 67 58" stroke="#0f2a3a" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">世界をむすぶ<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ムスビ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌏 ムスビの丘ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ムスビの丘 — 国際社会とSDGs（小6社会公民・協力型・1ファイル）
+   国連のしくみさがし → SDGs17の目標さがし → 井戸プロジェクトのつながり →
+   日本の国際協力さがし → はかせ（世界と助けあう日本）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  kokuren: ruby('国際連合', 'こくさいれんごう'),
+  sokai: ruby('総会', 'そうかい'),
+  anpori: ruby('安全保障理事会', 'あんぜんほしょうりじかい'),
+  sdgs: ruby('持続可能な開発目標', 'じぞくかのうなかいはつもくひょう'),
+  oda: ruby('政府開発援助', 'せいふかいはつえんじょ'),
+  jica: ruby('国際協力機構', 'こくさいきょうりょくきこう'),
+  kyoryokutai: ruby('青年海外協力隊', 'せいねんかいがいきょうりょくたい'),
+};
+
+// ---------- 国連のしくみ（3つの発見） ----------
+const KOKUREN = [
+  { key: 'sokai', name: '総会', icon: '🏛️', x: 250, y: 240, letter: '①',
+    txt: `世界の ほとんどの 国（190か国 以上）が 参加して、いろいろな 問題に ついて 話しあう、${W.kokuren}で いちばん 大きな 会議だよ。すべての 国が 平等に 1票を もっているんだ。` },
+  { key: 'anpori', name: '安全保障理事会', icon: '🛡️', x: 500, y: 190, letter: '②',
+    txt: `世界の 平和と 安全を 守るための、いちばん 重要な 話しあいを する 場所。争いが 起きた 時、どう 対応するかを 決めるよ。` },
+  { key: 'unicef', name: 'ユニセフ（国連児童基金）', icon: '🧒', x: 750, y: 240, letter: '③',
+    txt: `世界中の 子どもの 命と 権利を 守るための 活動を しているよ。安全な 水、栄養、教育などを 支援しているんだ。` },
+];
+function kokurenByKey(k) { return KOKUREN.find(x => x.key === k); }
+
+// ---------- SDGs17の目標（4つの発見） ----------
+const SDGS = [
+  { key: 'goal1', num: 1, name: '貧困をなくそう', icon: '🏚️', letter: 'あ',
+    txt: `世界中から あらゆる 形の 貧困を なくすことを めざす 目標。1日 約2.15ドル未満で くらす「極度の貧困」の 人は、今も 世界に 大勢 いるよ。` },
+  { key: 'goal4', num: 4, name: '質の高い教育をみんなに', icon: '📚', letter: 'い',
+    txt: `すべての 人が、公平に 質の高い 教育を 受けられるように する 目標。学校に 行けない 子どもは、世界に 約2億人以上と いわれているよ。` },
+  { key: 'goal6', num: 6, name: '安全な水とトイレを世界中に', icon: '💧', letter: 'う',
+    txt: `すべての 人が 安全な 水と トイレを 使えるように する 目標。世界の 4人に1人、約21億人が 安全に 管理された 水を 使えていないんだ。` },
+  { key: 'goal13', num: 13, name: '気候変動に具体的な対策を', icon: '🌡️', letter: 'え',
+    txt: `気候変動と その えいきょうに 対して、緊急に 対策を とる 目標。異常気象や 海面上昇は 世界中で もう 起きている 問題だよ。` },
+];
+function sdgsByKey(k) { return SDGS.find(x => x.key === k); }
+
+// ---------- 井戸プロジェクトのつながり（4つの発見） ----------
+const TSUNAGARI_WELL = { x: 500, y: 330 };
+const TSUNAGARI = [
+  { key: 'mizu', x: 500, y: 140, letter: 'あ', icon: '💧', name: '安全な水（目標6）',
+    txt: `井戸が できたことで、きたない 川の水を くまなくても、きれいな 水が すぐ 手に 入るように なったよ。` },
+  { key: 'kenko', x: 800, y: 300, letter: 'い', icon: '💊', name: '健康（目標3）',
+    txt: `きたない 水を のまなくなったことで、おなかを こわしたり 病気に なったり する 人が へったよ。` },
+  { key: 'kyouiku', x: 700, y: 540, letter: 'う', icon: '📚', name: '教育（目標4）',
+    txt: `遠くまで 水くみに 行く 時間が いらなくなったことで、子どもたち、とくに 女の子が 学校に 通えるように なったよ。` },
+  { key: 'byodo', x: 250, y: 540, letter: 'え', icon: '🤝', name: 'ジェンダー平等（目標5）',
+    txt: `水くみは 女の子や 女性の 仕事に なりやすく、その 大きな 負担が へって、自分の ための 時間を 持てるように なったよ。` },
+];
+function tsunagariByKey(k) { return TSUNAGARI.find(x => x.key === k); }
+
+// ---------- 日本の国際協力（3つの発見） ----------
+const KYOURYOKU = [
+  { key: 'oda', name: 'ODA（政府開発援助）', icon: '🤝', letter: 'あ',
+    txt: `日本の 政府が、発展とじょう国に対して お金や 技術で 協力する 取り組み。これを ${W.oda}と いうよ。` },
+  { key: 'jica', name: 'JICA（国際協力機構）', icon: '🏢', letter: 'い',
+    txt: `${W.oda}を 実さいに 行う 機関。世界中で 井戸や 道路、学校づくりなどを 支援しているよ。これを ${W.jica}と いうよ。` },
+  { key: 'kyoryokutai', name: '青年海外協力隊', icon: '✈️', letter: 'う',
+    txt: `技術や 知識を もった 日本の 人が、2年間ほど 現地で くらしながら 協力する 制度。これを ${W.kyoryokutai}と いうよ。` },
+];
+function kyouryokuByKey(k) { return KYOURYOKU.find(x => x.key === k); }
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'oka',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  kokurenFound: new Set(),
+  sdgsFound: new Set(),
+  tsunagariFound: new Set(),
+  kyouryokuFound: new Set(),
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 背景 ----------
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eaf6f7'); g.addColorStop(1, '#a0d0da');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(points, X, Y, sc, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1a5c7a' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#0f2a3a'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#1a5c7a';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 矢印を1本描く ----------
+function drawArrow(X, Y, sc, x1, y1, x2, y2, done) {
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+  const ux = dx / len, uy = dy / len;
+  const sx = x1 + ux * 50, sy = y1 + uy * 50;
+  const ex = x2 - ux * 46, ey = y2 - uy * 46;
+  gctx.strokeStyle = done ? '#1a5c7a' : '#8ec8d8';
+  gctx.lineWidth = (done ? 4.5 : 2.5) * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(sx), Y(sy)); gctx.lineTo(X(ex), Y(ey));
+  gctx.stroke();
+  const ang = Math.atan2(Y(ey) - Y(sy), X(ex) - X(sx));
+  gctx.fillStyle = done ? '#1a5c7a' : '#8ec8d8';
+  gctx.save(); gctx.translate(X(ex), Y(ey)); gctx.rotate(ang);
+  gctx.beginPath(); gctx.moveTo(0, 0); gctx.lineTo(-12 * sc, -6 * sc); gctx.lineTo(-12 * sc, 6 * sc); gctx.closePath(); gctx.fill();
+  gctx.restore();
+}
+
+// ---------- 丘のひろば（intro/vote/doneの背景） ----------
+function drawOkaScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  gctx.fillStyle = '#b8dde5';
+  gctx.beginPath(); gctx.ellipse(X(500), Y(460), 380 * sc, 170 * sc, 0, 0, TAU); gctx.fill();
+  gctx.font = `${100 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🌏', X(500), Y(300));
+  gctx.fillStyle = '#0f2a3a'; gctx.font = `700 ${18 * sc}px sans-serif`;
+  gctx.fillText('ムスビの丘', X(500), Y(420));
+}
+
+function drawDoneScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  gctx.fillStyle = '#b8dde5';
+  gctx.beginPath(); gctx.ellipse(X(500), Y(460), 380 * sc, 170 * sc, 0, 0, TAU); gctx.fill();
+  const pts = [[280, 300, '🏛️'], [500, 220, '💧'], [720, 300, '🤝']];
+  gctx.strokeStyle = '#1a5c7a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(280), Y(300)); gctx.lineTo(X(500), Y(220)); gctx.lineTo(X(720), Y(300)); gctx.closePath(); gctx.stroke();
+  pts.forEach(([x, y, icon]) => {
+    gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(icon, X(x), Y(y));
+  });
+  gctx.fillStyle = '#0f2a3a'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('世界は みんな、つながっている！', X(500), Y(560));
+}
+
+// ---------- 国連のしくみ（3つの発見） ----------
+function drawKokurenScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  KOKUREN.forEach(k => {
+    const done = S.kokurenFound.has(k.key);
+    gctx.font = `${42 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.globalAlpha = done ? 1 : 0.55;
+    gctx.fillText(k.icon, X(k.x), Y(k.y - 40));
+    gctx.globalAlpha = 1;
+    gctx.fillStyle = '#0f2a3a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(k.name, X(k.x), Y(k.y + 40));
+  });
+  drawPoints(KOKUREN.map(k => ({ key: k.key, letter: k.letter, x: k.x, y: k.y })), X, Y, sc, S.kokurenFound);
+}
+
+// ---------- SDGs17の目標（4つの発見） ----------
+function drawSdgsScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const pos = { goal1: [230, 240], goal4: [500, 190], goal6: [770, 240], goal13: [500, 400] };
+  SDGS.forEach(s => {
+    const [x, y] = pos[s.key];
+    const done = S.sdgsFound.has(s.key);
+    gctx.font = `${42 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.globalAlpha = done ? 1 : 0.55;
+    gctx.fillText(s.icon, X(x), Y(y - 40));
+    gctx.globalAlpha = 1;
+    gctx.fillStyle = '#0f2a3a'; gctx.font = `700 ${12 * sc}px sans-serif`;
+    gctx.fillText('目標' + s.num, X(x), Y(y + 36));
+  });
+  drawPoints(SDGS.map(s => ({ key: s.key, letter: s.letter, x: pos[s.key][0], y: pos[s.key][1] })), X, Y, sc, S.sdgsFound);
+}
+
+// ---------- 井戸プロジェクトのつながり ----------
+function drawTsunagariScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  TSUNAGARI.forEach(t => {
+    const done = S.tsunagariFound.has(t.key);
+    drawArrow(X, Y, sc, TSUNAGARI_WELL.x, TSUNAGARI_WELL.y, t.x, t.y, done);
+  });
+  gctx.font = `${50 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🚰', X(TSUNAGARI_WELL.x), Y(TSUNAGARI_WELL.y));
+  gctx.fillStyle = '#0f2a3a'; gctx.font = `700 ${14 * sc}px sans-serif`;
+  gctx.fillText('井戸が できた村', X(TSUNAGARI_WELL.x), Y(TSUNAGARI_WELL.y + 36));
+
+  TSUNAGARI.forEach(t => {
+    const done = S.tsunagariFound.has(t.key);
+    gctx.font = `${36 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.globalAlpha = done ? 1 : 0.55;
+    gctx.fillText(t.icon, X(t.x), Y(t.y - 34));
+    gctx.globalAlpha = 1;
+  });
+  drawPoints(TSUNAGARI, X, Y, sc, S.tsunagariFound);
+}
+
+// ---------- 日本の国際協力（3つの発見） ----------
+function drawKyouryokuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const pos = { oda: [260, 260], jica: [500, 220], kyoryokutai: [740, 260] };
+  KYOURYOKU.forEach(k => {
+    const [x, y] = pos[k.key];
+    const done = S.kyouryokuFound.has(k.key);
+    gctx.font = `${42 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.globalAlpha = done ? 1 : 0.55;
+    gctx.fillText(k.icon, X(x), Y(y - 40));
+    gctx.globalAlpha = 1;
+    gctx.fillStyle = '#0f2a3a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(k.name, X(x), Y(y + 36));
+  });
+  drawPoints(KYOURYOKU.map(k => ({ key: k.key, letter: k.letter, x: pos[k.key][0], y: pos[k.key][1] })), X, Y, sc, S.kyouryokuFound);
+}
+
+// ---------- はかせ：世界と助けあう日本 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  gctx.font = `${90 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🎌', X(500), Y(230));
+  gctx.fillStyle = '#0f2a3a'; gctx.font = `700 ${20 * sc}px sans-serif`;
+  gctx.fillText('2011年 東日本大震災', X(500), Y(330));
+  gctx.font = `700 ${28 * sc}px sans-serif`;
+  gctx.fillText('159の 国・地域　43の 国際機関', X(500), Y(400));
+  gctx.font = `700 ${16 * sc}px sans-serif`; gctx.fillStyle = '#4f7f8f';
+  gctx.fillText('から 支援の 申し出が あった', X(500), Y(440));
+  gctx.font = `${40 * sc}px sans-serif`;
+  gctx.fillText('🤝', X(500), Y(520));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'oka') drawOkaScene(X, Y, sc);
+  else if (S.scene === 'kokuren') drawKokurenScene(X, Y, sc);
+  else if (S.scene === 'sdgs') drawSdgsScene(X, Y, sc);
+  else if (S.scene === 'tsunagari') drawTsunagariScene(X, Y, sc);
+  else if (S.scene === 'kyouryoku') drawKyouryokuScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawDoneScene(X, Y, sc);
+}
+
+// ---------- ムスビの まど（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f2fafb'); grd.addColorStop(1, '#8ec8d8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'kokuren') {
+    const k = kokurenByKey(S.scope.key);
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(k.icon, R, R * 0.8);
+    label(k.name);
+  } else if (mode === 'sdgs') {
+    const s = sdgsByKey(S.scope.key);
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(s.icon, R, R * 0.8);
+    label('目標' + s.num + ' ' + s.name);
+  } else if (mode === 'tsunagari') {
+    const t2 = tsunagariByKey(S.scope.key);
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(t2.icon, R, R * 0.8);
+    label(t2.name);
+  } else if (mode === 'kyouryoku') {
+    const k2 = kyouryokuByKey(S.scope.key);
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(k2.icon, R, R * 0.8);
+    label(k2.name);
+  } else if (mode === 'stat') {
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌏', R, R * 0.85);
+    label('せかいの データ');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe9a8'); g2.addColorStop(1, 'rgba(255,233,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#0f2a3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌏', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#0f2a3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#0f2a3a';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1a5c7a', '#ffe9a8', '#2f9ab8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = 'ムスビの丘';
+  const titles = {
+    oka: '🌏 ムスビの丘',
+    kokuren: '🏛️ 国連の しくみさがし',
+    sdgs: '🎯 SDGs17の 目標さがし',
+    tsunagari: '🚰 井戸プロジェクトの つながり',
+    kyouryoku: '🤝 日本の 国際協力さがし',
+    hakase: '🌍 世界と 助けあう 日本',
+    done: '🌏 ムスビの丘 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ムスビの丘と 世界のつながり';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kokuren', 'm_sdgs', 'm_tsunagari', 'm_kyouryoku', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'oka', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌏🧵✨</div>
+        <h1>ムスビの丘</h1>
+        <div class="sub">〜 国際社会と SDGs 〜</div>
+        <p class="talk">ようこそ！ わたしは 世界の 国々を つなぐ 糸から 生まれた 精霊、<b>ムスビ</b>。この 丘からは、世界中の くにぐにが 見わたせるんだ。<br>
+        世界には、みんなで 力を あわせて 解決すべき 課題が たくさん あるよ。<b>いっしょに たしかめに いこう！</b></p>
+        <button class="btn" id="startBtn">ムスビの丘を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">世界には、安全な 水を 飲めない 人が どれくらい いると思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">💯</span><b>ア</b> 100人くらい</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌍</span><b>イ</b> 世界の 4人に 1人くらい</div>
+          <div class="vcard" data-v="2"><span class="vicon">😊</span><b>ウ</b> もう だれも いない</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：国連のしくみさがし ---
+  m_kokuren: {
+    enter() {
+      Object.assign(S, { scene: 'kokuren', scope: { type: 'idle' }, kokurenFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`世界の 国々が 力を あわせるための 組織、それが ${W.kokuren}。3つの 場所を タップして、どんな 役目か 調べてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KOKUREN.map(k => ({
+        label: k.letter + ' ' + k.name + (S.kokurenFound.has(k.key) ? '✓' : ''),
+        cb: () => this.reveal(k),
+      })));
+      if (S.kokurenFound.size >= KOKUREN.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(k) {
+      sTap(); S.kokurenFound.add(k.key);
+      S.scope = { type: 'kokuren', key: k.key };
+      scopeBurst();
+      say(k.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`世界の 平和と 安全を 守るための、いちばん 重要な 話しあいを する 場所は？`);
+      setButtons(choiceRow(['ア 総会', 'イ 安全保障理事会', 'ウ ユニセフ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kokuren'); S.phase = 'done';
+        say(`せいかい！ ${W.anpori}だよ。${W.kokuren}には、みんなで 話しあう ${W.sokai}や、子どもを 守る ユニセフなど、いろいろな 役目の 場所が あるんだ。`);
+        setButtons([{ label: 'つぎへ（SDGs17の目標さがし）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 総会', 'イ 安全保障理事会', 'ウ ユニセフ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：SDGs17の目標さがし ---
+  m_sdgs: {
+    enter() {
+      Object.assign(S, { scene: 'sdgs', scope: { type: 'idle' }, sdgsFound: new Set() });
+      updateLoc();
+      setWish('🎯', `世界が 2030年までに 達成しようと している 目標「${W.sdgs}」、略して SDGs。4つの カードを タップして 調べよう。`);
+      say(`カードを タップしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SDGS.map(s => ({
+        label: s.letter + ' 目標' + s.num,
+        cb: () => this.reveal(s),
+      })));
+      if (S.sdgsFound.size >= SDGS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(s) {
+      sTap(); S.sdgsFound.add(s.key);
+      S.scope = { type: 'sdgs', key: s.key };
+      scopeBurst();
+      say(`目標${s.num}「${s.name}」 ${s.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`SDGsの 目標は、全部で いくつ ある？`);
+      setButtons(choiceRow(['ア 7つ', 'イ 17こ', 'ウ 100こ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_sdgs'); S.phase = 'done';
+        say(`せいかい！ SDGsには 17の 目標が あるよ。貧困・教育・水・気候変動……どれも 世界中の 人が 力を あわせないと 解決できない 課題なんだ。`);
+        setButtons([{ label: 'つぎへ（井戸プロジェクトのつながり）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 7つ', 'イ 17こ', 'ウ 100こ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：井戸プロジェクトのつながり ---
+  m_tsunagari: {
+    enter() {
+      Object.assign(S, { scene: 'tsunagari', scope: { type: 'idle' }, tsunagariFound: new Set() });
+      updateLoc();
+      setWish('🚰', `ある村に 井戸が 1つ できたよ。じつは この 1つの 井戸が、いくつもの SDGs目標に つながっているんだ。あ〜えを タップして、どんな つながりか 調べよう。`);
+      say(`カードを タップしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(TSUNAGARI.map(t => ({
+        label: t.letter + ' ' + t.name + (S.tsunagariFound.has(t.key) ? '✓' : ''),
+        cb: () => this.reveal(t),
+      })));
+      if (S.tsunagariFound.size >= TSUNAGARI.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(t) {
+      sTap(); S.tsunagariFound.add(t.key);
+      S.scope = { type: 'tsunagari', key: t.key };
+      scopeBurst();
+      say(t.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`1つの 井戸プロジェクトは、いくつの SDGs目標に つながった？`);
+      setButtons(choiceRow(['ア 1こだけ', 'イ 4つ以上', 'ウ 0こ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_tsunagari'); S.phase = 'done';
+        say(`せいかい！ 水・健康・教育・平等……1つの 支援が、いくつもの 課題の 解決に つながることが あるんだ。世界の 課題は、たがいに つながりあっているんだね。`);
+        setButtons([{ label: 'つぎへ（日本の国際協力さがし）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 1こだけ', 'イ 4つ以上', 'ウ 0こ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M4：日本の国際協力さがし ---
+  m_kyouryoku: {
+    enter() {
+      Object.assign(S, { scene: 'kyouryoku', scope: { type: 'idle' }, kyouryokuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`日本も、世界の 国々を 支援する 取り組みを しているよ。3つの カードを タップして 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KYOURYOKU.map(k => ({
+        label: k.letter + ' ' + k.name + (S.kyouryokuFound.has(k.key) ? '✓' : ''),
+        cb: () => this.reveal(k),
+      })));
+      if (S.kyouryokuFound.size >= KYOURYOKU.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(k) {
+      sTap(); S.kyouryokuFound.add(k.key);
+      S.scope = { type: 'kyouryoku', key: k.key };
+      scopeBurst();
+      say(k.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`日本の ${W.oda}を 実さいに 行う 機関は どこ？`);
+      setButtons(choiceRow(['ア 国連', 'イ JICA', 'ウ ユニセフ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kyouryoku'); S.phase = 'done';
+        say(`せいかい！ ${W.jica}だよ。${W.oda}・${W.jica}・${W.kyoryokutai}……日本も 世界の 課題解決に 協力しているんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 国連', 'イ JICA', 'ウ ユニセフ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：世界と助けあう日本 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'stat' } });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 日本は 世界を 支援するだけじゃなく、じつは 世界から 助けてもらったことも あるんだよ。`);
+      setButtons([{ label: 'くわしく 見る', cb: () => this.show() }]);
+    },
+    show() {
+      sTap();
+      say(`2011年の 東日本大震災の とき、159の 国・地域と、43の 国際機関から「支援したい」という 申し出が あったんだ。国際緊急援助隊など、じっさいに かけつけてくれた 国も あったよ。`);
+      setButtons([{ label: 'かんがえる', cb: () => this.ask() }]);
+    },
+    ask() {
+      say(`国際協力とは、どんな 関係だと 思う？`);
+      setButtons(choiceRow(['ア 日本が 一方的に 助けてあげる 関係', 'イ 世界中の 国と 国が、おたがいに 助けあう 関係', 'ウ お金が ある 国だけが 得を する 関係'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 国際協力は、いつも 一方通行では ないんだ。日本が 世界を 助けることも、世界が 日本を 助けてくれることも ある。そうやって、世界は みんな つながっているんだね。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 日本が 一方的に 助けてあげる 関係', 'イ 世界中の 国と 国が、おたがいに 助けあう 関係', 'ウ お金が ある 国だけが 得を する 関係'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ムスビの丘 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 世界の 平和と 安全を 守る 話しあいの 場所は、（<span class="blankWord" data-a="安全保障理事会（あんぜんほしょうりじかい）">？？？</span>）。<br>
+        ② SDGsの 目標は 全部で（<span class="blankWord" data-a="17（じゅうなな）">？？？</span>）ある。<br>
+        ③ 日本の ODAを 実さいに 行う 機関は（<span class="blankWord" data-a="JICA（こくさいきょうりょくきこう）">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 世界の 4人に1人くらい</b> でした（約21億人、2024年ユニセフ調べ）！ 世界の 課題は、わたしたち みんなで 力を あわせて 解決していく ものなんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちの 人に「SDGsで、知っている 目標が あるか」聞いてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#0f2a3a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'tsunagari', scope: { type: 'glow' } });
+      S.tsunagariFound = new Set(TSUNAGARI.map(t => t.key));
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 国連や SDGsについて、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「SDGsの目標はいくつ？」「安全保障理事会って なに？」`);
+      setButtons([
+        { label: '🏛️ 国連の しくみ図', cls: 'sub', cb: () => this.show('kokuren') },
+        { label: '🎯 SDGsの 目標図', cls: 'sub', cb: () => this.show('sdgs') },
+        { label: '🚰 井戸の つながり図', cls: 'sub', cb: () => this.show('tsunagari') },
+        { label: '🤝 国際協力の 図', cls: 'sub', cb: () => this.show('kyouryoku') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_sdgs などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

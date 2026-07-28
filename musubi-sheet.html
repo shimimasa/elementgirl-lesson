@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ムスビの丘 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1a5c7a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 24mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .yajiTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .yajiTable th, .yajiTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .yajiTable th { background: #cfe9ee; text-align: center; }
+  .yajiTable td.letter { text-align: center; font-weight: 700; width: 8mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌏 ムスビの丘 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      世界には、安全な 水を 飲めない 人が どれくらい いると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 💯 100人くらい</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🌍 世界の 4人に1人くらい</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 😊 もう だれも いない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．国連の しくみさがし（①〜③）</span>
+    <div class="secBody">
+      3つの 場所を 調べて、名前を 下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">①</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">②</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">③</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">総会</span>
+        <span class="wordBank">安全保障理事会</span>
+        <span class="wordBank">ユニセフ（国連児童基金）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．SDGs17の 目標さがし（あ〜え）</span>
+    <div class="secBody">
+      4つの カードを 調べて、目標名を 線で むすぶか、記号で 書こう。
+      <table class="yajiTable">
+        <tr><th>記号</th><th>目標</th><th>ないよう（せんたく）</th></tr>
+        <tr><td class="letter">あ</td><td>目標1</td><td rowspan="4" style="vertical-align:top">
+          貧困をなくそう　・　質の高い教育をみんなに<br>
+          安全な水とトイレを世界中に　・　気候変動に具体的な対策を<br>
+          → あ〜えに あう ものを（　）に 書こう
+        </td></tr>
+        <tr><td class="letter">い</td><td>目標4</td></tr>
+        <tr><td class="letter">う</td><td>目標6</td></tr>
+        <tr><td class="letter">え</td><td>目標13</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．井戸プロジェクトの つながり（あ〜え）</span>
+    <div class="secBody">
+      1つの 井戸が つながる 4つの SDGs目標を、下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　）</div>
+        <div class="clueBox"><span class="rletter">え</span>（　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">安全な水</span>
+        <span class="wordBank">健康</span>
+        <span class="wordBank">教育</span>
+        <span class="wordBank">ジェンダー平等</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．日本の 国際協力さがし（あ〜う）</span>
+    <div class="secBody">
+      3つの カードを 調べて、名前を（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">ODA</span>
+        <span class="wordBank">JICA</span>
+        <span class="wordBank">青年海外協力隊</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（世界と助けあう日本）</span>
+    <div class="secBody">
+      国際協力とは、どんな 関係だと 思う？（〇を つけよう）<br>
+      ア 日本が 一方的に 助けてあげる 関係　・　イ おたがいに 助けあう 関係　・　ウ お金が ある国だけが 得を する 関係
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 世界の 平和と 安全を 守る 話しあいの 場所は（<span class="fillLine"></span>）。<br>
+      ② SDGsの 目標は 全部で（<span class="fillLine sm"></span>）ある。<br>
+      ③ 日本の ODAを 実さいに 行う 機関は（<span class="fillLine sm"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの 人に「SDGsで、知っている 目標が あるか」聞いてみよう。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ムスビの丘 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ムスビの丘 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「公民（国際社会とSDGs）」・学力幅あり・協力型／ 使うもの：「musubi.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_sdgs</b> などで途中再開（m_kokuren／m_sdgs／m_tsunagari／m_kyouryoku／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🏛️ 国連の しくみさがし</td><td>総会・安全保障理事会・ユニセフの3つをボタンで確認 → 「平和と安全を守る話しあいの場所は？」クイズ</td></tr>
+      <tr><td class="min">11〜19分</td><td>🎯 SDGs17の 目標さがし</td><td>あ〜えの4つのカードを順番にタップして発見 → 「SDGsの目標はいくつ？」クイズ</td></tr>
+      <tr><td class="min">19〜29分</td><td>🚰 井戸プロジェクトの つながり（<b>今日の見せ場</b>）</td><td>あ〜えの4つのつながりを発見 → 「1つの井戸がいくつの目標につながった？」クイズ。1人ずつ交代でタップさせるとよい</td></tr>
+      <tr><td class="min">29〜36分</td><td>🤝 日本の 国際協力さがし</td><td>あ〜うの3つのカードを発見 → 「ODAを行う機関は？」クイズ</td></tr>
+      <tr><td class="min">36〜41分</td><td>🌍 はかせチャレンジ（世界と助けあう日本）</td><td>東日本大震災での海外支援を紹介 → 「国際協力とはどんな関係？」クイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「家族にSDGsについて聞く」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「日本の国際協力さがし」を右下「つぎ▶」でスキップ可（<b>井戸プロジェクトのつながり・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 世界の4人に1人くらい</b>（約21億人、2024年ユニセフ調べ）／国連のしくみ＝<b>イ 安全保障理事会</b>／
+      SDGsの目標数＝<b>イ 17こ</b>／
+      井戸プロジェクトのつながり＝<b>イ 4つ以上</b>／
+      日本の国際協力＝<b>イ JICA</b>／
+      はかせ＝<b>イ おたがいに助けあう関係</b>／
+      まとめ＝①<b>安全保障理事会</b>　②<b>17</b>　③<b>JICA</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（国際社会・SDGsの本物の知識です）</h2>
+    <ul>
+      <li>国連（国際連合）：世界の平和と安全、経済・社会の発展のために190を超える国が加盟する国際機関。総会（すべての加盟国が参加する最高意思決定機関）、安全保障理事会（世界の平和と安全の維持に主要な責任を持つ）、ユニセフ（国連児童基金、子どもの命と権利を守る）などの機関がある</li>
+      <li>SDGs（持続可能な開発目標）：2015年に国連で採択された、2030年までに達成をめざす17の目標。貧困・飢餓・教育・水・気候変動など、世界共通の課題を扱う</li>
+      <li>安全な水：世界の人口の4人に1人にあたる約21億人が、安全に管理された飲み水を利用できていない（2024年、ユニセフ等の報告書より）</li>
+      <li>井戸と教育の関係：水くみは女性や女の子の仕事とされることが多く、遠い水源までの水くみに何時間もかかる地域では、女の子が学校に通う時間が奪われる。井戸ができて水くみの負担が減ると、通学や健康、ジェンダー平等など複数の課題の改善につながる（ユニセフ・国際NGO等の報告に基づく）</li>
+      <li>日本の国際協力：ODA（政府開発援助）は政府が発展途上国に行う資金・技術協力。JICA（国際協力機構）がODAを実際に行う機関。青年海外協力隊はJICAが実施する海外ボランティア派遣制度で、原則2年間現地で活動する</li>
+      <li>東日本大震災（2011年）では、159の国・地域と43の国際機関から支援の申し出があり、23の国・地域が緊急援助隊等を派遣した（外交青書等の記録に基づく）。国際協力は日本から世界への一方通行ではなく、おたがいに助けあう関係であることを示す事実</li>
+      <li>「ムスビの丘」の登場人物・シナリオはすべて架空の説明用キャラクターで、特定の国・政党・政治家・時事的な国際問題を扱うものではない</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「井戸プロジェクトのつながり」が今日いちばんの見せ場。1人ずつ交代であ〜えを押させると全員が参加できる</li>
+      <li>本単元は国際社会・SDGsという世界規模の内容を扱うが、特定の国・地域の政治的立場や時事的な国際紛争には触れない。授業中にそうした話題が出た場合は、価値判断を示さず中立に受け止め、深入りしない</li>
+      <li>「世界には課題がたくさんある」という事実だけで終わらせず、「日本も世界と助けあっている」「1つの支援がいくつもの課題解決につながる」という前向きな着地を大切にする</li>
+      <li>施設の子どもたちの家庭状況に配慮し、おうちミッションは無理に聞き取りを強制しない（「聞けなくても大丈夫」と一言添えるとよい）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「SDGsの目標はいくつ？」「安全保障理事会って何？」「JICAって何をするところ？」</li>
+      <li>社会シリーズは公民分野5作目（第17弾「ひとつぶ村」＝選挙→第24弾「テンビンの間」＝三権分立→第25弾「マルの蔵」＝税金→第26弾「ミハシラの杜」＝憲法と人権に続く）。これで公民分野の主要単元は一通り完成</li>
+      <li>教科書・資料集のSDGs17目標一覧表と本作の「SDGs17の目標さがし」を見比べると理解が深まる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
