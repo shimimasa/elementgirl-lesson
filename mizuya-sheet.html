@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ミズヤの里 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1e5c3a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cfead6; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cfead6; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🏠 ミズヤの里 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      木曽川・長良川・揖斐川が 集まる この 土地、大雨の ときは どうなると 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> ⛰️ 高い 土地だから 洪水には なりにくい</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🏠 昔から 何度も 水に つかり、堤防や 水屋の 備えを してきた</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> ☀️ 一度も 洪水に なったことが ない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．輪中の しくみを 発見しよう</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">輪中堤</span>
+        <span class="wordBank">水屋</span>
+        <span class="wordBank">上げ舟</span>
+      </div>
+      <div style="margin-top:1.2mm">なぜ 村の まわりを 堤防で 囲んだ？　ア 敵よけ ・ イ 洪水から 村を 守るため ・ ウ 見た目（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．もし 堤防が やぶれたら？ — 水位を ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 水位を えらんで 試してみよう。母屋・水屋が どうなったか 書こう（母屋だけ／水屋も／どちらも 無事）。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      水屋が 高い 石垣の 上に あるのは なぜ？　ア 見晴らし ・ イ 母屋が 水に つかっても 命と 食料を 守るため ・ ウ かざり（〇を つけよう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．宝暦治水（1754〜55年）</span>
+    <div class="secBody">
+      なぜ 薩摩藩の 武士が 命がけで 工事を したのだろう？（〇を つけよう）<br>
+      ア 薩摩藩が 自分から 手伝った　・　イ 江戸幕府に 工事を 命じられたから　・　ウ お金もうけの ため
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．今の くらしと 排水機場</span>
+    <div class="secBody">
+      今の 輪中に 備えられている、水を くみ出す 施設は？（〇を つけよう）<br>
+      ア 排水機場（ポンプで 川へ）　・　イ 見張りやぐら　・　ウ かんらんしゃ
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（伊勢湾台風）</span>
+    <div class="secBody">
+      1959年の 伊勢湾台風の あと、さらに 進められたのは？（〇を つけよう）<br>
+      ア 堤防を なくす こと　・　イ 堤防を 強くし 排水機場を 整えること　・　ウ 村ごと 引っこす こと
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 母屋より 高い 石垣の 上に 建てた 避難用の 建物を（<span class="fillLine"></span>）という。<br>
+      ② 1754年、木曽三川の 治水工事を 命じられた 藩は（<span class="fillLine"></span>）。<br>
+      ③ 1959年に 大きな 高潮の 被害を もたらした 台風は（<span class="fillLine"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          家や 近所で「水や 災害から 守るための 工夫」を 1つ さがしてみよう（土のう・避難場所 など）。おうちの人と 話してみよう。<br>
+          ☐ 見つけた もの：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ミズヤの里 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ミズヤの里 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4〜5社会「地理（低い土地のくらし・木曽三川と輪中）」・学力幅あり・協力型／ 使うもの：「mizuya.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_suii</b> などで途中再開（m_shikumi／m_suii／m_houreki／m_ima／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🏠 輪中の しくみ発見</td><td>3つの手がかり（輪中堤・水屋・上げ舟）をボタンで確認 → クイズ。低い土地を洪水から守る堤防の役割を紹介</td></tr>
+      <tr><td class="min">10〜20分</td><td>💧 水位シミュレーション（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で水位を選び「試す」→母屋・水屋がどうなるか判定。複数の水位を試して、水屋のありがたみを発見させる。1人ずつ交代で選ばせるとよい</td></tr>
+      <tr><td class="min">20〜28分</td><td>⛏️ 宝暦治水（1754〜55年）</td><td>薩摩藩の武士たちの工事の様子を見せる → なぜ命がけで工事をしたかクイズ。江戸幕府の命令だったことを確認</td></tr>
+      <tr><td class="min">28〜34分</td><td>🚰 今のくらしと排水機場</td><td>ポンプで水をくみ出す様子を見せる → クイズ。昔の知恵と今の技術の両方で土地が守られていることを紹介</td></tr>
+      <tr><td class="min">34〜41分</td><td>🌀 はかせチャレンジ（伊勢湾台風）</td><td>1959年の高潮被害を紹介 → その後さらに進んだ備えをクイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「水や災害の備えさがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「宝暦治水」を右下「つぎ▶」でスキップ可（<b>水位シミュレーション・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 昔から何度も水につかり、堤防や水屋の備えをしてきた</b>／輪中のしくみ＝<b>イ 洪水から村を守るため</b>／
+      水位シミュレーション＝<b>イ 母屋が水につかっても命と食料を守るため</b>（③〜⑤あたりが「母屋浸水・水屋は無事」を最も体感しやすい）／
+      宝暦治水＝<b>イ 江戸幕府に工事を命じられたから</b>／
+      今のくらし＝<b>ア 排水機場（ポンプで川へ）</b>／
+      伊勢湾台風＝<b>イ 堤防を強くし排水機場を整えること</b>／
+      まとめ＝①<b>水屋（みずや）</b>　②<b>薩摩藩</b>　③<b>伊勢湾台風</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の地理・歴史です）</h2>
+    <ul>
+      <li>木曽川・長良川・揖斐川の「木曽三川」が集まる濃尾平野下流域（岐阜県海津市など）は、旧海津町・旧平田町域がほぼ全域「海抜0メートル地帯」。集落のまわりを堤防で囲んだ地域を「輪中」という</li>
+      <li>「水屋」は母屋より一段高い石垣（3〜5m以上）の上に建てた避難用の建物。米やみそなどの食料・生活雑貨を保管し、長期の洪水にも備えた。母屋の軒下には避難・移動用の小舟「上げ舟」、仏だんは滑車で2階へ上げられる「上げ仏だん」の構造になっていた</li>
+      <li>1754年（宝暦4年）、江戸幕府は薩摩藩に木曽三川の治水工事（分流工事）を命令。工事は難航し、薩摩藩士51人が自害、33人が病死。総奉行・平田靱負も1755年の工事完成後に自害したと伝えられる</li>
+      <li>今の輪中地域では、堤防に加えて「排水機場」（ポンプで内側にたまった水を強制的に川へ排水する施設）が整備されている</li>
+      <li>1959年（昭和34年）の伊勢湾台風では、海抜0メートル地帯で高潮による甚大な被害が発生。地域によっては決壊した堤防の修復・排水完了まで120日以上浸水状態が続いた。この教訓から堤防強化・排水機場整備がいっそう進んだ</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「水位シミュレーション」が今日いちばんの見せ場。1人ずつ交代で水位を選ばせ、低い・中くらい・高いの3パターンをできるだけ全員に見せると発見が深まる</li>
+      <li>水位シミュレーションは「高いほど悪い／低いほど良い」という単純な成功失敗ではなく、「堤防が破れても水屋が命を守る」という<b>二重の備え</b>に気づかせるのがねらい。判定結果を焦らず一つずつ読み上げるとよい</li>
+      <li>戦争ではなく治水の話なので刺激の強い演出はないが、伊勢湾台風の被害は史実として淡々と伝え、今の備え（排水機場）へ前向きにつなげる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「水屋って何？」「治水工事をしたのはどこの藩？」「水位が高くなるとどうなる？」</li>
+      <li>教科書・資料集の輪中の断面図や水屋の写真を見て、画面で確かめた構造と見比べると理解が深まる</li>
+      <li>地理「低い土地のくらし」の続きとして、「高い土地のくらし」「あたたかい／寒い土地のくらし」などの単元へ発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
