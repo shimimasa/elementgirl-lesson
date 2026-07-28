@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ミハシラの杜 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f5c34; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 24mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .yajiTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .yajiTable th, .yajiTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .yajiTable th { background: #dcefd5; text-align: center; }
+  .yajiTable td.letter { text-align: center; font-weight: 700; width: 8mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🏛️ ミハシラの杜 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      もし「人権」という 考え方が なかったら、みんなの くらしは どうなると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 😐 今と あまり 変わらない</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 😢 自由に 意見を 言えなかったり、生き方を 選べなかったりする 人が 出てくる</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 😄 もっと 自由に なって 便利になる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．日本国憲法・3つの原則さがし</span>
+    <div class="secBody">
+      3つの 原則を、下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">①</span>（　　　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">②</span>（　　　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">③</span>（　　　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">国民主権</span>
+        <span class="wordBank">基本的人権の尊重</span>
+        <span class="wordBank">平和主義</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．人権の 種類さがし（あ〜え）</span>
+    <div class="secBody">
+      4つの 人権カードを 調べて、名前を 線で むすぶか、記号で 書こう。
+      <table class="yajiTable">
+        <tr><th>記号</th><th>ないよう</th><th>人権の 種類（せんたく）</th></tr>
+        <tr><td class="letter">あ</td><td>自由に 考え、発言できる</td><td rowspan="4" style="vertical-align:top">
+          自由権　・　平等権　・　社会権　・　参政権<br>
+          → あ〜えに あう ものを（　）に 書こう
+        </td></tr>
+        <tr><td class="letter">い</td><td>差別されず、平等に あつかわれる</td></tr>
+        <tr><td class="letter">う</td><td>教育を 受ける・健康で 文化的な 生活</td></tr>
+        <tr><td class="letter">え</td><td>選挙で 投票・政治に 参加する</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．権利が ぶつかったら</span>
+    <div class="secBody">
+      夜おそく 楽器を れんしゅうしたい 自分と、静かに 休みたい 近所の人。どうするのが いちばん いいかな？（〇を つけよう）<br>
+      ① 気にせず 大きな音で れんしゅうする　・　② 時間と 音の 大きさを 決めて れんしゅうする　・　③ ぜんぶ やめてしまう
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．国民の 義務さがし（あ〜う）</span>
+    <div class="secBody">
+      3つの 義務カードを 調べて、名前を（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　）の義務</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　）の義務</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　）の義務</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">教育</span>
+        <span class="wordBank">勤労</span>
+        <span class="wordBank">納税</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（子どもの権利条約）</span>
+    <div class="secBody">
+      子どもの権利条約に ふくまれて「いない」ものは？（〇を つけよう）<br>
+      ア 休み・遊ぶ 権利　・　イ 自由に 意見を 言う 権利　・　ウ 好きなだけ ゲームを する 権利
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 日本国憲法の 3つの柱は、国民主権・（<span class="fillLine"></span>）・平和主義。<br>
+      ② 人権と 人権が ぶつかったら（<span class="fillLine"></span>）で 調整する。<br>
+      ③ 国民の 3つの 義務は 教育・勤労・（<span class="fillLine sm"></span>）の義務。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの 人に「基本的人権って、何だと思う？」と 聞いてみよう。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ミハシラの杜 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ミハシラの杜 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「公民（日本国憲法・基本的人権）」・学力幅あり・協力型／ 使うもの：「mihashira.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_jinken</b> などで途中再開（m_gensoku／m_jinken／m_tairitsu／m_gimu／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🌳 3つの 原則さがし</td><td>国民主権・基本的人権の尊重・平和主義の3本柱をボタンで確認 → 「政治の あり方を 決めるのは だれ？」クイズ</td></tr>
+      <tr><td class="min">11〜19分</td><td>🕊️ 人権の 種類さがし</td><td>あ〜えの4つのカードを順番にタップして発見 → 「教育を受ける権利はどの人権？」クイズ</td></tr>
+      <tr><td class="min">19〜29分</td><td>⚖️ 権利が ぶつかったら（<b>今日の見せ場</b>）</td><td>①〜③のボタンを試して2本柱のバランスを確認 → 「公共の福祉」クイズ。1人ずつ交代でボタンを押させるとよい</td></tr>
+      <tr><td class="min">29〜36分</td><td>📜 国民の 義務さがし</td><td>あ〜うの3つのカードを発見 → 「税金は何に使われる？」クイズ</td></tr>
+      <tr><td class="min">36〜41分</td><td>🌍 はかせチャレンジ（子どもの権利条約）</td><td>①〜④の4本柱を発見 → 「ふくまれていないものは？」クイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「家族に基本的人権について聞く」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「国民の義務さがし」を右下「つぎ▶」でスキップ可（<b>権利がぶつかったら・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 自由に意見を言えなかったり、生き方を選べなかったりする人が出てくる</b>／3つの原則＝<b>イ 国民</b>（国民主権）／
+      人権の種類＝<b>イ 社会権</b>（教育を受ける権利）／
+      権利がぶつかったら＝<b>ア 公共の福祉</b>／
+      国民の義務＝<b>イ 学校や病院、道路など、みんなのくらしのために使われる</b>／
+      はかせ＝<b>ウ 好きなだけゲームをする権利</b>（子どもの権利条約に含まれない）／
+      まとめ＝①<b>基本的人権の尊重</b>　②<b>公共の福祉</b>　③<b>納税</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（憲法・人権の本物の知識です）</h2>
+    <ul>
+      <li>日本国憲法の三大原則：国民主権・基本的人権の尊重・平和主義。1946年11月3日公布（文化の日）、1947年5月3日施行（憲法記念日）</li>
+      <li>基本的人権の分類：自由権（思想・信教・職業選択などの自由）・平等権（差別されない権利）・社会権（生存権・教育を受ける権利など）・参政権（選挙権など）・請求権（裁判を受ける権利など）。本作では小6教科書レベルの4分類（自由権・平等権・社会権・参政権）で扱う</li>
+      <li>公共の福祉：人権と人権が衝突する場面で、互いの権利を尊重しあうために調整・制限が必要になる場合があるという考え方。人権は無制限ではないが、正当な理由なく制限されるものでもない</li>
+      <li>国民の三大義務：教育を受けさせる義務（憲法26条2項）・勤労の義務（憲法27条1項）・納税の義務（憲法30条）</li>
+      <li>子どもの権利条約（児童の権利に関する条約）：1989年に国連で採択、日本は1994年に批准。生きる権利・育つ権利・守られる権利・参加する権利の4つの柱で知られる</li>
+      <li>「ミハシラの杜」の登場人物・シナリオはすべて架空の説明用キャラクターで、特定の政党・政治家・時事的な政治issueを扱うものではない</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「権利がぶつかったら」が今日いちばんの見せ場。1人ずつ交代で①〜③を押させると全員が参加できる</li>
+      <li>本単元は人権・憲法という抽象的な内容を扱うが、実在の政党・政治家・時事issueは一切登場しない。授業中にそうした話題が出た場合は、価値判断を示さず中立に受け止め、深入りしない</li>
+      <li>「子どもの権利条約」は、子どもたち自身が「大切にされる存在である」ことを実感できるテーマ。前向きなメッセージとして伝え、特定の個人の境遇には触れずしくみの説明にとどめる</li>
+      <li>おうちミッションは家庭状況に配慮し、無理に聞き取りを強制しない（「聞けなくても大丈夫」と一言添えるとよい）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「日本国憲法の3つの柱は？」「公共の福祉って何？」「国民の3つの義務は？」</li>
+      <li>社会シリーズは公民分野4作目（第17弾「ひとつぶ村」＝選挙→第24弾「テンビンの間」＝三権分立→第25弾「マルの蔵」＝税金に続く）。次回は国際社会とSDGsなどへの発展が考えられる</li>
+      <li>教科書・資料集の基本的人権の分類表と本作の「人権の種類さがし」を見比べると理解が深まる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
