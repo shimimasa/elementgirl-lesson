@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>タイトウの丘 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #8a4212; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #e6dcc0; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #e6dcc0; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🎌 タイトウの丘 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      日露戦争に 勝った 日本は、ロシアから たくさんの 賠償金を もらえたと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> たくさん もらえた</div>
+        <div class="voteOpt"><span class="vnum">イ</span> もらえなかった</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 少しだけ もらえた</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．日清戦争を知る</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">朝鮮をめぐる対立</span>
+        <span class="wordBank">下関条約（1895年）</span>
+        <span class="wordBank">三国干渉（1895年）</span>
+      </div>
+      <div style="margin-top:1.2mm">三国干渉で「遼東半島を返しなさい」と要求された日本はどうした？　ア 要求をむしして持ちつづけた　・　イ 要求にしたがって清に返した　・　ウ 3か国と新しい戦争を始めた（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．日英同盟と日露戦争</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">日英同盟（1902年）</span>
+        <span class="wordBank">日本海海戦（1905年）</span>
+      </div>
+      <div style="margin-top:1.2mm">日本海海戦で 東郷平八郎は どこの国の艦隊を うち破った？　ア イギリス　・　イ ロシア　・　ウ 清（中国）（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．ポーツマス条約 — よそうタイムの こたえ合わせ</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">ポーツマス条約（1905年）</span>
+        <span class="wordBank">賠償金はゼロ</span>
+        <span class="wordBank">日比谷焼き打ち事件</span>
+      </div>
+      <div style="margin-top:1.2mm">さいしょの よそうタイムを 思い出そう。日露戦争に 勝った日本は 賠償金を もらえた？　ア たくさんもらえた　・　イ もらえなかった　・　ウ 少しだけもらえた（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．条約改正のバランス — 天びんで たしかめよう</span>
+    <div class="secBody">
+      条約改正の 進み具合を ①〜⑧で ためして、天びんが 水平に なった 番号を 書こう。<br>
+      水平に なった 番号（　　　）　少ないと（　　　　　　　　　）、たくさん 進むと（　　　　　　　　　）。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（条約改正の完成）</span>
+    <div class="secBody">
+      条約改正が 完成した 1911年は、さいしょの 不平等条約（1858年）から 数えて どのくらい あと？（〇を つけよう）<br>
+      ア 約10年後　・　イ 約30年後　・　ウ 約50年後
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 日清戦争の 講和条約を（<span class="fillLine"></span>）と いう。<br>
+      ② 日本が イギリスと 結んだ 同盟を（<span class="fillLine"></span>）と いう。<br>
+      ③ 日露戦争の 講和条約を（<span class="fillLine"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの人に「がんばって 勝った 戦争なのに、賠償金が もらえなかったら、どんな 気持ちに なると 思う？」と 聞いてみよう。日露戦争の ころの 日本を、いっしょに 振り返ってみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　タイトウの丘 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】タイトウの丘 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（日清・日露戦争と条約改正）」・学力幅あり・協力型／ 使うもの：「taitou.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kaisei</b> などで途中再開（m_nisshin／m_nichiro／m_kouwa／m_kaisei／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>⚔️ 日清戦争を 知る</td><td>朝鮮をめぐる対立・下関条約・三国干渉の3つをボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">10〜16分</td><td>🚢 日英同盟と 日露戦争</td><td>日英同盟・日本海海戦の2つを確認 → クイズ</td></tr>
+      <tr><td class="min">16〜24分</td><td>📜 ポーツマス条約</td><td>ポーツマス条約・賠償金ゼロ・日比谷焼き打ち事件の3つを確認 → よそうタイムをここで回収</td></tr>
+      <tr><td class="min">24〜35分</td><td>⚖️ 条約改正の バランス（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で条約改正の進み具合を選び、天びんが水平になるか試す。1人ずつ交代で選ばせるとよい。低い＝まだ不平等／高い（⑦⑧）＝完全対等</td></tr>
+      <tr><td class="min">35〜41分</td><td>🏛️ はかせチャレンジ（条約改正の完成）</td><td>国際的地位の向上・半世紀ごしの悲願達成の2つを発見 → クイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「日英同盟と日露戦争」を右下「つぎ▶」でスキップ可（<b>条約改正のバランス・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ もらえなかった</b>／三国干渉＝<b>イ 要求にしたがって遼東半島を清に返した</b>／
+      日本海海戦＝<b>イ ロシア</b>／ポーツマス条約（よそう回収）＝<b>イ もらえなかった</b>／条約改正のバランス＝⑦〜⑧で 水平に なる／
+      はかせチャレンジ＝<b>ウ 約50年後</b>／
+      まとめ＝①<b>下関条約</b>　②<b>日英同盟</b>　③<b>ポーツマス条約</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>朝鮮への力をめぐって日本と清（今の中国）は対立を深め、1894年に日清戦争が始まった</li>
+      <li>1895年、下関条約が結ばれ、清は日本に台湾・遼東半島・澎湖諸島をゆずり、賠償金2億両を支払うことになった</li>
+      <li>直後にロシア・フランス・ドイツの三国干渉により、日本は遼東半島を清に返すことになった</li>
+      <li>ロシアの南下をおそれた日本は1902年にイギリスと日英同盟を結んだ</li>
+      <li>1905年、東郷平八郎ひきいる連合艦隊が日本海海戦でロシアのバルチック艦隊を打ち破った</li>
+      <li>1905年、アメリカの仲立ちでポーツマス条約が結ばれた。韓国での日本の優越権・樺太南半分・旅順大連の租借権などを得たが、賠償金は一切なかった</li>
+      <li>賠償金なしの講和に納得できない人々が日比谷公園に集まり、日比谷焼き打ち事件が起きた</li>
+      <li>1894年、陸奥宗光が日英通商航海条約で治外法権（領事裁判権）の撤廃に成功。1911年、小村寿太郎が関税自主権を完全に回復し、1858年の不平等条約から53年をへて条約改正が完成した</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「条約改正のバランス」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせると全員が参加できる</li>
+      <li>戦争の場面は「どこで何が起きたか」という事実関係にとどめ、戦闘の悲惨さや犠牲の詳細には深く立ち入らない。外交・条約改正という達成に重心を置くとよい</li>
+      <li>日比谷焼き打ち事件は「賠償金なしの条約に納得できない人々が集まった」という事実関係の紹介にとどめ、暴動の詳細描写は避ける</li>
+      <li>実在の国（ロシア・中国・イギリスなど）を悪者あつかいせず、当時の国どうしの関係として中立に伝えるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「三国干渉って何？」「なぜ賠償金はもらえなかった？」「条約改正はなぜ実現できた？」</li>
+      <li>「ケムリの港」（黒船来航・不平等条約の発生）→「ガイトウの町」（明治維新・文明開化）→「タイトウの丘」（条約改正の完成）で、幕末から明治にかけての不平等条約をめぐる一連の流れが完結する</li>
+      <li>条約改正の完成後、日本は国際社会でさらに大きな役割をになうようになっていく。大正時代以降への発展として紹介してもよい</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
