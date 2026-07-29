@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>リュウヒョウの岸 — 寒い土地の くらし たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef8fb 0%, #cdeaf5 55%, #5aa8c9 100%);
+    color: #163044;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #1f5c78; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3a7a98; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dff0f8; border: 2px solid #a8d8e8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #a8d8e8;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe3a0, #d4900f);
+    border-color: #8a5a0a; color: #163044;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #eef8fb 0%, #d8ecf5 100%);
+    border: 3px solid #2f7a9c;
+    box-shadow: inset 0 0 40px rgba(20, 60, 90, .14), 0 4px 18px rgba(10, 40, 60, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #0d2536; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #1f5c78; color: #eafbff; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(10, 40, 60, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(10, 40, 60, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #cdeaf5; cursor: pointer;
+    background: linear-gradient(180deg, #2f7a9c, #1f5c78); color: #fff;
+    box-shadow: 0 3px 0 #0a2a38; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #3a9a78, #1f6a4a); border-color: #a8e8d0; box-shadow: 0 3px 0 #123a2a; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #1f5c78; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(10, 40, 60, .3), inset 0 0 24px rgba(10, 40, 60, .18);
+    flex-shrink: 0; background: #eaf6fa;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #3a7a98;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #0d2536; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f5fbfd; border: 2px solid #a8d8e8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #3a7a98; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #163044;
+    border: 1.5px solid #cdeaf5;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1f5c78; background: #ffe3a0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #dff0f8, #d8ecf5); color: #163044;
+    border: 2px solid #1f5c78; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #1f5c78; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #2f7a9c, #1f5c78); color: #fff;
+    box-shadow: 0 3px 0 #0a2a38, 0 5px 12px rgba(10, 40, 60, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0a2a38; }
+  .btn.sub {
+    background: #dff0f8; color: #1f5c78; box-shadow: 0 3px 0 #a8d8e8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #163044; box-shadow: 0 3px 0 #a8d8e8; font-weight: 400; border: 1.5px solid #cdeaf5; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe3a0; outline: 3px solid #2f7a9c; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(8, 28, 42, .82);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f5fbfd, #d8ecf5);
+    border: 3px solid #2f7a9c; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(8, 28, 42, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #1f5c78; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #1f5c78; }
+  .panel .sub { color: #3a7a98; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #163044; border: 1.5px solid #cdeaf5; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #3a7a98; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #163044; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cdeaf5; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #1f5c78; background: #ffe3a0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #1f5c78; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #1f5c78;
+    color: #0d2536; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #3a7a98;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dff0f8; color: #1f5c78;
+    border: 1px solid #a8d8e8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #dff0f8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">❄️ リュウヒョウの岸<small>— 寒い土地の くらし —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_ryuhyo" title="流氷を 知る">★</div>
+    <div class="badge" id="bd_m_kufuu" title="家の 工夫">★</div>
+    <div class="badge" id="bd_m_yane" title="雪から 家を守れ">★</div>
+    <div class="badge" id="bd_m_ima" title="今の くらし">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">北海道の くらし</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 リュウヒョウの めがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(10,40,60,.15)"/>
+            <!-- 氷塊を かさねた からだ -->
+            <path d="M26 118 Q22 104 30 96 L90 96 Q98 104 94 118 Z" fill="#a8d8e8" stroke="#163044" stroke-width="2"/>
+            <path d="M30 98 Q26 86 33 79 L87 79 Q94 86 90 98 Z" fill="#cdeaf5" stroke="#163044" stroke-width="2"/>
+            <path d="M33 81 Q29 70 36 64 L84 64 Q91 70 87 81 Z" fill="#eafbff" stroke="#163044" stroke-width="2"/>
+            <!-- 氷の つぎめ -->
+            <path d="M46 96 L46 118 M74 96 L74 118 M50 79 L50 96 M70 79 L70 96" stroke="#163044" stroke-width="1.4" opacity=".3"/>
+            <!-- 氷の かんむり -->
+            <path d="M24 36 Q14 26 20 14 Q28 18 30 28 Q28 10 40 4 Q42 16 38 26 Q44 6 58 4 Q56 16 50 26 Q60 8 74 10 Q66 20 58 28 Q72 14 86 20 Q76 28 66 30 Q80 24 90 34 Q78 36 68 36" fill="#eef8fb" stroke="#163044" stroke-width="1.6" stroke-linejoin="round"/>
+            <!-- あたま -->
+            <circle cx="60" cy="42" r="24" fill="#eef8fb" stroke="#163044" stroke-width="2.5"/>
+            <!-- みみ（氷の かけら） -->
+            <ellipse cx="37" cy="30" rx="7" ry="9" fill="#cdeaf5" stroke="#163044" stroke-width="2"/>
+            <ellipse cx="83" cy="30" rx="7" ry="9" fill="#cdeaf5" stroke="#163044" stroke-width="2"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="48" rx="5.5" ry="3.6" fill="#a8d8e8" opacity=".55"/>
+            <ellipse cx="74" cy="48" rx="5.5" ry="3.6" fill="#a8d8e8" opacity=".55"/>
+            <!-- め -->
+            <g class="eyes">
+              <circle cx="51" cy="40" r="5.4" fill="#fff"/>
+              <circle cx="69" cy="40" r="5.4" fill="#fff"/>
+              <circle cx="51.6" cy="40.6" r="3.2" fill="#0d2536"/>
+              <circle cx="69.6" cy="40.6" r="3.2" fill="#0d2536"/>
+              <circle cx="52.8" cy="38.8" r="1.1" fill="#fff"/>
+              <circle cx="70.8" cy="38.8" r="1.1" fill="#fff"/>
+            </g>
+            <!-- はな -->
+            <ellipse cx="60" cy="50" rx="4.4" ry="2.8" fill="#163044"/>
+            <!-- くち（にっこり） -->
+            <path d="M47 56 Q60 65 73 56" fill="none" stroke="#163044" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>流氷<rt>りゅうひょう</rt></ruby>の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>リュウヒョウ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">❄️ リュウヒョウの岸ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   リュウヒョウの岸 — 寒い土地の くらし（小5社会・地理・協力型・1ファイル）
+   流氷を知る（アムール川・海のめぐみ）→ 昔ながらの家の工夫（二重窓・風除室・断熱材）→
+   雪から家を守るシミュレーション（屋根のかたむき）→ 今のくらし（ロードヒーティング・スタッドレスタイヤ・無落雪屋根）→
+   はかせ（寒さをいかした産業）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  ryuhyou: ruby('流氷', 'りゅうひょう'),
+  amuru: ruby('アムール川', 'あむーるがわ'),
+  hyousou: ruby('氷藻', 'ひょうそう'),
+  setsugan: ruby('接岸', 'せつがん'),
+  nijuumado: ruby('二重窓', 'にじゅうまど'),
+  fuujoshitsu: ruby('風除室', 'ふうじょしつ'),
+  dannetsu: ruby('断熱材', 'だんねつざい'),
+  muraku: ruby('無落雪屋根', 'むらくせつやね'),
+  roadheat: 'ロードヒーティング',
+  josetsusha: ruby('除雪車', 'じょせつしゃ'),
+  supaiku: 'スパイクタイヤ',
+  studless: 'スタッドレスタイヤ',
+  funjin: ruby('粉じん公害', 'ふんじんこうがい'),
+  rakunou: ruby('酪農', 'らくのう'),
+  seinyuu: ruby('生乳', 'せいにゅう'),
+  jagaimo: 'じゃがいも',
+  tensai: 'てんさい',
+  saihyousen: ruby('砕氷船', 'さいひょうせん'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+const ANGLE_DEG = [0, 5, 10, 20, 30, 40, 50, 60];
+
+// ---------- 判定ロジック ----------
+function judgeYane(n) { // n: 1-8　屋根のかたむき
+  if (n <= 2) return { level: 'low' };
+  if (n >= 7) return { level: 'high' };
+  return { level: 'good' };
+}
+
+// ---------- 流氷を知る：手がかり ----------
+const RYUHYO_POINTS = [
+  { key: 0, letter: 'あ', name: '流氷の旅', x: 660, y: 210,
+    txt: `${W.ryuhyou}は、ロシアと 中国の 国境を 流れる 大きな川「${W.amuru}」の 水が こおって できる。海を わたって、${W.setsugan}する ころには およそ1000kmも 旅を しているんだ。` },
+  { key: 1, letter: 'い', name: '海のめぐみ', x: 320, y: 440,
+    txt: `${W.ryuhyou}が とけると、氷に とけこんでいた 鉄分や 栄養が 海に 流れ出す。氷の中で ふえた 小さな 藻（${W.hyousou}）を 食べに、たくさんの 生き物が 集まってくる。` },
+];
+
+// ---------- 昔ながらの 家の 工夫 ----------
+const KUFUU_POINTS = [
+  { key: 0, letter: 'あ', name: '二重窓', x: 230, y: 180,
+    txt: `一まいの ガラスでは なく、${W.nijuumado}に して あいだに 空気の層を 作る。空気の層が、冷たい 外の空気を ふせいでくれる。` },
+  { key: 1, letter: 'い', name: '風除室', x: 500, y: 480,
+    txt: `玄関の まわりを ガラスで かこった「${W.fuujoshitsu}」。冷たい風や 雪が 家の中に 入るのを ふせぎ、玄関の 床が こおるのも 防ぐ。荷物おきばにも 使われるよ。` },
+  { key: 2, letter: 'う', name: '厚い壁と断熱材', x: 790, y: 190,
+    txt: `かべの 中に 厚い ${W.dannetsu}を つめこんで、家の中の あたたかさが 外に にげないように している。` },
+];
+
+// ---------- 今の くらし ----------
+const IMA_POINTS = [
+  { key: 0, letter: 'あ', name: 'ロードヒーティング・除雪車', x: 230, y: 220,
+    txt: `道路の下に ヒーターを 通して 雪を とかす「${W.roadheat}」。大きな ${W.josetsusha}が 毎日 道路の 雪を どけてくれる。` },
+  { key: 1, letter: 'い', name: 'スタッドレスタイヤ', x: 790, y: 220,
+    txt: `昔は ピンの ついた「${W.supaiku}」を 使っていたが、ピンが 道路を けずって ${W.funjin}を 引きおこした。今は ゴムの みぞで 雪道を つかむ「${W.studless}」に かわったんだ。` },
+  { key: 2, letter: 'う', name: '無落雪屋根', x: 500, y: 480,
+    txt: `屋根を あえて 平らに して、まん中に むかって 雪どけ水を 流す「${W.muraku}」。雪おろしの 手間や 落雪事故を へらす 新しい 工夫だよ。` },
+];
+
+// ---------- はかせ：寒さをいかした産業 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '酪農', x: 230, y: 220,
+    txt: `すずしい 気候は 乳牛を 育てるのに ぴったり。北海道の ${W.seinyuu}生産量は、全国の 半分以上を しめる 日本一！` },
+  { key: 1, letter: 'い', name: '畑作（じゃがいも・てんさい）', x: 790, y: 220,
+    txt: `${W.jagaimo}は 全国の 生産量の 8わり以上、${W.tensai}（さとうだいこん）は ほぼ 北海道だけで 作られている。` },
+  { key: 2, letter: 'う', name: '流氷観光', x: 500, y: 480,
+    txt: `網走などでは、${W.saihyousen}「おーろら」に 乗って 流氷原を すすむ 観光が 人気。冬ならではの 寒さを 生かした 楽しみ方だよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'ryuhyo',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  ryuhyoFound: new Set(),
+  kufuuFound: new Set(),
+  imaFound: new Set(),
+  hakaseFound: new Set(),
+  yaneLevel: 4,
+  yaneTries: new Set(),
+  yaneAnimT: 0,
+  yaneDoneT: 0,
+  yaneResult: null,
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sWind = () => { tone(210, 0, 0.7, 'sawtooth', 0.05); tone(140, 0.12, 0.9, 'sawtooth', 0.06); };
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- カード発見ポイントの共通描画 ----------
+function drawPointMarkers(points, foundSet, X, Y, sc) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1f5c78' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#163044'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#1f5c78';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 流氷を知る ----------
+function drawRyuhyoScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(500));
+  g.addColorStop(0, '#eef8fb'); g.addColorStop(1, '#5aa8c9');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(180,200,170,.85)';
+  gctx.fillRect(X(0), Y(500), 1000 * sc, 140 * sc);
+  const floes = [[150, 300, 60], [260, 340, 45], [130, 400, 50], [330, 280, 38], [420, 360, 55], [520, 300, 42], [600, 380, 60], [700, 320, 46], [800, 270, 50], [860, 360, 40], [230, 220, 34], [500, 220, 30]];
+  floes.forEach(([fx, fy, fr]) => {
+    gctx.fillStyle = '#eafbff'; gctx.strokeStyle = '#a8d8e8'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath();
+    for (let i = 0; i < 7; i++) {
+      const a = i / 7 * TAU;
+      const rr = fr * (0.75 + 0.25 * Math.sin(i * 2.1 + fx));
+      const px = fx + Math.cos(a) * rr, py = fy + Math.sin(a) * rr * 0.6;
+      if (i === 0) gctx.moveTo(X(px), Y(py)); else gctx.lineTo(X(px), Y(py));
+    }
+    gctx.closePath(); gctx.fill(); gctx.stroke();
+  });
+  gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.globalAlpha = .85; gctx.fillText('❄️', X(880), Y(120));
+  gctx.globalAlpha = .55; gctx.fillText('❄️', X(80), Y(160));
+  gctx.globalAlpha = .35; gctx.fillText('❄️', X(480), Y(90));
+  gctx.globalAlpha = 1;
+  drawPointMarkers(RYUHYO_POINTS, S.ryuhyoFound, X, Y, sc);
+}
+
+// ---------- 雪の松（共通イラスト） ----------
+function drawSnowPine(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#5a4a3a'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 1.6 * sc;
+  gctx.fillRect(X(cx - 5), Y(baseY - 6), 10 * sc, 40 * sc);
+  for (let i = 0; i < 3; i++) {
+    gctx.beginPath();
+    gctx.moveTo(X(cx), Y(baseY - 40 - i * 30));
+    gctx.lineTo(X(cx - 30 + i * 4), Y(baseY - 6 - i * 26));
+    gctx.lineTo(X(cx + 30 - i * 4), Y(baseY - 6 - i * 26));
+    gctx.closePath();
+    gctx.fillStyle = i % 2 === 0 ? '#2f6a4a' : '#3a7a5a';
+    gctx.fill(); gctx.stroke();
+    gctx.fillStyle = 'rgba(255,255,255,.85)';
+    gctx.beginPath();
+    gctx.moveTo(X(cx), Y(baseY - 40 - i * 30));
+    gctx.lineTo(X(cx - 14 + i * 2), Y(baseY - 14 - i * 26));
+    gctx.lineTo(X(cx + 14 - i * 2), Y(baseY - 14 - i * 26));
+    gctx.closePath(); gctx.fill();
+  }
+}
+
+// ---------- 家（固定の屋根・工夫みっけ用） ----------
+function drawHouse(X, Y, sc) {
+  const bx = 500, baseY = 500;
+  gctx.fillStyle = '#eef8fb'; gctx.strokeStyle = 'rgba(168,216,232,.5)'; gctx.lineWidth = 1 * sc;
+  gctx.fillRect(X(bx - 270), Y(baseY - 4), 540 * sc, 24 * sc);
+  drawSnowPine(X, Y, sc, bx - 250, baseY);
+  drawSnowPine(X, Y, sc, bx + 250, baseY);
+  gctx.fillStyle = '#d8c8a8'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(bx - 170), Y(baseY - 130), 340 * sc, 130 * sc); gctx.fill(); gctx.stroke();
+  [[-130, 70], [60, 70]].forEach(([ox, ww]) => {
+    gctx.fillStyle = '#cdeaf5'; gctx.fillRect(X(bx + ox), Y(baseY - 95), ww * sc, 60 * sc);
+    gctx.strokeStyle = '#163044'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(bx + ox), Y(baseY - 95), ww * sc, 60 * sc);
+    gctx.strokeStyle = '#fff'; gctx.lineWidth = 1.6 * sc;
+    gctx.strokeRect(X(bx + ox + 8), Y(baseY - 87), (ww - 16) * sc, 44 * sc);
+  });
+  gctx.fillStyle = 'rgba(205,234,245,.75)'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 2 * sc;
+  gctx.fillRect(X(bx - 24), Y(baseY - 56), 48 * sc, 56 * sc);
+  gctx.strokeRect(X(bx - 24), Y(baseY - 56), 48 * sc, 56 * sc);
+  drawSnowPileRoof(X, Y, sc, bx, baseY, 35, 0.5);
+  gctx.font = `${28 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('❄️', X(bx), Y(baseY - 205));
+}
+
+function drawKufuuScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  g.addColorStop(0, '#dff0f8'); g.addColorStop(1, '#f5fbfd');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#eef8fb';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 240 * sc);
+  drawHouse(X, Y, sc);
+  drawPointMarkers(KUFUU_POINTS, S.kufuuFound, X, Y, sc);
+}
+
+// ---------- 雪から家を守れ（メイン操作） ----------
+function drawSnowPileRoof(X, Y, sc, bx, baseY, angleDeg, snowFrac) {
+  const halfW = 220;
+  const rise = halfW * Math.tan(clamp(angleDeg, 0, 60) * Math.PI / 180);
+  const peakY = baseY - 130 - Math.min(rise, 260);
+  gctx.fillStyle = '#3a7a5a'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(bx - halfW), Y(baseY - 130));
+  gctx.lineTo(X(bx), Y(peakY));
+  gctx.lineTo(X(bx + halfW), Y(baseY - 130));
+  gctx.lineTo(X(bx + halfW - 45), Y(baseY - 118));
+  gctx.lineTo(X(bx), Y(peakY + 24));
+  gctx.lineTo(X(bx - halfW + 45), Y(baseY - 118));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+
+  const thick = 6 + clamp(snowFrac, 0, 1) * 26;
+  if (thick > 6.5) {
+    gctx.fillStyle = 'rgba(255,255,255,.92)';
+    gctx.beginPath();
+    gctx.moveTo(X(bx - halfW), Y(baseY - 130 - thick * 0.25));
+    gctx.lineTo(X(bx), Y(peakY - thick * 0.6));
+    gctx.lineTo(X(bx + halfW), Y(baseY - 130 - thick * 0.25));
+    gctx.lineTo(X(bx + halfW - 45), Y(baseY - 118 - thick * 0.15));
+    gctx.lineTo(X(bx), Y(peakY + 24 - thick * 0.4));
+    gctx.lineTo(X(bx - halfW + 45), Y(baseY - 118 - thick * 0.15));
+    gctx.closePath(); gctx.fill();
+  }
+  return { halfW, peakY };
+}
+function drawSlideOff(X, Y, sc, bx, baseY, peakY, halfW, t) {
+  const midY = (peakY + (baseY - 130)) / 2;
+  [-1, 1].forEach(dir => {
+    const sx = lerp(bx + dir * halfW * 0.4, bx + dir * (halfW + 50), t);
+    const sy = lerp(midY, baseY + 6, t);
+    gctx.globalAlpha = clamp(1 - t * 0.2, 0.5, 1);
+    gctx.fillStyle = '#fff'; gctx.strokeStyle = '#a8d8e8'; gctx.lineWidth = 1.4 * sc;
+    gctx.beginPath(); gctx.ellipse(X(sx), Y(sy), 24 * sc * (1 - t * 0.25), 15 * sc * (1 - t * 0.25), 0, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.globalAlpha = 1;
+  });
+  if (t > 0.8) {
+    gctx.fillStyle = 'rgba(255,255,255,.6)';
+    [-1, 1].forEach(dir => {
+      gctx.beginPath(); gctx.arc(X(bx + dir * (halfW + 50)), Y(baseY + 6), 26 * sc * (t - 0.8) * 5, 0, TAU); gctx.fill();
+    });
+  }
+}
+function drawAvalanche(X, Y, sc, bx, baseY, peakY, t) {
+  const fy = lerp(peakY, baseY + 20, t);
+  gctx.fillStyle = '#fff'; gctx.strokeStyle = '#a8d8e8'; gctx.lineWidth = 1.6 * sc;
+  gctx.beginPath(); gctx.ellipse(X(bx), Y(fy), (36 + t * 34) * sc, (22 + t * 22) * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  if (t > 0.65) {
+    gctx.fillStyle = 'rgba(255,255,255,.75)';
+    gctx.beginPath(); gctx.arc(X(bx), Y(baseY + 14), 44 * sc * (t - 0.65) * 2.9, 0, TAU); gctx.fill();
+    gctx.font = `${24 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('⚠️', X(bx + 70), Y(baseY - 40));
+  }
+}
+function drawYaneScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  g.addColorStop(0, '#dff0f8'); g.addColorStop(1, '#f5fbfd');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#eef8fb';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 240 * sc);
+
+  const bx = 500, baseY = 500;
+  const angleDeg = ANGLE_DEG[clamp((S.yaneLevel || 1) - 1, 0, 7)];
+  const snowT = S.yaneAnimT || 0;
+  const doneT = S.yaneDoneT || 0;
+  const remainFrac = (S.yaneResult === 'good' || S.yaneResult === 'high') ? clamp(1 - doneT * 1.15, 0, 1) : 1;
+
+  drawSnowPine(X, Y, sc, bx - 250, baseY);
+  drawSnowPine(X, Y, sc, bx + 250, baseY);
+
+  gctx.fillStyle = '#d8c8a8'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(bx - 170), Y(baseY - 130), 340 * sc, 130 * sc); gctx.fill(); gctx.stroke();
+  [[-130, 70], [60, 70]].forEach(([ox, ww]) => {
+    gctx.fillStyle = '#cdeaf5'; gctx.fillRect(X(bx + ox), Y(baseY - 95), ww * sc, 60 * sc);
+    gctx.strokeStyle = '#163044'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(bx + ox), Y(baseY - 95), ww * sc, 60 * sc);
+  });
+
+  const { halfW, peakY } = drawSnowPileRoof(X, Y, sc, bx, baseY, angleDeg, snowT * remainFrac);
+
+  if (S.yaneResult === 'good' && doneT > 0) drawSlideOff(X, Y, sc, bx, baseY, peakY, halfW, doneT);
+  if (S.yaneResult === 'high' && doneT > 0) drawAvalanche(X, Y, sc, bx, baseY, peakY, doneT);
+
+  gctx.fillStyle = '#163044'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`屋根の かたむき ${NUMS[clamp((S.yaneLevel || 1) - 1, 0, 7)]}（約${angleDeg}°）`, X(500), Y(46));
+}
+
+// ---------- 今の くらし ----------
+function drawImaScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  g.addColorStop(0, '#dff0f8'); g.addColorStop(1, '#f0f4ea');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#eef8fb';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 240 * sc);
+  gctx.fillStyle = '#8a8f92';
+  gctx.fillRect(X(0), Y(430), 1000 * sc, 90 * sc);
+  gctx.strokeStyle = 'rgba(255,255,255,.6)'; gctx.setLineDash([20 * sc, 14 * sc]); gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(0), Y(475)); gctx.lineTo(X(1000), Y(475)); gctx.stroke(); gctx.setLineDash([]);
+  gctx.strokeStyle = 'rgba(224,90,40,.55)'; gctx.lineWidth = 2 * sc;
+  for (let lx = 40; lx < 960; lx += 50) { gctx.beginPath(); gctx.moveTo(X(lx), Y(492)); gctx.lineTo(X(lx + 20), Y(492)); gctx.stroke(); }
+  gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🚜', X(760), Y(455));
+  gctx.fillText('🚗', X(260), Y(455));
+  gctx.fillStyle = '#d8c8a8'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 2 * sc;
+  gctx.fillRect(X(700), Y(240), 220 * sc, 130 * sc); gctx.strokeRect(X(700), Y(240), 220 * sc, 130 * sc);
+  gctx.fillStyle = 'rgba(255,255,255,.9)'; gctx.fillRect(X(700), Y(228), 220 * sc, 16 * sc);
+  gctx.strokeRect(X(700), Y(228), 220 * sc, 16 * sc);
+  gctx.fillStyle = '#d8c8a8'; gctx.strokeStyle = '#163044';
+  gctx.fillRect(X(90), Y(260), 190 * sc, 110 * sc); gctx.strokeRect(X(90), Y(260), 190 * sc, 110 * sc);
+  gctx.beginPath(); gctx.moveTo(X(80), Y(260)); gctx.lineTo(X(185), Y(200)); gctx.lineTo(X(290), Y(260)); gctx.closePath();
+  gctx.fillStyle = '#3a7a5a'; gctx.fill(); gctx.stroke();
+  gctx.fillStyle = 'rgba(255,255,255,.9)';
+  gctx.beginPath(); gctx.moveTo(X(80), Y(260)); gctx.lineTo(X(185), Y(200)); gctx.lineTo(X(290), Y(260)); gctx.lineTo(X(270), Y(266)); gctx.lineTo(X(185), Y(214)); gctx.lineTo(X(100), Y(266)); gctx.closePath(); gctx.fill();
+  drawPointMarkers(IMA_POINTS, S.imaFound, X, Y, sc);
+}
+
+// ---------- はかせ：寒さをいかした産業 ----------
+function drawHakaseScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#dff0f8'); g.addColorStop(1, '#eafbff');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillStyle = '#cdeaf5'; gctx.fillRect(X(60), Y(110), 300 * sc, 170 * sc);
+  gctx.strokeStyle = '#3a7a98'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(60), Y(110), 300 * sc, 170 * sc);
+  ['🐄', '🥛', '🐄', '🥛'].forEach((ch, i) => gctx.fillText(ch, X(120 + i * 65), Y(200)));
+  gctx.fillStyle = '#dfe8c8'; gctx.fillRect(X(640), Y(110), 300 * sc, 170 * sc);
+  gctx.strokeStyle = '#5a8a30'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(640), Y(110), 300 * sc, 170 * sc);
+  ['🥔', '🥔', '🥔', '🥔'].forEach((ch, i) => gctx.fillText(ch, X(700 + i * 55), Y(200)));
+  const gg = gctx.createLinearGradient(0, Y(320), 0, Y(600));
+  gg.addColorStop(0, '#5aa8c9'); gg.addColorStop(1, '#1f5c78');
+  gctx.fillStyle = gg; gctx.fillRect(X(0), Y(320), 1000 * sc, 280 * sc);
+  ['🧊', '🚢', '🦭', '🦅', '🧊'].forEach((ch, i) => gctx.fillText(ch, X(230 + i * 130), Y(470 + (i % 2) * 40)));
+  drawPointMarkers(HAKASE_POINTS, S.hakaseFound, X, Y, sc);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'ryuhyo') drawRyuhyoScene(X, Y, sc);
+  else if (S.scene === 'kufuu') drawKufuuScene(X, Y, sc);
+  else if (S.scene === 'yane') drawYaneScene(X, Y, sc);
+  else if (S.scene === 'ima') drawImaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawYaneScene(X, Y, sc);
+}
+
+// ---------- リュウヒョウの めがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f5fbfd'); grd.addColorStop(1, '#a8d8e8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#1f5c78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const idx = clamp((S.yaneLevel || 1) - 1, 0, 7);
+    const r = judgeYane(idx + 1);
+    const cx = R, cy = R * 1.05, rad = R * 0.72;
+    sctx.strokeStyle = '#dfeef2'; sctx.lineWidth = R * 0.13; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, 0); sctx.stroke();
+    const frac = idx / 7;
+    const ang = Math.PI - Math.PI * frac;
+    sctx.strokeStyle = r.level === 'good' ? '#2f9a5a' : r.level === 'low' ? '#e0a020' : '#c1442e';
+    sctx.lineWidth = R * 0.13;
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, ang, true); sctx.stroke();
+    sctx.strokeStyle = '#163044'; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx + Math.cos(ang) * rad * 0.88, cy + Math.sin(ang) * rad * 0.88); sctx.stroke();
+    sctx.fillStyle = '#163044'; sctx.beginPath(); sctx.arc(cx, cy, R * 0.05, 0, TAU); sctx.fill();
+    label(`かたむき ${NUMS[idx]}（約${ANGLE_DEG[idx]}°）`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#eafbff'); g2.addColorStop(1, 'rgba(234,251,255,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#1f5c78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('❄️', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#1f5c78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🏠', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#163044';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1f5c78', '#ffe3a0', '#a8d8e8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  if ((S.yaneResult === 'good' || S.yaneResult === 'high') && S.yaneAnimT >= 1) S.yaneDoneT = clamp((S.yaneDoneT || 0) + dt * 0.6, 0, 1);
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '北海道（寒い 土地）';
+  const titles = {
+    ryuhyo: '🧊 流氷を 知る',
+    kufuu: '🏠 昔ながらの 家の 工夫',
+    yane: '❄️ 雪から 家を 守れ',
+    ima: '🚜 今の くらし',
+    hakase: '🐄 寒さを いかした 産業',
+    done: '🏔️ リュウヒョウの岸 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '北海道の くらし';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_ryuhyo', 'm_kufuu', 'm_yane', 'm_ima', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'ryuhyo', scope: { type: 'idle' }, ryuhyoFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🧊❄️🏠</div>
+        <h1>リュウヒョウの岸</h1>
+        <div class="sub">〜 寒い 土地の くらしの ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは オホーツク海の 流氷から 生まれた 精霊、<b>リュウヒョウ</b>。今日は 寒さの きびしい 土地、<b>北海道</b>の くらしの 工夫を <b>いっしょに たしかめに いこう！</b><br>
+        雪や 寒さから どうやって くらしを 守ってきたのか、そして 今の くらしは どう 変わったのか……見ていこう。</p>
+        <button class="btn" id="startBtn">北海道の くらしを たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">オホーツク海に 流氷が やってくると、海の 生き物は どうなると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🥶</span><b>ア</b> 海が こおって 生き物が いなくなってしまう</div>
+          <div class="vcard" data-v="1"><span class="vicon">🐟</span><b>イ</b> 流氷が 運ぶ 栄養で、逆に 海が 豊かになる</div>
+          <div class="vcard" data-v="2"><span class="vicon">🚫</span><b>ウ</b> 何も 変わらない</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：流氷を知る ---
+  m_ryuhyo: {
+    enter() {
+      Object.assign(S, { scene: 'ryuhyo', scope: { type: 'idle' }, ryuhyoFound: new Set() });
+      updateLoc();
+      setWish('🧊', `オホーツク海には 毎年 ${W.ryuhyou}が やってくる。2つの 手がかりを 調べて、どこから やってくるのか たしかめよう。`);
+      say(`下の ボタンを ぜんぶ おして、手がかりを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(RYUHYO_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.ryuhyoFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.ryuhyoFound.size >= RYUHYO_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.ryuhyoFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.ryuhyou}は、いったい どこから やってくると 思う？`);
+      setButtons(choiceRow(['ア 北海道の 中の 川から', 'イ ロシアと 中国の 国境を 流れる 大きな川から', 'ウ 南の あたたかい 海から'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_ryuhyo'); S.phase = 'done';
+        say(`せいかい！ ${W.ryuhyou}は ${W.amuru}の 水が こおって できたもの。海を わたって、およそ1000kmも 旅を して 北海道の岸まで やってくるんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.ryuhyou}が とけると、鉄分や 栄養が 海に 流れ出して、${W.hyousou}が ふえる。それを 食べる 魚たちが 集まってくる「海の めぐみ」でも あるんだよ。こんなに 寒い 土地で、人々は どうやって くらしてきたんだろう？`);
+        setButtons([{ label: 'つぎへ（家の工夫）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 北海道の 中の 川から', 'イ ロシアと 中国の 国境を 流れる 大きな川から', 'ウ 南の あたたかい 海から'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：昔ながらの 家の 工夫 ---
+  m_kufuu: {
+    enter() {
+      Object.assign(S, { scene: 'kufuu', scope: { type: 'idle' }, kufuuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`北海道の 家には、寒さから くらしを 守る 昔ながらの 工夫が つまっている。3つの 手がかりを、下の ボタンを ぜんぶ おして 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KUFUU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kufuuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kufuuFound.size >= KUFUU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kufuuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`なぜ 窓を 二重に すると 思う？`);
+      setButtons(choiceRow(['ア 見た目を きれいに するため', 'イ 空気の層で 冷たい 外の空気を ふせぎ、部屋を あたたかく 保つため', 'ウ 音を 大きく するため'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kufuu'); S.phase = 'done';
+        say(`せいかい！ ${W.nijuumado}・${W.fuujoshitsu}・${W.dannetsu}……どれも 寒さから 家の中の あたたかさを 守るための 工夫だったんだ。<br><br>💡 <b>たいせつポイント</b><br>空気は 熱を つたえにくいから、まどを 二重に して あいだに 空気の層を 作ると、冷たさが 中まで 入ってきにくくなる。<br>でも、屋根に つもった 雪は どうやって 防ぐんだろう？ たしかめてみよう！`);
+        setButtons([{ label: 'つぎへ（雪から家を守れ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 見た目を きれいに するため', 'イ 空気の層で 冷たい 外の空気を ふせぎ、部屋を あたたかく 保つため', 'ウ 音を 大きく するため'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：雪から家を守れ（メイン操作） ---
+  m_yane: {
+    enter() {
+      Object.assign(S, { scene: 'yane', scope: { type: 'gauge' }, yaneLevel: 4, yaneTries: new Set(), yaneAnimT: 0, yaneDoneT: 0, yaneResult: null });
+      updateLoc();
+      setWish('❄️', `屋根の かたむきに よって、雪の つもり方は 変わる。目もり①〜⑧で かたむきを えらんで、雪を ふらせてみよう。`);
+      say(`目もりを えらんで「雪を ふらせる」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.yaneLevel === n ? ' sel' : ''), cb: () => { S.yaneLevel = n; this.refreshCtl(); } });
+      list.push({ label: '❄️ 雪を ふらせる', cb: () => this.snow() });
+      setControls(list);
+    },
+    snow() {
+      setControls([]);
+      S.yaneResult = null; S.yaneDoneT = 0;
+      say(`目もり ${NUMS[S.yaneLevel - 1]}（約${ANGLE_DEG[S.yaneLevel - 1]}°の かたむき）に 雪が つもりはじめた……`);
+      sWind();
+      startTween(0, 1, 1.3, v => { S.yaneAnimT = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeYane(S.yaneLevel);
+      S.yaneTries.add(S.yaneLevel);
+      S.yaneResult = r.level;
+      if (r.level === 'low') {
+        sHmm();
+        say(`かたむきが ほとんど なくて、屋根に 雪が どんどん つもってしまう……このままでは 重みで 心配だ。もっと かたむきを つけて 試してみよう。`);
+        this.refreshCtl();
+      } else if (r.level === 'good') {
+        sYes(); scopeBurst(); award('m_yane'); S.phase = 'done';
+        say(`✨ ちょうど よい かたむきで、雪が 自然に すべり落ちた！ ✨<br><br>💡 <b>たいせつポイント</b><br>屋根に かたむきを つけると、つもった 雪が 自分の 重さで すべり落ちる。雪おろしの 手間が へって、家も 守られるんだ。`);
+        setButtons([{ label: 'つぎへ（今のくらし）', cb: nextStep }]);
+      } else {
+        sClank();
+        say(`急すぎる かたむきで、大量の 雪が 一気に 落ちてしまった……落雪事故の 心配が あるね。もう少し ゆるやかな かたむきで 試してみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：今の くらし ---
+  m_ima: {
+    enter() {
+      Object.assign(S, { scene: 'ima', scope: { type: 'idle' }, imaFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`今の 北海道の まちを 見てみると、雪や 寒さと つきあう 新しい 工夫が たくさん ある。3つの 手がかりを、下の ボタンを ぜんぶ おして 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(IMA_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.imaFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.imaFound.size >= IMA_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.imaFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`なぜ 今は スパイクタイヤを 使わなくなったと 思う？`);
+      setButtons(choiceRow(['ア 値段が 高くなったから', 'イ タイヤの ピンが 道路を けずり、粉じん公害を 引きおこしたから', 'ウ 雪が ふらなくなったから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_ima'); S.phase = 'done';
+        say(`せいかい！ 昔は ピンの ついた ${W.supaiku}が 使われていたが、ピンが 道路を けずって ${W.funjin}を 引きおこした。1990年に 法律が でき、今は ${W.studless}に かわったんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.roadheat}や ${W.josetsusha}、${W.muraku}……どれも 雪や 寒さと じょうずに つきあうための 新しい 工夫なんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 値段が 高くなったから', 'イ タイヤの ピンが 道路を けずり、粉じん公害を 引きおこしたから', 'ウ 雪が ふらなくなったから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：寒さをいかした産業 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 寒さの きびしい 気候は、こまることばかりでは ない。北海道ならではの 産業を 3つ、しょうかいしよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`寒い 気候は、北海道の くらしに とって どんな 意味が あるだろう？`);
+      setButtons(choiceRow(['ア こまった ことしか ない', 'イ 寒さや 雪を 生かした 産業や 楽しみ方が たくさん 生まれている', 'ウ 何も 関係ない'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.rakunou}は 生乳生産量 日本一、${W.jagaimo}や ${W.tensai}は 北海道が 大きな 産地、そして ${W.ryuhyou}観光も 冬ならではの 楽しみ。<br><br>💡 <b>たいせつポイント</b><br>寒さと 向き合いながら、その 気候を うまく 生かす……それが 北海道の くらしの 知恵なんだ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア こまった ことしか ない', 'イ 寒さや 雪を 生かした 産業や 楽しみ方が たくさん 生まれている', 'ウ 何も 関係ない'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, yaneLevel: 5, yaneAnimT: 1, yaneResult: 'good' });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ リュウヒョウの岸 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 流氷は、ロシアと 中国の 国境を 流れる 大きな川「（<span class="blankWord" data-a="アムール川">？？？</span>）」から やってくる。<br>
+        ② まどを 二重に するのは、空気の層で 冷たい 外の空気を（<span class="blankWord" data-a="ふせぐ">？？？</span>）ため。<br>
+        ③ 昔 使われていた スパイクタイヤは、ピンが 道路を けずり（<span class="blankWord" data-a="粉じん公害">？？？</span>）を 引きおこした。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 流氷が 運ぶ 栄養で、逆に 海が 豊かになる</b> でした！ 流氷が とけると 鉄分や 栄養が 海に とけ出して、${W.hyousou}が ふえ、それを 食べる 魚たちが 集まる 豊かな 海に なるんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">❄️ <b>おうちミッション</b><br>おうちの 窓が 1まいガラスか、2まい（ペアガラス）かを、おうちの人と いっしょに しらべてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#0d2536'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'yane', scope: { type: 'glow' }, yaneLevel: 5, yaneAnimT: 1, yaneResult: 'good' });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 北海道の くらしについて、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「流氷は どこから 来る？」「まどは なぜ 二重？」`);
+      setButtons([
+        { label: '🧊 流氷の 図', cls: 'sub', cb: () => this.show('ryuhyo') },
+        { label: '🏠 家の 工夫の 図', cls: 'sub', cb: () => this.show('kufuu') },
+        { label: '🚜 今の くらしの 図', cls: 'sub', cb: () => this.show('ima') },
+        { label: '🐄 産業の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_yane などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>

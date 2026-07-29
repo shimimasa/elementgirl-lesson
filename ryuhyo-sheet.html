@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>リュウヒョウの岸 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f5c78; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #dff0f8; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #dff0f8; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>❄️ リュウヒョウの岸 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      オホーツク海に 流氷が やってくると、海の 生き物は どうなると 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🥶 海が こおって 生き物が いなくなってしまう</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🐟 流氷が 運ぶ 栄養で、逆に 海が 豊かになる</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🚫 何も 変わらない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．流氷を 知る</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">流氷の 旅</span>
+        <span class="wordBank">海の めぐみ</span>
+      </div>
+      <div style="margin-top:1.2mm">流氷は、いったい どこから やってくる？　ア 北海道の 中の 川から ・ イ ロシアと 中国の 国境を 流れる 大きな川から ・ ウ 南の あたたかい海から（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．昔ながらの 家の 工夫</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">二重窓</span>
+        <span class="wordBank">風除室</span>
+        <span class="wordBank">厚い壁と断熱材</span>
+      </div>
+      <div style="margin-top:1.2mm">なぜ 窓を 二重に する？　ア 見た目の ため ・ イ 空気の層で 冷たさを ふせぐため ・ ウ 音を 大きく するため（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．雪から 家を 守れ — 屋根の かたむきを ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 屋根の かたむきを えらんで 試してみよう。雪が うまく すべり落ちた かたむきに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．今の くらし</span>
+    <div class="secBody">
+      なぜ 今は スパイクタイヤを 使わなくなったのだろう？（〇を つけよう）<br>
+      ア 値段が 高くなったから　・　イ タイヤの ピンが 道路を けずり、粉じん公害を 引きおこしたから　・　ウ 雪が ふらなくなったから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（寒さをいかした産業）</span>
+    <div class="secBody">
+      寒い 気候は、北海道の くらしに とって どんな 意味が ある？（〇を つけよう）<br>
+      ア こまった ことしか ない　・　イ 寒さや 雪を 生かした 産業や 楽しみ方が たくさん 生まれている　・　ウ 何も 関係ない
+      <table class="expTable" style="margin-top:1.5mm">
+        <tr><th>酪農</th><th>じゃがいも・てんさい</th><th>流氷観光</th></tr>
+        <tr><td>生乳生産量 <span class="fillLine sm"></span></td><td>生産量 <span class="fillLine sm"></span></td><td>砕氷船 <span class="fillLine sm"></span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 流氷は、ロシアと 中国の 国境を 流れる 大きな川「（<span class="fillLine"></span>）」から やってくる。<br>
+      ② まどを 二重に するのは、空気の層で 冷たい 外の空気を（<span class="fillLine"></span>）ため。<br>
+      ③ 昔 使われていた スパイクタイヤは、ピンが 道路を けずり（<span class="fillLine"></span>）を 引きおこした。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">❄️</span>
+        <div>
+          おうちの 窓が 1まいガラスか、2まい（ペアガラス）かを、おうちの人と いっしょに しらべてみよう。<br>
+          ☐ 調べた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　リュウヒョウの岸 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】リュウヒョウの岸 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「地理（寒い土地のくらし・北海道）」・学力幅あり・協力型／ 使うもの：「ryuhyo.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_yane</b> などで途中再開（m_ryuhyo／m_kufuu／m_yane／m_ima／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🧊 流氷を 知る</td><td>2つの手がかり（流氷の旅・海のめぐみ）をボタンで確認 → クイズ。アムール川から約1000km旅する話を紹介</td></tr>
+      <tr><td class="min">10〜18分</td><td>🏠 昔ながらの 家の 工夫</td><td>二重窓・風除室・厚い壁と断熱材の3つの工夫を発見 → なぜ窓を二重にするのかクイズ</td></tr>
+      <tr><td class="min">18〜28分</td><td>❄️ 雪から 家を 守れ（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で屋根のかたむきを選び「雪をふらせる」→雪がどうなるか判定。平らすぎ/急すぎでは失敗するので何度も挑戦させる。1人ずつ交代でかたむきを選ばせるとよい</td></tr>
+      <tr><td class="min">28〜35分</td><td>🚜 今の くらし</td><td>ロードヒーティング・除雪車・スタッドレスタイヤ・無落雪屋根の3つを発見 → なぜスパイクタイヤを使わなくなったかクイズ</td></tr>
+      <tr><td class="min">35〜41分</td><td>🐄 はかせチャレンジ（産業）</td><td>酪農・畑作・流氷観光を発見してクイズ。寒さを生かした産業へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「窓のガラスの枚数」調べ（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「昔ながらの家の工夫」を右下「つぎ▶」でスキップ可（<b>雪から家を守れ・今のくらし・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 流氷が運ぶ栄養で、逆に海が豊かになる</b>／流氷を知る＝<b>イ ロシアと中国の国境を流れる大きな川から</b>／
+      家の工夫＝<b>イ 空気の層で冷たい外の空気をふせぎ、部屋をあたたかく保つため</b>／雪から家を守れ＝<b>③〜⑥（約10〜40°）</b>／
+      今のくらし＝<b>イ タイヤのピンが道路をけずり、粉じん公害を引きおこしたから</b>／
+      はかせ＝<b>イ 寒さや雪を生かした産業や楽しみ方がたくさん生まれている</b>／
+      まとめ＝①<b>アムール川</b>　②<b>ふせぐ</b>　③<b>粉じん公害</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の地理です）</h2>
+    <ul>
+      <li>オホーツク海の流氷は、ロシアと中国の国境を流れる大河アムール川の水が凍ってでき、海をわたって約1000kmの旅をして例年1月下旬〜2月ごろ北海道沿岸に接岸する。流氷がとける時に鉄分や栄養が海に流れ出し、氷の中でふえた氷藻（アイスアルジー）を動物プランクトンや魚介類が食べに集まる「海のゆりかご」でもある</li>
+      <li>北海道の伝統的な家の工夫：窓を二重にして空気の層で冷気をふせぐ二重窓、玄関をガラスで囲み冷気や雪の吹き込み・床の凍結を防ぐ風除室、壁の中に厚い断熱材をつめる工夫などで寒さに備えてきた</li>
+      <li>屋根は雪下ろしの手間や落雪事故を減らすため傾斜をつけて自然に雪を落とすタイプと、あえて平らにして中央に雪どけ水を集めて排水する「無落雪屋根（スノーダクト式）」の2種類がある。道路の下にヒーターを通し雪をとかす「ロードヒーティング」や除雪車も欠かせない</li>
+      <li>かつて使われていたピン付きの「スパイクタイヤ」はアスファルトを削って粉じん公害（仙台砂漠など）を引きおこし、1990年の法律で1991年に製造・販売が中止。今はゴムの溝で雪道をつかむ「スタッドレスタイヤ」が使われている</li>
+      <li>北海道は生乳生産量が全国の半分以上を占め日本一。じゃがいも（ばれいしょ）は全国の8割以上、てんさい（さとうだいこん）はほぼ北海道だけで作られている。網走などの砕氷船「おーろら」による流氷観光も冬ならではの楽しみ</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「雪から家を守れ」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせると全員が参加できる</li>
+      <li>屋根のかたむきは「急なほど良い」わけではなく設計している。①②は平らすぎて雪の重みが心配、⑦⑧は急すぎて落雪事故の心配がある、というちょうどよい範囲（③〜⑥）を見つける過程を大事にする</li>
+      <li>よそうタイムの答え（イ：流氷が運ぶ栄養で海が豊かになる）は、多くの子が「流氷＝こわいもの・こまるもの」というイメージを持っているため意外性がある。まとめで丁寧に振り返るとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「流氷はどこから来る？」「窓はなぜ二重？」「スパイクタイヤはなぜ使われなくなった？」</li>
+      <li>教科書・資料集の北海道の伝統家屋・今の街並みの写真を見比べると理解が深まる</li>
+      <li>寒い土地（北海道）は、あたたかい土地（沖縄県・シーサの家）と対比すると、気候とくらしの工夫の関係がより立体的に理解できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
