@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ガイトウの町 — 明治維新と 文明開化 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef0f4 0%, #d3d8e2 55%, #8d94ac 100%);
+    color: #1c2436;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #2a3550; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5a6478; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dde0ea; border: 2px solid #b0b6cc;
+    font-size: clamp(16px, 1.8vw, 26px); color: #b0b6cc;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #1c2436;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f7f8fb 0%, #dfe2ec 100%);
+    border: 3px solid #4a5a78;
+    box-shadow: inset 0 0 40px rgba(20, 25, 45, .12), 0 4px 18px rgba(15, 18, 32, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #131a28; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #2a3550; color: #eef0f5; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15, 18, 32, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 18, 32, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #b0b6cc; cursor: pointer;
+    background: linear-gradient(180deg, #4a5a78, #2a3550); color: #fff;
+    box-shadow: 0 3px 0 #10141f; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #b8523a, #7a2e1e); border-color: #d89070; box-shadow: 0 3px 0 #4a1810; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #2a3550; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(20, 25, 45, .3), inset 0 0 24px rgba(20, 25, 45, .18);
+    flex-shrink: 0; background: #eef0f4;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #5a6478;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #131a28; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f8f8fb; border: 2px solid #b0b6cc; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #5a6478; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #1c2436;
+    border: 1.5px solid #ccd2df;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #2a3550; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #dde0ea, #dfe2ec); color: #1c2436;
+    border: 2px solid #2a3550; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #2a3550; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #4a5a78, #2a3550); color: #fff;
+    box-shadow: 0 3px 0 #10141f, 0 5px 12px rgba(20, 25, 45, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #10141f; }
+  .btn.sub {
+    background: #dde0ea; color: #39456a; box-shadow: 0 3px 0 #b0b6cc;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #1c2436; box-shadow: 0 3px 0 #b0b6cc; font-weight: 400; border: 1.5px solid #ccd2df; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #4a5a78; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(12, 14, 24, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f8f8fb, #dfe2ec);
+    border: 3px solid #4a5a78; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(12, 14, 24, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #2a3550; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #2a3550; }
+  .panel .sub { color: #5a6478; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #1c2436; border: 1.5px solid #ccd2df; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #5a6478; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #1c2436; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ccd2df; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #2a3550; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #2a3550; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #2a3550;
+    color: #131a28; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #5a6478;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dde0ea; color: #39456a;
+    border: 1px solid #b0b6cc; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #dde0ea; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🚦 ガイトウの町<small>— 明治維新と 文明開化 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_ishin" title="江戸から 明治へ">★</div>
+    <div class="badge" id="bd_m_bunmei" title="文明開化の 町">★</div>
+    <div class="badge" id="bd_m_kaikaku" title="三大改革を 知る">★</div>
+    <div class="badge" id="bd_m_chiso" title="地租改正の バランス">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">江戸から 明治へ</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 まほうのめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,20,30,.18)"/>
+            <!-- 台座 -->
+            <path d="M40 118 L44 100 L76 100 L80 118 Z" fill="#2a2e38" stroke="#1c2436" stroke-width="2"/>
+            <!-- 柱 -->
+            <rect x="53" y="62" width="14" height="40" rx="3" fill="#3a3f4c" stroke="#1c2436" stroke-width="2"/>
+            <!-- うで（腕飾り） -->
+            <path d="M53 70 Q38 68 34 56" stroke="#1c2436" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M67 70 Q82 68 86 56" stroke="#1c2436" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- ランプの ふち（傘） -->
+            <path d="M30 30 Q60 8 90 30 L86 41 Q60 24 34 41 Z" fill="#2a2e38" stroke="#1c2436" stroke-width="2"/>
+            <path d="M56 4 L60 -6 L64 4 Z" fill="#ffce54" stroke="#1c2436" stroke-width="1.2"/>
+            <!-- ランプ（あたま） -->
+            <circle cx="60" cy="42" r="26" fill="#fff3cf" stroke="#1c2436" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="48" rx="5" ry="3.4" fill="#ffb070" opacity=".55"/>
+            <ellipse cx="74" cy="48" rx="5" ry="3.4" fill="#ffb070" opacity=".55"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="42" rx="3.6" ry="5" fill="#1c2436"/>
+              <ellipse cx="69" cy="42" rx="3.6" ry="5" fill="#1c2436"/>
+              <circle cx="52.3" cy="39.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="39.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 56 Q60 61 67 56" stroke="#131a28" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">ガス灯の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ガイトウ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🚦 ガイトウの町ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ガイトウの町 — 明治維新と文明開化（小6社会・歴史・協力型・1ファイル）
+   江戸から明治へ（大政奉還・王政復古・戊辰戦争）→ 文明開化の町（くらしの変化）→
+   三大改革を知る（学制・徴兵令・地租改正）→ 地租改正のバランス（天びんで） →
+   はかせ（富国強兵・殖産興業）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  yoshinobu: ruby('徳川慶喜', 'とくがわよしのぶ'),
+  taiseihoukan: ruby('大政奉還', 'たいせいほうかん'),
+  ouseifukko: ruby('王政復古の大号令', 'おうせいふっこのだいごうれい'),
+  boshin: ruby('戊辰戦争', 'ぼしんせんそう'),
+  gokajou: ruby('五箇条の御誓文', 'ごかじょうのごせいもん'),
+  gakusei: ruby('学制', 'がくせい'),
+  chouheirei: ruby('徴兵令', 'ちょうへいれい'),
+  chisokaisei: ruby('地租改正', 'ちそかいせい'),
+  fukokukyouhei: ruby('富国強兵', 'ふこくきょうへい'),
+  shokusan: ruby('殖産興業', 'しょくさんこうぎょう'),
+  tomioka: ruby('富岡製糸場', 'とみおかせいしじょう'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 判定ロジック ----------
+function judgeChiso(n) { // n: 1-8 地租の割合レベル
+  if (n <= 2) return 'low';
+  if (n >= 7) return 'high';
+  return 'good';
+}
+function chisoTiltFromLevel(n) { // -1(農民が重い=政府が軽い)〜+1(政府が重い=農民が軽い)
+  return clamp((n - 4.5) / 3.5, -1, 1);
+}
+
+// ---------- 江戸から明治へ：手がかり ----------
+const ISHIN_POINTS = [
+  { key: 0, letter: 'あ', name: '大政奉還', x: 260, y: 320,
+    txt: `1867年、${W.yoshinobu}が 政権を 朝廷に 返した「${W.taiseihoukan}」。260年 つづいた 江戸幕府が、ここで 終わりを むかえたんだ。` },
+  { key: 1, letter: 'い', name: '王政復古の大号令', x: 500, y: 220,
+    txt: `同じ 1867年、朝廷は「天皇を 中心とした 新しい 政府を つくる」と 発表。これが「${W.ouseifukko}」。いよいよ 明治政府の 始まりだ。` },
+  { key: 2, letter: 'う', name: '戊辰戦争', x: 740, y: 340,
+    txt: `新政府軍と 旧幕府軍の 戦い「${W.boshin}」が、1868年〜1869年に 各地で 起きた。函館の 五稜郭（ごりょうかく）の 戦いで 終結したよ。` },
+];
+
+// ---------- 文明開化の町：手がかり ----------
+const BUNMEI_POINTS = [
+  { key: 0, letter: 'あ', name: '髪型・服装', x: 640, y: 200,
+    txt: `ちょんまげを切った「ざんぎり頭」や、洋服を着る人が増えた。「ざんぎり頭を たたいてみれば 文明開化の 音が する」という 都々逸（どどいつ）も 流行したよ。` },
+  { key: 1, letter: 'い', name: '町なみ', x: 760, y: 340,
+    txt: `東京の 銀座には レンガ造りの 建物と、ガス灯（わたしの 仲間だよ！）が ならぶ 町なみが 生まれたんだ。` },
+  { key: 2, letter: 'う', name: '乗り物・つうしん', x: 640, y: 470,
+    txt: `1872年、新橋〜横浜間に 日本 初の 鉄道が 開通。郵便や 電信（でんしん）の しくみも 整えられていったよ。` },
+];
+
+// ---------- 三大改革を知る：手がかり ----------
+const KAIKAKU_POINTS = [
+  { key: 0, letter: 'あ', name: '学制', x: 260, y: 260,
+    txt: `1872年、「${W.gakusei}」が 定められ、6さい以上の 子どもは みんな 小学校で 学ぶことに なった。` },
+  { key: 1, letter: 'い', name: '徴兵令', x: 500, y: 420,
+    txt: `1873年、「${W.chouheirei}」が 出され、満20さいに なった 男子は 兵役の 義務を 負うことに なった。` },
+  { key: 2, letter: 'う', name: '地租改正', x: 740, y: 260,
+    txt: `1873年、「${W.chisokaisei}」で、土地の 値段（地価）の 3％を、米ではなく お金で 納めるように 変わったよ。` },
+];
+
+// ---------- はかせ：富国強兵・殖産興業 手がかり ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '富岡製糸場', x: 300, y: 300,
+    txt: `1872年、群馬県に「${W.tomioka}」という 官営（国が 経営する）の 工場が でき、生糸（きいと）づくりの 新しい 技術を 全国に 広めたよ。` },
+  { key: 1, letter: 'い', name: '鉄道開通', x: 700, y: 300,
+    txt: `1872年、新橋〜横浜間 約29kmに、日本 初の 鉄道が 開通。人や 物を 運ぶ スピードが、大きく 変わったんだ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'ishin',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  ishinFound: new Set(),
+  bunmeiFound: new Set(),
+  kaikakuFound: new Set(),
+  hakaseFound: new Set(),
+  chisoLevel: 4,
+  chisoTries: new Set(),
+  chiso: { tiltF: 0 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(X, Y, sc, points, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 24 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#2a3550' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#131a28'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#2a3550';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 空の背景 ----------
+function bgSky(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#dfe6f0'); g.addColorStop(1, '#c4ccdc');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#e8dcb8';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+}
+
+// ---------- 江戸から明治へシーン（城のシルエット） ----------
+function drawCastle(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#3a3f4c'; gctx.strokeStyle = '#1c2436'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 90), Y(baseY)); gctx.lineTo(X(cx - 90), Y(baseY - 60));
+  gctx.lineTo(X(cx - 60), Y(baseY - 90)); gctx.lineTo(X(cx + 60), Y(baseY - 90));
+  gctx.lineTo(X(cx + 90), Y(baseY - 60)); gctx.lineTo(X(cx + 90), Y(baseY));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#4a5a78';
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 40), Y(baseY - 90)); gctx.lineTo(X(cx), Y(baseY - 150)); gctx.lineTo(X(cx + 40), Y(baseY - 90));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+}
+function drawIshinScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  drawCastle(X, Y, sc, 500, 480);
+  drawPoints(X, Y, sc, ISHIN_POINTS, S.ishinFound);
+}
+
+// ---------- 文明開化の町シーン（江戸/明治の対比） ----------
+function drawBunmeiScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  // 左半分＝江戸（木造の家なみ）
+  gctx.fillStyle = '#7a6a52'; gctx.strokeStyle = '#1c2436'; gctx.lineWidth = 2 * sc;
+  for (let i = 0; i < 3; i++) {
+    const bx = 120 + i * 130;
+    gctx.beginPath(); gctx.rect(X(bx), Y(420), 100 * sc, 140 * sc); gctx.fill(); gctx.stroke();
+    gctx.beginPath(); gctx.moveTo(X(bx - 10), Y(420)); gctx.lineTo(X(bx + 50), Y(380)); gctx.lineTo(X(bx + 110), Y(420)); gctx.closePath();
+    gctx.fillStyle = '#4a3a28'; gctx.fill(); gctx.stroke(); gctx.fillStyle = '#7a6a52';
+  }
+  // 右半分＝明治（レンガの洋館＋ガス灯）
+  gctx.fillStyle = '#b8523a'; gctx.strokeStyle = '#1c2436'; gctx.lineWidth = 2 * sc;
+  for (let i = 0; i < 3; i++) {
+    const bx = 620 + i * 120;
+    gctx.beginPath(); gctx.rect(X(bx), Y(400), 90 * sc, 160 * sc); gctx.fill(); gctx.stroke();
+  }
+  // ガス灯（小さい柱＋灯）
+  [560, 940].forEach(gx => {
+    gctx.strokeStyle = '#2a2e38'; gctx.lineWidth = 5 * sc;
+    gctx.beginPath(); gctx.moveTo(X(gx), Y(560)); gctx.lineTo(X(gx), Y(470)); gctx.stroke();
+    gctx.fillStyle = '#ffe9a8';
+    gctx.beginPath(); gctx.arc(X(gx), Y(460), 12 * sc, 0, TAU); gctx.fill();
+  });
+  // 境界線
+  gctx.strokeStyle = 'rgba(30,30,40,.35)'; gctx.lineWidth = 3 * sc; gctx.setLineDash([10 * sc, 8 * sc]);
+  gctx.beginPath(); gctx.moveTo(X(500), Y(60)); gctx.lineTo(X(500), Y(560)); gctx.stroke();
+  gctx.setLineDash([]);
+  gctx.fillStyle = '#2a3550'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('江戸', X(280), Y(100)); gctx.fillText('明治', X(720), Y(100));
+  drawPoints(X, Y, sc, BUNMEI_POINTS, S.bunmeiFound);
+}
+
+// ---------- 三大改革シーン ----------
+function drawKaikakuScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  gctx.fillStyle = '#f3e6cf'; gctx.strokeStyle = '#8a5a3a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(340), Y(200), 320 * sc, 260 * sc, 10 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#131a28'; gctx.font = `${90 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('📜', X(500), Y(330));
+  drawPoints(X, Y, sc, KAIKAKU_POINTS, S.kaikakuFound);
+}
+
+// ---------- 地租改正の天びん（メイン操作） ----------
+function drawBalance(X, Y, sc, cx, cy, tilt, leftLabel, leftIcon, rightLabel, rightIcon) {
+  const armLen = 220, armAngle = tilt * 0.22;
+  gctx.strokeStyle = '#131a28'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(cx), Y(cy)); gctx.lineTo(X(cx), Y(cy + 140)); gctx.stroke();
+  gctx.fillStyle = '#131a28';
+  gctx.beginPath(); gctx.moveTo(X(cx - 40), Y(cy + 140)); gctx.lineTo(X(cx + 40), Y(cy + 140)); gctx.lineTo(X(cx + 30), Y(cy + 156)); gctx.lineTo(X(cx - 30), Y(cy + 156)); gctx.closePath(); gctx.fill();
+
+  const lx = cx - Math.cos(armAngle) * armLen, ly = cy - Math.sin(armAngle) * armLen;
+  const rx = cx + Math.cos(armAngle) * armLen, ry = cy + Math.sin(armAngle) * armLen;
+  gctx.strokeStyle = tilt !== 0 ? '#b8523a' : '#131a28'; gctx.lineWidth = (tilt !== 0 ? 6 : 5) * sc;
+  gctx.beginPath(); gctx.moveTo(X(lx), Y(ly)); gctx.lineTo(X(rx), Y(ry)); gctx.stroke();
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), 7 * sc, 0, TAU); gctx.fillStyle = '#d4900f'; gctx.fill();
+
+  [[lx, ly, leftLabel, leftIcon], [rx, ry, rightLabel, rightIcon]].forEach(([px, py, label, icon]) => {
+    const dy = 34;
+    gctx.strokeStyle = '#131a28'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.moveTo(X(px), Y(py)); gctx.lineTo(X(px), Y(py + dy)); gctx.stroke();
+    gctx.fillStyle = '#fff'; gctx.strokeStyle = '#131a28'; gctx.lineWidth = 2.5 * sc;
+    gctx.beginPath(); gctx.ellipse(X(px), Y(py + dy + 20), 58 * sc, 16 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(icon, X(px), Y(py + dy + 18));
+    gctx.fillStyle = '#131a28'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(label, X(px), Y(py + dy + 46));
+  });
+}
+function drawChisoScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  drawBalance(X, Y, sc, 500, 320, S.chiso.tiltF, '農民の くらし', '🌾', '政府の 財政', '🏛️');
+  gctx.fillStyle = '#2a3550'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`地租の 割合 ${NUMS[S.chisoLevel - 1]}`, X(500), Y(120));
+}
+
+// ---------- はかせ：富国強兵・殖産興業 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  gctx.fillStyle = '#b8523a'; gctx.strokeStyle = '#1c2436'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.rect(X(200), Y(340), 220 * sc, 180 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#131a28'; gctx.font = `${64 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🏭', X(310), Y(430));
+  // 線路と汽車
+  gctx.strokeStyle = '#8a8f9c'; gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(560), Y(480)); gctx.lineTo(X(920), Y(480)); gctx.stroke();
+  gctx.fillText('🚂', X(700), Y(430));
+  drawPoints(X, Y, sc, HAKASE_POINTS, S.hakaseFound);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'ishin') drawIshinScene(X, Y, sc);
+  else if (S.scene === 'bunmei') drawBunmeiScene(X, Y, sc);
+  else if (S.scene === 'kaikaku') drawKaikakuScene(X, Y, sc);
+  else if (S.scene === 'chiso') drawChisoScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawChisoScene(X, Y, sc);
+}
+
+// ---------- まほうのめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#eef0f5'); grd.addColorStop(1, '#b0b6cc');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#2a3550'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'tilt') {
+    const deg = Math.round(S.chiso.tiltF * 12);
+    sctx.font = `700 ${R * 0.26}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#2a3550';
+    sctx.fillText((deg >= 0 ? '+' : '') + deg + '°', R, R * 0.78);
+    label('てんびんの かたむき');
+  } else if (mode === 'scroll') {
+    sctx.fillStyle = '#8a5a3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('📜', R, R * 0.85);
+    label(S.scope.name || '記録');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe9a8'); g2.addColorStop(1, 'rgba(255,233,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#2a3550'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚦', R, R * 0.85);
+    label('たしかめ かんりょう！');
+  } else {
+    sctx.fillStyle = '#2a3550'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#1c2436';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#2a3550', '#ffe9a8', '#4a5a78', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '明治時代（1868年〜）';
+  const titles = {
+    ishin: '🏯 江戸から 明治へ（1867〜1869年）',
+    bunmei: '🚦 文明開化の 町',
+    kaikaku: '📜 三大改革を 知る',
+    chiso: '⚖️ 地租改正の バランス',
+    hakase: '🏭 富国強兵・殖産興業',
+    done: '🚦 ガイトウの町 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '江戸から 明治へ';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_ishin', 'm_bunmei', 'm_kaikaku', 'm_chiso', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'ishin', scope: { type: 'idle' }, ishinFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🚦🎩🚂</div>
+        <h1>ガイトウの町</h1>
+        <div class="sub">〜 明治維新と 文明開化の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 街に ともった ガス灯の 光から 生まれた 精霊、<b>ガイトウ</b>。今から 約150年前、江戸から 明治へと 大きく 変わった 時代の ものがたりを、<b>いっしょに たしかめに いこう！</b><br>
+        江戸幕府は どうして 終わったのか、町の くらしは どう 変わったのか、そして 新しい 政府は どんな 改革を したのか……見ていこう。</p>
+        <button class="btn" id="startBtn">町を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">文明開化で、江戸時代の くらしは すぐに 何もかも 変わったと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">💯</span><b>ア</b> もちろん、いっきに ぜんぶ 変わった</div>
+          <div class="vcard" data-v="1"><span class="vicon">⏳</span><b>イ</b> 見た目は 都会から 急に 変わったが、くらしの 中身が 変わるには もっと 時間が かかった</div>
+          <div class="vcard" data-v="2"><span class="vicon">🙅</span><b>ウ</b> 実は 何も 変わらなかった</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：江戸から明治へ ---
+  m_ishin: {
+    enter() {
+      Object.assign(S, { scene: 'ishin', scope: { type: 'idle' }, ishinFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`🏯 江戸幕府は、どのようにして 終わりを むかえたのだろう？ 3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(ISHIN_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.ishinFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.ishinFound.size >= ISHIN_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.ishinFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`新政府が 最初に 発表した 政治の 方針は 何だろう？`);
+      setButtons(choiceRow(['ア 五箇条の御誓文（新しい政治の 方針を 示した）', 'イ 江戸幕府を そのまま 続けること', 'ウ 外国と すぐに 戦争を すること'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_ishin'); S.phase = 'done';
+        say(`せいかい！ 1868年、明治政府は「${W.gokajou}」で、みんなで 話し合って 政治を 進めることなどの 方針を 示したんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.taiseihoukan}→${W.ouseifukko}→${W.boshin}という 流れで、260年 続いた 江戸幕府が 終わり、新しい 明治政府が 始まったよ。`);
+        setButtons([{ label: 'つぎへ（文明開化の町）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 五箇条の御誓文（新しい政治の 方針を 示した）', 'イ 江戸幕府を そのまま 続けること', 'ウ 外国と すぐに 戦争を すること'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：文明開化の町 ---
+  m_bunmei: {
+    enter() {
+      Object.assign(S, { scene: 'bunmei', scope: { type: 'idle' }, bunmeiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`🚦 明治に なると、町の ようすが 大きく 変わり始めた。3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(BUNMEI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.bunmeiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.bunmeiFound.size >= BUNMEI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.bunmeiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`「文明開化」とは、どういう ことだろう？`);
+      setButtons(choiceRow(['ア 都市を 中心に、西洋の 文化や 技術を 取り入れて くらしが 変わった こと', 'イ 日本中 すべての 村で、いっせいに くらしが 変わった こと', 'ウ 江戸時代の くらしが そのまま 続いた こと'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_bunmei'); S.phase = 'done';
+        say(`せいかい！ まずは 都市を 中心に、西洋の 文化や 技術を 取り入れる「文明開化」が 進んだ。<br><br>💡 <b>たいせつポイント</b><br>でも 地方の くらしや 人々の 考え方まで 変わるには、まだ まだ 時間が かかったんだよ。`);
+        setButtons([{ label: 'つぎへ（三大改革を知る）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 都市を 中心に、西洋の 文化や 技術を 取り入れて くらしが 変わった こと', 'イ 日本中 すべての 村で、いっせいに くらしが 変わった こと', 'ウ 江戸時代の くらしが そのまま 続いた こと'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：三大改革を知る ---
+  m_kaikaku: {
+    enter() {
+      Object.assign(S, { scene: 'kaikaku', scope: { type: 'idle' }, kaikakuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`📜 明治政府は、国の 力を つけるために、大きな 改革を 進めた。3つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KAIKAKU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kaikakuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kaikakuFound.size >= KAIKAKU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kaikakuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`学制・徴兵令・地租改正、これらの 改革が 目ざしたのは 何だろう？`);
+      setButtons(choiceRow(['ア 外国の まねを して 楽しむこと', 'イ 国を 豊かに し、軍を 強くする「富国強兵」', 'ウ 江戸時代の しくみを そのまま 残すこと'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kaikaku'); S.phase = 'done';
+        say(`せいかい！ 学校で 学ぶ 力を つけ、兵を 集めて 軍を 強くし、税を 安定して 集める……どれも「${W.fukokukyouhei}」を 目ざした 改革だったんだ。<br><br>💡 <b>たいせつポイント</b><br>この あと、${W.chisokaisei}が 実さいに どう くらしに ひびいたか、天びんで たしかめてみよう。`);
+        setButtons([{ label: 'つぎへ（地租改正のバランス）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 外国の まねを して 楽しむこと', 'イ 国を 豊かに し、軍を 強くする「富国強兵」', 'ウ 江戸時代の しくみを そのまま 残すこと'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M4：地租改正のバランス（天びん・メイン操作） ---
+  m_chiso: {
+    enter() {
+      Object.assign(S, { scene: 'chiso', scope: { type: 'tilt' }, chiso: { tiltF: 0 }, chisoLevel: 4, chisoTries: new Set() });
+      updateLoc();
+      hideWish();
+      say(`⚖️ 地租（土地の値段に かかる 税金）の 割合を どれくらいに するか、政府は 悩んでいた。目もり①〜⑧で えらんで、天びんが つりあうか ためしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.chisoLevel === n ? ' sel' : ''), cb: () => { S.chisoLevel = n; this.refreshCtl(); } });
+      list.push({ label: '⚖️ 地租を 決める', cb: () => this.build() });
+      setControls(list);
+    },
+    build() {
+      setControls([]);
+      say(`目もり ${NUMS[S.chisoLevel - 1]} の 地租で、集めて みる……`);
+      sClank();
+      const target = chisoTiltFromLevel(S.chisoLevel);
+      startTween(S.chiso.tiltF, target, 1.1, v => { S.chiso.tiltF = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeChiso(S.chisoLevel);
+      S.chisoTries.add(S.chisoLevel);
+      if (r === 'good') {
+        sYes(); scopeBurst(); award('m_chiso'); S.phase = 'done';
+        say(`✨ 天びんが つりあった！ 政府は 学校や 鉄道を つくる お金を 得られ、農民の くらしも 保てる、ちょうどよい 地租に なった。✨<br><br>💡 <b>たいせつポイント</b><br>実さいの ${W.chisokaisei}では、地価の 3％を 現金で 納めることに 決まったんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else if (r === 'low') {
+        sHmm(); S.tryT = 0;
+        say(`地租が 少なすぎて、政府の 収入が 足りず、新しい 学校や 鉄道を つくる お金が 足りなく なりそうだ……もういちど 割合を えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm(); S.tryT = 0;
+        say(`地租が 重すぎて、農民の くらしが 苦しくなり、各地で 一揆が 起きて しまいそうだ……もういちど 割合を えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：富国強兵・殖産興業 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 政府は「${W.shokusan}」といって、産業を 育てることにも 力を 入れた。2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`政府が 工場や 鉄道を つくったのは、どうしてだと 思う？`);
+      setButtons(choiceRow(['ア 外国に 追いつくため、産業を 育てて 国を 豊かに するため', 'イ 見た目を かっこよく するため', 'ウ ただの 思いつきで'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.tomioka}で 生糸づくりの 技術を 広め、鉄道で 人や 物を 早く 運べるように した。産業を 育てて 国を 豊かに する「${W.shokusan}」の 取り組みだったんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.fukokukyouhei}と ${W.shokusan}、この 2つの 力で、日本は 急いで 近代化を 進めていったんだよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 外国に 追いつくため、産業を 育てて 国を 豊かに するため', 'イ 見た目を かっこよく するため', 'ウ ただの 思いつきで'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, chiso: { tiltF: 0 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ガイトウの町 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 260年 続いた 江戸幕府は、（<span class="blankWord" data-a="大政奉還">？？？</span>）で 終わりを むかえた。<br>
+        ② 明治政府が めざした、国を 豊かに し 軍を 強くする 考え方を（<span class="blankWord" data-a="富国強兵">？？？</span>）と いう。<br>
+        ③ 地租改正で、土地の 値段の 3％を（<span class="blankWord" data-a="お金（現金）">？？？</span>）で 納めることに なった。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 見た目は 都会から 急に 変わったが、くらしの 中身が 変わるには もっと 時間が かかった</b> でした！ 文明開化は 都市から 始まり、地方や 人々の 意識が 変わるには、まだ まだ 時間が 必要だったんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちの人に「もし 急に 新しい 決まりごとが 増えたら、くらしは どう 変わると 思う？」と 聞いてみよう。明治の 人々の 気もちを、いっしょに 想像してみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#131a28'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'chiso', scope: { type: 'glow' }, chiso: { tiltF: 0 } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 明治維新と 文明開化について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「江戸幕府が 終わった できごとは？」「三大改革は なに と なにと なに？」`);
+      setButtons([
+        { label: '🏯 江戸から明治への 図', cls: 'sub', cb: () => this.show('ishin') },
+        { label: '🚦 文明開化の町の 図', cls: 'sub', cb: () => this.show('bunmei') },
+        { label: '📜 三大改革の 図', cls: 'sub', cb: () => this.show('kaikaku') },
+        { label: '⚖️ 天びんの 図', cls: 'sub', cb: () => this.show('chiso') },
+        { label: '🏭 富国強兵の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'chiso') { S.chiso.tiltF = 0; }
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kaikaku などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
