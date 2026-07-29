@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ホシゾラの街 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f3a63; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe38a; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #dde8f7; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #dde8f7; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌟 ホシゾラの街 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      工場の けむりが 多い 町を 見て、むかしの 人たちは どう 思っていたと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🚚 危険だから すぐ 引っこししたい</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🎉 発展の しるしだと 思い、ほこりに 思う人も いた</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 😶 だれも 気にしていなかった</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．公害を 知ろう（四大公害病）</span>
+    <div class="secBody">
+      4つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）くまもと県</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）にいがた県</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）とやま県</div>
+        <div class="clueBox"><span class="rletter">え</span>（　　　　　　　　）みえ県</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">水俣病</span>
+        <span class="wordBank">新潟水俣病</span>
+        <span class="wordBank">イタイイタイ病</span>
+        <span class="wordBank">四日市ぜんそく</span>
+      </div>
+      <div style="margin-top:1.2mm">共通する 原因は？　ア 自然現象　イ 工場の有害物質が川や空気にまざった　ウ 外国の病気（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．町の 変化を 見る</span>
+    <div class="secBody">
+      画面の 「つぎへ」ボタンで 町が 変わる ようすを 見て、じゅんばんに １〜５を 書こう。
+      <div class="clueRow">
+        <div class="clueBox">（　）活気づく 町</div>
+        <div class="clueBox">（　）人々が 声を あげる</div>
+        <div class="clueBox">（　）しずかな 町</div>
+        <div class="clueBox">（　）空気や 水が よごれる</div>
+        <div class="clueBox">（　）工場が できる</div>
+      </div>
+      <div style="margin-top:1.2mm">よごれに 気づくのは？　ア わざと　イ 生産をいそぎ気づくのがおくれた　ウ すぐ気づいた（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．立ち上がった 人たち</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）1967〜73年</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）1967年</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）1971年</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">住民の裁判</span>
+        <span class="wordBank">公害対策基本法</span>
+        <span class="wordBank">環境庁の たんじょう</span>
+      </div>
+      <div style="margin-top:1.2mm">裁判の 結果は？　ア 敗訴した　イ 勝訴し法律・対策につながった　ウ 未実施（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．青空と海を とりもどせ — 対策の レベルを ためそう</span>
+    <div class="secBody">
+      レベル①〜⑧で 対策の 強さを えらんで 試してみよう。空と 海が きれいに もどった レベルに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（3Rと ごみの 量）</span>
+    <div class="secBody">
+      最近の 日本人 1人が 1日に 出す ごみの 量は、どう 変わってきている？（〇を つけよう）<br>
+      ア 増え続けている　・　イ 3Rなどの 取り組みで、少しずつ 減ってきている　・　ウ まったく 変わらない
+      <table class="expTable" style="margin-top:1.5mm">
+        <tr><th>令和元年度</th><th>令和3年度</th><th>令和6年度</th></tr>
+        <tr><td>ごみの量 <span class="fillLine sm"></span>g</td><td>ごみの量 <span class="fillLine sm"></span>g</td><td>ごみの量 <span class="fillLine sm"></span>g</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 高度経済成長の 時代に、4つの 病気＝（<span class="fillLine"></span>）が 起きた。<br>
+      ② 苦しんだ 住民たちが（<span class="fillLine"></span>）に 立ち上がり、勝訴した。<br>
+      ③ 今は（<span class="fillLine"></span>＝Reduce・Reuse・Recycle）で、ごみが 減ってきている。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">♻️</span>
+        <div>
+          家で 出る ごみを、もえる ごみ・もえない ごみ・資源ごみに 分けて 出してみよう。<br>
+          ☐ 自分に できそうな 3Rの 取り組み：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ホシゾラの街 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ホシゾラの街 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「地理（環境を守る・公害）」・学力幅あり・協力型／ 使うもの：「hoshizora.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_aozora</b> などで途中再開（m_kougai／m_seichou／m_tatakau／m_aozora／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🗾 公害を 知ろう</td><td>四大公害病（水俣病・新潟水俣病・イタイイタイ病・四日市ぜんそく）の4つの手がかりをボタンで確認 → 共通原因クイズ</td></tr>
+      <tr><td class="min">11〜18分</td><td>🏙️ 町の 変化を 見る</td><td>「つぎへ」でしずかな町→工場ができる→活気づく→よごれる→声をあげるの5段階を確認 → 気づきの遅れクイズ</td></tr>
+      <tr><td class="min">18〜25分</td><td>⚖️ 立ち上がった 人たち</td><td>裁判（1967〜73年・住民勝訴）・公害対策基本法（1967年）・環境庁誕生（1971年）の3つを発見 → 裁判の結果クイズ</td></tr>
+      <tr><td class="min">25〜35分</td><td>🏭 青空と海を とりもどせ（<b>今日の見せ場</b>）</td><td>レベル①〜⑧で対策の強さを選び「対策を試す」→空と海がどう変わるか判定。①〜⑥では不十分で失敗するので何度も挑戦させる。1人ずつ交代でレベルを選ばせるとよい</td></tr>
+      <tr><td class="min">35〜41分</td><td>♻️ はかせチャレンジ（3Rとごみの量）</td><td>Reduce・Reuse・Recycleを発見してクイズ。ごみ排出量のグラフ（減少傾向）を紹介</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「ごみの分別・3R実践」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「町の変化を見る」を右下「つぎ▶」でスキップ可（<b>青空と海をとりもどせ・はかせ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ ほこりに思う人もいた</b>／公害を知ろう＝<b>イ 工場から出た有害なものが川や空気にまざった</b>／
+      町の変化を見る＝<b>イ 生産をいそぐことを優先して気づくのがおくれた</b>／立ち上がった人たち＝<b>イ 勝訴し法律や対策づくりにつながった</b>／
+      青空と海をとりもどせ＝<b>⑦〜⑧（約90〜100%）</b>／はかせ＝<b>イ 3Rなどの取り組みで少しずつ減ってきている</b>／
+      まとめ＝①<b>四大公害病</b>　②<b>裁判</b>　③<b>3R</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史・地理です）</h2>
+    <ul>
+      <li>四大公害病：水俣病（熊本県水俣湾・1953〜60年ごろ・工場排水のメチル水銀）／新潟水俣病（新潟県阿賀野川流域・1964年ごろ〜・同じくメチル水銀）／イタイイタイ病（富山県神通川流域・鉱山排水のカドミウム）／四日市ぜんそく（三重県四日市市・1960年ごろ〜・石油化学コンビナートの亜硫酸ガス）</li>
+      <li>四大公害裁判は1967〜1973年に提訴され、いずれも住民（原告）側が勝訴。同じ1967年に公害対策基本法が制定され、1971年に環境庁が設置（2001年に環境省へ改組）</li>
+      <li>北九州市は1960年代、大気汚染「ばい煙の空」が国内最悪を記録し、洞海湾は工場排水で「死の海」に。しかし当初、工場の煙は「七色の煙」と呼ばれ、発展の象徴として絵はがきや校歌の歌詞にするほど誇りに思われていた時代があった</li>
+      <li>市民・企業・行政が一体となった対策（排水規制・下水道整備・浚渫など）により、わずか数年で国の環境基準をクリア。1987年に環境庁から「星空の街」に選定され、洞海湾には100種類を超える魚介類が戻った</li>
+      <li>3R（Reduce・Reuse・Recycle）の取り組みなどにより、1人1日あたりのごみ排出量は令和元年度918g→令和3年度890g→令和6年度839gと、少しずつ減ってきている（環境省調査）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「青空と海をとりもどせ」が今日いちばんの見せ場。1人ずつ交代でレベルを選ばせると全員が参加できる</li>
+      <li>公害病の説明は、原因・場所・症状を事実として簡潔に伝え、深追いしすぎない。つらさより「人々がどう立ち向かったか」に重心を置くと前向きに終われる</li>
+      <li>よそうタイムの答え（イ：ほこりに思う人もいた）は意外性がある。「よいと思っていたことが、あとで問題になることもある」という気づきにつなげるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「四大公害病って何？」「3Rって何の3つ？」「北九州市はどうやって環境をとりもどした？」</li>
+      <li>教科書・資料集の写真（当時の黒い煙・現在の洞海湾）を見比べると理解が深まる</li>
+      <li>これまでの地理シリーズ（低い土地のミズヤの里・高い土地のカンラの畑・あたたかい土地のシーサの家・寒い土地のリュウヒョウの岸・森林のネンリンの杜）と合わせて、国土の様々な自然・環境とのかかわりを振り返るとよい</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
