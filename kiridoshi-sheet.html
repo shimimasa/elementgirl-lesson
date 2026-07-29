@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>キリドオシの関 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2a3550; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cfe6ea; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cfe6ea; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⛰️ キリドオシの関 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      今の 教科書では、鎌倉幕府が 始まったのは 何年ごろだと 習うと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 📜 1192年ごろ（頼朝が 征夷大将軍に 任命された 年）</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🗾 1185年ごろ（守護・地頭を 全国に 置いた 年）</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🌸 1200年ごろ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．平氏の栄華と滅亡</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">平治の乱と清盛の政治</span>
+        <span class="wordBank">平氏一門の栄華</span>
+        <span class="wordBank">壇ノ浦の戦い</span>
+      </div>
+      <div style="margin-top:1.2mm">平氏一族は どうして 大きな 力を にぎった？　ア 武士として初めて太政大臣になり、朝廷の高い位を一族で独占したから　・　イ 農民たちに選ばれたから　・　ウ 天皇に命令されてしかたなく（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．頼朝と鎌倉</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">頼朝の挙兵</span>
+        <span class="wordBank">なぜ鎌倉か</span>
+        <span class="wordBank">侍所の設置</span>
+      </div>
+      <div style="margin-top:1.2mm">頼朝が 鎌倉を 本拠地に 選んだのは なぜ？　ア 都に近くて便利だったから　・　イ 山と海に囲まれた守りやすい地形で、源氏ゆかりの土地だったから　・　ウ たまたま気に入った場所だったから（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．守護・地頭を置く</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">守護を置く</span>
+        <span class="wordBank">地頭を置く</span>
+        <span class="wordBank">全国に広がる守り</span>
+      </div>
+      <div style="margin-top:1.2mm">さいしょの よそうタイムを 思い出そう。鎌倉幕府が 始まったと 考えられているのは 何年ごろ？　ア 1192年ごろ　・　イ 1185年ごろ　・　ウ 1200年ごろ（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．御恩と奉公のバランス — 天びんで たしかめよう</span>
+    <div class="secBody">
+      御恩（土地）の 量を ①〜⑧で ためして、天びんが つりあった 番号を 書こう。<br>
+      つりあった 番号（　　　）　将軍と 御家人を 結ぶ、土地を 仲立ちに した 主従関係を（　　　）と（　　　）と いう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（承久の乱と北条政子）</span>
+    <div class="secBody">
+      承久の乱で、御家人たちが 幕府側に ついたのは なぜ？（〇を つけよう）<br>
+      ア 頼朝から受けた御恩への感謝と、政子の呼びかけで心がまとまったから　・　イ 朝廷の方が弱そうに見えたから　・　ウ ただの偶然で
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 国ごとに 置かれ、軍事や 警察を 担当した 役目を（<span class="fillLine sm"></span>）と いう。<br>
+      ② 荘園や 公領ごとに 置かれ、年貢の 取り立てを 行った 役目を（<span class="fillLine sm"></span>）と いう。<br>
+      ③ 将軍が 御家人に 土地を 守り、新しい 土地を 与える ことを（<span class="fillLine sm"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの人に「もし 何かを して もらったら、お礼に 何を するべきだと 思う？」と 聞いてみよう。御恩と 奉公のように、たがいに 支えあう 関係について、いっしょに 話してみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　キリドオシの関 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】キリドオシの関 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（鎌倉幕府の成立）」・学力幅あり・協力型／ 使うもの：「kiridoshi.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_goon</b> などで途中再開（m_heike／m_kamakura／m_shugo／m_goon／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🏯 平氏の 栄華と 滅亡</td><td>3つの手がかり（平治の乱と清盛の政治・平氏一門の栄華・壇ノ浦の戦い）をボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">10〜16分</td><td>⛰️ 頼朝と 鎌倉</td><td>3つの手がかり（頼朝の挙兵・なぜ鎌倉か・侍所の設置）を確認 → クイズ</td></tr>
+      <tr><td class="min">16〜23分</td><td>🗾 守護・地頭を 置く</td><td>守護を置く・地頭を置く・全国に広がる守りの3つを確認 → クイズでよそうタイム（1185年）を回収</td></tr>
+      <tr><td class="min">23〜35分</td><td>⚖️ 御恩と奉公の バランス（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で御恩（土地）の量を選び、天びんが釣り合うか試す。1人ずつ交代で選ばせるとよい。少なすぎ＝御家人が不満／多すぎ＝将来あたえる土地が足りなくなる不安</td></tr>
+      <tr><td class="min">35〜41分</td><td>⚔️ はかせチャレンジ（承久の乱と北条政子）</td><td>後鳥羽上皇の挙兵・北条政子の呼びかけ・六波羅探題の3つを発見 → クイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「頼朝と鎌倉」を右下「つぎ▶」でスキップ可（<b>御恩と奉公のバランス・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 1185年ごろ</b>／平氏の栄華と滅亡＝<b>ア 武士として初めて太政大臣になり、朝廷の高い位を一族で独占したから</b>／
+      頼朝と鎌倉＝<b>イ 山と海に囲まれた守りやすい地形で、源氏ゆかりの土地だったから</b>／守護・地頭を置く＝<b>イ 1185年ごろ</b>／
+      御恩と奉公のバランス＝③〜⑥（中間）で つりあう／はかせ＝<b>ア 頼朝から受けた御恩への感謝と、政子の呼びかけで心がまとまったから</b>／
+      まとめ＝①<b>守護</b>　②<b>地頭</b>　③<b>御恩</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>1159年の平治の乱に勝利した平清盛は、1167年に武士として初めて太政大臣となり、日宋貿易でも大きな富を築いた</li>
+      <li>清盛は娘を天皇のきさきにし、一族で朝廷の高い位をほぼ独占するほどの栄華だった（「平家にあらずんば人にあらず」）</li>
+      <li>1180年、伊豆で源頼朝が挙兵。弟・源義経らの活やくで平氏を追いつめ、1185年、壇ノ浦の戦い（山口県）で平氏を滅ぼした</li>
+      <li>頼朝は鎌倉（三方を山、一方を海に囲まれた要害の地で、父・源義朝ゆかりの土地）を本拠地に選び、1180年に侍所を置いた</li>
+      <li>1185年、頼朝は国ごとに守護（軍事・警察）、荘園や公領ごとに地頭（年貢の取り立て・土地管理）を置く権利を朝廷に認めさせた。今の教科書では、この年を鎌倉幕府の実質的な始まりとする説が有力（1192年は頼朝が征夷大将軍に任命された年）</li>
+      <li>将軍は御家人に御恩（土地を守る・新しい土地を与える）を与え、御家人は奉公（いざという時に命がけで戦う、「いざ鎌倉」）でこたえた。この土地を仲立ちにした主従関係が鎌倉幕府をささえた</li>
+      <li>1221年、後鳥羽上皇が幕府をたおそうと兵を挙げた承久の乱が起こったが、頼朝の妻・北条政子が御家人に「頼朝公の御恩は山より高く海より深い」と呼びかけ、御家人の心を一つにまとめた。幕府は勝利し、京都に六波羅探題を置いて朝廷を見張った</li>
+      <li>ただし御家人にあたえる土地には限りがあり、この後の元寇（外国からの襲来）で十分な恩賞をあたえられない出来事が起き、幕府は少しずつゆらいでいく（「ツイジの砦」の時代につながる）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「御恩と奉公のバランス」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせると全員が参加できる</li>
+      <li>「御恩は多いほど良い」ではなく「少なすぎても多すぎても困る」というバランス感覚がねらい。マルの蔵（税金とくらし）・ガイトウの町（地租改正）・カンムリの都（租庸調）と同じ考え方だと関連づけてもよい</li>
+      <li>よそうタイムの答え（イ 1185年ごろ）は、「1192（いいくに）つくろう鎌倉幕府」で覚えた保護者世代とのギャップが面白いポイント。研究が進むと教科書の記述が変わることもある、という気づきにつなげてもよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「御恩と奉公ってどんなしくみ？」「守護と地頭は何をしたの？」「頼朝はなぜ鎌倉を選んだの？」</li>
+      <li>教科書・資料集の鎌倉の切通し（極楽寺坂切通しなど）の写真を見ると理解が深まる</li>
+      <li>御恩と奉公のきずなで強くなった鎌倉幕府だが、この後の元寇（外国からの襲来）で十分な恩賞をあたえられない出来事が起き、幕府は少しずつゆらいでいく。次回作「ツイジの砦」（元寇と博多の防塁）の時代へとつながっていく</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
