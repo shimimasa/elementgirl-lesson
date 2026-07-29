@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ニスジの都 — 室町幕府の 成立と 南北朝 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f5f0dc 0%, #ddd0a0 55%, #8a7550 100%);
+    color: #2a2010;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #6a4a1a; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #7a6a48; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ede4c8; border: 2px solid #cdb87a;
+    font-size: clamp(16px, 1.8vw, 26px); color: #cdb87a;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #2a2010;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #faf7ec 0%, #ede0c0 100%);
+    border: 3px solid #9a7a3a;
+    box-shadow: inset 0 0 40px rgba(20, 25, 45, .12), 0 4px 18px rgba(15, 18, 32, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #241c08; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #6a4a1a; color: #f3ecf8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15, 18, 32, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 18, 32, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #cdb87a; cursor: pointer;
+    background: linear-gradient(180deg, #9a7a3a, #6a4a1a); color: #fff;
+    box-shadow: 0 3px 0 #1c1424; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #b8523a, #7a2e1e); border-color: #d89070; box-shadow: 0 3px 0 #4a1810; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #6a4a1a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(20, 25, 45, .3), inset 0 0 24px rgba(20, 25, 45, .18);
+    flex-shrink: 0; background: #f5f0dc;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #7a6a48;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #241c08; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #faf6ea; border: 2px solid #cdb87a; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #7a6a48; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2a2010;
+    border: 1.5px solid #ddd0a8;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #6a4a1a; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ede4c8, #ede0c0); color: #2a2010;
+    border: 2px solid #6a4a1a; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #6a4a1a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #9a7a3a, #6a4a1a); color: #fff;
+    box-shadow: 0 3px 0 #1c1424, 0 5px 12px rgba(20, 25, 45, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1c1424; }
+  .btn.sub {
+    background: #ede4c8; color: #6a4e1e; box-shadow: 0 3px 0 #cdb87a;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2a2010; box-shadow: 0 3px 0 #cdb87a; font-weight: 400; border: 1.5px solid #ddd0a8; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #9a7a3a; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(12, 14, 24, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #faf6ea, #ede0c0);
+    border: 3px solid #9a7a3a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(12, 14, 24, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #6a4a1a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #6a4a1a; }
+  .panel .sub { color: #7a6a48; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2a2010; border: 1.5px solid #ddd0a8; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #7a6a48; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #2a2010; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ddd0a8; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #6a4a1a; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #6a4a1a; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #6a4a1a;
+    color: #241c08; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #7a6a48;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ede4c8; color: #6a4e1e;
+    border: 1px solid #cdb87a; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ede4c8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">⚔️ ニスジの都<small>— 室町幕府の 成立と 南北朝 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_metsubo" title="鎌倉幕府の 滅亡">★</div>
+    <div class="badge" id="bd_m_kenmu" title="建武の新政と 武士の不満">★</div>
+    <div class="badge" id="bd_m_onsho" title="恩賞の バランス">★</div>
+    <div class="badge" id="bd_m_nanboku" title="南北朝の 分裂">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">鎌倉幕府の 滅亡</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 にすじめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,20,30,.18)"/>
+            <!-- からだ（直垂ふう） -->
+            <path d="M40 118 L44 100 L76 100 L80 118 Z" fill="#3a2e14" stroke="#2a2010" stroke-width="2"/>
+            <!-- 二つ引き両の紋（頭上の丸） -->
+            <circle cx="60" cy="46" r="30" fill="#3a2e14" stroke="#2a2010" stroke-width="2.5"/>
+            <rect x="34" y="37" width="52" height="7" rx="1.5" fill="#f5f0dc"/>
+            <rect x="34" y="51" width="52" height="7" rx="1.5" fill="#f5f0dc"/>
+            <!-- 顔 -->
+            <circle cx="60" cy="94" r="26" fill="#fff3cf" stroke="#2a2010" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="100" rx="5" ry="3.4" fill="#ffb070" opacity=".55"/>
+            <ellipse cx="74" cy="100" rx="5" ry="3.4" fill="#ffb070" opacity=".55"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="94" rx="3.6" ry="5" fill="#2a2010"/>
+              <ellipse cx="69" cy="94" rx="3.6" ry="5" fill="#2a2010"/>
+              <circle cx="52.3" cy="91.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="91.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 108 Q60 113 67 108" stroke="#241c08" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>家紋<rt>かもん</rt></ruby>の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ニスジ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">👑 カンムリの都ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ニスジの都 — 室町幕府の成立と南北朝（小6社会・歴史・協力型・1ファイル）
+   鎌倉幕府の滅亡（後醍醐天皇の倒幕）→ 建武の新政と武士の不満（二条河原の落書）→
+   恩賞のバランス（天びんで） → 南北朝の分裂（京都と吉野の地図） →
+   はかせ（室町幕府の成立・南北朝の統一）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  godaigo: ruby('後醍醐天皇', 'ごだいごてんのう'),
+  ashikaga: ruby('足利尊氏', 'あしかがたかうじ'),
+  nitta: ruby('新田義貞', 'にったよしさだ'),
+  hojo: ruby('北条氏', 'ほうじょうし'),
+  kenmu: ruby('建武の新政', 'けんむのしんせい'),
+  onsho: ruby('恩賞', 'おんしょう'),
+  nijou: ruby('二条河原の落書', 'にじょうがわらのらくしょ'),
+  komei: ruby('光明天皇', 'こうみょうてんのう'),
+  hokuchou: ruby('北朝', 'ほくちょう'),
+  nanchou: ruby('南朝', 'なんちょう'),
+  yoshino: ruby('吉野', 'よしの'),
+  seiitaishougun: ruby('征夷大将軍', 'せいいたいしょうぐん'),
+  muromachibakufu: ruby('室町幕府', 'むろまちばくふ'),
+  nanbokuchou: ruby('南北朝時代', 'なんぼくちょうじだい'),
+  yoshimitsu: ruby('足利義満', 'あしかがよしみつ'),
+  meitokuwayaku: ruby('明徳の和約', 'めいとくのわやく'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 判定ロジック ----------
+function judgeOnsho(n) { // n: 1-8 武士への恩賞の量レベル
+  if (n <= 2) return 'low';
+  if (n >= 7) return 'high';
+  return 'good';
+}
+function onshoTiltFromLevel(n) { // -1(公家の取り分が重い=武士の恩賞が軽い)〜+1(武士への恩賞が重い=公家の反発)
+  return clamp((n - 4.5) / 3.5, -1, 1);
+}
+
+// ---------- 鎌倉幕府の滅亡：手がかり ----------
+const METSUBO_POINTS = [
+  { key: 0, letter: 'あ', name: '後醍醐天皇の倒幕計画', x: 260, y: 320,
+    txt: `${W.godaigo}は、鎌倉幕府を たおそうと 何度も 計画を 立てた。一度 失敗して 島流しに されても、あきらめなかったんだ。` },
+  { key: 1, letter: 'い', name: '足利尊氏・新田義貞の挙兵', x: 500, y: 220,
+    txt: `幕府の 御家人だった ${W.ashikaga}が 幕府に そむいて 京都の 六波羅探題を 攻め落とし、${W.nitta}は 鎌倉を 攻めたんだ。` },
+  { key: 2, letter: 'う', name: '北条氏の滅亡（1333年）', x: 740, y: 340,
+    txt: `1333年、鎌倉が 攻め落とされ、${W.hojo}は ほろびた。こうして 鎌倉幕府は 終わりを むかえたんだよ。` },
+];
+
+// ---------- 建武の新政と武士の不満：手がかり ----------
+const KENMU_POINTS = [
+  { key: 0, letter: 'あ', name: '天皇みずからの政治', x: 220, y: 300,
+    txt: `${W.godaigo}は「今の 政治は すべて 自分（天皇）が 決める」という 方針で、公家を 重んじる 政治「${W.kenmu}」を 始めたんだ。` },
+  { key: 1, letter: 'い', name: '恩賞への不満', x: 800, y: 470,
+    txt: `倒幕に 手がらの あった 武士より、公家が ${W.onsho}を 厚く もらう ことが 多く、武士たちの 不満が 高まっていったんだ。` },
+  { key: 2, letter: 'う', name: '二条河原の落書', x: 780, y: 260,
+    txt: `1334年、京都の 二条河原に「この ごろ 都に はやる もの、夜討・強盗・にせの 命令書……」で 始まる ${W.nijou}が はり出された。世の中の 混乱を 皮肉った ものだよ。` },
+];
+
+// ---------- 南北朝の分裂：手がかり（地図） ----------
+const NANBOKU_POINTS = [
+  { key: 0, letter: 'あ', name: '京都（北朝）', x: 320, y: 300,
+    txt: `1336年、${W.ashikaga}は 京都で 新しい 天皇「${W.komei}」を たてた。これが ${W.hokuchou}だよ。` },
+  { key: 1, letter: 'い', name: '吉野（南朝）', x: 680, y: 420,
+    txt: `${W.godaigo}は 京都を はなれ、山ふかい ${W.yoshino}へ うつって、自分こそ 正しい 天皇だと 主張した。これが ${W.nanchou}だよ。` },
+];
+
+// ---------- はかせ：室町幕府の成立・南北朝の統一 手がかり ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '室町幕府の成立', x: 300, y: 460,
+    txt: `1338年、${W.ashikaga}は ${W.seiitaishougun}に 任命され、新しい 武士の 政権「${W.muromachibakufu}」が 始まったんだ。` },
+  { key: 1, letter: 'い', name: '南北朝の統一', x: 700, y: 460,
+    txt: `北朝と 南朝に 分かれて 争う ${W.nanbokuchou}は、約56年も 続いた。1392年、${W.yoshimitsu}が ${W.meitokuwayaku}で 2つの 朝廷を 1つに まとめたんだよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'metsubo',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  metsuboFound: new Set(),
+  kenmuFound: new Set(),
+  nanbokuFound: new Set(),
+  hakaseFound: new Set(),
+  onshoLevel: 4,
+  onshoTries: new Set(),
+  onsho: { tiltF: 0 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(X, Y, sc, points, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 24 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#6a4a1a' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#241c08'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#6a4a1a';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 空の背景 ----------
+function bgSky(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#dfe6f0'); g.addColorStop(1, '#c4ccdc');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#e8dcb8';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+}
+
+// ---------- 宮殿のシルエット ----------
+function drawPalace(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#9a7a3a'; gctx.strokeStyle = '#2a2010'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.rect(X(cx - 90), Y(baseY - 90), 180 * sc, 90 * sc);
+  gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3a3f4c';
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 120), Y(baseY - 90)); gctx.lineTo(X(cx - 70), Y(baseY - 150));
+  gctx.lineTo(X(cx + 70), Y(baseY - 150)); gctx.lineTo(X(cx + 120), Y(baseY - 90));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#ffce54';
+  gctx.beginPath(); gctx.arc(X(cx), Y(baseY - 150), 8 * sc, 0, TAU); gctx.fill();
+}
+function drawMetsuboScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  drawPalace(X, Y, sc, 500, 480);
+  gctx.font = `${52 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('⚔️', X(500), Y(560));
+  drawPoints(X, Y, sc, METSUBO_POINTS, S.metsuboFound);
+}
+
+// ---------- 建武の新政シーン（御所と立て札） ----------
+function drawKenmuScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  drawPalace(X, Y, sc, 500, 480);
+  gctx.fillStyle = '#f3e6cf'; gctx.strokeStyle = '#8a5a3a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(400), Y(150), 200 * sc, 90 * sc, 8 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#241c08'; gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('📜', X(500), Y(195));
+  drawPoints(X, Y, sc, KENMU_POINTS, S.kenmuFound);
+}
+
+// ---------- 南北朝の分裂シーン（京都と吉野） ----------
+function drawNanbokuScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  gctx.fillStyle = '#7a9060'; gctx.strokeStyle = '#2a2010'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(560), Y(560)); gctx.lineTo(X(680), Y(340)); gctx.lineTo(X(800), Y(560));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.beginPath();
+  gctx.moveTo(X(660), Y(560)); gctx.lineTo(X(760), Y(400)); gctx.lineTo(X(870), Y(560));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  drawPalace(X, Y, sc, 320, 480);
+  gctx.strokeStyle = 'rgba(154,74,26,.5)'; gctx.lineWidth = 3 * sc; gctx.setLineDash([10 * sc, 8 * sc]);
+  gctx.beginPath(); gctx.moveTo(X(320), Y(300)); gctx.lineTo(X(680), Y(420)); gctx.stroke(); gctx.setLineDash([]);
+  drawPoints(X, Y, sc, NANBOKU_POINTS, S.nanbokuFound);
+}
+
+// ---------- 恩賞の天びん（メイン操作） ----------
+function drawBalance(X, Y, sc, cx, cy, tilt, leftLabel, leftIcon, rightLabel, rightIcon) {
+  const armLen = 220, armAngle = tilt * 0.22;
+  gctx.strokeStyle = '#241c08'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(cx), Y(cy)); gctx.lineTo(X(cx), Y(cy + 140)); gctx.stroke();
+  gctx.fillStyle = '#241c08';
+  gctx.beginPath(); gctx.moveTo(X(cx - 40), Y(cy + 140)); gctx.lineTo(X(cx + 40), Y(cy + 140)); gctx.lineTo(X(cx + 30), Y(cy + 156)); gctx.lineTo(X(cx - 30), Y(cy + 156)); gctx.closePath(); gctx.fill();
+
+  const lx = cx - Math.cos(armAngle) * armLen, ly = cy - Math.sin(armAngle) * armLen;
+  const rx = cx + Math.cos(armAngle) * armLen, ry = cy + Math.sin(armAngle) * armLen;
+  gctx.strokeStyle = tilt !== 0 ? '#b8523a' : '#241c08'; gctx.lineWidth = (tilt !== 0 ? 6 : 5) * sc;
+  gctx.beginPath(); gctx.moveTo(X(lx), Y(ly)); gctx.lineTo(X(rx), Y(ry)); gctx.stroke();
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), 7 * sc, 0, TAU); gctx.fillStyle = '#d4900f'; gctx.fill();
+
+  [[lx, ly, leftLabel, leftIcon], [rx, ry, rightLabel, rightIcon]].forEach(([px, py, label, icon]) => {
+    const dy = 34;
+    gctx.strokeStyle = '#241c08'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.moveTo(X(px), Y(py)); gctx.lineTo(X(px), Y(py + dy)); gctx.stroke();
+    gctx.fillStyle = '#fff'; gctx.strokeStyle = '#241c08'; gctx.lineWidth = 2.5 * sc;
+    gctx.beginPath(); gctx.ellipse(X(px), Y(py + dy + 20), 58 * sc, 16 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(icon, X(px), Y(py + dy + 18));
+    gctx.fillStyle = '#241c08'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(label, X(px), Y(py + dy + 46));
+  });
+}
+function drawOnshoScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  drawBalance(X, Y, sc, 500, 320, S.onsho.tiltF, '公家の 取り分', '👘', '武士への 恩賞', '⚔️');
+  gctx.fillStyle = '#6a4a1a'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`恩賞の 量 ${NUMS[S.onshoLevel - 1]}`, X(500), Y(120));
+}
+
+// ---------- はかせ：室町幕府の成立・南北朝の統一 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  gctx.strokeStyle = 'rgba(74,45,110,.35)'; gctx.lineWidth = 2 * sc;
+  for (let gx = 200; gx <= 800; gx += 100) {
+    gctx.beginPath(); gctx.moveTo(X(gx), Y(260)); gctx.lineTo(X(gx), Y(560)); gctx.stroke();
+  }
+  for (let gy = 260; gy <= 560; gy += 75) {
+    gctx.beginPath(); gctx.moveTo(X(200), Y(gy)); gctx.lineTo(X(800), Y(gy)); gctx.stroke();
+  }
+  drawPalace(X, Y, sc, 500, 340);
+  drawPoints(X, Y, sc, HAKASE_POINTS, S.hakaseFound);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'metsubo') drawMetsuboScene(X, Y, sc);
+  else if (S.scene === 'kenmu') drawKenmuScene(X, Y, sc);
+  else if (S.scene === 'onsho') drawOnshoScene(X, Y, sc);
+  else if (S.scene === 'nanboku') drawNanbokuScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawOnshoScene(X, Y, sc);
+}
+
+// ---------- まほうのめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f5f0dc'); grd.addColorStop(1, '#cdb87a');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#6a4a1a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'tilt') {
+    const deg = Math.round(S.onsho.tiltF * 12);
+    sctx.font = `700 ${R * 0.26}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#6a4a1a';
+    sctx.fillText((deg >= 0 ? '+' : '') + deg + '°', R, R * 0.78);
+    label('てんびんの かたむき');
+  } else if (mode === 'scroll') {
+    sctx.fillStyle = '#8a5a3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('📜', R, R * 0.85);
+    label(S.scope.name || '記録');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe9a8'); g2.addColorStop(1, 'rgba(255,233,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#6a4a1a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚦', R, R * 0.85);
+    label('たしかめ かんりょう！');
+  } else {
+    sctx.fillStyle = '#6a4a1a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2a2010';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#6a4a1a', '#ffe9a8', '#9a7a3a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '鎌倉〜京都（1330年代）';
+  const titles = {
+    metsubo: '⚔️ 鎌倉幕府の 滅亡（1333年）',
+    kenmu: '📜 建武の新政（1334年〜）',
+    onsho: '⚖️ 恩賞の バランス',
+    nanboku: '🗾 南北朝の 分裂（1336年〜）',
+    hakase: '🏯 室町幕府の 成立・南北朝の統一',
+    done: '⚔️ ニスジの都 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '鎌倉幕府の 滅亡';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_metsubo', 'm_kenmu', 'm_onsho', 'm_nanboku', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'metsubo', scope: { type: 'idle' }, metsuboFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">⚔️📜⚖️</div>
+        <h1>ニスジの都</h1>
+        <div class="sub">〜 室町幕府の成立と 南北朝の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 足利家の 家紋「二つ引き両」から 生まれた 精霊、<b>ニスジ</b>。今から 700年ほど前、鎌倉幕府が たおれ、新しい 武士の 世が 生まれるまでの ものがたりを、<b>いっしょに たしかめに いこう！</b><br>
+        鎌倉幕府は どうして たおれたのか、そして そのあと 世の中は どう 動いたのか……見ていこう。</p>
+        <button class="btn" id="startBtn">都を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">今の 教科書では、この時代 天皇は 何人 いたと 習うと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">1️⃣</span><b>ア</b> 1人</div>
+          <div class="vcard" data-v="1"><span class="vicon">2️⃣</span><b>イ</b> 2人</div>
+          <div class="vcard" data-v="2"><span class="vicon">3️⃣</span><b>ウ</b> 3人以上</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：鎌倉幕府の滅亡 ---
+  m_metsubo: {
+    enter() {
+      Object.assign(S, { scene: 'metsubo', scope: { type: 'idle' }, metsuboFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`⚔️ 150年ほど 続いた 鎌倉幕府は、どのように たおれたのだろう？ 3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(METSUBO_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.metsuboFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.metsuboFound.size >= METSUBO_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.metsuboFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`1333年に 鎌倉幕府が 滅んだのは、誰の 裏切りが 大きな 原因だったと 考えられているだろう？`);
+      setButtons(choiceRow(['ア 御家人だった 足利尊氏が、幕府に 反旗を ひるがえしたから', 'イ となりの 国が 攻めてきたから', 'ウ 農民が 一揆を 起こしたから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_metsubo'); S.phase = 'done';
+        say(`せいかい！ 幕府の 御家人だった ${W.ashikaga}が 幕府に そむいたことが、鎌倉幕府 滅亡の 大きな 原因に なったんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.godaigo}の 倒幕計画に、御家人たちも 味方するように なっていったんだよ。`);
+        setButtons([{ label: 'つぎへ（建武の新政）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 御家人だった 足利尊氏が、幕府に 反旗を ひるがえしたから', 'イ となりの 国が 攻めてきたから', 'ウ 農民が 一揆を 起こしたから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：建武の新政と武士の不満 ---
+  m_kenmu: {
+    enter() {
+      Object.assign(S, { scene: 'kenmu', scope: { type: 'idle' }, kenmuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`📜 鎌倉幕府が たおれた あと、${W.godaigo}は どんな 政治を 始めたのだろう？ 3つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KENMU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kenmuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kenmuFound.size >= KENMU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kenmuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.kenmu}は、武士たちに どう 受け止められただろう？`);
+      setButtons(choiceRow(['ア 武士の 望みどおりの、満足の いく 政治だった', 'イ 武士の 不満が 高まる 政治だった', 'ウ 武士には まったく 関係の ない 政治だった'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kenmu'); S.phase = 'done';
+        say(`せいかい！ ${W.nijou}に あるように、公家 重視の 政治に 武士たちの 不満は 高まる 一方だった。<br><br>💡 <b>たいせつポイント</b><br>とくに 倒幕に 手がらの あった 武士への ${W.onsho}が 不十分だったことが、大きな 不満の 種に なったんだ。`);
+        setButtons([{ label: 'つぎへ（恩賞のバランス）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 武士の 望みどおりの、満足の いく 政治だった', 'イ 武士の 不満が 高まる 政治だった', 'ウ 武士には まったく 関係の ない 政治だった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：恩賞のバランス（天びん・メイン操作） ---
+  m_onsho: {
+    enter() {
+      Object.assign(S, { scene: 'onsho', scope: { type: 'tilt' }, onsho: { tiltF: 0 }, onshoLevel: 4, onshoTries: new Set() });
+      updateLoc();
+      hideWish();
+      say(`⚖️ 倒幕に 力を つくした 武士たちに、恩賞（土地）を どれだけ わたすかが 大きな 問題に なった。目もり①〜⑧で 量を えらんで、天びんが つりあうか ためしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.onshoLevel === n ? ' sel' : ''), cb: () => { S.onshoLevel = n; this.refreshCtl(); } });
+      list.push({ label: '⚖️ 量を 決める', cb: () => this.build() });
+      setControls(list);
+    },
+    build() {
+      setControls([]);
+      say(`目もり ${NUMS[S.onshoLevel - 1]} の 量で、恩賞を くばって みる……`);
+      sClank();
+      const target = onshoTiltFromLevel(S.onshoLevel);
+      startTween(S.onsho.tiltF, target, 1.1, v => { S.onsho.tiltF = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeOnsho(S.onshoLevel);
+      S.onshoTries.add(S.onshoLevel);
+      if (r === 'good') {
+        sYes(); scopeBurst(); award('m_onsho'); S.phase = 'done';
+        say(`✨ 天びんが つりあった！ 武士たちも 納得でき、公家との バランスも 保てる、ちょうどよい 量に なった。✨<br><br>💡 <b>たいせつポイント</b><br>でも 実さいの 建武の新政では、この バランスが うまく 取れず、多くの 武士が 不満を つのらせたんだ。`);
+        setButtons([{ label: 'つぎへ（南北朝の分裂）', cb: nextStep }]);
+      } else if (r === 'low') {
+        sHmm(); S.tryT = 0;
+        say(`少なすぎて、公家ばかりが 恩賞を もらい、武士たちの 不満が つのって しまいそうだ……もういちど 量を えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm(); S.tryT = 0;
+        say(`多すぎて、公家からの 反発が 強まり、あたえられる 土地も すぐに 足りなく なりそうだ……もういちど 量を えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：南北朝の分裂（地図発見型、よそう回収） ---
+  m_nanboku: {
+    enter() {
+      Object.assign(S, { scene: 'nanboku', scope: { type: 'idle' }, nanbokuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`🗾 武士たちの 不満を 背に、${W.ashikaga}が 立ち上がった。都は どうなったのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(NANBOKU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.nanbokuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.nanbokuFound.size >= NANBOKU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.nanbokuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`さいしょの よそうタイムを 思い出そう。この時代、天皇は 何人 いただろう？`);
+      setButtons(choiceRow(['ア 1人', 'イ 2人', 'ウ 3人以上'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_nanboku'); S.phase = 'done';
+        say(`せいかい！ 京都の ${W.hokuchou}と 吉野の ${W.nanchou}、2つの 朝廷が 同時に 立つ ${W.nanbokuchou}が 始まったんだ。<br><br>💡 <b>たいせつポイント</b><br>2つの 天皇、2つの 朝廷が 争う ふしぎな 時代が、これから 半世紀以上も 続くことに なるよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 1人', 'イ 2人', 'ウ 3人以上'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：室町幕府の成立・南北朝の統一 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 京都と 吉野に 分かれた 争いは、どう 決着したのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`${W.nanbokuchou}は、どのくらいの 間 続いただろう？`);
+      setButtons(choiceRow(['ア 数年', 'イ 約10年', 'ウ 約60年'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 2) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 1336年から 1392年まで、${W.nanbokuchou}は 56年も 続いたんだ。${W.yoshimitsu}が ${W.meitokuwayaku}で ようやく 2つの 朝廷を 1つに まとめたんだよ。<br><br>💡 <b>たいせつポイント</b><br>でも 御家人に あたえる 土地には 限りが あり、恩賞への 不満は 残ったまま。このあと 元寇（げんこう）で じゅうぶんな 恩賞を あたえられない 出来事が 起き、幕府の 力は 少しずつ ゆらいでいくよ……。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 数年', 'イ 約10年', 'ウ 約60年'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, onsho: { tiltF: 0 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ニスジの都 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.godaigo}中心の 政治を（<span class="blankWord" data-a="建武の新政">？？？</span>）と いう。<br>
+        ② 京都の 北朝と 吉野の 南朝が 争った 時代を（<span class="blankWord" data-a="南北朝時代">？？？</span>）と いう。<br>
+        ③ 足利尊氏が 任命された 役職を（<span class="blankWord" data-a="征夷大将軍">？？？</span>）と いう。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 2人</b> でした！ 京都の 北朝と 吉野の 南朝、天皇が 同時に 2人 いた 時代だったんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちの人に「もし 同じ 国に 2人の リーダーが いたら、どんな ことが 困ると 思う？」と 聞いてみよう。南北朝の 争いを、いっしょに 振り返ってみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#241c08'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'onsho', scope: { type: 'glow' }, onsho: { tiltF: 0 } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 室町幕府の成立と 南北朝について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「鎌倉幕府は なぜ たおれた？」「南北朝は どう 統一された？」`);
+      setButtons([
+        { label: '⚔️ 鎌倉幕府滅亡の 図', cls: 'sub', cb: () => this.show('metsubo') },
+        { label: '📜 建武の新政の 図', cls: 'sub', cb: () => this.show('kenmu') },
+        { label: '⚖️ 天びんの 図', cls: 'sub', cb: () => this.show('onsho') },
+        { label: '🗾 南北朝の 図', cls: 'sub', cb: () => this.show('nanboku') },
+        { label: '🏯 室町幕府成立の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'onsho') { S.onsho.tiltF = 0; }
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_onsho などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

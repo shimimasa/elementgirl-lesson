@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ニスジの都 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2a3550; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #e6dcc0; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #e6dcc0; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⚔️ ニスジの都 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      今の 教科書では、この時代 天皇は 何人 いたと 習うと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 1人</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 2人</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 3人以上</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．鎌倉幕府の滅亡</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">後醍醐天皇の倒幕計画</span>
+        <span class="wordBank">足利尊氏・新田義貞の挙兵</span>
+        <span class="wordBank">北条氏の滅亡</span>
+      </div>
+      <div style="margin-top:1.2mm">1333年、鎌倉幕府が滅んだのは 誰の 裏切りが 大きな 原因？　ア 御家人だった足利尊氏が反旗をひるがえした　・　イ となりの国が攻めてきた　・　ウ 農民が一揆を起こした（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．建武の新政と武士の不満</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">天皇みずからの政治</span>
+        <span class="wordBank">恩賞への不満</span>
+        <span class="wordBank">二条河原の落書</span>
+      </div>
+      <div style="margin-top:1.2mm">建武の新政は 武士たちに どう 受け止められた？　ア 満足のいく政治だった　・　イ 武士の不満が高まる政治だった　・　ウ 武士には関係のない政治だった（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．恩賞のバランス — 天びんで たしかめよう</span>
+    <div class="secBody">
+      武士への 恩賞（土地）の 量を ①〜⑧で ためして、天びんが つりあった 番号を 書こう。<br>
+      つりあった 番号（　　　）　少なすぎると（　　　　　　　　　）、多すぎると（　　　　　　　　　）。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．南北朝の分裂</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">京都（北朝）</span>
+        <span class="wordBank">吉野（南朝）</span>
+      </div>
+      <div style="margin-top:1.2mm">さいしょの よそうタイムを 思い出そう。この時代、天皇は 何人 いた？　ア 1人　・　イ 2人　・　ウ 3人以上（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（室町幕府の成立・南北朝の統一）</span>
+    <div class="secBody">
+      南北朝時代は どのくらいの 間 続いた？（〇を つけよう）<br>
+      ア 数年　・　イ 約10年　・　ウ 約60年
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 後醍醐天皇 中心の 政治を（<span class="fillLine"></span>）と いう。<br>
+      ② 京都の 北朝と 吉野の 南朝が 争った 時代を（<span class="fillLine"></span>）と いう。<br>
+      ③ 足利尊氏が 任命された 役職を（<span class="fillLine sm"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの人に「もし 同じ 国に 2人の リーダーが いたら、どんな ことが 困ると 思う？」と 聞いてみよう。南北朝の 争いを、いっしょに 振り返ってみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ニスジの都 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ニスジの都 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（室町幕府の成立・南北朝）」・学力幅あり・協力型／ 使うもの：「nisuji.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_onsho</b> などで途中再開（m_metsubo／m_kenmu／m_onsho／m_nanboku／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>⚔️ 鎌倉幕府の 滅亡</td><td>3つの手がかり（後醍醐天皇の倒幕計画・足利尊氏と新田義貞の挙兵・北条氏の滅亡）をボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">10〜16分</td><td>📜 建武の新政と 武士の不満</td><td>天皇みずからの政治・恩賞への不満・二条河原の落書の3つを確認 → クイズ</td></tr>
+      <tr><td class="min">16〜28分</td><td>⚖️ 恩賞の バランス（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で武士への恩賞の量を選び、天びんが釣り合うか試す。1人ずつ交代で選ばせるとよい。少なすぎ＝武士の不満／多すぎ＝公家の反発</td></tr>
+      <tr><td class="min">28〜35分</td><td>🗾 南北朝の 分裂</td><td>京都（北朝）・吉野（南朝）の2つを発見 → クイズでよそうタイムを回収</td></tr>
+      <tr><td class="min">35〜41分</td><td>🏯 はかせチャレンジ（室町幕府の成立・南北朝の統一）</td><td>室町幕府の成立・南北朝の統一の2つを発見 → クイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「建武の新政と武士の不満」を右下「つぎ▶」でスキップ可（<b>恩賞のバランス・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 2人</b>／鎌倉幕府の滅亡＝<b>ア 御家人だった足利尊氏が、幕府に反旗をひるがえしたから</b>／
+      建武の新政と武士の不満＝<b>イ 武士の不満が高まる政治だった</b>／恩賞のバランス＝③〜⑥（中間）で つりあう／
+      南北朝の分裂＝<b>イ 2人</b>／はかせチャレンジ＝<b>ウ 約60年</b>／
+      まとめ＝①<b>建武の新政</b>　②<b>南北朝時代</b>　③<b>征夷大将軍</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>後醍醐天皇は鎌倉幕府をたおそうと何度も計画を立て、一度失敗して隠岐に流されてもあきらめなかった</li>
+      <li>幕府の御家人だった足利尊氏が幕府にそむいて京都の六波羅探題を攻め落とし、新田義貞は鎌倉を攻めた。1333年、北条氏は滅び鎌倉幕府は終わった</li>
+      <li>後醍醐天皇は「今の政治はすべて天皇が決める」という方針で、公家を重んじる建武の新政（1334年〜）を始めた。倒幕に手がらのあった武士より公家への恩賞が厚く、武士の不満が高まった</li>
+      <li>1334年、京都の二条河原に「このごろ都にはやる物、夜討・強盗・にせの命令書……」で始まる二条河原の落書がはり出された。世の中の混乱を皮肉ったもの</li>
+      <li>1336年、足利尊氏は京都で新しい天皇（光明天皇）をたて北朝とした。後醍醐天皇は吉野へうつり、自分こそ正しい天皇だと主張して南朝とした（南北朝時代の始まり）</li>
+      <li>1338年、足利尊氏は征夷大将軍に任命され、室町幕府が始まった</li>
+      <li>南北朝時代は1336年から1392年まで56年も続いた。1392年、足利義満が明徳の和約で2つの朝廷を1つにまとめた</li>
+      <li>ただし御家人にあたえる土地には限りがあり、恩賞への不満は残ったまま。このあと元寇で十分な恩賞をあたえられない出来事が起き、幕府の力は少しずつゆらいでいく（次回作「ツイジの砦」＝元寇の時代につながる）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「恩賞のバランス」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせると全員が参加できる</li>
+      <li>「天皇が2人いた」という事実は子どもにとって驚きが大きい。正統性の学術論争には立ち入らず、「北朝と南朝、2つの朝廷が並び立った」という事実関係の理解にとどめるとよい</li>
+      <li>よそうタイムの答え（イ）は、「1192（いいくに）つくろう鎌倉幕府」で覚えた保護者世代とのギャップもある話題。史学研究の進展で教科書の記述が変わる、という視点も伝えられるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「鎌倉幕府はなぜたおれた？」「南北朝はどう統一された？」「建武の新政って何？」</li>
+      <li>教科書・資料集の金閣（次回作「ぎんしゃの庭」で扱う室町文化）につながる、足利義満の時代への橋渡しとして紹介してもよい</li>
+      <li>御家人への恩賞の限界という課題は残ったまま。次回作「ツイジの砦」（元寇と博多の防塁）で、幕府がゆらいでいく様子へとつながっていく</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
