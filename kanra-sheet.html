@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ツイジの砦 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2f5f1e; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.3mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.4; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f2f9ec;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #d8ecc0; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #d8ecc0; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🥬 カンラの畑 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      真夏に キャベツを たくさん 作るなら、どこが むいていると 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🏖️ あつい 沖縄などの 土地</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🏔️ すずしい 高原</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🤷 どこでも 同じように そだつ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．高原の かんきょう発見</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">高原の 標高</span>
+        <span class="wordBank">キャベツが 好む 気温</span>
+        <span class="wordBank">昼と夜の 気温差</span>
+      </div>
+      <div style="margin-top:1.2mm">なぜ 夏でも すずしい 高原で キャベツが よく そだつ？　ア 雨が 多いから ・ イ 気温が 下がり すずしくなるから ・ ウ 日当たりが 悪いから（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．村の 開拓の 歴史</span>
+    <div class="secBody">
+      村の 人たちは、キャベツの 村づくりを どう 進めた？（〇を つけよう）<br>
+      ア 一人だけの 力で 成しとげた　・　イ 土地の 改良・栽培の 指導・道づくりを 分担して 力を 合わせた　・　ウ 何も くふうせず 自然に できあがった
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．出荷カレンダー — 月を ためそう</span>
+    <div class="secBody">
+      ①〜⑧の 月を えらんで 出荷してみよう。高く 売れた 月に 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>① 4月</th><th>② 5月</th><th>③ 6月</th><th>④ 7月</th><th>⑤ 8月</th><th>⑥ 9月</th><th>⑦ 10月</th><th>⑧ 11月</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      <div style="margin-top:1.2mm">夏（7〜9月）に 出荷すると なぜ 高く 売れる？　ア 他の 産地が お休みだから ・ イ 他の 産地は あつすぎて 作れない 時期に 高原だけが 出荷できるから ・ ウ ねだんが 決まっているから（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．産地リレー発見</span>
+    <div class="secBody">
+      3つの 地いきを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">春キャベツ（関東）</span>
+        <span class="wordBank">夏秋キャベツ（高原）</span>
+        <span class="wordBank">冬キャベツ（暖地）</span>
+      </div>
+      <div style="margin-top:1.2mm">一年中 キャベツが 買えるのは なぜ？　ア 1つの 産地が 作りつづけているから ・ イ 季節ごとに 産地が 入れかわり リレーの ように つないでいるから ・ ウ 保存して おいた ものを 売っているから（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（畑から 食たくまで）</span>
+    <div class="secBody">
+      新鮮な まま 遠くの 都市に とどけられるのは なぜだろう？（〇を つけよう）<br>
+      ア すぐ 冷凍して しまうから　・　イ 保冷トラックと 整った 道路で すばやく 運ぶから　・　ウ もともと 日もちが するから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 嬬恋村の 畑が ある 標高は 約（<span class="fillLine"></span>）。<br>
+      ② キャベツの 出荷量が 日本一に なる 時期は（<span class="fillLine"></span>）ごろ。<br>
+      ③ キャベツが よく そだつ 気温は（<span class="fillLine"></span>）くらい。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          スーパーで 売っている キャベツの ふくろの「産地シール」を 見てみよう。季節に よって 産地が かわるか、おうちの人と たしかめてみよう。<br>
+          ☐ 見つけた 産地：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　カンラの畑 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】カンラの畑 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「地理（高い土地のくらし・群馬県嬬恋村の高原野菜）」・学力幅あり・協力型／ 使うもの：「kanra.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_shukka</b> などで途中再開（m_kankyo／m_kaitaku／m_shukka／m_relay／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🏔️ 高原の かんきょう発見</td><td>3つの手がかり（標高・気温・寒暖差）をボタンで確認 → クイズ。涼しさがキャベツに合うことを紹介</td></tr>
+      <tr><td class="min">10〜16分</td><td>🏘️ 村の 開拓の歴史</td><td>3つの手がかり（貧しかった村・土の改良・道づくり）をボタンで確認 → クイズ。3人の先人の協力を紹介</td></tr>
+      <tr><td class="min">16〜27分</td><td>📅 出荷カレンダー（<b>今日の見せ場</b>）</td><td>①〜⑧の月を選んで出荷を試す→値段ゲージが変化。4〜5月・11月は安く、7〜9月は高い、という山型を何度も試させる。1人ずつ交代で月を選ばせるとよい</td></tr>
+      <tr><td class="min">27〜35分</td><td>🗾 産地リレー発見</td><td>3つの手がかり（春・夏秋・冬キャベツの産地）をボタンで確認 → クイズ。一年中買える理由を紹介</td></tr>
+      <tr><td class="min">35〜41分</td><td>🚚 はかせチャレンジ（畑から食たくまで）</td><td>保冷トラックの出発を見せる→新鮮なまま届く理由をクイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「産地シールさがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「村の開拓の歴史」を右下「つぎ▶」でスキップ可（<b>出荷カレンダー・産地リレー・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ すずしい 高原</b>／高原のかんきょう＝<b>イ 標高が高いほど気温が下がり すずしくなる</b>／
+      村の開拓＝<b>イ それぞれが分担して力を合わせた</b>／出荷カレンダー＝<b>④〜⑥（7〜9月）が高値、①②⑧（4・5・11月）は安値</b>／
+      産地リレー＝<b>イ 季節ごとに産地が入れかわりリレーのようにつないでいる</b>／
+      はかせ＝<b>イ 保冷トラックと整った道路ですばやく運ぶ</b>／
+      まとめ＝①<b>700〜1400m</b>　②<b>7〜10月</b>　③<b>15〜20℃</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の統計・歴史です）</h2>
+    <ul>
+      <li>群馬県嬬恋村は浅間山のふもと、標高700〜1400mに畑が広がる高原。夏秋キャベツの出荷量が全国1位で、全国に出まわる夏秋キャベツの約7割が嬬恋村産（年間収穫量 約20万トン）</li>
+      <li>キャベツの生育適温は15〜20℃、結球適温は13〜20℃。28℃以上の高温や7℃以下の低温では結球が鈍る。嬬恋村の夏（6〜9月ごろ）の気温はこの適温に近く、昼夜の寒暖差が大きいことも甘みを引き出す</li>
+      <li>産地リレー：春キャベツ（4〜6月・関東近在）→夏秋キャベツ（7〜10月・群馬嬬恋村や岩手など冷涼地）→冬キャベツ（11〜4月・愛知や千葉など暖地）と、季節ごとに得意な産地が入れかわり一年中出回る</li>
+      <li>今から約90年前（昭和初期）、嬬恋村は「日本一まずしい村」と言われるほど苦しかった。青果商人・農業技術員・村長の3人が土地の改良（黒ボク土＝かつて「のぼう土」と呼ばれた作物が育ちにくい土の改良）・栽培指導・道路整備をそれぞれ分担し、今の高原キャベツの産地を作り上げた</li>
+      <li>保冷トラックと整備された道路網により、収穫した新鮮なキャベツを一定の温度に保ったまま数百km離れた都市の市場まで届けられる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「出荷カレンダー」が今日いちばんの見せ場。1人ずつ交代で月を選ばせ、値段ゲージの変化を全員で見るとよい</li>
+      <li>出荷カレンダーは「高原がいつでも一番得」ではなく、他の産地と時期が重なる4〜5月・11月は安くなる、という山型の設定。単純な「高いほど良い」ではない点を丁寧に扱う</li>
+      <li>よそうタイムの答え（イ：すずしい高原）は、「夏＝暑い場所で育てる」という思い込みを裏切る構成。まとめで丁寧に振り返るとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「嬬恋村の標高はどれくらい？」「なぜ夏に出荷すると高く売れるの？」「産地リレーって何？」</li>
+      <li>スーパーのキャベツの産地シールを見る「おうちミッション」で、実際の産地リレーを家庭でも確認できる</li>
+      <li>低い土地のくらし（[[輪中・ミズヤの里]]）と対比させると、「地形・気候に応じたくらしの工夫」という地理分野の見方がつながる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
