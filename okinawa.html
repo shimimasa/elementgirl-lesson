@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>シーサの家 — あたたかい土地の くらし たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eafaf6 0%, #cdeee0 55%, #7bcf9a 100%);
+    color: #4a2a16;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #7a3018; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #a8623a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #f5e2c8; border: 2px solid #dfb787;
+    font-size: clamp(16px, 1.8vw, 26px); color: #dfb787;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe3a0, #d4900f);
+    border-color: #8a5a0a; color: #4a2a16;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #fdf8ec 0%, #f3e2c4 100%);
+    border: 3px solid #c1442e;
+    box-shadow: inset 0 0 40px rgba(120, 60, 20, .14), 0 4px 18px rgba(90, 40, 10, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #3a2010; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #7a3018; color: #fff4e6; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(90, 40, 10, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(90, 40, 10, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #bcdde2; cursor: pointer;
+    background: linear-gradient(180deg, #c1442e, #7a3018); color: #fff;
+    box-shadow: 0 3px 0 #3a1608; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #3fa0ac, #1f6068); border-color: #a8dde2; box-shadow: 0 3px 0 #123638; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #7a3018; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(90, 40, 10, .3), inset 0 0 24px rgba(90, 40, 10, .18);
+    flex-shrink: 0; background: #eef4f4;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #a8623a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #3a2010; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffaf1; border: 2px solid #dfb787; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #a8623a; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #4a2a16;
+    border: 1.5px solid #eccfa0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #7a3018; background: #ffe3a0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffe0be, #f3e2c4); color: #4a2a16;
+    border: 2px solid #7a3018; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #7a3018; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #c1442e, #7a3018); color: #fff;
+    box-shadow: 0 3px 0 #3a1608, 0 5px 12px rgba(90, 40, 10, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #3a1608; }
+  .btn.sub {
+    background: #f5e2c8; color: #8a5228; box-shadow: 0 3px 0 #dfb787;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #4a2a16; box-shadow: 0 3px 0 #dfb787; font-weight: 400; border: 1.5px solid #eccfa0; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe3a0; outline: 3px solid #c1442e; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(60, 26, 10, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fffaf1, #f3e2c4);
+    border: 3px solid #c1442e; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(60, 26, 10, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #7a3018; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #7a3018; }
+  .panel .sub { color: #a8623a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #4a2a16; border: 1.5px solid #eccfa0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #a8623a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #4a2a16; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #eccfa0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #7a3018; background: #ffe3a0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #7a3018; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #7a3018;
+    color: #3a2010; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #a8623a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #f5e2c8; color: #8a5228;
+    border: 1px solid #dfb787; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ffe0be; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🦁 シーサの家<small>— あたたかい土地の くらし —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_taifu" title="台風を 知る">★</div>
+    <div class="badge" id="bd_m_kufuu" title="家の 工夫">★</div>
+    <div class="badge" id="bd_m_mamoru" title="家を 守れ">★</div>
+    <div class="badge" id="bd_m_ima" title="今の くらし">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">沖縄の くらし</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 シーサの めがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="30" ry="6" fill="rgba(60,26,10,.18)"/>
+            <!-- 赤瓦を かさねた からだ -->
+            <path d="M26 118 Q22 104 30 96 L90 96 Q98 104 94 118 Z" fill="#a8492a" stroke="#4a2a16" stroke-width="2"/>
+            <path d="M30 98 Q26 86 33 79 L87 79 Q94 86 90 98 Z" fill="#c1573a" stroke="#4a2a16" stroke-width="2"/>
+            <path d="M33 81 Q29 70 36 64 L84 64 Q91 70 87 81 Z" fill="#d97a52" stroke="#4a2a16" stroke-width="2"/>
+            <!-- 瓦の つぎめ -->
+            <path d="M46 96 L46 118 M74 96 L74 118 M50 79 L50 96 M70 79 L70 96" stroke="#4a2a16" stroke-width="1.4" opacity=".35"/>
+            <!-- たてがみ -->
+            <path d="M24 36 Q14 26 20 14 Q28 18 30 28 Q28 10 40 4 Q42 16 38 26 Q44 6 58 4 Q56 16 50 26 Q60 8 74 10 Q66 20 58 28 Q72 14 86 20 Q76 28 66 30 Q80 24 90 34 Q78 36 68 36" fill="#8a3018" stroke="#4a2a16" stroke-width="1.6" stroke-linejoin="round"/>
+            <!-- あたま -->
+            <circle cx="60" cy="42" r="24" fill="#e8b078" stroke="#4a2a16" stroke-width="2.5"/>
+            <!-- みみ -->
+            <ellipse cx="37" cy="30" rx="7" ry="9" fill="#c1573a" stroke="#4a2a16" stroke-width="2"/>
+            <ellipse cx="83" cy="30" rx="7" ry="9" fill="#c1573a" stroke="#4a2a16" stroke-width="2"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="48" rx="5.5" ry="3.6" fill="#e0876a" opacity=".55"/>
+            <ellipse cx="74" cy="48" rx="5.5" ry="3.6" fill="#e0876a" opacity=".55"/>
+            <!-- め -->
+            <g class="eyes">
+              <circle cx="51" cy="40" r="5.4" fill="#fff"/>
+              <circle cx="69" cy="40" r="5.4" fill="#fff"/>
+              <circle cx="51.6" cy="40.6" r="3.2" fill="#3a2010"/>
+              <circle cx="69.6" cy="40.6" r="3.2" fill="#3a2010"/>
+              <circle cx="52.8" cy="38.8" r="1.1" fill="#fff"/>
+              <circle cx="70.8" cy="38.8" r="1.1" fill="#fff"/>
+            </g>
+            <!-- はな -->
+            <ellipse cx="60" cy="50" rx="4.4" ry="2.8" fill="#4a2a16"/>
+            <!-- くち（あ形） -->
+            <path d="M46 56 Q60 72 74 56 Q60 65 46 56" fill="#7a2010" stroke="#3a2010" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M52.5 56 L54 61 M67.5 56 L66 61" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">シーサーの<ruby>精霊<rt>せいれい</rt></ruby> <ruby>シーサ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🦁 シーサの家ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   シーサの家 — あたたかい土地の くらし（小5社会・地理・協力型・1ファイル）
+   台風の 多さを 知る → 昔ながらの 家の 工夫（赤瓦・しっくい・石垣・フクギ）→
+   台風から 家を 守る シミュレーション → 今の くらし（RC造）→
+   はかせ（あたたかい 気候を いかした 産業）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  akagawara: ruby('赤瓦', 'あかがわら'),
+  shikkui: 'しっくい',
+  ishigaki: ruby('石垣', 'いしがき'),
+  fukugi: 'フクギ',
+  shiisaa: 'シーサー',
+  taifu: ruby('台風', 'たいふう'),
+  fuusoku: ruby('最大瞬間風速', 'さいだいしゅんかんふうそく'),
+  miyako: ruby('宮古島台風', 'みやこじまたいふう'),
+  tekkin: ruby('鉄筋', 'てっきん') + 'コンクリート',
+  denshougiku: ruby('電照菊', 'でんしょうぎく'),
+  satoukibi: 'さとうきび',
+  sango: ruby('珊瑚', 'さんご') + '礁',
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+const WIND_MS = [17, 21, 25, 30, 35, 40, 50, 60];
+
+// ---------- 判定ロジック ----------
+function judgeTaifu(n) { // n: 1-8　風の強さ
+  if (n <= 2) return { level: 'safe' };
+  if (n >= 7) return { level: 'danger' };
+  return { level: 'ok' };
+}
+
+// ---------- 台風を知る：手がかり ----------
+const TAIFU_POINTS = [
+  { key: 0, letter: 'あ', name: '台風の通り道', x: 660, y: 210,
+    txt: `沖縄は、南の あたたかい海で 生まれた ${W.taifu}が 日本へ むかう「通り道」に ある。だから 毎年 何こも 台風が やってくるんだ。` },
+  { key: 1, letter: 'い', name: '記録的な風の強さ', x: 320, y: 440,
+    txt: `1966年、${W.miyako}が やってきた 時、沖縄で ${W.fuusoku}（秒速85.3m）を 記録した。これは 日本で いちばん 強い 風の 記録なんだ！` },
+];
+
+// ---------- 昔ながらの 家の 工夫 ----------
+const KUFUU_POINTS = [
+  { key: 0, letter: 'あ', name: '赤瓦としっくい', x: 230, y: 180,
+    txt: `屋根の ${W.akagawara}は、${W.shikkui}という 白い のりで しっかり 固められている。こうすると 強い 風でも 瓦が 飛ばされにくい。` },
+  { key: 1, letter: 'い', name: '石垣', x: 500, y: 480,
+    txt: `家の まわりを かこむ ${W.ishigaki}。石を つみあげて、強い 風や 海からの 塩を ふせいでいる。` },
+  { key: 2, letter: 'う', name: 'フクギ並木', x: 790, y: 190,
+    txt: `庭に 植えられた「${W.fukugi}」という 木。びっしり 並べて 植えることで、風よけの かべに なる。` },
+];
+
+// ---------- 今の くらし ----------
+const IMA_POINTS = [
+  { key: 0, letter: 'あ', name: 'コンクリートの家', x: 230, y: 220,
+    txt: `今の 沖縄の 家は、8わり以上が ${W.tekkin}で できた 四角い 家。台風にも 強い、じょうぶな つくりだ。` },
+  { key: 1, letter: 'い', name: '1949年の台風', x: 790, y: 220,
+    txt: `1949年、大きな 台風で 木の家が たくさん こわれてしまった ことが あった。これが コンクリートの 家が 広まる きっかけの ひとつに なったんだ。` },
+  { key: 2, letter: 'う', name: '屋上の貯水タンク', x: 500, y: 480,
+    txt: `屋根の上に よく 見える 大きな タンク。台風で 断水しても こまらないように、水を ためて おいてあるんだ。` },
+];
+
+// ---------- はかせ：あたたかい気候をいかした産業 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '電照菊', x: 230, y: 220,
+    txt: `夜も 明かりを つけて 育てる「電照栽培」。${W.denshougiku}の 出荷量は、なんと 日本一！` },
+  { key: 1, letter: 'い', name: 'さとうきび', x: 790, y: 220,
+    txt: `台風が きても たおれにくい ${W.satoukibi}。沖縄で いちばん たくさん つくられている 作物だよ。` },
+  { key: 2, letter: 'う', name: 'サンゴの海', x: 500, y: 480,
+    txt: `美しい ${W.sango}の 海は、観光や 漁業の 大きな めぐみに なっている。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'taifu',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  taifuFound: new Set(),
+  kufuuFound: new Set(),
+  imaFound: new Set(),
+  hakaseFound: new Set(),
+  windLevel: 4,
+  windTries: new Set(),
+  windAnimT: 0,
+  windDoneT: 0,
+  windResult: null,
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sWind = () => { tone(210, 0, 0.7, 'sawtooth', 0.05); tone(140, 0.12, 0.9, 'sawtooth', 0.06); };
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- カード発見ポイントの共通描画 ----------
+function drawPointMarkers(points, foundSet, X, Y, sc) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 22 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#7a3018' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#3a2010'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#7a3018';
+    gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 台風を知る ----------
+function drawTaifuScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(500));
+  g.addColorStop(0, '#8fe0e8'); g.addColorStop(1, '#4fb8c4');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = 'rgba(20,120,130,.4)';
+  gctx.fillRect(X(0), Y(500), 1000 * sc, 140 * sc);
+  gctx.fillStyle = '#5a9a5a'; gctx.strokeStyle = '#2a5a2a'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(400), Y(500));
+  gctx.bezierCurveTo(X(370), Y(440), X(400), Y(370), X(470), Y(360));
+  gctx.bezierCurveTo(X(560), Y(345), X(610), Y(400), X(600), Y(460));
+  gctx.bezierCurveTo(X(590), Y(500), X(480), Y(510), X(400), Y(500));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.font = `${44 * sc}px sans-serif`; gctx.globalAlpha = .9; gctx.fillText('🌀', X(840), Y(130));
+  gctx.font = `${38 * sc}px sans-serif`; gctx.globalAlpha = .6; gctx.fillText('🌀', X(910), Y(280));
+  gctx.font = `${30 * sc}px sans-serif`; gctx.globalAlpha = .35; gctx.fillText('🌀', X(950), Y(420));
+  gctx.globalAlpha = 1;
+  drawPointMarkers(TAIFU_POINTS, S.taifuFound, X, Y, sc);
+}
+
+// ---------- 家（伝統家屋）の共通イラスト ----------
+function drawTree(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#5a7a2a'; gctx.strokeStyle = '#2a4a10'; gctx.lineWidth = 1.6 * sc;
+  gctx.fillRect(X(cx - 5), Y(baseY - 6), 10 * sc, 40 * sc);
+  for (let i = 0; i < 3; i++) {
+    gctx.beginPath();
+    gctx.ellipse(X(cx), Y(baseY - 60 - i * 26), 34 * sc, 20 * sc, 0, 0, TAU);
+    gctx.fillStyle = i % 2 === 0 ? '#6fa03a' : '#7fb04a';
+    gctx.fill(); gctx.stroke();
+  }
+}
+function drawHouse(X, Y, sc, shakeX) {
+  const bx = 500 + (shakeX || 0), baseY = 500;
+  gctx.fillStyle = '#b0a690'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 2 * sc;
+  gctx.fillRect(X(bx - 270), Y(baseY - 4), 540 * sc, 24 * sc);
+  gctx.strokeStyle = 'rgba(74,42,22,.4)'; gctx.lineWidth = 1 * sc;
+  for (let lx = bx - 260; lx < bx + 270; lx += 34) {
+    gctx.beginPath(); gctx.moveTo(X(lx), Y(baseY - 4)); gctx.lineTo(X(lx), Y(baseY + 20)); gctx.stroke();
+  }
+  drawTree(X, Y, sc, bx - 250, baseY);
+  drawTree(X, Y, sc, bx + 250, baseY);
+  gctx.fillStyle = '#fdf6e8'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(bx - 170), Y(baseY - 130), 340 * sc, 130 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#dfeef2';
+  gctx.fillRect(X(bx - 130), Y(baseY - 95), 70 * sc, 60 * sc);
+  gctx.fillRect(X(bx + 60), Y(baseY - 95), 70 * sc, 60 * sc);
+  gctx.strokeRect(X(bx - 130), Y(baseY - 95), 70 * sc, 60 * sc);
+  gctx.strokeRect(X(bx + 60), Y(baseY - 95), 70 * sc, 60 * sc);
+  gctx.fillStyle = '#a8492a'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(bx - 220), Y(baseY - 130));
+  gctx.lineTo(X(bx), Y(baseY - 210));
+  gctx.lineTo(X(bx + 220), Y(baseY - 130));
+  gctx.lineTo(X(bx + 175), Y(baseY - 118));
+  gctx.lineTo(X(bx), Y(baseY - 186));
+  gctx.lineTo(X(bx - 175), Y(baseY - 118));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = 'rgba(253,246,232,.85)'; gctx.lineWidth = 1.6 * sc;
+  for (let i = 1; i <= 3; i++) {
+    const t = i / 4;
+    gctx.beginPath();
+    gctx.moveTo(X(lerp(bx - 220, bx, t)), Y(lerp(baseY - 130, baseY - 210, t)));
+    gctx.lineTo(X(lerp(bx, bx + 220, t)), Y(lerp(baseY - 210, baseY - 130, t)));
+    gctx.stroke();
+  }
+  gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🦁', X(bx), Y(baseY - 200));
+}
+
+function drawKufuuScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  g.addColorStop(0, '#bfeef2'); g.addColorStop(1, '#e6f6e0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#e8d8a8';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 240 * sc);
+  drawHouse(X, Y, sc, 0);
+  drawPointMarkers(KUFUU_POINTS, S.kufuuFound, X, Y, sc);
+}
+
+// ---------- 台風から家を守れ（メイン操作） ----------
+function drawWindLines(X, Y, sc, level, t) {
+  if (!level) return;
+  const n = 3 + level;
+  for (let i = 0; i < n; i++) {
+    const yy = 50 + (i * 480 / n) + (Math.sin(i * 1.7) * 10);
+    const speed = 260 + level * 60;
+    const xoff = ((t * speed + i * 90) % 1300);
+    const xx = 1050 - xoff;
+    if (xx < -80 || xx > 1050) continue;
+    gctx.strokeStyle = `rgba(255,255,255,${0.28 + level * 0.05})`;
+    gctx.lineWidth = (1.3 + level * 0.18) * sc;
+    gctx.beginPath();
+    gctx.moveTo(X(xx), Y(yy));
+    gctx.lineTo(X(xx - 55 - level * 6), Y(yy + 14));
+    gctx.stroke();
+  }
+}
+function drawFlyingTiles(X, Y, sc, t) {
+  for (let i = 0; i < 4; i++) {
+    const px = 520 + i * 30 - t * (320 + i * 70);
+    const py = 300 - t * (170 + i * 30) + i * 8;
+    gctx.save();
+    gctx.translate(X(px), Y(py));
+    gctx.rotate(t * 7 + i);
+    gctx.fillStyle = '#a8492a'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 1.4 * sc;
+    gctx.beginPath();
+    gctx.moveTo(-10 * sc, -6 * sc); gctx.lineTo(10 * sc, -6 * sc); gctx.lineTo(8 * sc, 6 * sc); gctx.lineTo(-8 * sc, 6 * sc);
+    gctx.closePath(); gctx.fill(); gctx.stroke();
+    gctx.restore();
+  }
+}
+function drawMamoruScene(X, Y, sc) {
+  const t = S.windAnimT || 0;
+  const level = S.windLevel || 1;
+  const stormy = t > 0.15 && level >= 3;
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  if (stormy) { g.addColorStop(0, '#7ec4cc'); g.addColorStop(1, '#dfeee0'); }
+  else { g.addColorStop(0, '#bfeef2'); g.addColorStop(1, '#e6f6e0'); }
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#e8d8a8';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 240 * sc);
+  const shake = t > 0 && t < 1 && level >= 3 ? Math.sin(t * 60) * Math.min(level, 6) : 0;
+  drawHouse(X, Y, sc, shake);
+  if (t > 0) drawWindLines(X, Y, sc, level, t);
+  if (S.windResult === 'danger' && t >= 1) drawFlyingTiles(X, Y, sc, Math.min((S.windDoneT || 0), 1));
+  gctx.fillStyle = '#4a2a16'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`風の 強さ ${NUMS[clamp(level - 1, 0, 7)]}（秒速 約${WIND_MS[clamp(level - 1, 0, 7)]}m）`, X(500), Y(46));
+}
+
+// ---------- 今の くらし ----------
+function drawImaScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  g.addColorStop(0, '#bfeef2'); g.addColorStop(1, '#f0ede0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#d8d0c0';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 240 * sc);
+  const buildings = [[300, 90, 210], [520, 130, 260], [720, 100, 190]];
+  buildings.forEach(([cx, bw, bh]) => {
+    gctx.fillStyle = '#e8e4da'; gctx.strokeStyle = '#8a8272'; gctx.lineWidth = 2.2 * sc;
+    gctx.beginPath(); gctx.rect(X(cx - bw / 2), Y(400 - bh), bw * sc, bh * sc); gctx.fill(); gctx.stroke();
+    gctx.fillStyle = '#a8ccd8';
+    for (let ry = 400 - bh + 24; ry < 388; ry += 34) {
+      for (let rx = cx - bw / 2 + 16; rx < cx + bw / 2 - 16; rx += 30) {
+        gctx.fillRect(X(rx), Y(ry), 16 * sc, 18 * sc);
+      }
+    }
+    gctx.fillStyle = '#6fa0ac'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 1.6 * sc;
+    gctx.beginPath(); gctx.ellipse(X(cx), Y(400 - bh - 10), 20 * sc, 10 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.fillRect(X(cx - 20), Y(400 - bh - 10), 40 * sc, 16 * sc);
+  });
+  drawPointMarkers(IMA_POINTS, S.imaFound, X, Y, sc);
+}
+
+// ---------- はかせ：あたたかい気候をいかした産業 ----------
+function drawHakaseScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#bfeef2'); g.addColorStop(1, '#dff0c8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  // 菊畑（左上）
+  gctx.fillStyle = '#e8d888'; gctx.fillRect(X(60), Y(110), 300 * sc, 170 * sc);
+  gctx.strokeStyle = '#8a7a30'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(60), Y(110), 300 * sc, 170 * sc);
+  ['🌼', '💡', '🌼', '💡'].forEach((ch, i) => gctx.fillText(ch, X(120 + i * 65), Y(200)));
+  // さとうきび畑（右上）
+  gctx.fillStyle = '#cfe6a0'; gctx.fillRect(X(640), Y(110), 300 * sc, 170 * sc);
+  gctx.strokeStyle = '#5a8a30'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(640), Y(110), 300 * sc, 170 * sc);
+  ['🌾', '🌾', '🌾', '🌾'].forEach((ch, i) => gctx.fillText(ch, X(700 + i * 55), Y(200)));
+  // サンゴの海（下）
+  const gg = gctx.createLinearGradient(0, Y(320), 0, Y(600));
+  gg.addColorStop(0, '#4fb8c4'); gg.addColorStop(1, '#1f7a8c');
+  gctx.fillStyle = gg; gctx.fillRect(X(0), Y(320), 1000 * sc, 280 * sc);
+  ['🪸', '🐠', '🪸', '🐟', '🪸'].forEach((ch, i) => gctx.fillText(ch, X(230 + i * 130), Y(470 + (i % 2) * 40)));
+  drawPointMarkers(HAKASE_POINTS, S.hakaseFound, X, Y, sc);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'taifu') drawTaifuScene(X, Y, sc);
+  else if (S.scene === 'kufuu') drawKufuuScene(X, Y, sc);
+  else if (S.scene === 'mamoru') drawMamoruScene(X, Y, sc);
+  else if (S.scene === 'ima') drawImaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawMamoruScene(X, Y, sc);
+}
+
+// ---------- シーサの めがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fff8ec'); grd.addColorStop(1, '#dfb787');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#7a3018'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const idx = clamp((S.windLevel || 1) - 1, 0, 7);
+    const cx = R, cy = R * 1.05, rad = R * 0.72;
+    sctx.strokeStyle = '#e8d2ac'; sctx.lineWidth = R * 0.13; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, 0); sctx.stroke();
+    const frac = idx / 7;
+    const ang = Math.PI - Math.PI * frac;
+    sctx.strokeStyle = frac < 0.25 ? '#4a9a5a' : frac < 0.75 ? '#e0a020' : '#c1442e';
+    sctx.lineWidth = R * 0.13;
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, ang, true); sctx.stroke();
+    sctx.strokeStyle = '#4a2a16'; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx + Math.cos(ang) * rad * 0.88, cy + Math.sin(ang) * rad * 0.88); sctx.stroke();
+    sctx.fillStyle = '#4a2a16'; sctx.beginPath(); sctx.arc(cx, cy, R * 0.05, 0, TAU); sctx.fill();
+    label(`風速 ${NUMS[idx]}（秒速${WIND_MS[idx]}m）`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe0a0'); g2.addColorStop(1, 'rgba(255,224,160,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#7a3018'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🦁', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#7a3018'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🏠', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#4a2a16';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#7a3018', '#ffe3a0', '#c1442e', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  if (S.windResult === 'danger' && S.windAnimT >= 1) S.windDoneT = clamp((S.windDoneT || 0) + dt * 0.6, 0, 1);
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '沖縄県（あたたかい 土地）';
+  const titles = {
+    taifu: '🌀 台風を 知る',
+    kufuu: '🏠 昔ながらの 家の 工夫',
+    mamoru: '🦁 台風から 家を 守れ',
+    ima: '🏢 今の くらし',
+    hakase: '🌼 あたたかい気候をいかした産業',
+    done: '🏝️ シーサの家 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '沖縄の くらし';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_taifu', 'm_kufuu', 'm_mamoru', 'm_ima', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'taifu', scope: { type: 'idle' }, taifuFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🦁🌀🏠</div>
+        <h1>シーサの家</h1>
+        <div class="sub">〜 あたたかい 土地の くらしの ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは シーサーの 像から 生まれた 精霊、<b>シーサ</b>。今日は 台風が 多い あたたかい 土地、<b>沖縄</b>の くらしの 工夫を <b>いっしょに たしかめに いこう！</b><br>
+        台風から 家を どうやって 守ってきたのか、そして 今の くらしは どう 変わったのか……見ていこう。</p>
+        <button class="btn" id="startBtn">沖縄の くらしを たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">沖縄の 家は、今も ほとんどが 赤い 瓦屋根だと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🏠</span><b>ア</b> はい、今も ほとんどが 赤瓦の 家</div>
+          <div class="vcard" data-v="1"><span class="vicon">🏢</span><b>イ</b> いいえ、今は 四角い コンクリートの 家が 多い</div>
+          <div class="vcard" data-v="2"><span class="vicon">🚫</span><b>ウ</b> 沖縄には 家が ほとんど ない</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：台風を知る ---
+  m_taifu: {
+    enter() {
+      Object.assign(S, { scene: 'taifu', scope: { type: 'idle' }, taifuFound: new Set() });
+      updateLoc();
+      setWish('🌀', `沖縄には 毎年 たくさんの ${W.taifu}が やってくる。2つの 手がかりを 調べて、どれくらい すごいのか たしかめよう。`);
+      say(`下の ボタンを ぜんぶ おして、手がかりを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(TAIFU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.taifuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.taifuFound.size >= TAIFU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.taifuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`沖縄に 台風が 多い いちばんの 理由は 何だと 思う？`);
+      setButtons(choiceRow(['ア 南の海で 生まれた 台風が 通る 道に あるから', 'イ 沖縄の 人たちが 台風を 呼んでいるから', 'ウ 高い山が 台風を 引きよせるから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_taifu'); S.phase = 'done';
+        say(`せいかい！ 沖縄は 南の あたたかい海で 生まれた ${W.taifu}が 日本へ 向かう「通り道」に ある。だから 毎年 何こも やってくるんだ。<br><br>💡 <b>たいせつポイント</b><br>1966年には 秒速85.3mという、日本で いちばん 強い 風の 記録も ある。こんな 台風から、沖縄の 人たちは どうやって 家を 守ってきたんだろう？`);
+        setButtons([{ label: 'つぎへ（家の工夫）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 南の海で 生まれた 台風が 通る 道に あるから', 'イ 沖縄の 人たちが 台風を 呼んでいるから', 'ウ 高い山が 台風を 引きよせるから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：昔ながらの 家の 工夫 ---
+  m_kufuu: {
+    enter() {
+      Object.assign(S, { scene: 'kufuu', scope: { type: 'idle' }, kufuuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`沖縄の 家には、台風から 身を 守る 昔ながらの 工夫が つまっている。3つの 手がかりを、下の ボタンを ぜんぶ おして 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KUFUU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kufuuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kufuuFound.size >= KUFUU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kufuuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`屋根を 低く つくり、瓦を ${W.shikkui}で しっかり 固めるのは なぜだと 思う？`);
+      setButtons(choiceRow(['ア 見た目を きれいに するため', 'イ 台風の 強い 風で 瓦が 飛ばされないようにするため', 'ウ 雨水を ためるため'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kufuu'); S.phase = 'done';
+        say(`せいかい！ ${W.akagawara}・${W.ishigaki}・${W.fukugi}……どれも 強い 風から 家と くらしを 守るための 工夫だったんだ。<br><br>💡 <b>たいせつポイント</b><br>屋根を 4方向に 低く つくる「寄棟づくり」も、どの 方向からの 風も 受け流せるように するための 工夫。<br>この 工夫で、どれくらい 強い 台風まで 耐えられるんだろう？ たしかめてみよう！`);
+        setButtons([{ label: 'つぎへ（台風から家を守れ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 見た目を きれいに するため', 'イ 台風の 強い 風で 瓦が 飛ばされないようにするため', 'ウ 雨水を ためるため'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：台風から家を守れ（メイン操作） ---
+  m_mamoru: {
+    enter() {
+      Object.assign(S, { scene: 'mamoru', scope: { type: 'gauge' }, windLevel: 4, windTries: new Set(), windAnimT: 0, windDoneT: 0, windResult: null });
+      updateLoc();
+      setWish('🌀', `工夫を こらした 家は、どれくらいの 風まで 耐えられるだろう。目もり①〜⑧で 風の強さを えらんで、風を ふかせてみよう。`);
+      say(`目もりを えらんで「風を ふかせる」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.windLevel === n ? ' sel' : ''), cb: () => { S.windLevel = n; this.refreshCtl(); } });
+      list.push({ label: '🌀 風を ふかせる', cb: () => this.blow() });
+      setControls(list);
+    },
+    blow() {
+      setControls([]);
+      S.windResult = null; S.windDoneT = 0;
+      say(`目もり ${NUMS[S.windLevel - 1]}（秒速 約${WIND_MS[S.windLevel - 1]}m）の 風が ふきはじめた……`);
+      sWind();
+      startTween(0, 1, 1.3, v => { S.windAnimT = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeTaifu(S.windLevel);
+      S.windTries.add(S.windLevel);
+      S.windResult = r.level;
+      if (r.level === 'safe') {
+        sTap();
+        say(`このくらいの 風なら、家は びくともしない。もっと 強い 風でも 試してみよう。`);
+        this.refreshCtl();
+      } else if (r.level === 'ok') {
+        sYes(); scopeBurst(); award('m_mamoru'); S.phase = 'done';
+        say(`✨ 工夫の おかげで、しっかり 持ちこたえた！ ✨<br><br>💡 <b>たいせつポイント</b><br>${W.akagawara}を ${W.shikkui}で 固め、まわりを ${W.ishigaki}と ${W.fukugi}で かこう。この 工夫が 合わさって、強い 風にも 耐えられる 家に なっていたんだ。`);
+        setButtons([{ label: 'つぎへ（今のくらし）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`猛烈な 風で、さすがに 瓦が 飛ばされてしまった……工夫にも 限界が ある。もう少し 弱い 風で 試してみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：今の くらし ---
+  m_ima: {
+    enter() {
+      Object.assign(S, { scene: 'ima', scope: { type: 'idle' }, imaFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`今の 沖縄の まちを 見てみると、昔とは ちがう 家が 多いことに 気づく。3つの 手がかりを、下の ボタンを ぜんぶ おして 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(IMA_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.imaFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.imaFound.size >= IMA_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.imaFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`なぜ 今は コンクリートの 家が 多いのだろう？`);
+      setButtons(choiceRow(['ア 見た目が おしゃれだから', 'イ 強い 台風にも 負けない、じょうぶな 家に するため', 'ウ 瓦が 高くて 買えなくなったから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_ima'); S.phase = 'done';
+        say(`せいかい！ 1949年の 大きな 台風などで 木の家が たくさん こわれた ことも あり、今では 8わり以上の 家が ${W.tekkin}づくりに なった。<br><br>💡 <b>たいせつポイント</b><br>昔の 工夫（${W.akagawara}・${W.ishigaki}・${W.fukugi}）も、今の 工夫（コンクリート・貯水タンク）も、どちらも「台風から くらしを 守る」という 同じ 目的が あるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 見た目が おしゃれだから', 'イ 強い 台風にも 負けない、じょうぶな 家に するため', 'ウ 瓦が 高くて 買えなくなったから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：あたたかい気候をいかした産業 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 台風の 多い あたたかい 気候は、こまることばかりでは ない。沖縄ならではの 産業を 3つ、しょうかいしよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`あたたかい 気候は、沖縄の くらしに とって どんな 意味が あるだろう？`);
+      setButtons(choiceRow(['ア こまった ことしか ない', 'イ あたたかさを 生かした 産業が たくさん 生まれている', 'ウ 何も 関係ない'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.denshougiku}は 出荷量 日本一、${W.satoukibi}は 台風にも 強い 沖縄いちばんの 作物、そして 美しい ${W.sango}の 海は 観光や 漁業の めぐみに。<br><br>💡 <b>たいせつポイント</b><br>台風と 向き合いながら、あたたかい 気候を うまく 生かす……それが 沖縄の くらしの 知恵なんだ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア こまった ことしか ない', 'イ あたたかさを 生かした 産業が たくさん 生まれている', 'ウ 何も 関係ない'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, windLevel: 5, windAnimT: 1, windResult: 'ok' });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ シーサの家 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 1966年、宮古島で 記録した 最大瞬間風速は 約（<span class="blankWord" data-a="秒速85m">？？？</span>）。<br>
+        ② 屋根の 瓦を しっくいで 固める 理由は、強い（<span class="blankWord" data-a="風">？？？</span>）で 飛ばされないようにするため。<br>
+        ③ 今の 沖縄の 家の 多くは（<span class="blankWord" data-a="コンクリート（RC造）">？？？</span>）で できている。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 今は 四角い コンクリートの 家が 多い</b> でした！ 赤瓦の 家は 減り、8わり以上が コンクリートの 家に 変わったんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>家の まわりで「風や 雨から 守る くふう」（雨戸・ひさし・へい など）を 1つ さがしてみよう。おうちの人と 話してみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#3a2010'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'mamoru', scope: { type: 'glow' }, windLevel: 5, windAnimT: 1, windResult: 'ok' });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 沖縄の くらしについて、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「シーサーは 何を している？」「今の 家は 何で できている？」`);
+      setButtons([
+        { label: '🌀 台風の 図', cls: 'sub', cb: () => this.show('taifu') },
+        { label: '🏠 家の 工夫の 図', cls: 'sub', cb: () => this.show('kufuu') },
+        { label: '🏢 今の くらしの 図', cls: 'sub', cb: () => this.show('ima') },
+        { label: '🌼 産業の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_mamoru などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
