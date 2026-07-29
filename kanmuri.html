@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>カンムリの都 — 聖徳太子と 大化の改新 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f2ecf7 0%, #ddd0e8 55%, #9a86ac 100%);
+    color: #241c30;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #4a2d6e; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a5a7a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ece4f2; border: 2px solid #c8b8d8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #c8b8d8;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4900f);
+    border-color: #8a5a0a; color: #241c30;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f8f5fa 0%, #ede6f2 100%);
+    border: 3px solid #6a4a8e;
+    box-shadow: inset 0 0 40px rgba(20, 25, 45, .12), 0 4px 18px rgba(15, 18, 32, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #221830; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #4a2d6e; color: #f3ecf8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15, 18, 32, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 18, 32, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #c8b8d8; cursor: pointer;
+    background: linear-gradient(180deg, #6a4a8e, #4a2d6e); color: #fff;
+    box-shadow: 0 3px 0 #1c1424; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #b8523a, #7a2e1e); border-color: #d89070; box-shadow: 0 3px 0 #4a1810; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #4a2d6e; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(20, 25, 45, .3), inset 0 0 24px rgba(20, 25, 45, .18);
+    flex-shrink: 0; background: #f2ecf7;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6a5a7a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #221830; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f9f6fb; border: 2px solid #c8b8d8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6a5a7a; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #241c30;
+    border: 1.5px solid #d8cce0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #4a2d6e; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ece4f2, #ede6f2); color: #241c30;
+    border: 2px solid #4a2d6e; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #4a2d6e; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #6a4a8e, #4a2d6e); color: #fff;
+    box-shadow: 0 3px 0 #1c1424, 0 5px 12px rgba(20, 25, 45, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1c1424; }
+  .btn.sub {
+    background: #ece4f2; color: #5a3d6e; box-shadow: 0 3px 0 #c8b8d8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #241c30; box-shadow: 0 3px 0 #c8b8d8; font-weight: 400; border: 1.5px solid #d8cce0; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9a8; outline: 3px solid #6a4a8e; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(12, 14, 24, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f9f6fb, #ede6f2);
+    border: 3px solid #6a4a8e; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(12, 14, 24, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #4a2d6e; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #4a2d6e; }
+  .panel .sub { color: #6a5a7a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #241c30; border: 1.5px solid #d8cce0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6a5a7a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #241c30; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d8cce0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #4a2d6e; background: #ffe9a8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #4a2d6e; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #4a2d6e;
+    color: #221830; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6a5a7a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ece4f2; color: #5a3d6e;
+    border: 1px solid #c8b8d8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ece4f2; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">👑 カンムリの都<small>— 聖徳太子と 大化の改新 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_seiji" title="聖徳太子の 政治改革">★</div>
+    <div class="badge" id="bd_m_kenzui" title="遣隋使の 航路">★</div>
+    <div class="badge" id="bd_m_taika" title="大化の改新">★</div>
+    <div class="badge" id="bd_m_socho" title="租庸調の バランス">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">聖徳太子の 政治改革</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 かんむりめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,20,30,.18)"/>
+            <!-- からだ -->
+            <path d="M40 118 L44 100 L76 100 L80 118 Z" fill="#3a2550" stroke="#241c30" stroke-width="2"/>
+            <!-- 纓（えい、後ろの飾り） -->
+            <path d="M80 58 Q104 46 110 24 Q100 52 84 66 Z" fill="#241c30" stroke="#140e1c" stroke-width="2"/>
+            <!-- 冠本体（山型） -->
+            <path d="M32 68 Q30 28 60 18 Q90 28 88 68 Z" fill="#6a3d9a" stroke="#241c30" stroke-width="2.5"/>
+            <!-- 額の帯 -->
+            <rect x="30" y="60" width="60" height="10" rx="4" fill="#ffce54" stroke="#241c30" stroke-width="1.5"/>
+            <!-- 顔 -->
+            <circle cx="60" cy="94" r="26" fill="#fff3cf" stroke="#241c30" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="46" cy="100" rx="5" ry="3.4" fill="#ffb070" opacity=".55"/>
+            <ellipse cx="74" cy="100" rx="5" ry="3.4" fill="#ffb070" opacity=".55"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="51" cy="94" rx="3.6" ry="5" fill="#241c30"/>
+              <ellipse cx="69" cy="94" rx="3.6" ry="5" fill="#241c30"/>
+              <circle cx="52.3" cy="91.5" r="1.2" fill="#fff"/>
+              <circle cx="70.3" cy="91.5" r="1.2" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 108 Q60 113 67 108" stroke="#221830" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">冠の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>カンムリ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">👑 カンムリの都ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   カンムリの都 — 聖徳太子と大化の改新（小6社会・歴史・協力型・1ファイル）
+   聖徳太子の政治改革（冠位十二階・十七条の憲法）→ 遣隋使の航路（対等外交）→
+   大化の改新（蘇我氏打倒・公地公民）→ 租庸調のバランス（天びんで） →
+   はかせ（大宝律令・平城京）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  suiko: ruby('推古天皇', 'すいこてんのう'),
+  sesshou: ruby('摂政', 'せっしょう'),
+  kan12: ruby('冠位十二階', 'かんいじゅうにかい'),
+  jushichijou: ruby('十七条の憲法', 'じゅうしちじょうのけんぽう'),
+  onononimoko: ruby('小野妹子', 'おののいもこ'),
+  kensuishi: ruby('遣隋使', 'けんずいし'),
+  soga: ruby('蘇我氏', 'そがし'),
+  nakanooe: ruby('中大兄皇子', 'なかのおおえのおうじ'),
+  nakatomi: ruby('中臣鎌足', 'なかとみのかまたり'),
+  isshi: ruby('乙巳の変', 'いっしのへん'),
+  koudokishi: ruby('公地公民', 'こうちこうみん'),
+  taika: ruby('大化の改新', 'たいかのかいしん'),
+  taihouritsuryou: ruby('大宝律令', 'たいほうりつりょう'),
+  heijoukyou: ruby('平城京', 'へいじょうきょう'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 判定ロジック ----------
+function judgeSocho(n) { // n: 1-8 租庸調の重さレベル
+  if (n <= 2) return 'low';
+  if (n >= 7) return 'high';
+  return 'good';
+}
+function sochoTiltFromLevel(n) { // -1(農民が重い=国が軽い)〜+1(国が重い=農民が軽い)
+  return clamp((n - 4.5) / 3.5, -1, 1);
+}
+
+// ---------- 聖徳太子の政治改革：手がかり ----------
+const SEIJI_POINTS = [
+  { key: 0, letter: 'あ', name: '推古天皇と摂政', x: 260, y: 320,
+    txt: `593年、日本 初の 女性の 天皇「${W.suiko}」が 即位。聖徳太子（厩戸皇子）は その${W.sesshou}として、政治を 助ける 役目に ついたんだ。` },
+  { key: 1, letter: 'い', name: '冠位十二階', x: 500, y: 220,
+    txt: `603年、「${W.kan12}」を 定めた。それまでは 家がら（生まれ）で 地位が 決まっていたけど、これからは 個人の 才能や 手がらで、色分けされた 冠（かんむり）を 与えるように なったんだ。` },
+  { key: 2, letter: 'う', name: '十七条の憲法', x: 740, y: 340,
+    txt: `604年、「${W.jushichijou}」を 定めた。「和（なか よく すること）を もって 貴しと なす」など、役人の 心がまえを 示したんだよ。` },
+];
+
+// ---------- 遣隋使の航路：手がかり ----------
+const KENZUI_POINTS = [
+  { key: 0, letter: 'あ', name: '難波を出発', x: 220, y: 300,
+    txt: `607年、${W.onononimoko}を 中心と した 使者の 船が、難波（今の 大阪）を 出発した。` },
+  { key: 1, letter: 'い', name: '瀬戸内海・北九州', x: 500, y: 430,
+    txt: `瀬戸内海を 通り、北九州の 港から 海を こえて、中国大陸を 目ざしたんだ。` },
+  { key: 2, letter: 'う', name: '隋の都・国書', x: 780, y: 260,
+    txt: `${W.onononimoko}は 隋の 皇帝に、「日の出る 国の 天子から、日の しずむ 国の 天子へ」で 始まる 国書を わたした。対等な 国として あつかってほしいという 気もちが こめられていたんだ。` },
+];
+
+// ---------- 大化の改新：手がかり ----------
+const TAIKA_POINTS = [
+  { key: 0, letter: 'あ', name: '蘇我氏の力', x: 260, y: 260,
+    txt: `聖徳太子の 死後、豪族の「${W.soga}」が 大きな 力を 持ち、天皇を しのぐ ほどの ようすだった。` },
+  { key: 1, letter: 'い', name: '乙巳の変', x: 500, y: 420,
+    txt: `645年、${W.nakanooe}と ${W.nakatomi}が、宮中で 蘇我入鹿を 討ち取った。これを「${W.isshi}」と いうよ。` },
+  { key: 2, letter: 'う', name: '公地公民', x: 740, y: 260,
+    txt: `それまで 豪族の ものだった 土地と 人々を、すべて 天皇（国）の ものと する「${W.koudokishi}」の 方針が 示されたんだ。` },
+];
+
+// ---------- はかせ：大宝律令・平城京 手がかり ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '大宝律令', x: 300, y: 460,
+    txt: `701年、「${W.taihouritsuryou}」が 定められ、天皇を 中心とした 国の しくみ（律令国家）が ととのったんだ。` },
+  { key: 1, letter: 'い', name: '平城京', x: 700, y: 460,
+    txt: `710年、奈良に「${W.heijoukyou}」が つくられ、都が うつされた。道が ごばんの目のように 整然と ならぶ 大きな 都だったよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'seiji',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  seijiFound: new Set(),
+  kenzuiFound: new Set(),
+  taikaFound: new Set(),
+  hakaseFound: new Set(),
+  sochoLevel: 4,
+  sochoTries: new Set(),
+  socho: { tiltF: 0 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(X, Y, sc, points, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 24 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#4a2d6e' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#221830'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#4a2d6e';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 空の背景 ----------
+function bgSky(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#dfe6f0'); g.addColorStop(1, '#c4ccdc');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#e8dcb8';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+}
+
+// ---------- 宮殿のシルエット ----------
+function drawPalace(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#6a4a8e'; gctx.strokeStyle = '#241c30'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.rect(X(cx - 90), Y(baseY - 90), 180 * sc, 90 * sc);
+  gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3a3f4c';
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 120), Y(baseY - 90)); gctx.lineTo(X(cx - 70), Y(baseY - 150));
+  gctx.lineTo(X(cx + 70), Y(baseY - 150)); gctx.lineTo(X(cx + 120), Y(baseY - 90));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#ffce54';
+  gctx.beginPath(); gctx.arc(X(cx), Y(baseY - 150), 8 * sc, 0, TAU); gctx.fill();
+}
+function drawSeijiScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  drawPalace(X, Y, sc, 500, 480);
+  drawPoints(X, Y, sc, SEIJI_POINTS, S.seijiFound);
+}
+
+// ---------- 遣隋使の航路シーン（海と船） ----------
+function drawKenzuiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#dfe6f0'); g.addColorStop(1, '#a8c8d8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.strokeStyle = 'rgba(255,255,255,.55)'; gctx.lineWidth = 2 * sc;
+  for (let i = 0; i < 5; i++) {
+    const wy = 380 + i * 40;
+    gctx.beginPath();
+    for (let x = 0; x <= 1000; x += 40) {
+      const yy = wy + Math.sin(x / 60) * 6;
+      if (x === 0) gctx.moveTo(X(x), Y(yy)); else gctx.lineTo(X(x), Y(yy));
+    }
+    gctx.stroke();
+  }
+  gctx.strokeStyle = 'rgba(74,45,110,.4)'; gctx.lineWidth = 3 * sc; gctx.setLineDash([10 * sc, 8 * sc]);
+  gctx.beginPath();
+  gctx.moveTo(X(220), Y(300)); gctx.quadraticCurveTo(X(500), Y(520), X(780), Y(260));
+  gctx.stroke(); gctx.setLineDash([]);
+  gctx.font = `${50 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('⛵', X(500), Y(440));
+  drawPoints(X, Y, sc, KENZUI_POINTS, S.kenzuiFound);
+}
+
+// ---------- 大化の改新シーン ----------
+function drawTaikaScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  gctx.fillStyle = '#f3e6cf'; gctx.strokeStyle = '#8a5a3a'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(340), Y(200), 320 * sc, 260 * sc, 10 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#221830'; gctx.font = `${90 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('📜', X(500), Y(330));
+  drawPoints(X, Y, sc, TAIKA_POINTS, S.taikaFound);
+}
+
+// ---------- 租庸調の天びん（メイン操作） ----------
+function drawBalance(X, Y, sc, cx, cy, tilt, leftLabel, leftIcon, rightLabel, rightIcon) {
+  const armLen = 220, armAngle = tilt * 0.22;
+  gctx.strokeStyle = '#221830'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(cx), Y(cy)); gctx.lineTo(X(cx), Y(cy + 140)); gctx.stroke();
+  gctx.fillStyle = '#221830';
+  gctx.beginPath(); gctx.moveTo(X(cx - 40), Y(cy + 140)); gctx.lineTo(X(cx + 40), Y(cy + 140)); gctx.lineTo(X(cx + 30), Y(cy + 156)); gctx.lineTo(X(cx - 30), Y(cy + 156)); gctx.closePath(); gctx.fill();
+
+  const lx = cx - Math.cos(armAngle) * armLen, ly = cy - Math.sin(armAngle) * armLen;
+  const rx = cx + Math.cos(armAngle) * armLen, ry = cy + Math.sin(armAngle) * armLen;
+  gctx.strokeStyle = tilt !== 0 ? '#b8523a' : '#221830'; gctx.lineWidth = (tilt !== 0 ? 6 : 5) * sc;
+  gctx.beginPath(); gctx.moveTo(X(lx), Y(ly)); gctx.lineTo(X(rx), Y(ry)); gctx.stroke();
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), 7 * sc, 0, TAU); gctx.fillStyle = '#d4900f'; gctx.fill();
+
+  [[lx, ly, leftLabel, leftIcon], [rx, ry, rightLabel, rightIcon]].forEach(([px, py, label, icon]) => {
+    const dy = 34;
+    gctx.strokeStyle = '#221830'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.moveTo(X(px), Y(py)); gctx.lineTo(X(px), Y(py + dy)); gctx.stroke();
+    gctx.fillStyle = '#fff'; gctx.strokeStyle = '#221830'; gctx.lineWidth = 2.5 * sc;
+    gctx.beginPath(); gctx.ellipse(X(px), Y(py + dy + 20), 58 * sc, 16 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(icon, X(px), Y(py + dy + 18));
+    gctx.fillStyle = '#221830'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(label, X(px), Y(py + dy + 46));
+  });
+}
+function drawSochoScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  drawBalance(X, Y, sc, 500, 320, S.socho.tiltF, '農民の くらし', '🌾', '国づくり', '🏛️');
+  gctx.fillStyle = '#4a2d6e'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`租庸調の 重さ ${NUMS[S.sochoLevel - 1]}`, X(500), Y(120));
+}
+
+// ---------- はかせ：大宝律令・平城京 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  gctx.strokeStyle = 'rgba(74,45,110,.35)'; gctx.lineWidth = 2 * sc;
+  for (let gx = 200; gx <= 800; gx += 100) {
+    gctx.beginPath(); gctx.moveTo(X(gx), Y(260)); gctx.lineTo(X(gx), Y(560)); gctx.stroke();
+  }
+  for (let gy = 260; gy <= 560; gy += 75) {
+    gctx.beginPath(); gctx.moveTo(X(200), Y(gy)); gctx.lineTo(X(800), Y(gy)); gctx.stroke();
+  }
+  drawPalace(X, Y, sc, 500, 340);
+  drawPoints(X, Y, sc, HAKASE_POINTS, S.hakaseFound);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'seiji') drawSeijiScene(X, Y, sc);
+  else if (S.scene === 'kenzui') drawKenzuiScene(X, Y, sc);
+  else if (S.scene === 'taika') drawTaikaScene(X, Y, sc);
+  else if (S.scene === 'socho') drawSochoScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawSochoScene(X, Y, sc);
+}
+
+// ---------- まほうのめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f3ecf8'); grd.addColorStop(1, '#c8b8d8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#4a2d6e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'tilt') {
+    const deg = Math.round(S.socho.tiltF * 12);
+    sctx.font = `700 ${R * 0.26}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#4a2d6e';
+    sctx.fillText((deg >= 0 ? '+' : '') + deg + '°', R, R * 0.78);
+    label('てんびんの かたむき');
+  } else if (mode === 'scroll') {
+    sctx.fillStyle = '#8a5a3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('📜', R, R * 0.85);
+    label(S.scope.name || '記録');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe9a8'); g2.addColorStop(1, 'rgba(255,233,168,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#4a2d6e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚦', R, R * 0.85);
+    label('たしかめ かんりょう！');
+  } else {
+    sctx.fillStyle = '#4a2d6e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#241c30';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#4a2d6e', '#ffe9a8', '#6a4a8e', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '飛鳥時代（600年ごろ〜）';
+  const titles = {
+    seiji: '👑 聖徳太子の 政治改革（593〜604年）',
+    kenzui: '⛵ 遣隋使の 航路（607年）',
+    taika: '📜 大化の改新（645年〜）',
+    socho: '⚖️ 租庸調の バランス',
+    hakase: '🏯 大宝律令・平城京',
+    done: '👑 カンムリの都 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '聖徳太子の 政治改革';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_seiji', 'm_kenzui', 'm_taika', 'm_socho', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'seiji', scope: { type: 'idle' }, seijiFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">👑📜⚖️</div>
+        <h1>カンムリの都</h1>
+        <div class="sub">〜 聖徳太子と 大化の改新の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 冠位十二階の 冠（かんむり）から 生まれた 精霊、<b>カンムリ</b>。今から 1400年ほど前、聖徳太子や 中大兄皇子たちが、天皇を 中心とした 国づくりを 進めた 時代の ものがたりを、<b>いっしょに たしかめに いこう！</b><br>
+        国の しくみは どう 変わったのか、遠い 国とは どう つきあったのか、そして 国づくりを ささえる ために どんな しくみが できたのか……見ていこう。</p>
+        <button class="btn" id="startBtn">都を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">遣隋使（けんずいし）は、中国（隋）に対して どんな 態度で 出かけたと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🙇</span><b>ア</b> 家来のように 従う 態度で、貢ぎ物を 持っていった</div>
+          <div class="vcard" data-v="1"><span class="vicon">🤝</span><b>イ</b> 対等な 国として、堂々と わたりあおうとした</div>
+          <div class="vcard" data-v="2"><span class="vicon">🙈</span><b>ウ</b> 関わらないように、こっそり 様子を 見に 行っただけ</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：聖徳太子の政治改革 ---
+  m_seiji: {
+    enter() {
+      Object.assign(S, { scene: 'seiji', scope: { type: 'idle' }, seijiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`👑 聖徳太子は、どのように 天皇 中心の 国づくりを 進めたのだろう？ 3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SEIJI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.seijiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.seijiFound.size >= SEIJI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.seijiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.kan12}で、聖徳太子が 目ざした ことは 何だろう？`);
+      setButtons(choiceRow(['ア 家がらに よらず、力の ある 人を 取り立てること', 'イ 家がらの 高い人だけを 大切に すること', 'ウ 冠の 色を きれいに 見せること'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_seiji'); S.phase = 'done';
+        say(`せいかい！ それまで 家がら（生まれ）で 決まっていた 地位を、${W.kan12}では 個人の 才能や 手がらで 決めるように 変えたんだ。<br><br>💡 <b>たいせつポイント</b><br>${W.jushichijou}とあわせて、天皇を 中心とした 政治の 土台を つくろうと したんだよ。`);
+        setButtons([{ label: 'つぎへ（遣隋使の航路）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 家がらに よらず、力の ある 人を 取り立てること', 'イ 家がらの 高い人だけを 大切に すること', 'ウ 冠の 色を きれいに 見せること'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：遣隋使の航路 ---
+  m_kenzui: {
+    enter() {
+      Object.assign(S, { scene: 'kenzui', scope: { type: 'idle' }, kenzuiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`⛵ 聖徳太子は、進んだ 制度や 文化を 学ぶために、中国（隋）へ 使いを 送った。航路の 3つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KENZUI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kenzuiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kenzuiFound.size >= KENZUI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kenzuiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`さいしょの よそうタイムを 思い出そう。${W.kensuishi}は、中国（隋）に対して どんな 態度で 出かけたのだろう？`);
+      setButtons(choiceRow(['ア 家来のように 従う 態度で', 'イ 対等な 国として、堂々と', 'ウ こっそり 様子を 見に 行っただけ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kenzui'); S.phase = 'done';
+        say(`せいかい！ ${W.onononimoko}が わたした 国書には、対等な 国として つきあいたいという 気もちが こめられていた。<br><br>💡 <b>たいせつポイント</b><br>この 態度に 隋の 皇帝は おこったとも 言われているけど、日本は 進んだ 制度や 文化を 学びながら、対等な 外交を 目ざしたんだよ。`);
+        setButtons([{ label: 'つぎへ（大化の改新）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 家来のように 従う 態度で', 'イ 対等な 国として、堂々と', 'ウ こっそり 様子を 見に 行っただけ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：大化の改新 ---
+  m_taika: {
+    enter() {
+      Object.assign(S, { scene: 'taika', scope: { type: 'idle' }, taikaFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`📜 聖徳太子の 死後、国の しくみは どう 変わったのだろう？ 3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(TAIKA_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.taikaFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.taikaFound.size >= TAIKA_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.taikaFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.taika}で、中大兄皇子たちが 目ざした ことは 何だろう？`);
+      setButtons(choiceRow(['ア 天皇を 中心とした、国全体で まとまる しくみを つくること', 'イ 蘇我氏に かわって 自分たちが 好き勝手に すること', 'ウ 豪族どうしの 争いを もっと 増やすこと'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_taika'); S.phase = 'done';
+        say(`せいかい！ ${W.isshi}で 蘇我氏を 倒した あと、${W.koudokishi}の 方針を 示し、天皇を 中心とした 中央集権国家を つくろうと したんだ。<br><br>💡 <b>たいせつポイント</b><br>これで 土地と 人々は、豪族ではなく 国の ものに なった。この あと、国は どうやって 人々から 税を 集めたのか、たしかめてみよう。`);
+        setButtons([{ label: 'つぎへ（租庸調のバランス）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 天皇を 中心とした、国全体で まとまる しくみを つくること', 'イ 蘇我氏に かわって 自分たちが 好き勝手に すること', 'ウ 豪族どうしの 争いを もっと 増やすこと'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M4：租庸調のバランス（天びん・メイン操作） ---
+  m_socho: {
+    enter() {
+      Object.assign(S, { scene: 'socho', scope: { type: 'tilt' }, socho: { tiltF: 0 }, sochoLevel: 4, sochoTries: new Set() });
+      updateLoc();
+      hideWish();
+      say(`⚖️ 公地公民に なった 土地から、国は 租（そ）・庸（よう）・調（ちょう）という 税や 労役を 集めることに した。目もり①〜⑧で 重さを えらんで、天びんが つりあうか ためしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.sochoLevel === n ? ' sel' : ''), cb: () => { S.sochoLevel = n; this.refreshCtl(); } });
+      list.push({ label: '⚖️ 重さを 決める', cb: () => this.build() });
+      setControls(list);
+    },
+    build() {
+      setControls([]);
+      say(`目もり ${NUMS[S.sochoLevel - 1]} の 重さで、租庸調を 集めて みる……`);
+      sClank();
+      const target = sochoTiltFromLevel(S.sochoLevel);
+      startTween(S.socho.tiltF, target, 1.1, v => { S.socho.tiltF = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeSocho(S.sochoLevel);
+      S.sochoTries.add(S.sochoLevel);
+      if (r === 'good') {
+        sYes(); scopeBurst(); award('m_socho'); S.phase = 'done';
+        say(`✨ 天びんが つりあった！ 国は 都づくりや 寺づくりを 進める お金を 得られ、農民の くらしも 保てる、ちょうどよい 重さに なった。✨<br><br>💡 <b>たいせつポイント</b><br>実さいの 律令制度では、租（収穫の 約3％を 稲で）・庸（都での 労役の かわりに 布で）・調（地方の 特産品を）と いう 形で 負担を 分けたんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else if (r === 'low') {
+        sHmm(); S.tryT = 0;
+        say(`軽すぎて、国の 収入が 足りず、新しい 都や 寺を つくる お金や 人手が 足りなく なりそうだ……もういちど 重さを えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm(); S.tryT = 0;
+        say(`重すぎて、農民の くらしが 苦しくなり、口分田（くぶんでん）を 捨てて 逃げ出す 人が 出て しまいそうだ……もういちど 重さを えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：大宝律令・平城京 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 大化の改新から 半世紀ほどかけて、国づくりの しくみが 完成していった。2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`${W.taihouritsuryou}や ${W.heijoukyou}が つくられたのは、どうしてだと 思う？`);
+      setButtons(choiceRow(['ア 天皇を 中心とした 国の しくみを、しっかり 固めるため', 'イ 見た目を かっこよく するため', 'ウ ただの 思いつきで'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.taihouritsuryou}で 法律の しくみが 整い、${W.heijoukyou}という 大きな 都も できた。天皇を 中心とした 国づくりは、これで ひとまず 完成したんだ。<br><br>💡 <b>たいせつポイント</b><br>でも 農民の 重い 負担は 残ったまま。この あと 病気や ききんが 重なって、世の中が また 大きく ゆれ動いていくよ……。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 天皇を 中心とした 国の しくみを、しっかり 固めるため', 'イ 見た目を かっこよく するため', 'ウ ただの 思いつきで'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, socho: { tiltF: 0 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ カンムリの都 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 家がらでなく 才能や 手がらで 冠を 与える しくみを（<span class="blankWord" data-a="冠位十二階">？？？</span>）と いう。<br>
+        ② 645年、中大兄皇子たちが 蘇我氏を 倒した できごとを（<span class="blankWord" data-a="乙巳の変">？？？</span>）と いう。<br>
+        ③ 土地と 人々を 天皇（国）の ものと する 方針を（<span class="blankWord" data-a="公地公民">？？？</span>）と いう。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 対等な 国として、堂々と わたりあおうとした</b> でした！ ${W.onononimoko}の 国書には、対等な 外交を 目ざす 気もちが こめられていたんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちの人に「もし 学校や 会社で、生まれや 家がらでなく 実力だけで 決まるとしたら、どう 思う？」と 聞いてみよう。冠位十二階の 考え方を、いっしょに 振り返ってみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#221830'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'socho', scope: { type: 'glow' }, socho: { tiltF: 0 } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 聖徳太子と 大化の改新について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「冠位十二階って どんな しくみ？」「大化の改新で 何が 変わった？」`);
+      setButtons([
+        { label: '👑 聖徳太子の 図', cls: 'sub', cb: () => this.show('seiji') },
+        { label: '⛵ 遣隋使の 図', cls: 'sub', cb: () => this.show('kenzui') },
+        { label: '📜 大化の改新の 図', cls: 'sub', cb: () => this.show('taika') },
+        { label: '⚖️ 天びんの 図', cls: 'sub', cb: () => this.show('socho') },
+        { label: '🏯 大宝律令・平城京の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'socho') { S.socho.tiltF = 0; }
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_taika などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

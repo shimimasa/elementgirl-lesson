@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>カンムリの都 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2a3550; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe9a8; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cfe6ea; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cfe6ea; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>👑 カンムリの都 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      遣隋使（けんずいし）は、中国（隋）に対して どんな 態度で 出かけたと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🙇 家来のように 従う 態度で、貢ぎ物を 持っていった</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🤝 対等な 国として、堂々と わたりあおうとした</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🙈 関わらないように、こっそり 様子を 見に 行っただけ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．聖徳太子の政治改革</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">推古天皇と摂政</span>
+        <span class="wordBank">冠位十二階</span>
+        <span class="wordBank">十七条の憲法</span>
+      </div>
+      <div style="margin-top:1.2mm">冠位十二階で 聖徳太子が 目ざしたことは？　ア 家がらによらず力のある人を取り立てる　・　イ 家がらの高い人だけを大切にする　・　ウ 冠の色をきれいに見せる（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．遣隋使の航路</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">難波を出発</span>
+        <span class="wordBank">瀬戸内海・北九州</span>
+        <span class="wordBank">隋の都・国書</span>
+      </div>
+      <div style="margin-top:1.2mm">遣隋使は 隋に対して どんな 態度で 出かけた？　ア 家来のように従う　・　イ 対等な国として堂々と　・　ウ こっそり様子を見に行っただけ（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．大化の改新</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">蘇我氏の力</span>
+        <span class="wordBank">乙巳の変</span>
+        <span class="wordBank">公地公民</span>
+      </div>
+      <div style="margin-top:1.2mm">大化の改新が めざした ことは？　ア 天皇中心で国全体がまとまるしくみ　・　イ 蘇我氏にかわり好き勝手にする　・　ウ 豪族どうしの争いを増やす（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．租庸調のバランス — 天びんで たしかめよう</span>
+    <div class="secBody">
+      租（そ）・庸（よう）・調（ちょう）の 重さを ①〜⑧で ためして、天びんが つりあった 番号を 書こう。<br>
+      つりあった 番号（　　　）　実さいの 租は、収穫の 約（　　　）％を 稲で 納めるものだった。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（大宝律令・平城京）</span>
+    <div class="secBody">
+      大宝律令や 平城京が つくられたのは なぜ？（〇を つけよう）<br>
+      ア 天皇を中心とした国のしくみを、しっかり固めるため　・　イ 見た目をかっこよくするため　・　ウ ただの思いつきで
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 家がらでなく 才能や 手がらで 冠を 与える しくみを（<span class="fillLine"></span>）と いう。<br>
+      ② 645年、中大兄皇子たちが 蘇我氏を 倒した できごとを（<span class="fillLine"></span>）と いう。<br>
+      ③ 土地と 人々を 天皇（国）の ものと する 方針を（<span class="fillLine sm"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの人に「もし 学校や 会社で、生まれや 家がらでなく 実力だけで 決まるとしたら、どう 思う？」と 聞いてみよう。冠位十二階の 考え方を、いっしょに 振り返ってみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　カンムリの都 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】カンムリの都 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（聖徳太子・大化の改新）」・学力幅あり・協力型／ 使うもの：「kanmuri.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_socho</b> などで途中再開（m_seiji／m_kenzui／m_taika／m_socho／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>👑 聖徳太子の 政治改革</td><td>3つの手がかり（推古天皇と摂政・冠位十二階・十七条の憲法）をボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">10〜16分</td><td>⛵ 遣隋使の 航路</td><td>3つの手がかり（難波を出発・瀬戸内海と北九州・隋の都と国書）を確認 → クイズでよそうタイムを回収</td></tr>
+      <tr><td class="min">16〜23分</td><td>📜 大化の改新</td><td>蘇我氏の力・乙巳の変・公地公民の3つを確認 → クイズ</td></tr>
+      <tr><td class="min">23〜35分</td><td>⚖️ 租庸調の バランス（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で租庸調の重さを選び、天びんが釣り合うか試す。1人ずつ交代で選ばせるとよい。軽すぎ＝国づくり進まず／重すぎ＝農民が逃げ出す</td></tr>
+      <tr><td class="min">35〜41分</td><td>🏯 はかせチャレンジ（大宝律令・平城京）</td><td>大宝律令・平城京の2つを発見 → クイズ</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「大化の改新」を右下「つぎ▶」でスキップ可（<b>租庸調のバランス・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 対等な国として、堂々とわたりあおうとした</b>／聖徳太子の政治改革＝<b>ア 家がらによらず、力のある人を取り立てること</b>／
+      遣隋使の航路＝<b>イ 対等な国として、堂々と</b>／大化の改新＝<b>ア 天皇を中心とした、国全体でまとまるしくみをつくること</b>／
+      租庸調のバランス＝③〜⑥（中間）で つりあう／大宝律令・平城京＝<b>ア 天皇を中心とした国のしくみを、しっかり固めるため</b>／
+      まとめ＝①<b>冠位十二階</b>　②<b>乙巳の変</b>　③<b>公地公民</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>593年、推古天皇（日本初の女性天皇）が即位し、聖徳太子（厩戸皇子）はその摂政として政治を助けた</li>
+      <li>603年、冠位十二階を制定。それまで家がら（生まれ）で決まっていた地位を、個人の才能・功績で色分けした冠を与える方式に変えた</li>
+      <li>604年、十七条の憲法を制定。「和をもって貴しとなす」など役人の心がまえを示した</li>
+      <li>607年、小野妹子を中心とした遣隋使を派遣。「日出づる処の天子、書を日没する処の天子に致す。つつがなきや」で始まる国書を渡し、対等な外交を目ざした（隋の煬帝が無礼だと怒ったとも言われる）</li>
+      <li>645年、中大兄皇子・中臣鎌足が蘇我入鹿を討った乙巳の変が起こり、646年ごろ、土地と人々を天皇（国）のものとする公地公民の方針（改新の詔）が示された。これらの一連の改革を大化の改新という</li>
+      <li>律令制度の税負担：租（口分田の収穫の約3%を稲で）・庸（都での労役10日の代わりに布で）・調（地方の特産品を）。ほかに雑徭（労役）や兵役（衛士・防人）もあった</li>
+      <li>701年に大宝律令が完成し、710年に平城京（奈良）へ遷都。天皇を中心とした律令国家のしくみが整った</li>
+      <li>ただし農民の税負担は重く、奈良時代には口分田を捨てて逃げ出す浮浪・逃亡が社会問題化した。この後、疫病やききんも重なり世の中が乱れていく（次回作「大仏づくり工房」の時代につながる）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「租庸調のバランス」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせると全員が参加できる</li>
+      <li>「税が重い＝いつも悪い」ではなく「軽すぎても重すぎても困る」というバランス感覚がねらい。マルの蔵（税金とくらし）・ガイトウの町（地租改正）と同じ考え方だと関連づけてもよい</li>
+      <li>よそうタイムの答え（イ）は、「昔の日本は中国に従っていた」という思い込みを裏切る発見。対等な外交を目ざした先人の心意気を伝えるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「冠位十二階ってどんなしくみ？」「大化の改新で何が変わった？」「遣隋使は何のために送られた？」</li>
+      <li>教科書・資料集の法隆寺（現存する世界最古の木造建築）の写真を見ると理解が深まる</li>
+      <li>大宝律令・平城京で整った国のしくみも、農民の重い負担は残ったまま。次回作「大仏づくり工房」（奈良の大仏・聖武天皇）の「病気・ききん・反乱」の時代へとつながっていく</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
