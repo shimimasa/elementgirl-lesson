@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ネンリンの杜 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #6b4a24; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .7mm 3.5mm; border-radius: 4mm; margin-bottom: .9mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #f0e6c8; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #f0e6c8; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌲 ネンリンの杜 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      日本の 国土の 中で、いちばん 多いのは どれだと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🌾 田畑</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🌲 森林</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🏘️ 住宅地</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．森の 種類さがし</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">天然林</span>
+        <span class="wordBank">人工林</span>
+      </div>
+      <div style="margin-top:1.2mm">日本の 森林の うち、人が 植えて 育てる 人工林は どれくらい？　ア 1わりくらい ・ イ 4わりくらい ・ ウ 9わりくらい（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．木を 育てる いっしょう</span>
+    <div class="secBody">
+      画面の 「つぎへ」ボタンで 木が 育つ ようすを 見て、そだつ じゅんばんに １〜５を 書こう。
+      <div class="clueRow">
+        <div class="clueBox">（　）枝打ち</div>
+        <div class="clueBox">（　）下刈り</div>
+        <div class="clueBox">（　）主伐</div>
+        <div class="clueBox">（　）苗木を植える</div>
+        <div class="clueBox">（　）間伐</div>
+      </div>
+      <div style="margin-top:1.2mm">苗木を 植えてから 木材に 使えるまで、何年くらい かかる？　ア 5〜10年 ・ イ 40〜50年 ・ ウ 200年以上（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．間伐しよう — 間伐の 量を ためそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 間伐の 量を えらんで 試してみよう。下草が 元気に 育った 量に 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．森の はたらき発見</span>
+    <div class="secBody">
+      もし 森が なかったら、大雨の ときに どうなる？（〇を つけよう）<br>
+      ア 何も かわらない　・　イ 一気に 川へ 水が 流れこみ、こう水が おきやすくなる　・　ウ かえって 安全に なる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（木材と くらし）</span>
+    <div class="secBody">
+      最近、日本の 木材自給率は どうなってきている？（〇を つけよう）<br>
+      ア 減り続けている　・　イ 下がりきってから、また 少しずつ 回復してきている　・　ウ ずっと 変わらない
+      <table class="expTable" style="margin-top:1.5mm">
+        <tr><th>1950年代</th><th>2002年</th><th>2024年</th></tr>
+        <tr><td>自給率 <span class="fillLine sm"></span></td><td>自給率 <span class="fillLine sm"></span></td><td>自給率 <span class="fillLine sm"></span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 日本の 国土の 約（<span class="fillLine"></span>）は 森林。<br>
+      ② 苗木を 植えてから 木材に 使えるように なるまで（<span class="fillLine"></span>）くらい かかる。<br>
+      ③ 間伐を しないと、下草が 育たず 土が（<span class="fillLine"></span>）に なってしまう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌲</span>
+        <div>
+          家の 中に ある、木で できた ものを 5つ さがしてみよう。<br>
+          ☐ 見つけた もの：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ネンリンの杜 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ネンリンの杜 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「地理（森林とわたしたちのくらし）」・学力幅あり・協力型／ 使うもの：「nenrin.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kanbatsu</b> などで途中再開（m_shurui／m_sodateru／m_kanbatsu／m_hataraki／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🌳 森の 種類さがし</td><td>天然林・人工林の2つの手がかりをボタンで確認 → クイズ。人工林はスギ・ヒノキが代表という話を紹介</td></tr>
+      <tr><td class="min">10〜18分</td><td>🌱 木を 育てる いっしょう</td><td>「つぎへ」で苗木→下刈り→枝打ち→間伐→主伐の5段階を確認 → 育成年数クイズ（40〜50年）</td></tr>
+      <tr><td class="min">18〜28分</td><td>🪚 間伐しよう（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で間伐の量を選び「間伐する」→森の様子がどうなるか判定。少なすぎ/多すぎでは失敗するので何度も挑戦させる。1人ずつ交代で目もりを選ばせるとよい</td></tr>
+      <tr><td class="min">28〜35分</td><td>💧 森の はたらき発見</td><td>緑のダム・空気をきれいに・土をささえるの3つを発見 → もし森がなかったらクイズ</td></tr>
+      <tr><td class="min">35〜41分</td><td>🪑 はかせチャレンジ（木材とくらし）</td><td>木材自給率の変化・国産材見直し・身近な木材製品を発見してクイズ。国産材利用へ発展</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「家の中の木製品さがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「木を育てるいっしょう」を右下「つぎ▶」でスキップ可（<b>間伐しよう・森のはたらき発見・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 森林（国土の約7わり）</b>／森の種類さがし＝<b>イ 4わりくらい（人工林）</b>／
+      木を育てるいっしょう＝<b>イ 40〜50年</b>／間伐しよう＝<b>③〜⑥（約25〜70%）</b>／
+      森のはたらき発見＝<b>イ 一気に川へ水が流れこみ、こう水がおきやすくなる</b>／
+      はかせ＝<b>イ 下がりきってから、また少しずつ回復してきている</b>／
+      まとめ＝①<b>7わり</b>　②<b>40〜50年</b>　③<b>むきだし</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の地理です）</h2>
+    <ul>
+      <li>日本の国土の約67〜68.5%（約7割）は森林。森林面積は約2,500万ha。先進国の中でもフィンランド・スウェーデンに次ぐ世界トップクラスの森林率</li>
+      <li>森林のうち約1,000万ha（約4割）が人工林、残り約6割が天然林。人工林の樹種はスギが約45%・ヒノキが約25%と、この2種で7割を占める</li>
+      <li>苗木を植えてから木材として使えるまで40〜50年。植林後は下刈り（雑草除去、5〜8年間毎年）→枝打ち→間伐→主伐（皆伐）という長期の手入れサイクルがある</li>
+      <li>間伐をしないと過密になり光が地表に届かず下層植生（下草）が育たない→土壌が流出しやすくなり土砂崩壊等の山地災害が起きやすくなる。間伐を行うと光が届き下草が発達→根が土を支え水源涵養・土砂災害防止機能が高まる</li>
+      <li>木材自給率は1950年代（ピーク期）は9割以上あったが、安価な外国産木材の輸入拡大で2002年に過去最低の18.8%まで低下。近年は国産材利用の見直しが進み、2024年（令和6年）は42.5%まで回復している</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「間伐しよう」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせると全員が参加できる</li>
+      <li>間伐の量は「多いほど良い」わけではなく設計している。①②は間伐なしで木がこみすぎ、⑦⑧は間伐しすぎで木が減りすぎ、というちょうどよい範囲（③〜⑥）を見つける過程を大事にする</li>
+      <li>よそうタイムの答え（イ：森林が国土の約7割）は、田畑や住宅地の方が多いと感じている子もいるため意外性がある。まとめで丁寧に振り返るとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「人工林って何？」「間伐はなぜ必要？」「木材自給率は今どれくらい？」</li>
+      <li>教科書・資料集の人工林（スギ・ヒノキの並木）と天然林の写真を見比べると理解が深まる</li>
+      <li>森林は「環境を守る・公害」単元（次回候補）にもつながるテーマ。森の保水機能や自然保護の視点を続けて扱うと発展できる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
