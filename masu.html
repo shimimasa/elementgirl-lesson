@@ -891,6 +891,7 @@ function gotoStep(i) {
   S.phase = ''; S.tween = null;
   hideOverlay(); hideWish();
   setControls([]);
+  setButtons([]);
   STEPS[FLOW[S.stepIndex]].enter();
   updateLoc();
 }
