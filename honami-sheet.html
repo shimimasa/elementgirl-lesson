@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ホナミの田 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2f6b3a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #f3d968; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #cbe6a8; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #cbe6a8; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌾 ホナミの田 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      戦争で 焼け野原に なった 日本は、その後 何年ぐらいで 独立を 取りもどしたと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 1年も かからず</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 7年ほど</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 50年以上</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．戦後の改革を知る</span>
+    <div class="secBody">
+      見つけた 手がかりに ✓を つけよう。
+      <div class="clueRow">
+        <div class="clueBox">☐ GHQによる占領</div>
+        <div class="clueBox">☐ 婦人参政権</div>
+        <div class="clueBox">☐ 労働組合の後おし</div>
+      </div>
+      <div class="clueRow" style="margin-top:1mm">
+        <div class="clueBox">☐ 教育の自由化</div>
+        <div class="clueBox">☐ 財閥解体</div>
+      </div>
+      <div style="margin-top:1.2mm">これらの 戦後改革を 進めたのは だれの 指令？　ア 日本の議会　・　イ GHQ（連合国軍総司令部）　・　ウ 国際連合（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．新しい選挙</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">選挙法改正（1945年）</span>
+        <span class="wordBank">初めての女性議員（1946年）</span>
+      </div>
+      <div style="margin-top:1.2mm">1946年の 選挙で 初めて 選挙に 参加できたのは？　ア 18歳以上の男女　・　イ 20歳以上の男女　・　ウ お金持ちの人だけ（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．農地改革の バランス — 自作農の 割合を たしかめよう</span>
+    <div class="secBody">
+      進み具合 ①〜⑧を 試して、自作農の 割合（％）を 記録しよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      <div style="margin-top:1.2mm">農地改革の 結果、農村は どう変わった？　ア ほとんど変わらなかった　・　イ 多くの小作人が自作農になった　・　ウ 田んぼがなくなった（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．独立と国際社会へ</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">サンフランシスコ平和条約（1951年）</span>
+        <span class="wordBank">国際連合への加盟（1956年）</span>
+      </div>
+      <div style="margin-top:1.2mm">さいしょの よそうタイムを 思い出そう。独立回復までの 年数は？　ア 1年もかからず　・　イ 7年ほど　・　ウ 50年以上（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（経済の復興）</span>
+    <div class="secBody">
+      日本の経済が 戦争前の 水準まで 回復するのに どれくらい かかった？（〇を つけよう）<br>
+      ア 1年ほど　・　イ 10年ほど　・　ウ 100年ほど
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 1945年、日本を 占領し 戦後改革を 指導した 連合国軍総司令部を（<span class="fillLine"></span>）と いう。<br>
+      ② 農地改革によって、多くの 小作人が 自分の 田を 持つ（<span class="fillLine"></span>）に なった。<br>
+      ③ 1951年に 結ばれ、翌年 独立回復の きっかけと なった 条約を（<span class="fillLine"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌾</span>
+        <div>
+          おうちの人に「もし 自分の 田や 畑を 持てたら、どんな 気持ちに なると 思う？」と 聞いてみよう。自作農に なった 人たちの 気持ちを、いっしょに 想像してみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ホナミの田 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ホナミの田 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（戦後の民主化と復興）」・学力幅あり・協力型／ 使うもの：「honami.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_nouchi</b> などで途中再開（m_kaikaku／m_senkyo／m_nouchi／m_dokuritsu／hakase／ending）</li>
+      <li>☐ <b>本時のねらいの確認</b>：前作「ズキンの家」（昭和の戦争）の直接の続編。焼け野原からの復興を、農地改革で自作農が増えていく様子（グリッドの色の変化）で実感させ、「民主化と復興」を前向きに締める構成です</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🏛️ 戦後の 改革を 知る</td><td>GHQ占領・婦人参政権・労働組合・教育の自由化・財閥解体の5つをボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">10〜14分</td><td>🗳️ 新しい 選挙</td><td>選挙法改正・初めての女性議員の2つを確認 → クイズ</td></tr>
+      <tr><td class="min">14〜28分</td><td>🌾 農地改革の バランス（<b>今日の見せ場</b>）</td><td>①〜⑧を1人ずつ交代で試し、田んぼのグリッドが小作色→自作農色に変わる様子をシート４に記録。⑦⑧で成功</td></tr>
+      <tr><td class="min">28〜35分</td><td>🌏 独立と 国際社会へ</td><td>サンフランシスコ平和条約・国連加盟の2つを確認 → クイズで<b>よそうタイムを回収</b></td></tr>
+      <tr><td class="min">35〜40分</td><td>📈 はかせチャレンジ（経済の復興）</td><td>朝鮮特需・「もはや戦後ではない」の2つを発見 → クイズ</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を伝える</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「戦後の改革を知る」の発見ポイントを一部先生が代わりに開いて調整（<b>農地改革・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 7年ほど</b>／戦後改革を進めたのは＝<b>イ GHQ（連合国軍総司令部）</b>／
+      新しい選挙＝<b>イ 20歳以上の男女</b>／農地改革の結果＝<b>イ 多くの小作人が自作農になった</b>／
+      独立回復までの年数（よそう回収）＝<b>イ 7年ほど</b>／経済回復までの年数＝<b>イ 10年ほど</b>／
+      まとめ＝①<b>GHQ</b>　②<b>自作農</b>　③<b>サンフランシスコ平和条約</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>1945年、マッカーサーを最高司令官とするGHQ（連合国軍総司令部）が日本を占領。五大改革指令に基づき、婦人参政権・労働組合の後おし・教育の自由化・圧政的諸制度の撤廃・財閥解体などが進められた</li>
+      <li>1945年の選挙法改正で満20歳以上のすべての男女に選挙権が認められ、1946年4月の総選挙で39人の女性議員が誕生した</li>
+      <li>農地改革では政府が地主から農地を買い上げ、小作人に安く売りわたした。改革前は小作地率が約46%だったが、改革後は約10%まで減り、多くの自作農が生まれた</li>
+      <li>1951年、48か国とサンフランシスコ平和条約を結び、翌1952年の発効で日本は独立を回復。占領開始からおよそ7年後のことだった</li>
+      <li>1956年、日本は国際連合に加盟。同年の経済白書には「もはや戦後ではない」という言葉が登場し、経済が戦争前の水準を超えて回復したことを示した</li>
+      <li>1950年に始まった朝鮮戦争によるアメリカ軍向け物資の生産（朝鮮特需）が、日本の経済回復を大きく後おしした</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「農地改革のバランス」のグリッドが今日いちばんの見せ場。1人ずつ交代で目もりを選ばせ、⑦⑧の「ほとんどが自作農に」到達するまで試させるとよい</li>
+      <li>実在の政党・政治家・時事的な政治論争には触れず、教科書レベルの戦後改革・復興の史実の紹介にとどめる</li>
+      <li>前作「ズキンの家」（昭和の戦争）を先に扱っている前提の続編。未見のクラスでも本作単独で完結する内容だが、可能なら続けて見せると効果的</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「GHQって何？」「農地改革で何が変わった？」「もはや戦後ではないってどういう意味？」</li>
+      <li>「ズキンの家」（昭和の戦争と銃後のくらし）の直接の続編として、戦後の民主化・復興までの流れを一本につないだ</li>
+      <li>この後、高度経済成長・東京オリンピックなど、豊かさが広がっていく時代の単元を今後の新規開拓候補として検討</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

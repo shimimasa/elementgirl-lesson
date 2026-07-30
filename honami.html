@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ホナミの田 — 戦後の 民主化と 復興 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #bfe6f2 0%, #eef8e0 45%, #f3d968 100%);
+    color: #23331c;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #2f6b3a; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #557048; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e2d8b8; border: 2px solid #7fb35a;
+    font-size: clamp(16px, 1.8vw, 26px); color: #7fb35a;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #f3d968, #6a9a3a);
+    border-color: #5a4a20; color: #23331c;
+    box-shadow: 0 0 14px rgba(138,112,48,.7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f5f0e0 0%, #c8e6a0 100%);
+    border: 3px solid #6b5a30;
+    box-shadow: inset 0 0 40px rgba(20, 25, 45, .12), 0 4px 18px rgba(15, 18, 32, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #16260f; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #2f6b3a; color: #eef8e0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15, 18, 32, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 18, 32, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #7fb35a; cursor: pointer;
+    background: linear-gradient(180deg, #5a9048, #2f6b3a); color: #fff;
+    box-shadow: 0 3px 0 #16260f; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #5a6a48, #3a4a38); border-color: #8aa088; box-shadow: 0 3px 0 #16260f; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #d8c05a, #9a8030); border-color: #ece0b0; box-shadow: 0 3px 0 #6a5620; color: #3a3020; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #2f6b3a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(30, 28, 20, .3), inset 0 0 24px rgba(20, 25, 45, .18);
+    flex-shrink: 0; background: #eef8e0;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #557048;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #16260f; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fbfceb; border: 2px solid #7fb35a; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #557048; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #23331c;
+    border: 1.5px solid #cdbfa0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #2f6b3a; background: #f3d968; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #e2d8b8, #c8e6a0); color: #23331c;
+    border: 2px solid #2f6b3a; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #2f6b3a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #5a9048, #2f6b3a); color: #fff;
+    box-shadow: 0 3px 0 #16260f, 0 5px 12px rgba(30, 28, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #16260f; }
+  .btn.sub {
+    background: #e2d8b8; color: #33471f; box-shadow: 0 3px 0 #7fb35a;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #23331c; box-shadow: 0 3px 0 #7fb35a; font-weight: 400; border: 1.5px solid #cdbfa0; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #f3d968; outline: 3px solid #5a9048; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(12, 14, 24, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fbfceb, #c8e6a0);
+    border: 3px solid #6b5a30; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(12, 14, 24, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #2f6b3a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #2f6b3a; }
+  .panel .sub { color: #557048; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #23331c; border: 1.5px solid #cdbfa0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #557048; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #23331c; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cdbfa0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #2f6b3a; background: #f3d968; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #2f6b3a; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #2f6b3a;
+    color: #16260f; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #557048;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e2d8b8; color: #33471f;
+    border: 1px solid #7fb35a; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #e2d8b8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🌾 ホナミの田<small>— 戦後の 民主化と 復興 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kaikaku" title="戦後の 改革を 知る">★</div>
+    <div class="badge" id="bd_m_senkyo" title="新しい 選挙">★</div>
+    <div class="badge" id="bd_m_nouchi" title="農地改革の バランス">★</div>
+    <div class="badge" id="bd_m_dokuritsu" title="独立と 国際社会へ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">戦後の 改革を 知る</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 ほなみめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,20,30,.18)"/>
+            <!-- からだ（稲束ふう） -->
+            <path d="M42 116 L46 96 L74 96 L78 116 Z" fill="#c8a832" stroke="#16260f" stroke-width="2"/>
+            <!-- 稲穂の頭（黄金の粒が垂れる） -->
+            <path d="M32 70 Q30 34 60 30 Q90 34 88 70 Q88 86 74 94 L46 94 Q32 86 32 70 Z" fill="#f3d968" stroke="#c8a832" stroke-width="2.5"/>
+            <!-- 垂れる稲穂の粒 -->
+            <g fill="#e0c04a" stroke="#c8a832" stroke-width="1">
+              <ellipse cx="38" cy="42" rx="4" ry="6" transform="rotate(-25 38 42)"/>
+              <ellipse cx="34" cy="54" rx="4" ry="6" transform="rotate(-15 34 54)"/>
+              <ellipse cx="82" cy="42" rx="4" ry="6" transform="rotate(25 82 42)"/>
+              <ellipse cx="86" cy="54" rx="4" ry="6" transform="rotate(15 86 54)"/>
+              <ellipse cx="60" cy="28" rx="4.2" ry="6.5"/>
+            </g>
+            <!-- 緑の葉 -->
+            <path d="M60 30 Q48 18 38 24" stroke="#5a9048" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M60 30 Q72 18 82 24" stroke="#5a9048" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- 顔 -->
+            <circle cx="60" cy="92" r="22" fill="#fffaea" stroke="#23331c" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="48" cy="97" rx="4.6" ry="3.2" fill="#e8a878" opacity=".55"/>
+            <ellipse cx="72" cy="97" rx="4.6" ry="3.2" fill="#e8a878" opacity=".55"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="52" cy="91" rx="3.4" ry="4.6" fill="#23331c"/>
+              <ellipse cx="68" cy="91" rx="3.4" ry="4.6" fill="#23331c"/>
+              <circle cx="53.2" cy="88.6" r="1.1" fill="#fff"/>
+              <circle cx="69.2" cy="88.6" r="1.1" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 104 Q60 108 67 104" stroke="#16260f" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>稲穂<rt>いなほ</rt></ruby>の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ホナミ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌾 ホナミの田ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ホナミの田 — 戦後の民主化と復興（小6社会・歴史・協力型・1ファイル）
+   戦後の改革を知る（GHQ・五大改革指令）→ 新しい選挙（婦人参政権）→
+   農地改革のバランス（自作農化グリッド・単調増加型）→ 独立と国際社会へ
+   （サンフランシスコ平和条約・国連加盟・よそう回収）→ はかせ（朝鮮特需・
+   経済白書）。前作「ズキンの家」（昭和の戦争と銃後のくらし）の直接の続編。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  senryo: ruby('占領', 'せんりょう'),
+  godai: ruby('五大改革指令', 'ごだいかいかくしれい'),
+  fujin: ruby('婦人参政権', 'ふじんさんせいけん'),
+  roudou: ruby('労働組合', 'ろうどうくみあい'),
+  kyouiku: ruby('教育基本法', 'きょういくきほんほう'),
+  zaibatsu: ruby('財閥解体', 'ざいばつかいたい'),
+  senkyoho: ruby('選挙法改正', 'せんきょほうかいせい'),
+  sousenkyo: ruby('総選挙', 'そうせんきょ'),
+  nouchi: ruby('農地改革', 'のうちかいかく'),
+  kosaku: ruby('小作', 'こさく'),
+  jisakunou: ruby('自作農', 'じさくのう'),
+  jinushi: ruby('地主', 'じぬし'),
+  heiwajouyaku: ruby('サンフランシスコ平和条約', 'さんふらんしすこへいわじょうやく'),
+  dokuritsu: ruby('独立回復', 'どくりつかいふく'),
+  kokusairengou: ruby('国際連合', 'こくさいれんごう'),
+  kamei: ruby('加盟', 'かめい'),
+  tokuju: ruby('朝鮮特需', 'ちょうせんとくじゅ'),
+  hakusho: ruby('経済白書', 'けいざいはくしょ'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 判定ロジック ----------
+// 農地改革：進み具合を上げるほど 自作農の コマが 増えていく（単調増加型）
+const NOUCHI_STEPS = [
+  { n: 1, jisaku: 1, txt: `政府は 地主から 農地を 買い上げ始めたけど、まだ ほんの わずか。ほとんどの 田は ${W.jinushi}の ものの ままで、${W.kosaku}の くらしは 変わっていないよ。` },
+  { n: 2, jisaku: 2, txt: `買い上げは 少しずつ 進んでいるけど、まだまだ 足りない。多くの ${W.kosaku}人が、高い 小作料に 苦しんでいるままだよ。` },
+  { n: 3, jisaku: 3, txt: `自分の田を 持てた 人も 出てきたけど、村全体では まだ 一部。改革は まだ 道半ばだね。` },
+  { n: 4, jisaku: 4, txt: `半分近くまで 進んできた。${W.jisakunou}が 少しずつ 増え、村の 空気も 変わり始めているよ。` },
+  { n: 5, jisaku: 5, txt: `ちょうど 半分の 田が ${W.jisakunou}の ものに なった。これは 改革が 始まる前の、小作地の 割合と 同じくらいだよ。` },
+  { n: 6, jisaku: 6, txt: `${W.jisakunou}が ${W.kosaku}を 上回ってきた。「自分の 田を 一生けんめい 耕す」という 人が、村の 多数に なってきたね。` },
+  { n: 7, jisaku: 8, txt: `ほとんどの 田が ${W.jisakunou}の ものに なった！ これが 実さいの ${W.nouchi}の 結果に 近い すがただよ。` },
+  { n: 8, jisaku: 10, txt: `すべての 田が ${W.jisakunou}の ものに なった。地主から 農地を 買い上げ、小作人に 安く 売りわたす ${W.nouchi}が、大きく 村を 変えたんだ。` },
+];
+function judgeNouchi(n) { if (n <= 2) return 'low'; if (n >= 7) return 'high'; return 'mid'; }
+
+// ---------- 戦後の改革を知る：手がかり ----------
+const KAIKAKU_POINTS = [
+  { key: 0, letter: 'あ', name: 'GHQによる占領（1945年）', x: 250, y: 260,
+    txt: `マッカーサーを 最高司令官とする GHQ（連合国軍総司令部）が 日本を ${W.senryo}し、戦後の 改革を 指導していったんだ。` },
+  { key: 1, letter: 'い', name: '婦人参政権（1945年）', x: 500, y: 220,
+    txt: `${W.fujin}が 認められた。今まで 選挙に 参加できなかった 女性も、いよいよ 投票できるように なったんだよ。` },
+  { key: 2, letter: 'う', name: '労働組合の後おし', x: 750, y: 260,
+    txt: `働く人たちが 力を 合わせる ${W.roudou}づくりが 後おしされた。給料や 働き方を、会社と 話しあえるように なったんだ。` },
+  { key: 3, letter: 'え', name: '教育の自由化', x: 350, y: 420,
+    txt: `軍国主義的な 教科書の 記述は 墨で 塗りつぶされ、新しく ${W.kyouiku}が 定められた。男女いっしょに 学ぶ 学校も 広がったよ。` },
+  { key: 4, letter: 'お', name: '財閥解体', x: 650, y: 420,
+    txt: `三井・三菱など、国の 経済を 支配していた 大きな 会社の グループ（財閥）を 分ける ${W.zaibatsu}が 行われたんだ。` },
+];
+
+// ---------- 新しい選挙：手がかり ----------
+const SENKYO_POINTS = [
+  { key: 0, letter: 'あ', name: '選挙法改正（1945年）', x: 220, y: 260,
+    txt: `1945年、${W.senkyoho}が 行われ、満20歳以上の すべての 男女に 選挙権が 認められた。それまでは 男性だけだったんだ。` },
+  { key: 1, letter: 'い', name: '初めての女性議員（1946年）', x: 780, y: 260,
+    txt: `1946年4月の ${W.sousenkyo}で、日本で 初めて 女性が 投票し、なんと 39人もの 女性議員が 誕生したんだよ。` },
+];
+
+// ---------- 独立と国際社会へ：手がかり（よそう回収） ----------
+const DOKURITSU_POINTS = [
+  { key: 0, letter: 'あ', name: 'サンフランシスコ平和条約（1951年）', x: 220, y: 340,
+    txt: `1951年、48か国と ${W.heiwajouyaku}を 結び、翌1952年に 条約が 発効して 日本は ${W.dokuritsu}した。${W.senryo}が 始まってから、およそ 7年後の ことだったんだよ。` },
+  { key: 1, letter: 'い', name: '国際連合への加盟（1956年）', x: 780, y: 340,
+    txt: `1956年、日本は ${W.kokusairengou}に ${W.kamei}した。世界の 国々の 仲間として、再び 認められるように なったんだ。` },
+];
+
+// ---------- はかせ：経済の復興 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '朝鮮特需（1950年〜）', x: 280, y: 540,
+    txt: `1950年に 始まった 朝鮮戦争で、日本は アメリカ軍向けの 品物を 大量に 作ることに なり、これが ${W.tokuju}と 呼ばれる 大きな 好景気を 生んだんだ。` },
+  { key: 1, letter: 'い', name: '「もはや戦後ではない」（1956年）', x: 620, y: 520,
+    txt: `1956年の ${W.hakusho}に「もはや 戦後ではない」という 言葉が 登場した。日本の 経済が、戦争前の 水準を こえて 回復したことを 示す 言葉だったんだよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kaikaku',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  kaikakuFound: new Set(),
+  senkyoFound: new Set(),
+  dokuritsuFound: new Set(),
+  hakaseFound: new Set(),
+  nouchiN: 1,
+  nouchiTries: new Set(),
+  nouchi: { jisakuF: 1 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(X, Y, sc, points, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 24 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#2f6b3a' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#23331c'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#2f6b3a';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 大地と空の背景 ----------
+function bgScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#c8e6a0'); g.addColorStop(1, '#8a8064');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  const g2 = gctx.createLinearGradient(0, Y(500), 0, Y(640));
+  g2.addColorStop(0, '#6a7a5a'); g2.addColorStop(1, '#4a5a48');
+  gctx.fillStyle = g2;
+  gctx.fillRect(X(0), Y(500), 1000 * sc, 140 * sc);
+}
+
+// ---------- 日本家屋（銃後のくらしのイメージ） ----------
+function drawHouse(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#c8e6a0'; gctx.strokeStyle = '#23331c'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.rect(X(cx - 90), Y(baseY - 90), 180 * sc, 90 * sc);
+  gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#2f6b3a';
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 110), Y(baseY - 90)); gctx.lineTo(X(cx), Y(baseY - 150));
+  gctx.lineTo(X(cx + 110), Y(baseY - 90));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#eef8e0';
+  [cx - 50, cx, cx + 50].forEach(px => {
+    gctx.beginPath(); gctx.rect(X(px - 8), Y(baseY - 90), 16 * sc, 90 * sc);
+    gctx.fill(); gctx.stroke();
+  });
+}
+
+function drawKaikakuScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.fillStyle = '#7fb35a'; gctx.strokeStyle = '#23331c'; gctx.lineWidth = 2.4 * sc;
+  [[150, 560, 70, 120], [260, 560, 90, 160], [400, 560, 70, 100], [720, 560, 90, 180], [850, 560, 70, 130]].forEach(([bx, by, bw, bh]) => {
+    gctx.beginPath(); gctx.rect(X(bx - bw / 2), Y(by - bh), bw * sc, bh * sc); gctx.fill(); gctx.stroke();
+  });
+  drawPoints(X, Y, sc, KAIKAKU_POINTS, S.kaikakuFound);
+}
+
+function drawSenkyoScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.fillStyle = '#eef8e0'; gctx.strokeStyle = '#23331c'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(430), Y(380), 140 * sc, 100 * sc, 8 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#2f6b3a';
+  gctx.beginPath(); gctx.rect(X(460), Y(370), 80 * sc, 14 * sc); gctx.fill();
+  gctx.fillStyle = '#23331c'; gctx.font = `700 ${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('投票箱', X(500), Y(440));
+  drawPoints(X, Y, sc, SENKYO_POINTS, S.senkyoFound);
+}
+
+// ---------- 農地改革：自作農化グリッド（メイン操作） ----------
+function drawNouchiGrid(X, Y, sc, cx, topY, jisakuF) {
+  const cols = 10, cellW = 42, cellH = 50, gap = 6;
+  const totalW = cols * cellW + (cols - 1) * gap;
+  const startX = cx - totalW / 2;
+  for (let i = 0; i < cols; i++) {
+    const fillRatio = clamp(jisakuF - i, 0, 1);
+    const x0 = startX + i * (cellW + gap);
+    gctx.fillStyle = '#8a8064'; gctx.strokeStyle = '#23331c'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.roundRect(X(x0), Y(topY), cellW * sc, cellH * sc, 6 * sc); gctx.fill(); gctx.stroke();
+    if (fillRatio > 0.02) {
+      const fh = cellH * fillRatio;
+      gctx.fillStyle = '#f3d968';
+      gctx.beginPath(); gctx.roundRect(X(x0), Y(topY + cellH - fh), cellW * sc, fh * sc, 6 * sc); gctx.fill();
+    }
+  }
+  const legendY = topY - 30, sq = 16;
+  gctx.fillStyle = '#f3d968'; gctx.strokeStyle = '#23331c'; gctx.lineWidth = 1.5 * sc;
+  gctx.beginPath(); gctx.rect(X(cx - 170), Y(legendY - sq / 2), sq * sc, sq * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#23331c'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'left'; gctx.textBaseline = 'middle';
+  gctx.fillText('自作農の田', X(cx - 170 + sq + 6), Y(legendY));
+  gctx.fillStyle = '#8a8064'; gctx.strokeStyle = '#23331c';
+  gctx.beginPath(); gctx.rect(X(cx + 20), Y(legendY - sq / 2), sq * sc, sq * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#23331c';
+  gctx.fillText('地主の田（小作）', X(cx + 20 + sq + 6), Y(legendY));
+  gctx.textAlign = 'center';
+  gctx.font = `700 ${22 * sc}px sans-serif`;
+  gctx.fillText(Math.round(jisakuF * 10) + '% が 自作農に', X(cx), Y(topY + cellH + 30));
+}
+function drawNouchiScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  drawHouse(X, Y, sc, 180, 560);
+  drawNouchiGrid(X, Y, sc, 600, 260, S.nouchi.jisakuF);
+  gctx.fillStyle = '#23331c'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`農地改革の 進み具合 ${NUMS[S.nouchiN - 1]}`, X(600), Y(120));
+}
+
+// ---------- 独立と国際社会へ ----------
+function drawDokuritsuScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.fillStyle = '#5a9048'; gctx.strokeStyle = '#23331c'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.arc(X(500), Y(340), 130 * sc, 0, TAU); gctx.fill(); gctx.stroke();
+  gctx.font = `${100 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🌏', X(500), Y(340));
+  drawPoints(X, Y, sc, DOKURITSU_POINTS, S.dokuritsuFound);
+}
+
+// ---------- はかせ：経済の復興 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.strokeStyle = '#2f6b3a'; gctx.lineWidth = 5 * sc; gctx.lineCap = 'round';
+  gctx.beginPath();
+  gctx.moveTo(X(220), Y(480));
+  gctx.quadraticCurveTo(X(460), Y(460), X(540), Y(380));
+  gctx.quadraticCurveTo(X(680), Y(260), X(820), Y(200));
+  gctx.stroke();
+  gctx.font = `${46 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('📈', X(820), Y(170));
+  drawPoints(X, Y, sc, HAKASE_POINTS, S.hakaseFound);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kaikaku') drawKaikakuScene(X, Y, sc);
+  else if (S.scene === 'senkyo') drawSenkyoScene(X, Y, sc);
+  else if (S.scene === 'nouchi') drawNouchiScene(X, Y, sc);
+  else if (S.scene === 'dokuritsu') drawDokuritsuScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawNouchiScene(X, Y, sc);
+}
+
+// ---------- ほなみめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#eef8e0'); grd.addColorStop(1, '#7fb35a');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#2f6b3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'grid') {
+    const pct = Math.round(S.nouchi.jisakuF * 10);
+    sctx.font = `700 ${R * 0.26}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#2f6b3a';
+    sctx.fillText(pct + '%', R, R * 0.78);
+    label('自作農の わりあい');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#f3d968'); g2.addColorStop(1, 'rgba(216,201,138,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#2f6b3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚦', R, R * 0.85);
+    label('たしかめ かんりょう！');
+  } else {
+    sctx.fillStyle = '#2f6b3a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#23331c';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#2f6b3a', '#f3d968', '#5a9048', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '戦後の 日本と 世界（1945〜1956年）';
+  const titles = {
+    kaikaku: '🏛️ 戦後の 改革を 知る（1945年〜）',
+    senkyo: '🗳️ 新しい 選挙',
+    nouchi: '🌾 農地改革の バランス',
+    dokuritsu: '🌏 独立と 国際社会へ',
+    hakase: '📈 経済の 復興',
+    done: '🌾 ホナミの田 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '戦後の 改革を 知る';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kaikaku', 'm_senkyo', 'm_nouchi', 'm_dokuritsu', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kaikaku', scope: { type: 'idle' }, kaikakuFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🏛️🗳️🌾</div>
+        <h1>ホナミの田</h1>
+        <div class="sub">〜 戦後の 民主化と 復興の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 焼け野原に また 実り始めた 稲穂から 生まれた 精霊、<b>ホナミ</b>。戦争が 終わった あの日から、日本は どうやって 立ち直っていったのか、<b>いっしょに たしかめに いこう！</b><br>
+        くらしの しくみも、田んぼの すがたも、少しずつ 変わっていったんだよ……見ていこう。</p>
+        <button class="btn" id="startBtn">田を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">戦争で 焼け野原に なった 日本は、その後 何年ぐらいで 外国の 支配（占領）が 終わって、独立を 取りもどしたと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">⏱️</span><b>ア</b> 1年も かからず</div>
+          <div class="vcard" data-v="1"><span class="vicon">📅</span><b>イ</b> 7年ほど</div>
+          <div class="vcard" data-v="2"><span class="vicon">🐢</span><b>ウ</b> 50年以上</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：戦後の改革を知る ---
+  m_kaikaku: {
+    enter() {
+      Object.assign(S, { scene: 'kaikaku', scope: { type: 'idle' }, kaikakuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`🏛️ 戦争が 終わった 日本は、大きな 改革の 時代を むかえた。どんな できごとが あったのだろう？ 5つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KAIKAKU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kaikakuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kaikakuFound.size >= KAIKAKU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kaikakuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`これらの 戦後改革を 進めたのは、だれの 指令だっただろう？`);
+      setButtons(choiceRow(['ア 日本の 議会', 'イ GHQ（連合国軍総司令部）', 'ウ 国際連合'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kaikaku'); S.phase = 'done';
+        say(`せいかい！ ${W.godai}という GHQの 指令に もとづいて、日本の 大きな 改革が 進められたんだ。<br><br>💡 <b>たいせつポイント</b><br>選挙・労働組合・教育・財閥解体など、くらしの しくみが いっきに 変わっていったんだよ。`);
+        setButtons([{ label: 'つぎへ（新しい 選挙）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 日本の 議会', 'イ GHQ（連合国軍総司令部）', 'ウ 国際連合'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：新しい選挙 ---
+  m_senkyo: {
+    enter() {
+      Object.assign(S, { scene: 'senkyo', scope: { type: 'idle' }, senkyoFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`🗳️ 選挙の しくみも、大きく 変わった。どんな できごとが あったのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SENKYO_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.senkyoFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.senkyoFound.size >= SENKYO_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.senkyoFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`1946年の 選挙で、初めて 選挙に 参加できるように なったのは だれだろう？`);
+      setButtons(choiceRow(['ア 18歳以上の 男女', 'イ 20歳以上の 男女', 'ウ お金持ちの 人だけ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_senkyo'); S.phase = 'done';
+        say(`せいかい！ ${W.senkyoho}で、満20歳以上の すべての 男女に 選挙権が 認められたんだ。<br><br>💡 <b>たいせつポイント</b><br>それまでは 男性だけだった 選挙権が、女性にも 広がった。1946年の ${W.sousenkyo}では、39人もの 女性議員が 誕生したんだよ。`);
+        setButtons([{ label: 'つぎへ（農地改革）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 18歳以上の 男女', 'イ 20歳以上の 男女', 'ウ お金持ちの 人だけ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：農地改革のバランス（自作農化グリッド・メイン操作） ---
+  m_nouchi: {
+    enter() {
+      Object.assign(S, { scene: 'nouchi', scope: { type: 'grid' }, nouchiN: 4, nouchiTries: new Set(), nouchi: { jisakuF: 0 } });
+      updateLoc();
+      setWish('🌾', `政府は ${W.jinushi}から 農地を 買い上げ、${W.kosaku}人に 安く 売りわたす ${W.nouchi}を 進めた。進み具合 ①〜⑧を えらんで、田んぼが どう 変わるか 試してみよう。`);
+      say(`目もりを えらんで「改革を 進める」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.nouchiN === n ? ' sel' : ''), cb: () => { S.nouchiN = n; this.refreshCtl(); } });
+      list.push({ label: '🌾 改革を 進める', cb: () => this.run() });
+      setControls(list);
+    },
+    run() {
+      setControls([]);
+      say(`進み具合 ${NUMS[S.nouchiN - 1]} で、農地改革を 進めてみる……`);
+      sClank();
+      const info = NOUCHI_STEPS[S.nouchiN - 1];
+      startTween(S.nouchi.jisakuF, info.jisaku, 1.1, v => { S.nouchi.jisakuF = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeNouchi(S.nouchiN);
+      S.nouchiTries.add(S.nouchiN);
+      const info = NOUCHI_STEPS[S.nouchiN - 1];
+      if (r === 'high') {
+        sYes(); scopeBurst(); award('m_nouchi'); S.phase = 'done';
+        say(`✨ ${info.txt} ✨<br><br>💡 <b>たいせつポイント</b><br>${W.nouchi}によって、多くの ${W.kosaku}人が 自分の 田を 持つ ${W.jisakunou}に なったんだ。`);
+        setButtons([{ label: 'つぎへ（独立と 国際社会へ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`${info.txt}<br>もういちど 進み具合を えらんで、試してみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：独立と国際社会へ（よそう回収） ---
+  m_dokuritsu: {
+    enter() {
+      Object.assign(S, { scene: 'dokuritsu', scope: { type: 'idle' }, dokuritsuFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`🌏 日本は 少しずつ、世界の 国々との つながりを 取りもどしていった。どんな できごとが あったのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(DOKURITSU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.dokuritsuFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.dokuritsuFound.size >= DOKURITSU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.dokuritsuFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`さいしょの よそうタイムを 思い出そう。戦争が 終わってから 独立を 回復するまで、何年くらい かかっただろう？`);
+      setButtons(choiceRow(['ア 1年も かからず', 'イ 7年ほど', 'ウ 50年以上'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_dokuritsu'); S.phase = 'done';
+        say(`せいかい！ ${W.senryo}が 始まってから およそ 7年後の 1952年、${W.heiwajouyaku}の 発効で 日本は ${W.dokuritsu}したんだ。<br><br>💡 <b>たいせつポイント</b><br>1956年には ${W.kokusairengou}にも ${W.kamei}し、世界の 国々の 仲間に もどっていったんだよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 1年も かからず', 'イ 7年ほど', 'ウ 50年以上'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：経済の復興 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ くらしの しくみだけでなく、経済も 大きく 立ち直っていった。2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`日本の 経済が、戦争前の 水準まで 回復するのに、だいたい どれくらい かかったと 思う？`);
+      setButtons(choiceRow(['ア 1年ほど', 'イ 10年ほど', 'ウ 100年ほど'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.tokuju}などで 経済は 立ち直り、1956年の ${W.hakusho}には「もはや 戦後ではない」という 言葉が 登場したんだ。<br><br>💡 <b>たいせつポイント</b><br>焼け野原に なった 町から、およそ 10年で 戦争前の 水準を こえるまでに 立ち直ったんだよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 1年ほど', 'イ 10年ほど', 'ウ 100年ほど'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, nouchi: { jisakuF: 10 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ホナミの田 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 1945年、日本を 占領し 戦後改革を 指導した 連合国軍総司令部を（<span class="blankWord" data-a="GHQ">？？？</span>）と いう。<br>
+        ② 農地改革によって、多くの 小作人が 自分の 田を 持つ（<span class="blankWord" data-a="自作農">？？？</span>）に なった。<br>
+        ③ 1951年に 結ばれ、翌年 日本が 独立を 回復する きっかけと なった 条約を（<span class="blankWord" data-a="サンフランシスコ平和条約">？？？</span>）と いう。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 7年ほど</b> でした！ 占領が 始まってから およそ 7年後の 1952年に、独立を 取りもどしたんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🌾 <b>おうちミッション</b><br>おうちの人に「もし 自分の 田や 畑を 持てたら、どんな 気持ちに なると 思う？」と 聞いてみよう。自作農に なった 人たちの 気持ちを、いっしょに 想像してみてね。</p>
+        <p class="talk">日本は 民主化と 復興を 進め、少しずつ 豊かな くらしを 取りもどしていったんだよ。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#23331c'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'nouchi', scope: { type: 'glow' }, nouchi: { jisakuF: 10 } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 戦後の 民主化と 復興について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「GHQって 何？」「農地改革で 何が 変わった？」`);
+      setButtons([
+        { label: '🏛️ 戦後の 改革の 図', cls: 'sub', cb: () => this.show('kaikaku') },
+        { label: '🗳️ 新しい 選挙の 図', cls: 'sub', cb: () => this.show('senkyo') },
+        { label: '🌾 農地改革の 図', cls: 'sub', cb: () => this.show('nouchi') },
+        { label: '🌏 独立と 国際社会の 図', cls: 'sub', cb: () => this.show('dokuritsu') },
+        { label: '📈 経済の 復興の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'nouchi') { S.nouchi.jisakuF = 10; }
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_nouchi などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
