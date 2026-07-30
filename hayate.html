@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ハヤテの駅 — 高度経済成長と現代 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #cfe8f5 0%, #eef6fa 45%, #b8d8e8 100%);
+    color: #16324a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #1a5ca8; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4a7ca0; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dceaf2; border: 2px solid #e0472f;
+    font-size: clamp(16px, 1.8vw, 26px); color: #e0472f;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe082, #1a5ca8);
+    border-color: #0e2f4a; color: #fff;
+    box-shadow: 0 0 14px rgba(26,92,168,.7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f4fafd 0%, #b8d8e8 100%);
+    border: 3px solid #1a5ca8;
+    box-shadow: inset 0 0 40px rgba(20, 50, 74, .12), 0 4px 18px rgba(14, 30, 45, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #16324a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #1a5ca8; color: #f4fafd; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(14, 30, 45, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(14, 30, 45, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #e0472f; cursor: pointer;
+    background: linear-gradient(180deg, #3d82c4, #1a5ca8); color: #fff;
+    box-shadow: 0 3px 0 #0e2f4a; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #8a9aa8, #566a78); border-color: #c8d4dc; box-shadow: 0 3px 0 #0e2f4a; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffcf6a, #e0472f); border-color: #ffe8b8; box-shadow: 0 3px 0 #8a2010; color: #fff; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #1a5ca8; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(14, 30, 45, .3), inset 0 0 24px rgba(20, 50, 74, .18);
+    flex-shrink: 0; background: #f4fafd;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #4a7ca0;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #16324a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fbfeff; border: 2px solid #e0472f; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #4a7ca0; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #16324a;
+    border: 1.5px solid #cfe0ea;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1a5ca8; background: #ffe082; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #dceaf2, #b8d8e8); color: #16324a;
+    border: 2px solid #1a5ca8; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #1a5ca8; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #3d82c4, #1a5ca8); color: #fff;
+    box-shadow: 0 3px 0 #0e2f4a, 0 5px 12px rgba(14, 30, 45, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0e2f4a; }
+  .btn.sub {
+    background: #dceaf2; color: #204258; box-shadow: 0 3px 0 #e0472f;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #16324a; box-shadow: 0 3px 0 #e0472f; font-weight: 400; border: 1.5px solid #cfe0ea; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe082; outline: 3px solid #1a5ca8; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(10, 22, 34, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fbfeff, #b8d8e8);
+    border: 3px solid #1a5ca8; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(14, 30, 45, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #1a5ca8; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #1a5ca8; }
+  .panel .sub { color: #4a7ca0; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #16324a; border: 1.5px solid #cfe0ea; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #4a7ca0; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #16324a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cfe0ea; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #1a5ca8; background: #ffe082; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #1a5ca8; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #1a5ca8;
+    color: #0e2f4a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #4a7ca0;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dceaf2; color: #204258;
+    border: 1px solid #e0472f; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #dceaf2; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🚄 ハヤテの駅<small>— 高度経済成長と 現代 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_keiki" title="高度経済成長を 知る">★</div>
+    <div class="badge" id="bd_m_shinkansen" title="新幹線の 速さ">★</div>
+    <div class="badge" id="bd_m_johoka" title="情報化社会の 広がり">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+    <div class="badge" id="bd_m_mirai" title="未来へ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">高度経済成長を 知る</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 はやてめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,20,30,.18)"/>
+            <!-- 新幹線の からだ（先頭車両ふう、丸い ノーズ） -->
+            <path d="M30 110 Q24 68 42 46 Q60 32 78 46 Q96 68 90 110 Q60 120 30 110 Z" fill="#f4fafd" stroke="#1a5ca8" stroke-width="2.4"/>
+            <!-- 青い ライン -->
+            <path d="M27 90 Q60 99 93 90" stroke="#1a5ca8" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <!-- 赤い ライン -->
+            <path d="M28 99 Q60 108 92 99" stroke="#e0472f" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <!-- かお -->
+            <circle cx="60" cy="74" r="18" fill="#fff8e6" stroke="#1a5ca8" stroke-width="2.5"/>
+            <ellipse cx="49" cy="79" rx="4" ry="2.8" fill="#e8926a" opacity=".5"/>
+            <ellipse cx="71" cy="79" rx="4" ry="2.8" fill="#e8926a" opacity=".5"/>
+            <g class="eyes">
+              <ellipse cx="53" cy="71" rx="3.1" ry="4.1" fill="#0e2f4a"/>
+              <ellipse cx="67" cy="71" rx="3.1" ry="4.1" fill="#0e2f4a"/>
+              <circle cx="54.1" cy="68.9" r="1" fill="#fff"/>
+              <circle cx="68.1" cy="68.9" r="1" fill="#fff"/>
+            </g>
+            <path d="M52 84 Q60 88 68 84" stroke="#0e2f4a" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>疾風<rt>はやて</rt></ruby>の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ハヤテ<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🚄 ハヤテの駅ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ハヤテの駅 — 高度経済成長と現代（小6社会・歴史・協力型・1ファイル）
+   高度経済成長を知る（三種の神器・3C）→ 新幹線の速さ（数値階段・メイン
+   操作）→ 情報化社会の広がり → はかせ（バブル経済・東日本大震災・令和）
+   → 未来へ（歴史シリーズ全体の総括）。「ホナミの田」（戦後の民主化と
+   復興）の続きにあたる、歴史シリーズ最終単元。原始〜現代までの時代の
+   流れがこれで一本につながる。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  sanshu: ruby('三種の神器', 'さんしゅのじんぎ'),
+  koudokeizai: ruby('高度経済成長', 'こうどけいざいせいちょう'),
+  shinsanshu: ruby('新三種の神器', 'しんさんしゅのじんぎ'),
+  tokyoorin: ruby('東京オリンピック', 'とうきょうおりんぴっく'),
+  shinkansen: ruby('東海道新幹線', 'とうかいどうしんかんせん'),
+  johoka: ruby('情報化社会', 'じょうほうかしゃかい'),
+  bubble: ruby('バブル経済', 'ばぶるけいざい'),
+  daishinsai: ruby('東日本大震災', 'ひがしにほんだいしんさい'),
+  reiwa: ruby('令和', 'れいわ'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 高度経済成長を知る：手がかり ----------
+const KEIKI_POINTS = [
+  { key: 0, letter: 'あ', name: '三種の神器', x: 220, y: 260,
+    txt: `白黒テレビ・洗濯機・冷蔵庫は ${W.sanshu}と 呼ばれ、多くの 家庭が あこがれたんだ。1956年ごろ、テレビは まだ 1.4%しか 家庭に なかったんだよ。` },
+  { key: 1, letter: 'い', name: '高度経済成長', x: 500, y: 340,
+    txt: `1950年代 後半から 1970年代 初めごろまで、日本は 毎年 平均10%前後もの、いちじるしい ${W.koudokeizai}を 続けたんだ。` },
+  { key: 2, letter: 'う', name: '新三種の神器（3C）', x: 780, y: 260,
+    txt: `1960年代 後半には、カラーテレビ・クーラー・車が 頭文字の Cから「3C」＝${W.shinsanshu}と 呼ばれ、新しい あこがれに なったんだよ。` },
+];
+
+// ---------- 新幹線の速さ：判定ロジック ----------
+const SPEED_STEPS = [
+  { n: 1, kmh: 80, txt: `在来線の 特急と あまり 変わらない 速さ。東京-大阪は 6時間以上 かかってしまうよ。` },
+  { n: 2, kmh: 110, txt: `少し 早く なったけど、まだ 5時間くらい かかるね。` },
+  { n: 3, kmh: 140, txt: `だんだん 近づいてきた。4時間半くらいかな。` },
+  { n: 4, kmh: 170, txt: `もう少し！ 4時間 少しで 着けそうだよ。` },
+  { n: 5, kmh: 200, txt: `いい 感じ！ 東京-大阪が 4時間くらいで 結べそうだね。` },
+  { n: 6, kmh: 210, txt: `せいかいに ぴったり！ 実際の 開業当時と 同じ、最高時速210kmで、東京-新大阪 552.6kmを 約4時間で 結んだんだ。` },
+  { n: 7, kmh: 250, txt: `速すぎるよ……。当時の 線路や 車両では、カーブを 安全に 曲がりきれず、あぶないんだ。` },
+  { n: 8, kmh: 300, txt: `もっと 速いけど、当時の 技術では とても 実現できない 速さだよ。` },
+];
+function judgeSpeed(n) { if (n <= 2) return 'low'; if (n >= 7) return 'high'; return 'good'; }
+
+// ---------- 情報化社会の広がり：手がかり ----------
+const JOHOKA_POINTS = [
+  { key: 0, letter: 'あ', name: 'パソコンとインターネット', x: 220, y: 300,
+    txt: `1990年代から 2000年代にかけて、パソコンや インターネットが 家庭にも 広がり、世界中の 情報を すぐに 調べられるように なったんだ。` },
+  { key: 1, letter: 'い', name: '携帯電話からスマートフォンへ', x: 500, y: 380,
+    txt: `携帯電話は どんどん 小さく 便利に なり、2010年代には スマートフォンが 広く 使われるように なったよ。` },
+  { key: 2, letter: 'う', name: 'SNSでの情報発信', x: 780, y: 300,
+    txt: `だれもが 自分の 考えを 発信し、世界中の 人と つながれる SNSが 広がり、くらしや つながり方を 大きく 変えたんだ。` },
+];
+
+// ---------- はかせ：現代の日本 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: 'バブル経済とその後', x: 260, y: 320,
+    txt: `1980年代 後半、株や 土地の 値段が 実力以上に 高くなる ${W.bubble}が 起き、1990年代に はじけて 長い 不景気が 続いたんだ。` },
+  { key: 1, letter: 'い', name: '東日本大震災と令和へ', x: 700, y: 320,
+    txt: `2011年の ${W.daishinsai}など、大きな 試練も 経験しながら、2019年には 元号が「${W.reiwa}」に 変わり、日本は 今も 歩み続けているよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'keiki',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  keikiFound: new Set(),
+  johokaFound: new Set(),
+  hakaseFound: new Set(),
+  speedN: 4,
+  speedTries: new Set(),
+  speed: { f: 80 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(X, Y, sc, points, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 24 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1a5ca8' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#0e2f4a'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#1a5ca8';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 町なみと空の背景 ----------
+function bgScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#b8d8e8'); g.addColorStop(1, '#8aa8b8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  const g2 = gctx.createLinearGradient(0, Y(500), 0, Y(640));
+  g2.addColorStop(0, '#5a6a70'); g2.addColorStop(1, '#3a4a50');
+  gctx.fillStyle = g2;
+  gctx.fillRect(X(0), Y(500), 1000 * sc, 140 * sc);
+}
+
+function drawTownRow(X, Y, sc) {
+  gctx.fillStyle = '#3d82c4'; gctx.strokeStyle = '#0e2f4a'; gctx.lineWidth = 2.4 * sc;
+  [[150, 560, 90, 100], [400, 560, 120, 150], [620, 560, 100, 90], [860, 560, 90, 130]].forEach(([bx, by, bw, bh]) => {
+    gctx.beginPath(); gctx.rect(X(bx - bw / 2), Y(by - bh), bw * sc, bh * sc); gctx.fill(); gctx.stroke();
+  });
+}
+
+function drawKeikiScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  drawTownRow(X, Y, sc);
+  gctx.fillStyle = '#16324a'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('日本（1950〜1970年代）', X(500), Y(140));
+  drawPoints(X, Y, sc, KEIKI_POINTS, S.keikiFound);
+}
+
+// ---------- 新幹線の速さ（メイン操作） ----------
+function drawShinkansenScene(X, Y, sc, kmh) {
+  bgScene(X, Y, sc);
+  const cx = 500, trackY = 460;
+  // レール
+  gctx.strokeStyle = '#3a4a50'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(120), Y(trackY)); gctx.lineTo(X(880), Y(trackY)); gctx.stroke();
+  gctx.fillStyle = '#16324a'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('東京', X(160), Y(trackY + 40));
+  gctx.fillText('新大阪', X(840), Y(trackY + 40));
+
+  // 新幹線の位置（速度に応じて進む位置を変える演出）
+  const posF = clamp((kmh - 60) / 260, 0.05, 0.95);
+  const trainX = 160 + (840 - 160) * posF;
+  gctx.font = `${64 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🚄', X(trainX), Y(trackY - 40));
+
+  gctx.fillStyle = '#16324a'; gctx.font = `700 ${24 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`最高時速 ${Math.round(kmh)}km（目もり ${NUMS[S.speedN - 1]}）`, X(cx), Y(140));
+}
+
+// ---------- 情報化社会の広がり ----------
+function drawJohokaScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  drawTownRow(X, Y, sc);
+  gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('💻', X(500), Y(420));
+  drawPoints(X, Y, sc, JOHOKA_POINTS, S.johokaFound);
+}
+
+// ---------- はかせ：現代の日本 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.strokeStyle = '#1a5ca8'; gctx.lineWidth = 4 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(300), Y(400)); gctx.lineTo(X(700), Y(400)); gctx.stroke();
+  gctx.font = `${36 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('📈', X(500), Y(400));
+  drawPoints(X, Y, sc, HAKASE_POINTS, S.hakaseFound);
+}
+
+// ---------- 未来へ（総括） ----------
+function drawMiraiScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.font = `${70 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🌅', X(500), Y(340));
+  gctx.fillStyle = '#16324a'; gctx.font = `700 ${22 * sc}px sans-serif`;
+  gctx.fillText('土器から 現代まで、長い 歴史の 旅', X(500), Y(460));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'keiki') drawKeikiScene(X, Y, sc);
+  else if (S.scene === 'shinkansen') drawShinkansenScene(X, Y, sc, S.speed.f);
+  else if (S.scene === 'johoka') drawJohokaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'mirai') drawMiraiScene(X, Y, sc);
+  else if (S.scene === 'done') drawShinkansenScene(X, Y, sc, S.speed.f);
+}
+
+// ---------- はやてめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f4fafd'); grd.addColorStop(1, '#e0472f');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#1a5ca8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'speed') {
+    sctx.font = `700 ${R * 0.24}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#1a5ca8';
+    sctx.fillText(Math.round(S.speed.f) + 'km/h', R, R * 0.78);
+    label('新幹線の 最高時速');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffe082'); g2.addColorStop(1, 'rgba(216,201,138,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#1a5ca8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚦', R, R * 0.85);
+    label('たしかめ かんりょう！');
+  } else {
+    sctx.fillStyle = '#1a5ca8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#16324a';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1a5ca8', '#ffe082', '#e0472f', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '高度経済成長と 現代（1950年代〜今）';
+  const titles = {
+    keiki: '📺 高度経済成長を 知る',
+    shinkansen: '🚄 新幹線の 速さ',
+    johoka: '💻 情報化社会の 広がり',
+    hakase: '📈 はかせチャレンジ',
+    mirai: '🌅 未来へ',
+    done: '🚄 ハヤテの駅 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '高度経済成長を 知る';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_keiki', 'm_shinkansen', 'm_johoka', 'hakase', 'm_mirai', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'keiki', scope: { type: 'idle' }, keikiFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">📺🚄💻</div>
+        <h1>ハヤテの駅</h1>
+        <div class="sub">〜 高度経済成長と 現代の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 新幹線の 先頭車両から 生まれた 精霊、<b>ハヤテ</b>。焼け野原から 立ち直った 日本が、どんどん 豊かに なっていった 時代から、今の わたしたちの くらしまで、<b>いっしょに たしかめに いこう！</b><br>
+        これが 歴史の 旅の さいごの 駅だよ。</p>
+        <button class="btn" id="startBtn">駅を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">1950年代、多くの 家庭が あこがれた「三種の神器」って どんな 道具だと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">📺</span>ア テレビ・洗濯機・冷蔵庫</div>
+          <div class="vcard" data-v="1"><span class="vicon">🚗</span>イ 自動車・エアコン・パソコン</div>
+          <div class="vcard" data-v="2"><span class="vicon">👘</span>ウ 着物・下駄・ちょうちん</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：高度経済成長を知る ---
+  m_keiki: {
+    enter() {
+      Object.assign(S, { scene: 'keiki', scope: { type: 'idle' }, keikiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`📺 戦後の 日本は、どんどん 豊かに なっていった。どんな できごとが あったのだろう？ 3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KEIKI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.keikiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.keikiFound.size >= KEIKI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.keikiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`さいしょの よそうタイムを 思い出そう。「三種の神器」って どんな 道具だったのだろう？`);
+      setButtons(choiceRow(['ア テレビ・洗濯機・冷蔵庫', 'イ 自動車・エアコン・パソコン', 'ウ 着物・下駄・ちょうちん'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_keiki'); S.phase = 'done';
+        say(`せいかい！ ${W.sanshu}は 白黒テレビ・洗濯機・冷蔵庫。多くの 家庭が あこがれた「豊かさ」の しるしだったんだ。<br><br>💡 <b>たいせつポイント</b><br>1960年代 後半には、カラーテレビ・クーラー・車の「3C」に あこがれが 移っていったよ。`);
+        setButtons([{ label: 'つぎへ（新幹線の 速さ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア テレビ・洗濯機・冷蔵庫', 'イ 自動車・エアコン・パソコン', 'ウ 着物・下駄・ちょうちん'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：新幹線の速さ（数値階段・メイン操作） ---
+  m_shinkansen: {
+    enter() {
+      Object.assign(S, { scene: 'shinkansen', scope: { type: 'speed' }, speedN: 4, speedTries: new Set(), speed: { f: 80 } });
+      updateLoc();
+      setWish('🚄', `1964年、${W.tokyoorin}に あわせて ${W.shinkansen}が 開業した。オリンピック開会式の たった 9日前だったんだよ。最高時速 目もり ①〜⑧を えらんで、東京-大阪を どれくらいの 速さで 結べるか 試してみよう。`);
+      say(`目もりを えらんで「新幹線を 走らせる」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.speedN === n ? ' sel' : ''), cb: () => { S.speedN = n; this.refreshCtl(); } });
+      list.push({ label: '🚄 新幹線を 走らせる', cb: () => this.run() });
+      setControls(list);
+    },
+    run() {
+      setControls([]);
+      say(`最高時速 ${SPEED_STEPS[S.speedN - 1].kmh}kmで 走らせてみる……`);
+      sClank();
+      const info = SPEED_STEPS[S.speedN - 1];
+      startTween(S.speed.f, info.kmh, 1.1, v => { S.speed.f = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeSpeed(S.speedN);
+      S.speedTries.add(S.speedN);
+      const info = SPEED_STEPS[S.speedN - 1];
+      if (r === 'good') {
+        sYes(); scopeBurst(); award('m_shinkansen'); S.phase = 'done';
+        say(`✨ ${info.txt} ✨<br><br>💡 <b>たいせつポイント</b><br>世界初の 高速鉄道と して、${W.shinkansen}は 日本の 高度経済成長の シンボルに なったんだよ。`);
+        setButtons([{ label: 'つぎへ（情報化社会）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`${info.txt}<br>もういちど 目もりを えらんで、試してみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M3：情報化社会の広がり ---
+  m_johoka: {
+    enter() {
+      Object.assign(S, { scene: 'johoka', scope: { type: 'idle' }, johokaFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`💻 くらしは その後も 大きく 変わっていった。${W.johoka}の 広がりを 3つの 手がかりで 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(JOHOKA_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.johokaFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.johokaFound.size >= JOHOKA_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.johokaFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.johoka}の 広がりで、くらしは どう 変わったのだろう？`);
+      setButtons(choiceRow(['ア だれでも すぐに 情報を 調べたり 発信したり できるように なった', 'イ 情報を 得る 手段は まったく 変わらなかった', 'ウ 手紙や 電話が 禁止された'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_johoka'); S.phase = 'done';
+        say(`せいかい！ パソコン・インターネット・スマートフォン・SNSの 広がりで、だれもが 情報を 得たり 発信したり できるように なったんだ。<br><br>💡 <b>たいせつポイント</b><br>世界中の 人と すぐに つながれる、便利な 反面、使い方には 気をつけたいね。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア だれでも すぐに 情報を 調べたり 発信したり できるように なった', 'イ 情報を 得る 手段は まったく 変わらなかった', 'ウ 手紙や 電話が 禁止された'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：現代の日本 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 高度経済成長の あと、日本には どんな できごとが あったのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`これからの 日本や 世界を よりよく していくのは、だれだと 思う？`);
+      setButtons(choiceRow(['ア 政治家だけ', 'イ わたしたち 一人ひとり', 'ウ 外国の 人だけ'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.bubble}の 好況と その後の 不景気、${W.daishinsai}のような 試練も 乗りこえながら、今の 日本が あるんだ。<br><br>💡 <b>たいせつポイント</b><br>そして これからを つくっていくのは、歴史を 学んだ わたしたち 一人ひとりなんだよ。`);
+        setButtons([{ label: 'つぎへ（未来へ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 政治家だけ', 'イ わたしたち 一人ひとり', 'ウ 外国の 人だけ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- 未来へ（歴史シリーズ全体の総括） ---
+  m_mirai: {
+    enter() {
+      Object.assign(S, { scene: 'mirai', scope: { type: 'glow' } });
+      updateLoc();
+      hideWish();
+      say(`🌅 土器を 作り、田んぼを 耕し、武士が 世を 治め、鎖国から 開国し、戦争と 復興を 経て……長い 長い 歴史の 旅を、ここまで たしかめてきたね。`);
+      setButtons([{ label: 'はかせに にんてい してもらう', cb: () => this.finish() }]);
+    },
+    finish() {
+      sFanfare(); scopeBurst(); award('m_mirai'); S.phase = 'done';
+      say(`これで、原始から 現代までの 歴史の 旅が、ぜんぶ つながったよ！ 🎉<br><br>この あとの 歴史を つくっていくのは、これを 学んだ きみたちだよ。`);
+      setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, speed: { f: 210 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(0);
+      showOverlay(`
+        <h2>⭐ ハヤテの駅 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 1950年代 後半から 高い 経済成長が 続いた 時代を（<span class="blankWord" data-a="高度経済成長">？？？</span>）と いう。<br>
+        ② 1964年、東京オリンピックに あわせて 開業した 高速鉄道を（<span class="blankWord" data-a="東海道新幹線">？？？</span>）と いう。<br>
+        ③ インターネットや 携帯電話が 広がり、だれもが 情報を 得たり 発信したり できる 社会を（<span class="blankWord" data-a="情報化社会">？？？</span>）と いう。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ア テレビ・洗濯機・冷蔵庫</b> でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🚄 <b>おうちミッション</b><br>おうちの人に「昔と 今で、くらしの 中で いちばん 変わったと 思う ことは 何？」と 聞いてみよう。家族の 思い出と いっしょに、変わってきた くらしを 想像してみてね。</p>
+        <p class="talk">土器や 田んぼの 時代から、武士の 世、鎖国、戦争と 復興を 経て、今の わたしたちの くらしまで——長い 歴史の 旅が、これで ひとつに つながったよ。この あとの 歴史を つくっていくのは、きみたちだよ！</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#0e2f4a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'shinkansen', scope: { type: 'glow' }, speed: { f: 210 } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 高度経済成長と 現代について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「三種の神器って 何？」「新幹線は いつ できた？」`);
+      setButtons([
+        { label: '📺 高度経済成長の 図', cls: 'sub', cb: () => this.show('keiki') },
+        { label: '🚄 新幹線の 図', cls: 'sub', cb: () => this.show('shinkansen') },
+        { label: '💻 情報化社会の 図', cls: 'sub', cb: () => this.show('johoka') },
+        { label: '📈 はかせの 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: '🌅 未来への 図', cls: 'sub', cb: () => this.show('mirai') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'shinkansen') { S.speed.f = 210; }
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_shinkansen などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

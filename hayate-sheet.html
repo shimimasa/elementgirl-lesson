@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ハヤテの駅 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1a5ca8; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe082; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #b8d8e8; }
+  .levelTable td.res { height: 7mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🚄 ハヤテの駅 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      1950年代、多くの 家庭が あこがれた「三種の神器」って どんな 道具だと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> テレビ・洗濯機・冷蔵庫</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 自動車・エアコン・パソコン</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 着物・下駄・ちょうちん</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．高度経済成長を知る</span>
+    <div class="secBody">
+      見つけた 手がかりに ✓を つけよう。
+      <div class="clueRow">
+        <div class="clueBox">☐ 三種の神器</div>
+        <div class="clueBox">☐ 高度経済成長</div>
+        <div class="clueBox">☐ 新三種の神器（3C）</div>
+      </div>
+      <div style="margin-top:1.2mm">さいしょの よそうタイムを 思い出そう。「三種の神器」って どんな 道具？（〇を つけよう、上と 同じ 選択肢）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．新幹線の速さ — 最高時速を たしかめよう</span>
+    <div class="secBody">
+      目もり ①〜⑧を 試して、新幹線の 最高時速（km/h）を 記録しよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      <div style="margin-top:1.2mm">1964年に開業した高速鉄道を何という？（ふりがな付きで書こう）　（　　　　　　　　）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．情報化社会の広がり</span>
+    <div class="secBody">
+      見つけた 手がかりに ✓を つけよう。
+      <div class="clueRow">
+        <div class="clueBox">☐ パソコンとインターネット</div>
+        <div class="clueBox">☐ 携帯電話からスマートフォンへ</div>
+        <div class="clueBox">☐ SNSでの情報発信</div>
+      </div>
+      <div style="margin-top:1.2mm">情報化社会の 広がりで くらしは どう変わった？　ア だれでもすぐに情報を調べたり発信したりできる　・　イ 変わらない　・　ウ 手紙や電話が禁止された（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．はかせチャレンジ（現代の日本）</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">バブル経済とその後</span>
+        <span class="wordBank">東日本大震災と令和へ</span>
+      </div>
+      <div style="margin-top:1.2mm">これからの 日本や 世界を よくしていくのは だれ？　ア 政治家だけ　・　イ わたしたち一人ひとり　・　ウ 外国の人だけ（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 1950年代 後半から 高い 経済成長が 続いた 時代を（<span class="fillLine"></span>）と いう。<br>
+      ② 1964年、東京オリンピックに あわせて 開業した 高速鉄道を（<span class="fillLine"></span>）と いう。<br>
+      ③ インターネットや 携帯電話が 広がり、だれもが 情報を 得たり 発信したり できる 社会を（<span class="fillLine"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🚄</span>
+        <div>
+          おうちの人に「昔と 今で、くらしの 中で いちばん 変わったと 思う ことは 何？」と 聞いてみよう。家族の 思い出と いっしょに、変わってきた くらしを 想像してみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　歴史シリーズ 見習い、これまで おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ハヤテの駅 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（高度経済成長と現代）」・学力幅あり・協力型／ 使うもの：「hayate.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_shinkansen</b> などで途中再開（m_keiki／m_shinkansen／m_johoka／hakase／m_mirai／ending）</li>
+      <li>☐ <b>本時のねらいの確認</b>：「ホナミの田」（戦後の民主化と復興）の続きにあたる、歴史シリーズ最終単元。原始〜現代までの時代の流れがこれで一本につながる。最後は「これからの歴史をつくるのは自分たち」という前向きなメッセージで締めくくる構成です</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜9分</td><td>📺 高度経済成長を 知る</td><td>三種の神器・高度経済成長・新三種の神器(3C)の3つをボタンで確認 → クイズで<b>よそうタイムを回収</b></td></tr>
+      <tr><td class="min">9〜22分</td><td>🚄 新幹線の 速さ（<b>今日の見せ場</b>）</td><td>①〜⑧を1人ずつ交代で試し、新幹線が走る様子をシート３に記録。⑥（時速210km）で史実にぴったり一致</td></tr>
+      <tr><td class="min">22〜28分</td><td>💻 情報化社会の 広がり</td><td>パソコン・スマホ・SNSの3つを確認 → クイズ</td></tr>
+      <tr><td class="min">28〜35分</td><td>📈 はかせチャレンジ（現代の日本）</td><td>バブル経済・東日本大震災と令和の2つを発見 → クイズ</td></tr>
+      <tr><td class="min">35〜40分</td><td>🌅 未来へ（歴史シリーズ総括）</td><td>「はかせに にんてい してもらう」ボタンで、歴史の旅全体を振り返る</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション</td><td>「？？？」タッチで穴埋め→シート６。おうちミッション（シート７）を伝える</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「高度経済成長を知る」の発見ポイントを一部先生が代わりに開いて調整（<b>新幹線の速さ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ア テレビ・洗濯機・冷蔵庫</b>／新幹線の最高時速＝<b>210km（東京-新大阪552.6kmを約4時間）</b>／
+      情報化社会の説明＝<b>ア だれでもすぐに情報を調べたり発信したりできるようになった</b>／
+      未来をよくしていくのは＝<b>イ わたしたち一人ひとり</b>／
+      まとめ＝①<b>高度経済成長</b>　②<b>東海道新幹線</b>　③<b>情報化社会</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>1950年代後半、白黒テレビ・洗濯機・冷蔵庫が「三種の神器」と呼ばれた（1956年時点でテレビの普及率はまだ1.4%）。1950年代後半〜1970年代初めごろまで、日本は年平均10%前後の高度経済成長を続けた</li>
+      <li>1960年代後半には、カラーテレビ・クーラー・車が頭文字Cから「3C」＝新三種の神器と呼ばれた。カラーテレビは1964年の東京オリンピックを「カラーで見よう」という宣伝で急速に普及した</li>
+      <li>東海道新幹線は1964年10月1日開業。東京オリンピック開会式（10月10日）のわずか9日前だった。東京〜新大阪552.6kmを最高時速210kmで約4時間、世界初の高速鉄道として注目を集めた</li>
+      <li>1990年代〜2000年代にパソコンとインターネットが家庭に普及、2010年代にはスマートフォンとSNSが広がり、情報化社会が進んだ</li>
+      <li>1980年代後半のバブル経済とその崩壊、2011年の東日本大震災など、現代の日本もさまざまな出来事を経験しながら、2019年の令和への改元を経て今も歩み続けている</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「新幹線の速さ」が今日いちばんの見せ場。目もり⑥（時速210km）で史実にぴったり一致する体験を大切にしたい</li>
+      <li>この作品は歴史シリーズ最終単元。最後の「未来へ」場面は、これまで学んできた歴史がつながっていることを実感させる大切な締めくくりなので、時間配分を確保すること</li>
+      <li>実在の政党・政治家・時事的な政治論争には触れず、教科書レベルの史実の紹介にとどめる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・シリーズ全体の振り返り</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「三種の神器って何？」「新幹線はいつできた？」「情報化社会で何が変わった？」</li>
+      <li>「ホナミの田」（戦後の民主化と復興）の続きとして、歴史シリーズ全体（原始・古代〜現代）の時代の流れをこれで一本につないだ</li>
+      <li>今後の新規開拓は、社会の地理・公民のさらなる深掘りや、理科の未踏分野（生命分野の成長・チョウなど）を検討</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
