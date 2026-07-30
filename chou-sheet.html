@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>アオバの葉かげ そだちノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #3d7a26; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #d7f08a; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 1.9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .8mm 3.5mm; border-radius: 4mm; margin-bottom: 1.2mm;
+  }
+  .secBody { font-size: 10pt; line-height: 1.5; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 40mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #e6f3d8; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .flowIcons { display: flex; align-items: center; justify-content: center; gap: 2mm; font-size: 15pt; margin: 1mm 0; }
+  .flowIcons .arrow { font-size: 10pt; color: #666; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 24pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: 1.5mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.5mm; margin-bottom: 3mm; }
+  .tHead h1 { font-size: 14pt; margin: 0; }
+  .tHead .sub { font-size: 9.5pt; color: #555; }
+  .tSec { margin-bottom: 2.4mm; }
+  .tSec h2 {
+    font-size: 10.5pt; margin: 0 0 1.2mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 9pt; line-height: 1.42; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用そだちノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🐛 アオバの葉かげ そだちノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      チョウは <ruby>蛹<rt>さなぎ</rt></ruby>の あいだ じっと 動かないよね。中では 何が 起きていると 思う？（１つに〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 😴 何も 起きていない、ただ休んでいるだけ</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🪶 ゆっくり 羽が 生えてくる だけ</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🌀 体が いちど どろどろに とけて、まったく 新しく 作りなおされる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．卵を さがそう</span>
+    <div class="secBody">
+      モンシロチョウは どこに 卵を 産むかな？　3まいの キャベツの葉を さがして、答えを 見つけよう。<br>
+      なぜ その葉に 産むと 思う？　→（ <span class="fillLine" style="width:60mm"></span> ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．幼虫の成長（目もり①〜⑤）</span>
+    <div class="secBody">
+      脱皮の たびに 体長が 大きく なるよ。けっかを 書きこもう。
+      <table class="expTable">
+        <tr><th>目もり</th><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th></tr>
+        <tr><td class="item">よび名</td><td>1れい</td><td>2れい</td><td>3れい</td><td>4れい</td><td>5れい(しゅうれい)</td></tr>
+        <tr><td class="item">体長</td><td>3〜5mm</td><td>5〜10mm</td><td>10〜18mm</td><td>18〜30mm</td><td>30〜36mm</td></tr>
+        <tr><td class="item">脱皮の回数</td><td>(ふ化)</td><td>1回目</td><td>2回目</td><td>3回目</td><td>4回目</td></tr>
+      </table>
+      幼虫が 大きくなるとき：（ 体が どんどん のびる ・ <b>皮が きつくなるたび 脱皮する</b> ・ 一度に 大人サイズに なる ）に〇
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．さなぎ → 羽化</span>
+    <div class="secBody">
+      <div class="flowIcons">🐛<span class="arrow">→</span>📌前蛹<span class="arrow">→</span>📦さなぎ<span class="arrow">→</span>🦋羽化<span class="arrow">→</span>🦋（羽をのばす）</div>
+      さなぎの中で 何が 起きていたか：（ <span class="fillLine" style="width:70mm"></span> ）<br>
+      卵から 成虫まで、やく（ <span class="fillLine" style="width:14mm"></span> ）かかる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．はかせチャレンジ：チョウと バッタを くらべよう</span>
+    <div class="secBody">
+      <table class="expTable">
+        <tr><th style="width:30%"></th><th>チョウ</th><th>バッタ</th></tr>
+        <tr><td class="item">そだち方</td><td>卵→幼虫→さなぎ→成虫</td><td>卵→幼虫（若虫）→成虫</td></tr>
+        <tr><td class="item">よび名</td><td>（ <span class="fillLine" style="width:26mm"></span> ）</td><td>（ <span class="fillLine" style="width:26mm"></span> ）</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① モンシロチョウは キャベツなど（<span class="fillLine" style="width:20mm"></span>）の 葉に 卵を 産む。<br>
+      ② 幼虫は 大きくなるとき（<span class="fillLine" style="width:20mm"></span>）を くりかえす。<br>
+      ③ さなぎの中では 体が（<span class="fillLine" style="width:30mm"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．おうちミッション：モンシロチョウを さがそう</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🥬</span>
+        <div>
+          おうちの 近くで、キャベツや アブラナの 葉を さがして、モンシロチョウの 卵や 幼虫が いないか かんさつしてみよう。<br>
+          ☐ 見つけた！（ ばしょ：<span style="border-bottom:.4mm solid #222;display:inline-block;width:40mm">　</span> ）<br>
+          <span style="font-size:8.5pt">※虫を 見つけても むりに さわらない。手を あらう。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　アオバの葉かげ けんきゅういん、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】アオバの葉かげ — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小3理科「チョウを育てよう（昆虫の成長）」・学力幅あり・協力型／ 使うもの：「chou.html」・プロジェクタ・このノート（1ページ目を人数分）。飼育・実物は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、①〜⑤ボタンで幼虫が育つ様子・さなぎ→羽化の流れを一通り確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_youchu</b> などで途中再開（m_tamago／m_youchu／m_sanagi／m_uka／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（さなぎ→羽化ミッションで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🥚 卵を さがそう</td><td>代表がキャベツの葉をタッチして卵を発見。「なぜキャベツか」を予想してから3択</td></tr>
+      <tr><td class="min">10〜20分</td><td>🐛 幼虫の成長（<b>今日の見せ場①</b>）</td><td>①〜⑤を順番にタッチ。脱皮のたびに大きくなる様子をシート３の表に記入しながら確認</td></tr>
+      <tr><td class="min">20〜28分</td><td>📦 さなぎに なる</td><td>「つぎへ」で前蛹→さなぎ化を確認。「もう食べない」ことに注目させる</td></tr>
+      <tr><td class="min">28〜35分</td><td>🦋 羽化する（<b>今日の見せ場②</b>）</td><td>さなぎの中の変化（よそうタイムの答え）→羽化→羽を伸ばす、の順で進める</td></tr>
+      <tr><td class="min">35〜41分</td><td>🔍 はかせチャレンジ</td><td>チョウとバッタの対比図で完全変態・不完全変態を確認。シート５に記入</td></tr>
+      <tr><td class="min">41〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート６。近所での観察（シート７）を安全の約束とセットで予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「はかせチャレンジ」を短めに扱う（<b>幼虫の成長 と さなぎ→羽化は削らない</b>、今日いちばんの見せ場のため）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ（体がいちど溶けて作りなおされる）</b>／卵を さがそう＝<b>イ（幼虫がすぐ食べられる葉だから）</b>／
+      幼虫の成長＝<b>イ（脱皮をくりかえす）</b>／はかせ＝<b>イ（バッタはさなぎにならず若虫が少しずつ近づく）</b>／
+      まとめ＝①<b>食草（アブラナ科）</b>　②<b>4回の脱皮</b>　③<b>いちど溶けて作りなおされる</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>モンシロチョウの幼虫は<b>脱皮を4回</b>くりかえし、1齢(3〜5mm)→2齢(5〜10mm)→3齢(10〜18mm)→4齢(18〜30mm)→終齢(30〜36mm)と成長する。卵から成虫まで<b>およそ1か月</b>、成虫の寿命はおよそ2週間</li>
+      <li>さなぎの中では、幼虫の体の大部分がいったん分解され、「成虫原基」と呼ばれる細胞のもとから羽・脚・複眼などの成虫の体が新しく作られる——これが完全変態のしくみで、教科書レベルを超えるが子どもが驚く事実</li>
+      <li>チョウ・カブトムシなど<b>さなぎの時期がある</b>成長を「完全変態」、バッタ・トンボなど<b>さなぎにならない</b>成長を「不完全変態」という。モンシロチョウは卵をキャベツ・アブラナなどアブラナ科の葉（食草）にしか産まない</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「幼虫の成長」ミッションは①〜⑤の順番にしかボタンが押せない設計。「脱皮しないと次の大きさになれない」ことを体感させてから押させると効果的</li>
+      <li>「さなぎの中」は今日いちばんの見せ場。よそうタイムの答えを急がず、「じっと動かないけど……」と間をとってから種明かしすると発見が引き立つ</li>
+      <li>おうちミッションは<b>安全最優先</b>：虫を見つけても無理に触らない・つかまえない・手を洗う。実際にモンシロチョウの幼虫を教室で飼育・観察する学習に発展させても良い</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「幼虫は何回脱皮する？」「さなぎの中では何が起きている？」「バッタとチョウ、どちらがさなぎになる？」</li>
+      <li>教室でモンシロチョウやアゲハチョウの幼虫を実際に飼育すると、脱皮・さなぎ化・羽化の瞬間を本物で観察できる（食草の確保が必須：モンシロチョウ＝キャベツ・アブラナ科、アゲハ＝ミカン科）</li>
+      <li>理科の生命分野は「めばえラボ」（植物の発芽）に続き本作で2単元目。次は「動物の誕生（メダカ・人）」「人の体のつくりと運動（骨と筋肉）」等が候補</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
