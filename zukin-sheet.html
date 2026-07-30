@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ズキンの家 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #5a4a26; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #d8c98a; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #d8cba0; }
+  .levelTable td.res { height: 7mm; }
+
+  .expTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; }
+  .expTable th, .expTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; vertical-align: middle; }
+  .expTable th { background: #d8cba0; }
+  .expTable td.item { text-align: left; white-space: nowrap; font-weight: 700; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⛑️ ズキンの家 きろくノート</h1>
+    <span class="stars">☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      戦争が 始まった とき、国民は どんな 気持ちだったと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> はじめから 反対する人が 多かった</div>
+        <div class="voteOpt"><span class="vnum">イ</span> はじめは 多くの人が 支持していた</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> だれも 気に していなかった</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．戦争への道</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">満州事変（1931年）</span>
+        <span class="wordBank">国際連盟脱退（1933年）</span>
+        <span class="wordBank">日中戦争（1937年）</span>
+      </div>
+      <div style="margin-top:1.2mm">日本が 国際連盟を 脱退したのは なぜ？　ア 満州国を認めてもらえなかったから　・　イ 会費をはらうお金が足りなかったから　・　ウ リーダーが交代したから（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．銃後のくらし — 配給ゲージを たしかめよう</span>
+    <div class="secBody">
+      「1年 すすめる」で 1937年から 1945年まで 進めて、配給ゲージ（％）を 記録しよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td>1937</td><td>1938</td><td>1940</td><td>1941</td><td>1942</td><td>1943</td><td>1944</td><td>1945</td></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      <div style="margin-top:1.2mm">さいしょの よそうタイムを 思い出そう。戦争が 始まった ころ、国民の 気持ちは？　ア はじめから反対する人が多かった　・　イ はじめは多くの人が支持していた　・　ウ だれも気にしていなかった（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．終戦へ</span>
+    <div class="secBody">
+      3つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">う</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">沖縄戦（1945年3〜6月）</span>
+        <span class="wordBank">広島・長崎の原爆（8月）</span>
+        <span class="wordBank">終戦（8月15日）</span>
+      </div>
+      <div style="margin-top:1.2mm">戦争が 終わったことを 国民に 伝えたのは 何？　ア 新聞の号外だけ　・　イ 天皇陛下の声によるラジオ放送　・　ウ 学校の先生からの手紙（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．はかせチャレンジ（戦争が終わった日）</span>
+    <div class="secBody">
+      戦争が 終わった 日、人々の 気持ちは どうだった？（〇を つけよう）<br>
+      ア みんな大喜びだった　・　イ 悲しみとほっとした気持ちが入りまじっていた　・　ウ 何も感じなかった
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 1931年、満州の 鉄道が 爆破された できごとを きっかけに 始まった 戦いを（<span class="fillLine"></span>）と いう。<br>
+      ② 1937年に 始まり、長く 続いた 日本と 中国の 戦争を（<span class="fillLine"></span>）と いう。<br>
+      ③ 1945年8月15日、天皇陛下の 声で 戦争の 終わりを 伝えた 放送を（<span class="fillLine"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏠</span>
+        <div>
+          おうちの人に「もし 今、配給が どんどん 減っていったら、どんな 気持ちに なると 思う？」と 聞いてみよう。当時の くらしを、いっしょに 想像してみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ズキンの家 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ズキンの家 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（昭和の戦争と銃後のくらし）」・学力幅あり・協力型／ 使うもの：「zukin.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kurashi</b> などで途中再開（m_michi／m_kurashi／m_shusen／hakase／ending）</li>
+      <li>☐ <b>本時のねらいの確認</b>：戦争の悲惨さを詳しく描くことより、「戦争が国民のくらしをどう変えていったか」を配給ゲージの変化で実感させ、最後は次回（戦後復興）への前向きな橋渡しで締める構成です</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>⚔️ 戦争への 道</td><td>満州事変・国際連盟脱退・日中戦争の3つをボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">10〜24分</td><td>🏠 銃後の くらし（<b>今日の見せ場</b>）</td><td>「1年 すすめる」で1937〜1945年を1人ずつ交代で進め、配給ゲージが100%→3%へ落ちる様子をシート３に記録 → よそうタイムをここで回収</td></tr>
+      <tr><td class="min">24〜33分</td><td>🕊️ 終戦へ</td><td>沖縄戦・広島長崎の原爆・終戦（玉音放送）の3つを確認 → クイズ</td></tr>
+      <tr><td class="min">33〜40分</td><td>🌅 はかせチャレンジ（戦争が終わった日）</td><td>複雑な気持ち・焼け野原からの出発の2つを発見 → クイズ</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート６。おうちミッション（シート７）・次回作予告を伝える</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「戦争への道」のクイズの再挑戦回数を減らして調整（<b>銃後のくらし・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ はじめは多くの人が支持していた</b>／国際連盟脱退の理由＝<b>ア 満州国を認めてもらえなかったから</b>／
+      銃後のくらし（よそう回収）＝<b>イ はじめは多くの人が支持していた</b>／終戦を伝えたもの＝<b>イ 天皇陛下の声によるラジオ放送</b>／
+      はかせチャレンジ＝<b>イ 悲しみとほっとした気持ちが入りまじっていた</b>／
+      まとめ＝①<b>満州事変</b>　②<b>日中戦争</b>　③<b>玉音放送</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>1931年9月、関東軍が南満州鉄道の線路を爆破した柳条湖事件をきっかけに満州事変が起こり、満州（中国東北部）が占領された</li>
+      <li>国際連盟のリットン調査団が満州国を認めないと報告すると、日本はこれに反発し1933年に国際連盟を脱退。国際的な孤立を深めた</li>
+      <li>1937年、盧溝橋事件をきっかけに日中戦争が始まり、戦いは長期化した。1938年には国家総動員法が定められた</li>
+      <li>1940年に砂糖・マッチが切符制に（月1人240gほど）、1941年に米も配給制に。1942年には衣料も切符制に広がった</li>
+      <li>1943年ごろには金属供出（お寺の鐘や家庭のなべまで）が行われ、1944年には都市の子どもを地方へ移す学童疎開が始まった</li>
+      <li>1945年3〜6月に沖縄戦、8月6日に広島、8月9日に長崎に原子爆弾が投下された</li>
+      <li>1945年8月14日、日本はポツダム宣言の受諾を決定。8月15日正午、天皇陛下の声による玉音放送で国民に終戦が伝えられた</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「銃後のくらし」の配給ゲージが今日いちばんの見せ場。1人ずつ交代で「1年すすめる」を押させると全員が参加できる</li>
+      <li>沖縄戦・原爆は「いつ・どこで・何が起きたか」という事実関係の紹介にとどめ、犠牲者の詳細な描写や戦闘の悲惨さの深掘りは避ける。児童の中には家庭環境が複雑な子もいるため、感情を強くゆさぶる演出よりも「事実を知る」ことを優先する設計にしている</li>
+      <li>本作は「戦争」の範囲に絞っており、戦後の民主化・復興・高度経済成長は次回作であつかう予定。まとめの最後で前向きに次回へつなげる</li>
+      <li>実在の国（中国・アメリカなど）を悪者あつかいせず、当時のできごととして中立に伝えるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「満州事変って何？」「配給ゲージはなぜ減っていった？」「玉音放送って何？」</li>
+      <li>「タイトウの丘」（日清・日露戦争と条約改正・明治後期）の続きとして、大正〜昭和前期の戦争へと時代が進む</li>
+      <li>次回作は「戦争が終わったあと、日本はどうやって立ち直っていったか」（戦後の民主化・復興）を予定。まとめの最後でその予告をしている</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

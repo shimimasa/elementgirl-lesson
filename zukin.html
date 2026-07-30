@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ズキンの家 — 昭和の戦争と 銃後のくらし たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #ece3c8 0%, #cdbb8c 45%, #4a4a38 100%);
+    color: #2a2418;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #5a4a26; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a624a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e2d8b8; border: 2px solid #a89568;
+    font-size: clamp(16px, 1.8vw, 26px); color: #a89568;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #d8c98a, #8a7030);
+    border-color: #5a4a20; color: #2a2418;
+    box-shadow: 0 0 14px rgba(138,112,48,.7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f5f0e0 0%, #cdbb8c 100%);
+    border: 3px solid #6b5a30;
+    box-shadow: inset 0 0 40px rgba(20, 25, 45, .12), 0 4px 18px rgba(15, 18, 32, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #241f10; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #5a4a26; color: #ece3c8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(15, 18, 32, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 18, 32, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #a89568; cursor: pointer;
+    background: linear-gradient(180deg, #7a6a42, #5a4a26); color: #fff;
+    box-shadow: 0 3px 0 #241f14; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #5a6a48, #3a4a38); border-color: #8aa088; box-shadow: 0 3px 0 #241f18; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #d8c05a, #9a8030); border-color: #ece0b0; box-shadow: 0 3px 0 #6a5620; color: #3a3020; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #5a4a26; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(30, 28, 20, .3), inset 0 0 24px rgba(20, 25, 45, .18);
+    flex-shrink: 0; background: #ece3c8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6a624a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #241f10; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f5efdc; border: 2px solid #a89568; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6a624a; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2a2418;
+    border: 1.5px solid #cdbfa0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #5a4a26; background: #d8c98a; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #e2d8b8, #cdbb8c); color: #2a2418;
+    border: 2px solid #5a4a26; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #5a4a26; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #7a6a42, #5a4a26); color: #fff;
+    box-shadow: 0 3px 0 #241f14, 0 5px 12px rgba(30, 28, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #241f14; }
+  .btn.sub {
+    background: #e2d8b8; color: #4a3f24; box-shadow: 0 3px 0 #a89568;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2a2418; box-shadow: 0 3px 0 #a89568; font-weight: 400; border: 1.5px solid #cdbfa0; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #d8c98a; outline: 3px solid #7a6a42; font-weight: 700; }
+  .swatch { display: inline-flex; gap: 2px; margin-right: .15em; }
+  .swatch i { display: inline-block; width: .8em; height: .8em; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); font-style: normal; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(12, 14, 24, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f5efdc, #cdbb8c);
+    border: 3px solid #6b5a30; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(12, 14, 24, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #5a4a26; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #5a4a26; }
+  .panel .sub { color: #6a624a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2a2418; border: 1.5px solid #cdbfa0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6a624a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #2a2418; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cdbfa0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #5a4a26; background: #d8c98a; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #5a4a26; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #5a4a26;
+    color: #241f10; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6a624a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e2d8b8; color: #4a3f24;
+    border: 1px solid #a89568; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #e2d8b8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">⛑️ ズキンの家<small>— 昭和の戦争と 銃後のくらし —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_michi" title="戦争への 道">★</div>
+    <div class="badge" id="bd_m_kurashi" title="銃後の くらし">★</div>
+    <div class="badge" id="bd_m_shusen" title="終戦へ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">戦争への 道</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 ずきんめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,20,30,.18)"/>
+            <!-- からだ（もんぺふう） -->
+            <path d="M40 118 L44 100 L76 100 L80 118 Z" fill="#3a3428" stroke="#241f18" stroke-width="2"/>
+            <!-- 防空頭巾（頭を包む丸いフード） -->
+            <path d="M30 72 Q28 30 60 27 Q92 30 90 72 Q90 90 75 97 L45 97 Q30 90 30 72 Z" fill="#5a4a26" stroke="#2a2418" stroke-width="2.5"/>
+            <!-- キルティングの縦線ステッチ -->
+            <path d="M45 33 Q41 60 45 94" stroke="#a89568" stroke-width="1.6" fill="none" opacity=".7"/>
+            <path d="M60 28 L60 96" stroke="#a89568" stroke-width="1.6" fill="none" opacity=".7"/>
+            <path d="M75 33 Q79 60 75 94" stroke="#a89568" stroke-width="1.6" fill="none" opacity=".7"/>
+            <!-- あご紐 -->
+            <path d="M44 88 Q60 100 76 88" stroke="#2a2418" stroke-width="2" fill="none"/>
+            <!-- 顔 -->
+            <circle cx="60" cy="92" r="22" fill="#f0ead0" stroke="#2a2418" stroke-width="2.5"/>
+            <!-- ほっぺ -->
+            <ellipse cx="48" cy="97" rx="4.6" ry="3.2" fill="#d8a878" opacity=".55"/>
+            <ellipse cx="72" cy="97" rx="4.6" ry="3.2" fill="#d8a878" opacity=".55"/>
+            <!-- め -->
+            <g class="eyes">
+              <ellipse cx="52" cy="91" rx="3.4" ry="4.6" fill="#2a2418"/>
+              <ellipse cx="68" cy="91" rx="3.4" ry="4.6" fill="#2a2418"/>
+              <circle cx="53.2" cy="88.6" r="1.1" fill="#fff"/>
+              <circle cx="69.2" cy="88.6" r="1.1" fill="#fff"/>
+            </g>
+            <!-- くち -->
+            <path d="M53 104 Q60 108 67 104" stroke="#241f10" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>頭巾<rt>ずきん</rt></ruby>の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>ズキン<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">⛑️ ズキンの家ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ズキンの家 — 昭和の戦争と銃後のくらし（小6社会・歴史・協力型・1ファイル）
+   戦争への道（満州事変・国際連盟脱退・日中戦争）→ 銃後のくらし（配給が
+   年々厳しくなる時間送り・よそう回収） → 終戦へ（沖縄戦・原爆・ポツダム
+   宣言） → はかせ（戦争が終わった日・戦後への布石）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  ryujoko: ruby('柳条湖事件', 'りゅうじょうこじけん'),
+  manshu: ruby('満州事変', 'まんしゅうじへん'),
+  kantogun: ruby('関東軍', 'かんとうぐん'),
+  kokusairenmei: ruby('国際連盟', 'こくさいれんめい'),
+  rittou: ruby('リットン調査団', 'りっとんちょうさだん'),
+  rokokyo: ruby('盧溝橋事件', 'ろこうきょうじけん'),
+  nitchu: ruby('日中戦争', 'にっちゅうせんそう'),
+  kokka: ruby('国家総動員法', 'こっかそうどういんほう'),
+  haikyu: ruby('配給', 'はいきゅう'),
+  kippusei: ruby('切符制', 'きっぷせい'),
+  tonarigumi: ruby('隣組', 'となりぐみ'),
+  kinzoku: ruby('金属供出', 'きんぞくきょうしゅつ'),
+  gakudosokai: ruby('学童疎開', 'がくどうそかい'),
+  okinawasen: ruby('沖縄戦', 'おきなわせん'),
+  genbaku: ruby('原子爆弾', 'げんしばくだん'),
+  potsdam: ruby('ポツダム宣言', 'ぽつだむせんげん'),
+  gyokuon: ruby('玉音放送', 'ぎょくおんほうそう'),
+  shusen: ruby('終戦', 'しゅうせん'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 判定ロジック ----------
+// 銃後のくらし：年を進めるほど 配給ゲージは 減っていく（単調減少・時間送り型）
+const KURASHI_YEARS = [
+  { n: 1, year: '1937年', gauge: 100, txt: `${W.rokokyo}を きっかけに ${W.nitchu}が 始まった。まだ 町の くらしに 大きな 変化は 見えない。` },
+  { n: 2, year: '1938年', gauge: 88, txt: `${W.kokka}が 定められ、国全体が 戦争に 協力する しくみが 作られていった。綿糸など、少しずつ 品物の 使用が 制限され始めたよ。` },
+  { n: 3, year: '1940年', gauge: 68, txt: `砂糖・マッチが ${W.kippusei}に なった。切符と ひきかえでないと 買えない。1人 1か月 240gほど……お店に 並んで やっと 手に 入る 量だよ。` },
+  { n: 4, year: '1941年', gauge: 52, txt: `お米も ${W.haikyu}制に なった。12月、太平洋戦争が 始まり、戦いは さらに 大きく 広がっていく。` },
+  { n: 5, year: '1942年', gauge: 38, txt: `衣料にも 切符制が 広がった。1年に 服 何点までと 決められ、新しい 服も 自由には 買えなくなったよ。` },
+  { n: 6, year: '1943年', gauge: 24, txt: `お寺の 鐘や 家庭の なべまで、${W.kinzoku}として 差し出された。${W.tonarigumi}どうし たすけあいながらも、品物は どんどん 少なく なっていく。` },
+  { n: 7, year: '1944年', gauge: 12, txt: `空襲を さけるため、都市の 子どもたちが 地方へ うつる ${W.gakudosokai}が 始まった。家族と はなれて くらす 子も 多かったんだ。` },
+  { n: 8, year: '1945年', gauge: 3, txt: `配給は ほとんど 底を つき、空襲も 激しさを 増していった。人々の くらしは、ぎりぎりの ところまで 追いつめられていたんだよ。` },
+];
+function haikyuLevel(n) { if (n <= 2) return 'low'; if (n >= 7) return 'high'; return 'mid'; }
+
+// ---------- 戦争への道：手がかり ----------
+const MICHI_POINTS = [
+  { key: 0, letter: 'あ', name: '満州事変（1931年）', x: 260, y: 320,
+    txt: `1931年9月、${W.kantogun}が 南満州鉄道の 線路を 爆破する ${W.ryujoko}が 起こり、これを きっかけに 満州（中国東北部）全体を 占領する ${W.manshu}が 始まったんだ。` },
+  { key: 1, letter: 'い', name: '国際連盟脱退（1933年）', x: 500, y: 240,
+    txt: `${W.kokusairenmei}の ${W.rittou}が「満州国を 認めない」と 報告すると、日本は これに 反発し、1933年、${W.kokusairenmei}を 脱退した。国際社会の 中で、日本は 孤立への 道を 歩み始めたんだ。` },
+  { key: 2, letter: 'う', name: '日中戦争（1937年）', x: 740, y: 340,
+    txt: `1937年、北京 近くの 橋で 起きた ${W.rokokyo}を きっかけに、日本と 中国の 戦争が 全土に 広がっていった。これが ${W.nitchu}だよ。戦いは 長期化していったんだ。` },
+];
+
+// ---------- 終戦へ：手がかり ----------
+const SHUSEN_POINTS = [
+  { key: 0, letter: 'あ', name: '沖縄戦（1945年3〜6月）', x: 220, y: 300,
+    txt: `1945年3月から6月、沖縄では 激しい 地上戦が 行われた。多くの 住民も 巻きこまれ、たいへん 大きな 犠牲を 出したんだ。` },
+  { key: 1, letter: 'い', name: '広島・長崎の原爆（8月）', x: 780, y: 260,
+    txt: `8月6日に 広島、8月9日に 長崎に、たった 一発で 町を 壊してしまう ${W.genbaku}が 落とされた。今までにない 大きな 被害を 出したんだよ。` },
+  { key: 2, letter: 'う', name: '終戦（8月15日）', x: 500, y: 470,
+    txt: `8月14日、日本は ${W.potsdam}を 受け入れることを 決めた。そして 8月15日 正午、天皇陛下の 声による ${W.gyokuon}で、戦争が 終わったことが 国民に 伝えられたんだ。` },
+];
+
+// ---------- はかせ：戦争が終わった日・次回作への布石 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '複雑な気持ち', x: 300, y: 460,
+    txt: `${W.gyokuon}を 聞いた 人々の 気持ちは 一つではなかった。深い 悲しみと、「もう 戦争を しなくて いい」という ほっとした 気持ちが、入りまじっていたんだ。` },
+  { key: 1, letter: 'い', name: '焼け野原からの出発', x: 700, y: 460,
+    txt: `東京をはじめ 多くの 町が 焼け野原に なった。でも 人々は、その 場所から 少しずつ 新しい くらしを 立て直し始めていくんだよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'michi',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  michiFound: new Set(),
+  shusenFound: new Set(),
+  hakaseFound: new Set(),
+  kurashiYear: 1,
+  kurashiTries: new Set(),
+  kurashi: { gaugeF: 100 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(X, Y, sc, points, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 24 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#5a4a26' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#2a2418'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#5a4a26';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 大地と空の背景 ----------
+function bgScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#cdbb8c'); g.addColorStop(1, '#8a8064');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  const g2 = gctx.createLinearGradient(0, Y(500), 0, Y(640));
+  g2.addColorStop(0, '#6a7a5a'); g2.addColorStop(1, '#4a5a48');
+  gctx.fillStyle = g2;
+  gctx.fillRect(X(0), Y(500), 1000 * sc, 140 * sc);
+}
+
+// ---------- 日本家屋（銃後のくらしのイメージ） ----------
+function drawHouse(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#cdbb8c'; gctx.strokeStyle = '#2a2418'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.rect(X(cx - 90), Y(baseY - 90), 180 * sc, 90 * sc);
+  gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#5a4a26';
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 110), Y(baseY - 90)); gctx.lineTo(X(cx), Y(baseY - 150));
+  gctx.lineTo(X(cx + 110), Y(baseY - 90));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#ece3c8';
+  [cx - 50, cx, cx + 50].forEach(px => {
+    gctx.beginPath(); gctx.rect(X(px - 8), Y(baseY - 90), 16 * sc, 90 * sc);
+    gctx.fill(); gctx.stroke();
+  });
+}
+
+function drawMichiScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.fillStyle = '#a89568'; gctx.strokeStyle = '#2a2418'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(150), Y(560));
+  gctx.quadraticCurveTo(X(300), Y(300), X(550), Y(260));
+  gctx.quadraticCurveTo(X(800), Y(240), X(850), Y(400));
+  gctx.quadraticCurveTo(X(700), Y(560), X(400), Y(580));
+  gctx.closePath();
+  gctx.fill(); gctx.stroke();
+  drawPoints(X, Y, sc, MICHI_POINTS, S.michiFound);
+}
+
+// ---------- 銃後のくらし：配給ゲージ（メイン操作） ----------
+function drawGauge(X, Y, sc, cx, topY, gaugeF) {
+  const gw = 300, gh = 34;
+  gctx.strokeStyle = '#2a2418'; gctx.lineWidth = 3 * sc;
+  gctx.fillStyle = '#f5efdc';
+  gctx.beginPath(); gctx.roundRect(X(cx - gw / 2), Y(topY), gw * sc, gh * sc, 8 * sc); gctx.fill(); gctx.stroke();
+  const fillW = gw * clamp(gaugeF, 0, 100) / 100;
+  const col = gaugeF > 60 ? '#7a8a5a' : gaugeF > 25 ? '#c9a04a' : '#a04838';
+  gctx.fillStyle = col;
+  gctx.beginPath(); gctx.roundRect(X(cx - gw / 2), Y(topY), fillW * sc, gh * sc, 8 * sc); gctx.fill();
+  gctx.fillStyle = '#2a2418'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('🌾 配給ゲージ', X(cx), Y(topY - 20));
+  gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textBaseline = 'middle';
+  gctx.fillText(Math.round(gaugeF) + '%', X(cx), Y(topY + gh / 2));
+}
+function drawKurashiScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  drawHouse(X, Y, sc, 260, 560);
+  drawGauge(X, Y, sc, 650, 200, S.kurashi.gaugeF);
+  const info = KURASHI_YEARS[S.kurashiYear - 1];
+  gctx.fillStyle = '#2a2418'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`${info.year}（${NUMS[S.kurashiYear - 1]}）`, X(650), Y(120));
+}
+
+// ---------- 日本列島の簡易地図（終戦へ） ----------
+function drawShusenScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.fillStyle = '#7a6a42'; gctx.strokeStyle = '#2a2418'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(420), Y(560));
+  gctx.quadraticCurveTo(X(500), Y(420), X(620), Y(380));
+  gctx.quadraticCurveTo(X(700), Y(350), X(720), Y(420));
+  gctx.quadraticCurveTo(X(660), Y(500), X(560), Y(560));
+  gctx.closePath();
+  gctx.fill(); gctx.stroke();
+  gctx.beginPath(); gctx.ellipse(X(500), Y(600), 30 * sc, 12 * sc, 0, 0, TAU);
+  gctx.fill(); gctx.stroke();
+  drawPoints(X, Y, sc, SHUSEN_POINTS, S.shusenFound);
+}
+
+// ---------- はかせ：戦争が終わった日 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.strokeStyle = 'rgba(90,90,60,.35)'; gctx.lineWidth = 2 * sc;
+  for (let gx = 200; gx <= 800; gx += 100) {
+    gctx.beginPath(); gctx.moveTo(X(gx), Y(260)); gctx.lineTo(X(gx), Y(560)); gctx.stroke();
+  }
+  for (let gy = 260; gy <= 560; gy += 75) {
+    gctx.beginPath(); gctx.moveTo(X(200), Y(gy)); gctx.lineTo(X(800), Y(gy)); gctx.stroke();
+  }
+  drawHouse(X, Y, sc, 500, 340);
+  drawPoints(X, Y, sc, HAKASE_POINTS, S.hakaseFound);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'michi') drawMichiScene(X, Y, sc);
+  else if (S.scene === 'kurashi') drawKurashiScene(X, Y, sc);
+  else if (S.scene === 'shusen') drawShusenScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawKurashiScene(X, Y, sc);
+}
+
+// ---------- ずきんめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#ece3c8'); grd.addColorStop(1, '#a89568');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#5a4a26'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const pct = Math.round(S.kurashi.gaugeF);
+    sctx.font = `700 ${R * 0.26}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#5a4a26';
+    sctx.fillText(pct + '%', R, R * 0.78);
+    label('配給ゲージの りょう');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#d8c98a'); g2.addColorStop(1, 'rgba(216,201,138,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#5a4a26'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚦', R, R * 0.85);
+    label('たしかめ かんりょう！');
+  } else {
+    sctx.fillStyle = '#5a4a26'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2a2418';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#5a4a26', '#d8c98a', '#7a6a42', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '日本・大陸・銃後の家（1931〜1945年）';
+  const titles = {
+    michi: '⚔️ 戦争への 道（1931年〜）',
+    kurashi: '🏠 銃後の くらし',
+    shusen: '🕊️ 終戦へ（1945年）',
+    hakase: '🌅 戦争が 終わった日',
+    done: '⛑️ ズキンの家 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '戦争への 道';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_michi', 'm_kurashi', 'm_shusen', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'michi', scope: { type: 'idle' }, michiFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">⚔️🏠🕊️</div>
+        <h1>ズキンの家</h1>
+        <div class="sub">〜 昭和の戦争と 銃後のくらしの ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 防空頭巾（ぼうくうずきん）から 生まれた 精霊、<b>ズキン</b>。今から 90年ほど前、日本が 大きな 戦争に 向かっていった 時代を、<b>いっしょに たしかめに いこう！</b><br>
+        戦っていた 兵士たちだけでなく、家で くらす 人々の 毎日も、少しずつ 変わっていったんだよ……見ていこう。</p>
+        <button class="btn" id="startBtn">家を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">戦争が 始まった とき、国民は どんな 気持ちだったと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">✋</span><b>ア</b> はじめから 反対する人が 多かった</div>
+          <div class="vcard" data-v="1"><span class="vicon">📰</span><b>イ</b> はじめは 多くの人が 支持していた</div>
+          <div class="vcard" data-v="2"><span class="vicon">😶</span><b>ウ</b> だれも 気に していなかった</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：戦争への道 ---
+  m_michi: {
+    enter() {
+      Object.assign(S, { scene: 'michi', scope: { type: 'idle' }, michiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`⚔️ 1930年代、日本は 大陸で 少しずつ 戦争への 道を 歩み始めていった。どんな できごとが あったのだろう？ 3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(MICHI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.michiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.michiFound.size >= MICHI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.michiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`日本が ${W.kokusairenmei}を 脱退したのは なぜだろう？`);
+      setButtons(choiceRow(['ア 満州国を 認めてもらえなかったから', 'イ 会費を はらう お金が 足りなかったから', 'ウ 話しあいの リーダーが 交代したから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_michi'); S.phase = 'done';
+        say(`せいかい！ ${W.rittou}の 報告で「満州国は 認められない」と されたことに 反発し、日本は ${W.kokusairenmei}を 脱退したんだ。<br><br>💡 <b>たいせつポイント</b><br>国際社会の 中で 孤立を 深めた 日本は、この あと ${W.nitchu}へと 進んでいく。国どうしの 話しあいの 場を はなれたことは、大きな 分かれ道だったんだよ。`);
+        setButtons([{ label: 'つぎへ（銃後のくらし）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 満州国を 認めてもらえなかったから', 'イ 会費を はらう お金が 足りなかったから', 'ウ 話しあいの リーダーが 交代したから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：銃後のくらし（配給ゲージ時間送り・メイン操作・よそう回収） ---
+  m_kurashi: {
+    enter() {
+      Object.assign(S, { scene: 'kurashi', scope: { type: 'gauge' }, kurashiYear: 1, kurashi: { gaugeF: 100 } });
+      updateLoc();
+      hideWish();
+      say(`🌾 ${W.haikyu}や 節約の くらしは、年を 追うごとに どう 変わっていったのだろう？「1年 すすめる」ボタンで、1937年から 1945年まで たしかめてみよう。<br>${KURASHI_YEARS[0].txt}`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.kurashiYear >= KURASHI_YEARS.length) {
+        setControls([]);
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+        return;
+      }
+      setControls([{ label: `${NUMS[S.kurashiYear - 1]}→${NUMS[S.kurashiYear]} 1年 すすめる ▶`, cb: () => this.advance() }]);
+      setButtons([]);
+    },
+    advance() {
+      setControls([]);
+      S.kurashiYear += 1;
+      const info = KURASHI_YEARS[S.kurashiYear - 1];
+      sClank();
+      startTween(S.kurashi.gaugeF, info.gauge, 1.0, v => { S.kurashi.gaugeF = v; }, () => {
+        say(info.txt);
+        this.refreshCtl();
+      });
+    },
+    ask() {
+      hideWish();
+      say(`戦争が 始まった 1937年ごろ、国民の 気持ちは どうだっただろう？ さいしょの よそうタイムを 思い出そう。`);
+      setButtons(choiceRow(['ア はじめから 反対する人が 多かった', 'イ はじめは 多くの人が 支持していた', 'ウ だれも 気に していなかった'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_kurashi'); S.phase = 'done';
+        say(`せいかい！ はじめは 新聞も 勝利を 大きく 伝え、多くの人が 戦争を 支持していたんだ。でも ${W.haikyu}が 減り くらしが 苦しくなっても、本当の 気持ちを 言いにくい 空気が 広がっていったんだよ。<br><br>💡 <b>たいせつポイント</b><br>ゲージが 100%から 3%まで 落ちたように、くらしは 少しずつ、でも 確実に 苦しく なっていったんだ。`);
+        setButtons([{ label: 'つぎへ（終戦へ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。ゲージの 変化を 思い出して、もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア はじめから 反対する人が 多かった', 'イ はじめは 多くの人が 支持していた', 'ウ だれも 気に していなかった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：終戦へ ---
+  m_shusen: {
+    enter() {
+      Object.assign(S, { scene: 'shusen', scope: { type: 'idle' }, shusenFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`🕊️ 1945年、戦争は いよいよ おわりへと 近づいていった。どんな できごとが あったのだろう？ 3つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHUSEN_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.shusenFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.shusenFound.size >= SHUSEN_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.shusenFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`戦争が 終わったことを、国民に 伝えたのは 何だっただろう？`);
+      setButtons(choiceRow(['ア 新聞の 号外だけ', 'イ 天皇陛下の 声による ラジオ放送', 'ウ 学校の 先生からの 手紙'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_shusen'); S.phase = 'done';
+        say(`せいかい！ 8月15日 正午、${W.gyokuon}で 国民に 戦争の 終わりが 伝えられたんだ。<br><br>💡 <b>たいせつポイント</b><br>ラジオから 天皇陛下の 声が 直接 流れるのは、この 時が はじめてだった。多くの人が 静かに 聞き入ったと 言われているよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 新聞の 号外だけ', 'イ 天皇陛下の 声による ラジオ放送', 'ウ 学校の 先生からの 手紙'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：戦争が終わった日 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 戦争が 終わった あの日、人々は どんな 気持ちだったのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`戦争が 終わった 日、人々の 気持ちは どうだっただろう？`);
+      setButtons(choiceRow(['ア みんな 大喜びだった', 'イ 悲しみと ほっとした 気持ちが 入りまじっていた', 'ウ 何も 感じなかった'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 深い 悲しみと、「もう 戦争を しなくて いい」という ほっとした 気持ちが、入りまじっていたんだ。<br><br>💡 <b>たいせつポイント</b><br>焼け野原に なった 町から、人々は 少しずつ 新しい くらしを 立て直し始めていく。次は、その 戦後の 歩みを たしかめに 行こう……。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア みんな 大喜びだった', 'イ 悲しみと ほっとした 気持ちが 入りまじっていた', 'ウ 何も 感じなかった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, kurashi: { gaugeF: 3 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ズキンの家 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 4 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 1931年、満州の 鉄道が 爆破された できごとを きっかけに 始まった 戦いを（<span class="blankWord" data-a="満州事変">？？？</span>）と いう。<br>
+        ② 1937年に 始まり、長く 続いた 日本と 中国の 戦争を（<span class="blankWord" data-a="日中戦争">？？？</span>）と いう。<br>
+        ③ 1945年8月15日、天皇陛下の 声で 戦争の 終わりを 伝えた 放送を（<span class="blankWord" data-a="玉音放送">？？？</span>）と いう。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ はじめは 多くの人が 支持していた</b> でした！ 新聞も 勝利を 大きく 伝えていたんだ。でも 配給ゲージが 100%から 3%まで 落ちたように、くらしは 少しずつ 苦しく なっていったんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちの人に「もし 今、配給が どんどん 減っていったら、どんな 気持ちに なると 思う？」と 聞いてみよう。当時の くらしを、いっしょに 想像してみてね。</p>
+        <p class="talk">次回は「戦争が 終わった あと、日本は どうやって 立ち直っていったのか」を たしかめに いくよ。おたのしみに！</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#2a2418'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'kurashi', scope: { type: 'glow' }, kurashi: { gaugeF: 3 } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 昭和の 戦争と 銃後の くらしについて、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「満州事変って 何？」「配給ゲージは なぜ 減っていった？」`);
+      setButtons([
+        { label: '⚔️ 戦争への 道の 図', cls: 'sub', cb: () => this.show('michi') },
+        { label: '🏠 配給ゲージの 図', cls: 'sub', cb: () => this.show('kurashi') },
+        { label: '🕊️ 終戦への 図', cls: 'sub', cb: () => this.show('shusen') },
+        { label: '🌅 戦争が 終わった日の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'kurashi') { S.kurashi.gaugeF = 3; }
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kurashi などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
