@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>タワラの辻 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #7a2a3a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #e8c860; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #dcc49a; }
+  .levelTable td.res { height: 7mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌾 タワラの辻 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      1925年の 普通選挙法で、選挙に 参加できるように なったのは だれだと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 満25歳以上の すべての 男子</div>
+        <div class="voteOpt"><span class="vnum">イ</span> すべての 国民、男女とも</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> お金持ちの 男性だけ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．第一次世界大戦と日本</span>
+    <div class="secBody">
+      見つけた 手がかりに ✓を つけよう。
+      <div class="clueRow">
+        <div class="clueBox">☐ 日英同盟と参戦</div>
+        <div class="clueBox">☐ 大戦景気と成金</div>
+        <div class="clueBox">☐ シベリア出兵</div>
+      </div>
+      <div style="margin-top:1.2mm">日本が 大戦景気に なった 理由は？　ア ヨーロッパへの 輸出が 急増したから　・　イ 米が たくさん とれたから　・　ウ 観光客が 増えたから（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．米騒動 — 米の値段の変化を たしかめよう</span>
+    <div class="secBody">
+      「次の月へすすめる」を おして、米の 値段（1916年比）を 記録しよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      <div style="margin-top:1.2mm">1918年、米の値段の急上昇をきっかけに全国に広がった暴動を何という？（ふりがな付きで書こう）　（　　　　　　　　）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．原敬内閣</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">米騒動で内閣がたおれる</span>
+        <span class="wordBank">原敬内閣の成立（1918年）</span>
+      </div>
+      <div style="margin-top:1.2mm">爵位を持たず「平民宰相」と呼ばれた首相は？　ア 原敬　・　イ 吉野作造　・　ウ 徳川家康（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．普通選挙法</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">普通選挙法（1925年）</span>
+        <span class="wordBank">治安維持法（同時制定）</span>
+      </div>
+      <div style="margin-top:1.2mm">さいしょの よそうタイムを 思い出そう。選挙に 参加できたのは？　ア 満25歳以上の 男子　・　イ すべての 国民　・　ウ お金持ちだけ（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（大正デモクラシーの広がり）</span>
+    <div class="secBody">
+      大正デモクラシーの 説明として 正しいのは？（〇を つけよう）<br>
+      ア 民衆の声が政治に反映されるようになっていった時代　・　イ 軍隊の力がもっとも強かった時代　・　ウ 外国との交流がすべて絶たれた時代
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 1918年、米の 値段の 急上昇を きっかけに 全国に 広がった 暴動を（<span class="fillLine"></span>）と いう。<br>
+      ② 1925年、納税額の 制限を なくし 満25歳以上の 男子に 選挙権を 認めた 法律を（<span class="fillLine"></span>）と いう。<br>
+      ③ 天皇主権の 中でも 民衆の 意見を 大切にする 政治を 目ざした 吉野作造の 考えを（<span class="fillLine"></span>）と いう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌾</span>
+        <div>
+          おうちの人に「もし 米の 値段が 急に 3倍に なったら、どんな 気持ちに なると 思う？」と 聞いてみよう。くらしへの えいきょうを、いっしょに 考えてみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　タワラの辻 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】タワラの辻 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（大正デモクラシーと第一次世界大戦・米騒動と普通選挙法）」・学力幅あり・協力型／ 使うもの：「tawara.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kome</b> などで途中再開（m_taisen／m_kome／m_seito／m_fusen／hakase／ending）</li>
+      <li>☐ <b>本時のねらいの確認</b>：「タイトウの丘」（日清・日露戦争と条約改正）の後、既存作「ズキンの家」（昭和の戦争と銃後のくらし）の前史にあたる。米騒動という民衆の行動が内閣をたおし、普通選挙法へつながっていく「民衆の声が政治を動かす」流れを実感させる構成です</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜9分</td><td>⚓ 第一次世界大戦と 日本</td><td>日英同盟・大戦景気・シベリア出兵の3つをボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">9〜22分</td><td>🌾 米騒動（<b>今日の見せ場</b>）</td><td>「次の月へすすめる」を1人ずつ交代で押し、米価が上がっていく様子をシート３に記録。⑧で米騒動発生</td></tr>
+      <tr><td class="min">22〜28分</td><td>🏛️ 原敬内閣</td><td>米騒動で内閣がたおれる・原敬内閣成立の2つを確認 → クイズ</td></tr>
+      <tr><td class="min">28〜35分</td><td>📜 普通選挙法</td><td>普通選挙法・治安維持法の2つを確認 → クイズで<b>よそうタイムを回収</b></td></tr>
+      <tr><td class="min">35〜40分</td><td>📢 はかせチャレンジ（大正デモクラシー）</td><td>吉野作造の民本主義・大正デモクラシーの広がりの2つを発見 → クイズ</td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を伝える</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「第一次世界大戦と日本」の発見ポイントを一部先生が代わりに開いて調整（<b>米騒動・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ア 満25歳以上のすべての男子</b>／大戦景気の理由＝<b>ア ヨーロッパへの輸出が急増したから</b>／
+      米騒動＝<b>米騒動</b>／平民宰相＝<b>ア 原敬</b>／
+      よそうタイム回収＝<b>ア（同上）</b>／大正デモクラシーの説明＝<b>ア 民衆の声が政治に反映されるようになっていった時代</b>／
+      まとめ＝①<b>米騒動</b>　②<b>普通選挙法</b>　③<b>民本主義</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>日本は日英同盟を理由に第一次世界大戦（1914〜1918年）に参戦。戦場から遠い立場を活かし輸出を伸ばして大戦景気にわき、船の運賃は戦前の1トン約3円から1917年には40円超に高騰、一夜で大金持ちになる「成金」も現れた</li>
+      <li>1918年、ロシア革命に対抗するシベリア出兵が始まり、シベリア出兵をにらんだ米の投機的買い占めが横行して米価が急騰。1916〜1918年の2年間で米価はほぼ3倍になった</li>
+      <li>1918年7月23日、富山県魚津の女性たちが米の県外移出を止めようと立ち上がったのが米騒動の発端。騒動は全国に広がり、責任を取って内閣が退陣した</li>
+      <li>かわって原敬が首相となり、日本初の本格的な政党内閣を組織。爵位を持たない「平民宰相」として親しまれた</li>
+      <li>1925年、加藤高明内閣のもとで普通選挙法が制定され、納税額による制限が撤廃され満25歳以上のすべての男子に選挙権が認められた。有権者数は約307万人（1920年）から約1240万人（1928年）へ、約4倍に増えた。ただし女性の参政権はまだ実現せず、実現するのは1945年（既存作「ホナミの田」で扱う戦後の改革）まで待つことになる</li>
+      <li>普通選挙法と同時に治安維持法も制定され、社会主義や労働運動を取り締まる法律として表裏一体の性格を持った</li>
+      <li>政治学者・吉野作造は、天皇主権の憲法のもとでも民衆の意見を大切にする政治を目ざす「民本主義」を唱え、大正デモクラシーの理論的な支柱となった</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「米騒動」が今日いちばんの見せ場。1人ずつ交代で「次の月へすすめる」を押させ、米価がじわじわ上がっていく緊張感を味わわせるとよい</li>
+      <li>「普通選挙」といっても女性は含まれていなかったという事実は、この単元でいちばん伝えたい気づき。「ホナミの田」（戦後の女性参政権実現）へのつながりを意識させるとよい</li>
+      <li>実在の政党・政治家・時事的な政治論争には触れず、教科書レベルの史実の紹介にとどめる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「米騒動って何がきっかけ？」「普通選挙法で選挙できたのはだれ？」「民本主義ってどういう考え？」</li>
+      <li>「タイトウの丘」（日清・日露戦争と条約改正）の後、既存作「ズキンの家」（昭和の戦争）の前史として、大正から昭和への時代の流れを一本につないだ</li>
+      <li>この後、高度経済成長と現代（東京オリンピック・情報化社会）など、戦後のさらに先の単元を今後の新規開拓候補として検討</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
