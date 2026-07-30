@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マスの野 — 秀吉の 全国統一 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f8e6b0 0%, #fbf3d0 45%, #e3a458 100%);
+    color: #3a2210;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #a83828; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8a5a2a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e8d9a8; border: 2px solid #d4af37;
+    font-size: clamp(16px, 1.8vw, 26px); color: #d4af37;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #f3d968, #a83828);
+    border-color: #4a2a10; color: #3a2210;
+    box-shadow: 0 0 14px rgba(168,56,40,.7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #faf0d0 0%, #e8c078 100%);
+    border: 3px solid #7a4020;
+    box-shadow: inset 0 0 40px rgba(60, 30, 10, .12), 0 4px 18px rgba(40, 20, 10, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #4a2a10; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #a83828; color: #fdf0c8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(40, 20, 10, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(40, 20, 10, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #d4af37; cursor: pointer;
+    background: linear-gradient(180deg, #c2643a, #a83828); color: #fff;
+    box-shadow: 0 3px 0 #4a2a10; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #8a7a5a, #5a4a38); border-color: #c8b088; box-shadow: 0 3px 0 #4a2a10; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #d8c05a, #9a8030); border-color: #ece0b0; box-shadow: 0 3px 0 #6a5620; color: #3a2210; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #a83828; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(40, 20, 10, .3), inset 0 0 24px rgba(60, 30, 10, .18);
+    flex-shrink: 0; background: #fdf0c8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #8a5a2a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #4a2a10; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffaf0; border: 2px solid #d4af37; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #8a5a2a; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #3a2210;
+    border: 1.5px solid #e0c090;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #a83828; background: #f3d968; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #e8d9a8, #e8c078); color: #3a2210;
+    border: 2px solid #a83828; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #a83828; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #c2643a, #a83828); color: #fff;
+    box-shadow: 0 3px 0 #4a2a10, 0 5px 12px rgba(60, 30, 10, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #4a2a10; }
+  .btn.sub {
+    background: #e8d9a8; color: #5a4020; box-shadow: 0 3px 0 #d4af37;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #3a2210; box-shadow: 0 3px 0 #d4af37; font-weight: 400; border: 1.5px solid #e0c090; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #f3d968; outline: 3px solid #a83828; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(30, 16, 6, .8);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fffaf0, #e8c078);
+    border: 3px solid #7a4020; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(40, 20, 10, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #a83828; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #a83828; }
+  .panel .sub { color: #8a5a2a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #3a2210; border: 1.5px solid #e0c090; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8a5a2a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 20vw, 210px); cursor: pointer;
+    background: #fff; color: #3a2210; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #e0c090; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #a83828; background: #f3d968; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #a83828; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #a83828;
+    color: #4a2a10; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #8a5a2a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e8d9a8; color: #5a4020;
+    border: 1px solid #d4af37; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #e8d9a8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">📐 マスの野<small>— 秀吉の 全国統一 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kenchi" title="検地を 知る">★</div>
+    <div class="badge" id="bd_m_ichi" title="一地一作人">★</div>
+    <div class="badge" id="bd_m_katanagari" title="刀狩の バランス">★</div>
+    <div class="badge" id="bd_m_choutou" title="朝鮮出兵">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">検地を 知る</div>
+    <div id="locChip"></div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 ますめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="120" rx="26" ry="6" fill="rgba(20,20,30,.18)"/>
+            <!-- 検地竿(かざり) -->
+            <line x1="84" y1="40" x2="100" y2="14" stroke="#7a4a20" stroke-width="4" stroke-linecap="round"/>
+            <line x1="88" y1="34" x2="94" y2="24" stroke="#f0c880" stroke-width="2" stroke-linecap="round"/>
+            <!-- 枡の 上ぶち（開いた口） -->
+            <path d="M30 50 L44 36 L104 36 L90 50 Z" fill="#f0c880" stroke="#4a2a10" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- 枡の からだ -->
+            <rect x="30" y="50" width="60" height="56" rx="5" fill="#dcae66" stroke="#4a2a10" stroke-width="2.5"/>
+            <!-- ますめ(グリッド) -->
+            <g stroke="#a87838" stroke-width="1.4" opacity=".55">
+              <line x1="50" y1="50" x2="50" y2="106"/>
+              <line x1="70" y1="50" x2="70" y2="106"/>
+              <line x1="30" y1="70" x2="90" y2="70"/>
+              <line x1="30" y1="88" x2="90" y2="88"/>
+            </g>
+            <!-- かどの 木組み -->
+            <g fill="#4a2a10">
+              <rect x="30" y="50" width="6" height="6"/>
+              <rect x="84" y="50" width="6" height="6"/>
+              <rect x="30" y="100" width="6" height="6"/>
+              <rect x="84" y="100" width="6" height="6"/>
+            </g>
+            <!-- かお -->
+            <circle cx="60" cy="86" r="19" fill="#fff8e6" stroke="#4a2a10" stroke-width="2.5"/>
+            <ellipse cx="49" cy="91" rx="4.2" ry="3" fill="#e8926a" opacity=".55"/>
+            <ellipse cx="71" cy="91" rx="4.2" ry="3" fill="#e8926a" opacity=".55"/>
+            <g class="eyes">
+              <ellipse cx="53" cy="84" rx="3.2" ry="4.3" fill="#4a2a10"/>
+              <ellipse cx="67" cy="84" rx="3.2" ry="4.3" fill="#4a2a10"/>
+              <circle cx="54.1" cy="81.8" r="1" fill="#fff"/>
+              <circle cx="68.1" cy="81.8" r="1" fill="#fff"/>
+            </g>
+            <path d="M52 96 Q60 100 68 96" stroke="#4a2a10" fill="none" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>枡<rt>ます</rt></ruby>の<ruby>精霊<rt>せいれい</rt></ruby> <ruby>マス<rt></rt></ruby></div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">📐 マスの野ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   マスの野 — 秀吉の全国統一（小6社会・歴史・協力型・1ファイル）
+   検地を知る（検地帳・検地竿・京枡）→ 一地一作人（検地帳に記録される
+   のはただ1人）→ 刀狩のバランス（数値階段・メイン操作）→ 朝鮮出兵
+   （文禄・慶長の役）→ はかせ（兵農分離の完成・関ヶ原への道）。
+   「ヒナワの陣」（戦国・鉄砲伝来〜長篠の戦い）の直後、「ケヤリの道」
+   （江戸幕府成立・参勤交代）の前史にあたる。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  taikou: ruby('太閤', 'たいこう'),
+  kenchi: ruby('検地', 'けんち'),
+  kenchichou: ruby('検地帳', 'けんちちょう'),
+  kenchizao: ruby('検地竿', 'けんちざお'),
+  kyouMasu: ruby('京枡', 'きょうます'),
+  kokudaka: ruby('石高', 'こくだか'),
+  shouen: ruby('荘園領主', 'しょうえんりょうしゅ'),
+  jitou: ruby('地頭', 'じとう'),
+  nanushi: ruby('名主', 'なぬし'),
+  katanagari: ruby('刀狩', 'かたながり'),
+  katanagarirei: ruby('刀狩令', 'かたながりれい'),
+  houkouji: ruby('方広寺', 'ほうこうじ'),
+  daibutsu: ruby('大仏', 'だいぶつ'),
+  heinoubunri: ruby('兵農分離', 'へいのうぶんり'),
+  bunroku: ruby('文禄の役', 'ぶんろくのえき'),
+  keichou: ruby('慶長の役', 'けいちょうのえき'),
+  sekigahara: ruby('関ヶ原の戦い', 'せきがはらのたたかい'),
+  ieyasu: ruby('徳川家康', 'とくがわいえやす'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 検地を知る：手がかり ----------
+const KENCHI_POINTS = [
+  { key: 0, letter: 'あ', name: '検地帳（けんちちょう）', x: 220, y: 260,
+    txt: `田畑の 面積や ${W.kokudaka}（収かく高）を 記録した 帳ぼが ${W.kenchichou}。これを もとに 年貢の 量が 決められたんだ。` },
+  { key: 1, letter: 'い', name: '検地竿（けんちざお）', x: 500, y: 340,
+    txt: `田畑の 広さを 測る ものさし、${W.kenchizao}。1間＝6尺3寸（約1.9m）に 統一されたよ。それまで 地域ごとに バラバラだったんだ。` },
+  { key: 2, letter: 'う', name: '京枡（きょうます）', x: 780, y: 260,
+    txt: `お米の 量を はかる ます、${W.kyouMasu}。ばらばらだった ますの 大きさを これで 全国 統一したんだ。ぼく（マス）は この ますから 生まれたよ。` },
+];
+
+// ---------- 一地一作人：3つの ラベル ----------
+const ICHI_TAGS = [
+  { key: 0, label: W.shouen, sub: '荘園領主' },
+  { key: 1, label: W.jitou, sub: '地頭' },
+  { key: 2, label: '名主・農民', sub: '名主・農民' },
+];
+
+// ---------- 刀狩のバランス：判定ロジック ----------
+const KATANAGARI_STEPS = [
+  { n: 1, kata: 0.08, txt: `ほとんど 集まらなかった。村には まだ 刀や 鉄砲が たくさん 残っていて、いつ 一揆が 起きても おかしくない ままだよ。` },
+  { n: 2, kata: 0.22, txt: `少しは 集まったけど、まだまだ 足りない。村には 武器が 目立つ ままで、不安は 消えていないよ。` },
+  { n: 3, kata: 0.45, txt: `半分近くまで 集まってきた。村の ようすが 少し 落ち着いてきたね。` },
+  { n: 4, kata: 0.62, txt: `だいぶ 集まった。武士と 農民の くらしが、はっきりと 分かれ始めているよ。` },
+  { n: 5, kata: 0.78, txt: `ちょうど よい くらいに 集まった。一揆は 防げて、農具に 使う 分の 金物は ちゃんと 村に 残っているね。` },
+  { n: 6, kata: 0.9, txt: `これも ちょうど よい。武器は 十分に 集まり、村の 農具は そのまま 使えているよ。` },
+  { n: 7, kata: 0.97, txt: `集めすぎたかも……。くわや かまのような 農具まで 取り上げられてしまい、田畑を たがやせず 困っている 人が 出てきたよ。` },
+  { n: 8, kata: 1.0, txt: `全部 取り上げてしまった！ 農具まで 根こそぎ なくなり、村は 米づくりも できず 大こまり。これでは 意味が ないね。` },
+];
+function judgeKatanagari(n) { if (n <= 2) return 'low'; if (n >= 7) return 'high'; return 'good'; }
+
+// ---------- 朝鮮出兵：手がかり ----------
+const CHOUTOU_POINTS = [
+  { key: 0, letter: 'あ', name: '文禄の役（1592年）', x: 260, y: 280,
+    txt: `1592年、秀吉は 明（中国）を 従えようと ${W.bunroku}を 起こし、約16万人もの 大軍を 朝鮮に 送りこんだんだ。` },
+  { key: 1, letter: 'い', name: '慶長の役と撤退（1597〜1598年）', x: 700, y: 340,
+    txt: `1597年の ${W.keichou}でも 約14万人を 送ったが 苦戦。1598年に 秀吉が 亡くなると、日本軍は 朝鮮から 引き上げたんだ。` },
+];
+
+// ---------- はかせ：兵農分離の完成 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '兵農分離の完成', x: 260, y: 320,
+    txt: `検地で 農民を 土地に 結びつけ、刀狩で 武器を 取り上げたことで、武士と 農民の 身分が はっきり 分かれる ${W.heinoubunri}が 完成したんだ。` },
+  { key: 1, letter: 'い', name: '秀吉の死と関ヶ原への道（1598〜1600年）', x: 700, y: 320,
+    txt: `1598年に 秀吉が 亡くなると、${W.ieyasu}が 力を 強めていく。2年後の 1600年、${W.sekigahara}を へて、江戸幕府が 開かれていくんだよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kenchi',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  kenchiFound: new Set(),
+  choutouFound: new Set(),
+  hakaseFound: new Set(),
+  ichi: { f: 0 },
+  kataN: 4,
+  kataTries: new Set(),
+  kata: { f: 0 },
+  tween: null,
+  anim: {},
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sClank = () => { tone(880, 0, 0.1, 'triangle', 0.08); tone(1046, 0.06, 0.16, 'triangle', 0.07); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 発見ポイントの共通描画 ----------
+function drawPoints(X, Y, sc, points, foundSet) {
+  points.forEach(p => {
+    const done = foundSet.has(p.key);
+    const px = X(p.x), py = Y(p.y);
+    gctx.beginPath(); gctx.arc(px, py, 24 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#a83828' : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#4a2a10'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#a83828';
+    gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.letter, px, py + 1 * sc);
+  });
+}
+
+// ---------- 田畑と空の背景 ----------
+function bgScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#e8c078'); g.addColorStop(1, '#9a7a4a');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  const g2 = gctx.createLinearGradient(0, Y(500), 0, Y(640));
+  g2.addColorStop(0, '#7a6248'); g2.addColorStop(1, '#5a4a38');
+  gctx.fillStyle = g2;
+  gctx.fillRect(X(0), Y(500), 1000 * sc, 140 * sc);
+}
+
+function drawKenchiScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.fillStyle = '#d4af37'; gctx.strokeStyle = '#4a2a10'; gctx.lineWidth = 2.4 * sc;
+  [[150, 560, 90, 60], [400, 560, 120, 70], [620, 560, 100, 60], [860, 560, 90, 65]].forEach(([bx, by, bw, bh]) => {
+    gctx.beginPath(); gctx.rect(X(bx - bw / 2), Y(by - bh), bw * sc, bh * sc); gctx.fill(); gctx.stroke();
+  });
+  drawPoints(X, Y, sc, KENCHI_POINTS, S.kenchiFound);
+}
+
+// ---------- 一地一作人（メイン操作） ----------
+function drawIchiScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  const cx = 500, cy = 420, f = S.ichi.f;
+  // 田んぼ
+  gctx.fillStyle = '#c8e6a0'; gctx.strokeStyle = '#4a2a10'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(cx - 120), Y(cy - 40), 240 * sc, 100 * sc, 10 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#4a2a10'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('田', X(cx), Y(cy + 10));
+
+  const offs = [
+    { dx: -110, dy: -170, fly: [-70, -60] },
+    { dx: 110, dy: -170, fly: [70, -60] },
+    { dx: 0, dy: -110, fly: [0, -40] },
+  ];
+  ICHI_TAGS.forEach((tag, i) => {
+    const o = offs[i];
+    const isLast = i === 2;
+    const alpha = isLast ? 1 : (1 - f);
+    if (alpha <= 0.02) return;
+    const px = cx + o.dx + o.fly[0] * f, py = cy + o.dy + o.fly[1] * f;
+    const scale = isLast ? (1 + f * 0.2) : 1;
+    gctx.save();
+    gctx.globalAlpha = alpha;
+    const bw = 150 * scale, bh = 50 * scale;
+    gctx.fillStyle = isLast ? '#f3d968' : '#fff';
+    gctx.strokeStyle = isLast && f > 0.5 ? '#a83828' : '#4a2a10';
+    gctx.lineWidth = (isLast && f > 0.5 ? 3.4 : 2.2) * sc;
+    gctx.beginPath(); gctx.roundRect(X(px - bw / 2), Y(py - bh / 2), bw * sc, bh * sc, 8 * sc); gctx.fill(); gctx.stroke();
+    gctx.fillStyle = '#3a2210'; gctx.font = `700 ${16 * scale * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(tag.sub, X(px), Y(py));
+    gctx.restore();
+  });
+
+  if (f > 0.6) {
+    const a2 = clamp((f - 0.6) / 0.4, 0, 1);
+    gctx.save(); gctx.globalAlpha = a2;
+    gctx.fillStyle = '#a83828';
+    gctx.beginPath(); gctx.roundRect(X(cx - 90), Y(cy + 70), 180 * sc, 44 * sc, 8 * sc); gctx.fill();
+    gctx.fillStyle = '#fff'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('検地帳に 記録', X(cx), Y(cy + 92));
+    gctx.restore();
+  }
+}
+
+// ---------- 刀狩のバランス（メイン操作） ----------
+function drawKatanagariScene(X, Y, sc, kataF) {
+  bgScene(X, Y, sc);
+  // 刀塚（左）
+  const pileX = 260, pileY = 500, count = Math.round(kataF * 8);
+  gctx.fillStyle = '#3a2210'; gctx.font = `700 ${20 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('あつめた 刀', X(pileX), Y(pileY - 130));
+  for (let i = 0; i < count; i++) {
+    const ang = -0.9 + i * 0.24;
+    const bx = pileX + (i % 4) * 6 - 9, by = pileY - i * 5;
+    gctx.save();
+    gctx.translate(X(bx), Y(by));
+    gctx.rotate(ang);
+    gctx.strokeStyle = '#c8c8d0'; gctx.lineWidth = 4 * sc; gctx.lineCap = 'round';
+    gctx.beginPath(); gctx.moveTo(0, 0); gctx.lineTo(70 * sc, 0); gctx.stroke();
+    gctx.strokeStyle = '#7a4a20'; gctx.lineWidth = 8 * sc;
+    gctx.beginPath(); gctx.moveTo(-14 * sc, 0); gctx.lineTo(2 * sc, 0); gctx.stroke();
+    gctx.restore();
+  }
+  // 炉（右）
+  const forgeX = 720, forgeY = 460;
+  const grd = gctx.createRadialGradient(X(forgeX), Y(forgeY), 4 * sc, X(forgeX), Y(forgeY), 90 * sc);
+  grd.addColorStop(0, kataF > 0.15 ? '#ffcf6a' : '#c8b088');
+  grd.addColorStop(1, 'rgba(200,120,40,0)');
+  gctx.fillStyle = grd; gctx.beginPath(); gctx.arc(X(forgeX), Y(forgeY), 90 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = '#5a4a38'; gctx.strokeStyle = '#4a2a10'; gctx.lineWidth = 2.6 * sc;
+  gctx.beginPath(); gctx.roundRect(X(forgeX - 60), Y(forgeY - 10), 120 * sc, 60 * sc, 10 * sc); gctx.fill(); gctx.stroke();
+  if (kataF > 0.15) {
+    gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('🔥', X(forgeX), Y(forgeY + 6));
+  }
+  gctx.fillStyle = '#3a2210'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('釘・かすがいに', X(forgeX), Y(forgeY - 40));
+
+  // 農民と農具（右奥、多すぎると農具が消える）
+  const farmX = 860, farmY = 560;
+  gctx.fillStyle = '#fdf0c8'; gctx.strokeStyle = '#4a2a10'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath(); gctx.arc(X(farmX), Y(farmY - 34), 16 * sc, 0, TAU); gctx.fill(); gctx.stroke();
+  const hoeAlpha = kataF >= 0.95 ? clamp((1 - (kataF - 0.95) / 0.05), 0, 1) : 1;
+  gctx.save(); gctx.globalAlpha = hoeAlpha;
+  gctx.strokeStyle = '#5a4a38'; gctx.lineWidth = 5 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(farmX + 20), Y(farmY - 10)); gctx.lineTo(X(farmX + 40), Y(farmY + 30)); gctx.stroke();
+  gctx.fillStyle = '#3a2210';
+  gctx.beginPath(); gctx.roundRect(X(farmX + 34), Y(farmY + 26), 16 * sc, 8 * sc, 3 * sc); gctx.fill();
+  gctx.restore();
+  gctx.fillStyle = '#3a2210'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(hoeAlpha > 0.3 ? '農具は のこる' : '農具まで なくなった…', X(farmX), Y(farmY + 60));
+
+  gctx.fillStyle = '#3a2210'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`武器を 集めた 割合 ${Math.round(kataF * 100)}%（目もり ${NUMS[S.kataN - 1]}）`, X(500), Y(140));
+}
+
+// ---------- 朝鮮出兵：地図 ----------
+function drawChoutouScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  // 海
+  gctx.fillStyle = '#8fb8c8';
+  gctx.fillRect(X(0), Y(200), 1000 * sc, 260 * sc);
+  // 日本列島(簡略)
+  gctx.fillStyle = '#c8e6a0'; gctx.strokeStyle = '#4a2a10'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(160), Y(260)); gctx.quadraticCurveTo(X(120), Y(340), X(200), Y(420));
+  gctx.quadraticCurveTo(X(300), Y(460), X(340), Y(400));
+  gctx.quadraticCurveTo(X(280), Y(320), X(260), Y(250));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3a2210'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('日本', X(220), Y(360));
+  // 朝鮮半島(簡略)
+  gctx.fillStyle = '#c8e6a0';
+  gctx.beginPath();
+  gctx.moveTo(X(660), Y(220)); gctx.lineTo(X(760), Y(230)); gctx.quadraticCurveTo(X(800), Y(320), X(740), Y(420));
+  gctx.lineTo(X(660), Y(400)); gctx.quadraticCurveTo(X(630), Y(300), X(660), Y(220));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillText('朝鮮', X(720), Y(310));
+  // 船
+  gctx.font = `${34 * sc}px sans-serif`;
+  gctx.fillText('⛵', X(480), Y(300));
+  drawPoints(X, Y, sc, CHOUTOU_POINTS, S.choutouFound);
+}
+
+// ---------- はかせ：兵農分離と関ヶ原への道 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgScene(X, Y, sc);
+  gctx.strokeStyle = '#a83828'; gctx.lineWidth = 4 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(500), Y(560)); gctx.lineTo(X(260), Y(340)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(500), Y(560)); gctx.lineTo(X(700), Y(340)); gctx.stroke();
+  gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🏯', X(500), Y(590));
+  drawPoints(X, Y, sc, HAKASE_POINTS, S.hakaseFound);
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kenchi') drawKenchiScene(X, Y, sc);
+  else if (S.scene === 'ichi') drawIchiScene(X, Y, sc);
+  else if (S.scene === 'katanagari') drawKatanagariScene(X, Y, sc, S.kata.f);
+  else if (S.scene === 'choutou') drawChoutouScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawKatanagariScene(X, Y, sc, S.kata.f);
+}
+
+// ---------- ますめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fdf0c8'); grd.addColorStop(1, '#d4af37');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#a83828'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔎', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'pile') {
+    const pct = Math.round(S.kata.f * 100);
+    sctx.font = `700 ${R * 0.26}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillStyle = '#a83828';
+    sctx.fillText(pct + '%', R, R * 0.78);
+    label('武器を あつめた 割合');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#f3d968'); g2.addColorStop(1, 'rgba(216,201,138,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#a83828'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚦', R, R * 0.85);
+    label('たしかめ かんりょう！');
+  } else {
+    sctx.fillStyle = '#a83828'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔭', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#3a2210';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#a83828', '#f3d968', '#d4af37', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  $('locChip').textContent = '秀吉の 全国統一（1582〜1598年ごろ）';
+  const titles = {
+    kenchi: '📜 検地を 知る（1582年〜）',
+    ichi: '📐 一地一作人',
+    katanagari: '⚔️ 刀狩の バランス',
+    choutou: '⛵ 朝鮮出兵（1592〜1598年）',
+    hakase: '🏯 兵農分離と つぎの 時代へ',
+    done: '📐 マスの野 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '検地を 知る';
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kenchi', 'm_ichi', 'm_katanagari', 'm_choutou', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kenchi', scope: { type: 'idle' }, kenchiFound: new Set() });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">📜⚔️⛵</div>
+        <h1>マスの野</h1>
+        <div class="sub">〜 秀吉の 全国統一の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 全国の 田畑を 測る ます、<ruby>京枡<rt>きょうます</rt></ruby>から 生まれた 精霊、<b>マス</b>。豊臣秀吉が 天下を 統一するために 行った、<ruby>検地<rt>けんち</rt></ruby>と <ruby>刀狩<rt>かたながり</rt></ruby>という 2つの 大きな 改革を、<b>いっしょに たしかめに いこう！</b><br>
+        村の くらしが どう 変わったのか、見ていこう……。</p>
+        <button class="btn" id="startBtn">村を たしかめに 出かける！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">秀吉が 出した ${W.katanagarirei}の あと、村から 武器は 完全に なくなったと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🚫</span><b>ア</b> はい、刀も 鉄砲も 一つも 残らなかった</div>
+          <div class="vcard" data-v="1"><span class="vicon">🤔</span><b>イ</b> いいえ、猟や 害じゅうよけの 鉄砲などは 残っていた</div>
+          <div class="vcard" data-v="2"><span class="vicon">✊</span><b>ウ</b> いいえ、農民は 反発し だれも 従わなかった</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：検地を知る ---
+  m_kenchi: {
+    enter() {
+      Object.assign(S, { scene: 'kenchi', scope: { type: 'idle' }, kenchiFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`📜 秀吉は 1582年から、全国の 田畑を 測る ${W.kenchi}を 始めた。どんな 道具が 使われたのだろう？ 3つの 手がかりを 調べて たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KENCHI_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.kenchiFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.kenchiFound.size >= KENCHI_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.kenchiFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`検地で 全国の 基準を 統一したことで、何が 良く なったのだろう？`);
+      setButtons(choiceRow(['ア 地域ごとに バラバラだった 年貢の 基準が、公平に なった', 'イ 農民の 年貢が 完全に なくなった', 'ウ 米づくりを しなくて よく なった'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_kenchi'); S.phase = 'done';
+        say(`せいかい！ ${W.taikou}${W.kenchi}によって、${W.kenchizao}と ${W.kyouMasu}で 全国の 基準が 統一され、${W.kokudaka}で 年貢を 公平に 決められるように なったんだ。<br><br>💡 <b>たいせつポイント</b><br>それまでは 大名や 地域ごとに ますの 大きさすら バラバラだったんだよ。`);
+        setButtons([{ label: 'つぎへ（一地一作人）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 地域ごとに バラバラだった 年貢の 基準が、公平に なった', 'イ 農民の 年貢が 完全に なくなった', 'ウ 米づくりを しなくて よく なった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M2：一地一作人 ---
+  m_ichi: {
+    enter() {
+      Object.assign(S, { scene: 'ichi', scope: { type: 'idle' }, ichi: { f: 0 } });
+      updateLoc();
+      setWish('📜', `同じ 田んぼに、${W.shouen}・${W.jitou}・${W.nanushi}など、何人もの 人が 権利を 持っていたんだ。検地帳には、だれが 記録されたと 思う？ 「検地して 記録する」ボタンを おしてみよう。`);
+      say(`ボタンを おすと、田んぼの 上に 重なった 権利が どう なるか 見えてくるよ。`);
+      setButtons([{ label: '📜 検地して 記録する', cb: () => this.run() }]);
+    },
+    run() {
+      setButtons([]);
+      sClank();
+      startTween(S.ichi.f, 1, 1.3, v => { S.ichi.f = v; }, () => this.ask());
+    },
+    ask() {
+      scopeBurst();
+      hideWish();
+      say(`検地帳には、この 田んぼの だれが 記録されたのだろう？`);
+      setButtons(choiceRow(['ア その 土地を 耕している 人 1人だけ', 'イ 土地に 関わった 人 全員', 'ウ だれも 記録されなかった'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 0) {
+        sYes(); scopeBurst(); award('m_ichi'); S.phase = 'done';
+        say(`せいかい！ 検地帳には 田畑ごとに ただ 1人の 耕作者だけが 記録された。これを <b>一地一作人</b>と いうよ。<br><br>💡 <b>たいせつポイント</b><br>${W.shouen}や ${W.jitou}など、いくつも 重なっていた 土地の 権利が、これで すっきり 整理されたんだ。`);
+        setButtons([{ label: 'つぎへ（刀狩の バランス）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア その 土地を 耕している 人 1人だけ', 'イ 土地に 関わった 人 全員', 'ウ だれも 記録されなかった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- M3：刀狩のバランス（数値階段・メイン操作） ---
+  m_katanagari: {
+    enter() {
+      Object.assign(S, { scene: 'katanagari', scope: { type: 'pile' }, kataN: 4, kataTries: new Set(), kata: { f: 0 } });
+      updateLoc();
+      setWish('⚔️', `秀吉は 1588年、${W.katanagarirei}を 出し、農民から 刀や 鉄砲などの 武器を 取り上げさせた。集める 量 ①〜⑧を えらんで、村が どう 変わるか 試してみよう。`);
+      say(`目もりを えらんで「刀狩を おこなう」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.kataN === n ? ' sel' : ''), cb: () => { S.kataN = n; this.refreshCtl(); } });
+      list.push({ label: '⚔️ 刀狩を おこなう', cb: () => this.run() });
+      setControls(list);
+    },
+    run() {
+      setControls([]);
+      say(`目もり ${NUMS[S.kataN - 1]} で、刀狩を おこなってみる……`);
+      sClank();
+      const info = KATANAGARI_STEPS[S.kataN - 1];
+      startTween(S.kata.f, info.kata, 1.1, v => { S.kata.f = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeKatanagari(S.kataN);
+      S.kataTries.add(S.kataN);
+      const info = KATANAGARI_STEPS[S.kataN - 1];
+      if (r === 'good') {
+        sYes(); scopeBurst(); award('m_katanagari'); S.phase = 'done';
+        say(`✨ ${info.txt} ✨<br><br>💡 <b>たいせつポイント</b><br>建前は ${W.houkouji}の ${W.daibutsu}づくりの 釘・かすがいに するため、と 発表されたんだ。`);
+        setButtons([{ label: 'つぎへ（朝鮮出兵）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`${info.txt}<br>もういちど 目もりを えらんで、試してみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：朝鮮出兵 ---
+  m_choutou: {
+    enter() {
+      Object.assign(S, { scene: 'choutou', scope: { type: 'idle' }, choutouFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`⛵ 全国を 統一した 秀吉は、海の むこうの 朝鮮にも 大軍を 送りこんだ。何が 起きたのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(CHOUTOU_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.choutouFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.choutouFound.size >= CHOUTOU_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.choutouFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`なぜ 日本軍は 朝鮮から 引き上げることに なったのだろう？`);
+      setButtons(choiceRow(['ア 完全に 勝利し、目的を 達成したから', 'イ 秀吉が 亡くなり、戦いを 続ける 意味が なくなったから', 'ウ 最初から 戦うつもりが なかったから'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('m_choutou'); S.phase = 'done';
+        say(`せいかい！ 1598年に ${W.taikou}秀吉が 亡くなると、この 戦いを 続ける 理由が なくなり、日本軍は 朝鮮から 引き上げたんだ。<br><br>💡 <b>たいせつポイント</b><br>2度にわたる 朝鮮出兵は、大名たちに 大きな 負担を 残しただけに 終わったんだよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 完全に 勝利し、目的を 達成したから', 'イ 秀吉が 亡くなり、戦いを 続ける 意味が なくなったから', 'ウ 最初から 戦うつもりが なかったから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：兵農分離の完成 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      hideWish();
+      say(`さいごは <b>はかせチャレンジ</b>！ 検地と 刀狩は、この あとの 時代に どう つながっていくのだろう？ 2つの 手がかりを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? '✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`${W.heinoubunri}が 完成したことで、武士と 農民の くらしは どう 変わったのだろう？`);
+      setButtons(choiceRow(['ア 武士も 農民も 同じように 農業を するように なった', 'イ 武士は 城下町に 住み、農民は 村で 農業に 専念するように なった', 'ウ 武士と 農民の 区別が なくなった'], (i, el) => this.pick(i, el)));
+    },
+    pick(n, el) {
+      markPicked(el);
+      if (n === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.heinoubunri}によって、武士は 城下町に 住んで 政治や 軍事を、農民は 村で 農業に 専念する、という くらしの 区別が できあがったんだ。<br><br>💡 <b>たいせつポイント</b><br>この しくみは、この あとの 江戸時代の 身分制度の もとにも なっていくんだよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ア 武士も 農民も 同じように 農業を するように なった', 'イ 武士は 城下町に 住み、農民は 村で 農業に 専念するように なった', 'ウ 武士と 農民の 区別が なくなった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, kata: { f: 0.9 } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ マスの野 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 太閤検地で 全国の 基準を 統一する ますを（<span class="blankWord" data-a="京枡">？？？</span>）と いう。<br>
+        ② 刀狩令が 建前として かかげたのは、京都の（<span class="blankWord" data-a="方広寺">？？？</span>）の 大仏づくりの 釘・かすがいに するためだった。<br>
+        ③ 検地と 刀狩によって、武士と 農民の 身分を 分ける（<span class="blankWord" data-a="兵農分離">？？？</span>）が 進んだ。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ</b> でした！ 建前は 大仏の 釘・かすがいに するためだったけど、ほんとうの ねらいは 一揆を 防ぎ、武士と 農民の 身分を 分ける こと。しかも 村には、猟や 害じゅうよけの 鉄砲などが その後も 残っていたことが、後の 研究で わかっているんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">📐 <b>おうちミッション</b><br>おうちの人に「刀狩で 武器を 取り上げられた 村の 人たちは、どんな 気持ちだったと 思う？」と 聞いてみよう。安心する 気持ちと、不満な 気持ち、両方を いっしょに 想像してみてね。</p>
+        <p class="talk">検地と 刀狩で 武士と 農民の 身分が 分かれ、この あと 徳川家康が 力を 強めて、江戸幕府の 時代へと 進んでいくんだよ。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#4a2a10'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'katanagari', scope: { type: 'glow' }, kata: { f: 0.9 } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ 秀吉の 全国統一について、${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「検地って 何？」「刀狩の 建前は 何だった？」`);
+      setButtons([
+        { label: '📜 検地を 知るの 図', cls: 'sub', cb: () => this.show('kenchi') },
+        { label: '📐 一地一作人の 図', cls: 'sub', cb: () => this.show('ichi') },
+        { label: '⚔️ 刀狩の バランスの 図', cls: 'sub', cb: () => this.show('katanagari') },
+        { label: '⛵ 朝鮮出兵の 図', cls: 'sub', cb: () => this.show('choutou') },
+        { label: '🏯 はかせの 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      if (scene === 'ichi') { S.ichi.f = 1; }
+      if (scene === 'katanagari') { S.kata.f = 0.9; }
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_katanagari などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

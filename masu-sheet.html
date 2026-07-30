@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>マスの野 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #a83828; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #f3d968; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 1.4mm; margin-bottom: 1.8mm;
+  }
+  .sheetHead h1 { font-size: 13.5pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: .9mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10.5pt; font-weight: 700;
+    padding: .55mm 3.5mm; border-radius: 4mm; margin-bottom: .6mm;
+  }
+  .secBody { font-size: 9.6pt; line-height: 1.32; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.2mm 2mm; font-size: 8.6pt; text-align: center; line-height: 1.4;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+  .wordBank {
+    display: inline-block; border: .4mm dashed #666; border-radius: 2mm;
+    padding: .8mm 2.5mm; font-size: 9pt; background: #f7f7f7;
+  }
+
+  .clueRow { display: flex; gap: 1.6mm; margin-top: 1mm; flex-wrap: wrap; }
+  .clueBox {
+    flex: 1; min-width: 38mm; border: .5mm solid #222; border-radius: 2mm;
+    padding: 1mm 2mm; font-size: 8.6pt; line-height: 1.4;
+  }
+  .clueBox .rletter { display: inline-block; width: 6mm; height: 6mm; border-radius: 50%; border: .4mm solid #222; text-align: center; font-weight: 700; margin-right: 1.4mm; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.6mm 1mm; }
+  .levelTable th { background: #f0dba0; }
+  .levelTable td.res { height: 7mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 1.4mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 8.5pt; margin-top: .3mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.32; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>📐 マスの野 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      秀吉が 出した 刀狩令の あと、村から 武器は 完全に なくなったと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> はい、一つも 残らなかった</div>
+        <div class="voteOpt"><span class="vnum">イ</span> いいえ、猟や 害じゅうよけの 鉄砲などは 残っていた</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> いいえ、農民は 反発し 従わなかった</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．検地を知る</span>
+    <div class="secBody">
+      見つけた 手がかりに ✓を つけよう。
+      <div class="clueRow">
+        <div class="clueBox">☐ 検地帳</div>
+        <div class="clueBox">☐ 検地竿</div>
+        <div class="clueBox">☐ 京枡</div>
+      </div>
+      <div style="margin-top:1.2mm">検地で 基準を 統一したことで、何が 良く なった？　ア 年貢の 基準が 公平に なった　・　イ 年貢が 完全に なくなった　・　ウ 米づくりを しなくて よく なった（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．一地一作人</span>
+    <div class="secBody">
+      同じ 田んぼに 権利を 持っていたのは？　下の 言葉から 3つ えらんで 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">1</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">2</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">3</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">荘園領主</span>
+        <span class="wordBank">地頭</span>
+        <span class="wordBank">名主・農民</span>
+      </div>
+      <div style="margin-top:1.2mm">検地帳に 記録されたのは？　ア 耕している 人 1人だけ　・　イ 関わった 人 全員　・　ウ だれも 記録されず（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．刀狩のバランス — 集めた割合を たしかめよう</span>
+    <div class="secBody">
+      目もり ①〜⑧を 試して、武器を 集めた 割合（％）を 記録しよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      <div style="margin-top:1.2mm">刀狩令が 建前として かかげたのは？　ア 武士だけが 戦えるように するため　・　イ 京都の 大仏づくりの 釘・かすがいに するため　・　ウ 外国と 戦争するため（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．朝鮮出兵</span>
+    <div class="secBody">
+      2つの 手がかりを 調べよう。下の 言葉から えらんで（　）に 書こう。
+      <div class="clueRow">
+        <div class="clueBox"><span class="rletter">あ</span>（　　　　　　　　）</div>
+        <div class="clueBox"><span class="rletter">い</span>（　　　　　　　　）</div>
+      </div>
+      <div style="margin-top:1mm">
+        <span class="wordBank">文禄の役（1592年）</span>
+        <span class="wordBank">慶長の役と撤退（1597〜1598年）</span>
+      </div>
+      <div style="margin-top:1.2mm">なぜ 日本軍は 朝鮮から 引き上げた？　ア 完全に 勝利したから　・　イ 秀吉が 亡くなったから　・　ウ 最初から 戦う気が なかったから（〇を つけよう）</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（兵農分離の完成）</span>
+    <div class="secBody">
+      兵農分離が 完成すると、武士と 農民の くらしは どう 変わった？（〇を つけよう）<br>
+      ア 同じように 農業を する　・　イ 武士は 城下町、農民は 村で 農業に 専念　・　ウ 区別が なくなった
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 太閤検地で 全国の 基準を 統一する ますを（<span class="fillLine"></span>）と いう。<br>
+      ② 刀狩令が 建前として かかげたのは、京都の（<span class="fillLine"></span>）の 大仏づくりの 釘・かすがいに するためだった。<br>
+      ③ 検地と 刀狩によって、武士と 農民の 身分を 分ける（<span class="fillLine"></span>）が 進んだ。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">📐</span>
+        <div>
+          おうちの人に「刀狩で 武器を 取り上げられた 村の 人たちは、どんな 気持ちだったと 思う？」と 聞いてみよう。安心する 気持ちと、不満な 気持ち、両方を いっしょに 想像してみてね。<br>
+          ☐ 聞いた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　マスの野 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】マスの野 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「歴史（秀吉の全国統一・太閤検地と刀狩）」・学力幅あり・協力型／ 使うもの：「masu.html」・プロジェクタ・このノート（1ページ目を人数分）。実験器具は不要です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_katanagari</b> などで途中再開（m_kenchi／m_ichi／m_katanagari／m_choutou／hakase／ending）</li>
+      <li>☐ <b>本時のねらいの確認</b>：「ヒナワの陣」（戦国・鉄砲伝来〜長篠の戦い）の直後、「ケヤリの道」（江戸幕府成立・参勤交代）の前史にあたる。検地と刀狩で武士と農民の身分がはっきり分かれていく「兵農分離」の完成を、刀狩のバランス（数値階段）で実感させる構成です</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜9分</td><td>📜 検地を 知る</td><td>検地帳・検地竿・京枡の3つをボタンで確認 → クイズ</td></tr>
+      <tr><td class="min">9〜14分</td><td>📐 一地一作人</td><td>「検地して記録する」ボタンで田んぼの権利が1つに整理される演出を見る → クイズ</td></tr>
+      <tr><td class="min">14〜28分</td><td>⚔️ 刀狩の バランス（<b>今日の見せ場</b>）</td><td>①〜⑧を1人ずつ交代で試し、刀の山と釘・かすがいへの変化をシート４に記録。⑤⑥あたりで成功</td></tr>
+      <tr><td class="min">28〜35分</td><td>⛵ 朝鮮出兵</td><td>文禄の役・慶長の役と撤退の2つを確認 → クイズ</td></tr>
+      <tr><td class="min">35〜40分</td><td>🏯 はかせチャレンジ（兵農分離）</td><td>兵農分離の完成・秀吉の死と関ヶ原への道の2つを発見 → クイズで<b>よそうタイムを回収</b></td></tr>
+      <tr><td class="min">40〜45分</td><td>まとめ → おうちミッション</td><td>「？？？」タッチで穴埋め→シート７。おうちミッション（シート８）を伝える</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「検地を知る」の発見ポイントを一部先生が代わりに開いて調整（<b>刀狩のバランス・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 猟や害じゅうよけの鉄砲などは残っていた</b>／検地の基準統一の効果＝<b>ア 年貢の基準が公平になった</b>／
+      一地一作人＝<b>ア 耕している人1人だけ</b>／刀狩令の建前＝<b>イ 大仏づくりの釘・かすがい</b>／
+      朝鮮出兵の撤退理由＝<b>イ 秀吉が亡くなったから</b>／兵農分離の効果＝<b>イ 武士は城下町、農民は村で農業に専念</b>／
+      まとめ＝①<b>京枡</b>　②<b>方広寺</b>　③<b>兵農分離</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の歴史です）</h2>
+    <ul>
+      <li>太閤検地は1582年（天正10年）に開始。検地竿（1間＝6尺3寸＝約1.9m）と京枡で全国の測量・計量の基準を統一し、石高で年貢を決めた。田畑ごとに耕作者1人だけを記録する「一地一作人」の原則も確立した</li>
+      <li>刀狩令は1588年（天正16年）。農民から刀・脇差・弓・槍・鉄砲などを没収し、建前は「京都・方広寺の大仏づくりの釘・かすがいにするため」とされた</li>
+      <li>ただし歴史学者・藤木久志の研究では、刀狩後も村には猟や害じゅうよけのための鉄砲などが実際には多く残っていたことが明らかになっている。刀狩の本当のねらいは「武器をゼロにすること」ではなく、武士だけが武器を持つ特権とすることで身分を固定する「兵農分離」だった</li>
+      <li>検地と刀狩によって兵農分離が完成し、武士は城下町に住み政治・軍事を担い、農民は村で農業に専念するという江戸時代の身分制度の土台ができた</li>
+      <li>秀吉は1592年（文禄の役・約16万人）、1597年（慶長の役・約14万人）の2度、朝鮮に大軍を送ったが苦戦。1598年に秀吉が死去すると日本軍は撤退した</li>
+      <li>1598年の秀吉の死後、徳川家康が力を強め、1600年の関ヶ原の戦いを経て江戸幕府が開かれていく（既存作「ケヤリの道」＝参勤交代・江戸幕府成立へ続く）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「刀狩のバランス」が今日いちばんの見せ場。1人ずつ交代で目もりを選ばせ、⑦⑧まで試して「集めすぎると農具までなくなる」失敗も体験させると理解が深まる</li>
+      <li>刀狩の「建前」と「本当のねらい」のギャップは、この単元でいちばん伝えたい発見。表向きの理由だけで歴史を判断しない、という見方につなげるとよい</li>
+      <li>実在の政党・政治家・時事的な政治論争には触れず、教科書レベルの史実の紹介にとどめる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「検地って何？」「刀狩の建前は何だった？」「一地一作人ってどういう意味？」</li>
+      <li>「ヒナワの陣」（戦国・鉄砲伝来〜長篠の戦い）の直後、既存作「ケヤリの道」（江戸幕府成立・参勤交代）の前史として、戦国から江戸時代への流れを一本につないだ</li>
+      <li>この後、江戸の産業と文化（元禄文化・化政文化）など、江戸時代の暮らしを扱う単元を今後の新規開拓候補として検討</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
