@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>いろみずの研究所 — 水よう液の正体たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f5fbfd 0%, #e3f3f7 55%, #bfe3ea 100%);
+    color: #163044;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #1f6a78; text-shadow: 0 1px 0 #fff;
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3a8a98; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dff3f0; border: 2px solid #a8dcd8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #a8dcd8;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe3a0, #d4900f);
+    border-color: #8a5a0a; color: #163044;
+    box-shadow: 0 0 14px rgba(212, 144, 15, .7);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #f5fbfd 0%, #e0f0f2 100%);
+    border: 3px solid #2f8a9c;
+    box-shadow: inset 0 0 40px rgba(20, 90, 90, .12), 0 4px 18px rgba(10, 50, 60, .2);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #0d3640; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #1f6a78; color: #eafffb; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(10, 50, 60, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(10, 50, 60, .42) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #cdeaf5; cursor: pointer;
+    background: linear-gradient(180deg, #2f8a9c, #1f6a78); color: #fff;
+    box-shadow: 0 3px 0 #0a3a38; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #3a9a78, #1f6a4a); border-color: #a8e8d0; box-shadow: 0 3px 0 #123a2a; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #1f6a78; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(10, 50, 60, .3), inset 0 0 24px rgba(10, 50, 60, .18);
+    flex-shrink: 0; background: #eaf9f6;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #3a8a98;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #0d3640; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f5fdfb; border: 2px solid #a8dcd8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #3a8a98; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #163044;
+    border: 1.5px solid #cdeaf5;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1f6a78; background: #ffe3a0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #dff3f0, #d8ecea); color: #163044;
+    border: 2px solid #1f6a78; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #1f6a78; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #2f8a9c, #1f6a78); color: #fff;
+    box-shadow: 0 3px 0 #0a3a38, 0 5px 12px rgba(10, 50, 60, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0a3a38; }
+  .btn.sub {
+    background: #dff3f0; color: #1f6a78; box-shadow: 0 3px 0 #a8dcd8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #163044; box-shadow: 0 3px 0 #a8dcd8; font-weight: 400; border: 1.5px solid #cdeaf5; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe3a0; outline: 3px solid #2f8a9c; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(8, 34, 40, .82);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f5fdfb, #d8ecea);
+    border: 3px solid #2f8a9c; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(8, 34, 40, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #1f6a78; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #1f6a78; }
+  .panel .sub { color: #3a8a98; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #163044; border: 1.5px solid #cdeaf5; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #3a8a98; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 22vw, 220px); cursor: pointer;
+    background: #fff; color: #163044; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cdeaf5; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #1f6a78; background: #ffe3a0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #1f6a78; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #1f6a78;
+    color: #0d3640; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #3a8a98;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dff3f0; color: #1f6a78;
+    border: 1px solid #a8dcd8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #dff3f0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🧪 いろみずの研究所<small>— 水よう液の 正体たいけん —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_nakama" title="仲間分け">★</div>
+    <div class="badge" id="bd_m_toumei" title="とけているのは何">★</div>
+    <div class="badge" id="bd_m_kinzoku" title="塩酸で鉄をとかす">★</div>
+    <div class="badge" id="bd_m_betsumono" title="とけた鉄の正体">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">水よう液の せかい</div>
+    <div id="locChip">けんきゅうしつ</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 イロめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="122" rx="28" ry="6" fill="rgba(10,50,60,.15)"/>
+            <defs>
+              <clipPath id="bodyClip">
+                <path d="M60 20 C40 20 25 42 25 68 C25 98 40 118 60 118 C80 118 95 98 95 68 C95 42 80 20 60 20 Z"/>
+              </clipPath>
+            </defs>
+            <path d="M60 20 C40 20 25 42 25 68 C25 98 40 118 60 118 C80 118 95 98 95 68 C95 42 80 20 60 20 Z" fill="#f5fdfb" stroke="#163044" stroke-width="2.5"/>
+            <g clip-path="url(#bodyClip)">
+              <rect x="20" y="20" width="80" height="46" fill="#3f74c2"/>
+              <path d="M20 66 Q60 56 100 66 L100 120 L20 120 Z" fill="#e2536e"/>
+              <path d="M20 63 Q60 53 100 63" stroke="#fff" stroke-width="2" fill="none" opacity=".5"/>
+            </g>
+            <circle cx="60" cy="46" r="23" fill="#fff8ec" stroke="#163044" stroke-width="2.5"/>
+            <ellipse cx="46" cy="52" rx="5.5" ry="3.4" fill="#ffcfa0" opacity=".55"/>
+            <ellipse cx="74" cy="52" rx="5.5" ry="3.4" fill="#ffcfa0" opacity=".55"/>
+            <g class="eyes">
+              <circle cx="51" cy="44" r="5.2" fill="#fff"/>
+              <circle cx="69" cy="44" r="5.2" fill="#fff"/>
+              <circle cx="51.6" cy="44.6" r="3" fill="#0d3640"/>
+              <circle cx="69.6" cy="44.6" r="3" fill="#0d3640"/>
+              <circle cx="52.8" cy="42.8" r="1" fill="#fff"/>
+              <circle cx="70.8" cy="42.8" r="1" fill="#fff"/>
+            </g>
+            <path d="M48 58 Q60 65 72 58" fill="none" stroke="#163044" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- ラボゴーグル -->
+            <path d="M32 30 Q60 18 88 30" fill="none" stroke="#8a5aa8" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="38" cy="31" r="6" fill="none" stroke="#8a5aa8" stroke-width="3"/>
+            <circle cx="82" cy="31" r="6" fill="none" stroke="#8a5aa8" stroke-width="3"/>
+          </svg>
+          <div class="catname"><ruby>色<rt>いろ</rt></ruby>のしずくの<ruby>精霊<rt>せいれい</rt></ruby> イロ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🧪 いろみずの研究所ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   いろみずの研究所 — 水よう液の性質（小6理科・協力型・1ファイル）
+   水よう液を なかまわけ（リトマス紙・酸性/中性/アルカリ性）→
+   とけているのは何？（蒸発実験・気体/固体）→
+   塩酸で鉄をとかそう（こさ①〜⑧の数値階段シミュレーション）→
+   とけた鉄の正体（磁石・塩酸テストで別の物質と気づく）→
+   はかせ（むらさきキャベツ液の連続的な色変化）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function hexToRgb(hex) { hex = hex.replace('#', ''); return { r: parseInt(hex.substr(0, 2), 16), g: parseInt(hex.substr(2, 2), 16), b: parseInt(hex.substr(4, 2), 16) }; }
+function lerpColor(c1, c2, t) {
+  const p1 = hexToRgb(c1), p2 = hexToRgb(c2);
+  const r = Math.round(lerp(p1.r, p2.r, t)), g = Math.round(lerp(p1.g, p2.g, t)), b = Math.round(lerp(p1.b, p2.b, t));
+  return `rgb(${r},${g},${b})`;
+}
+
+const W = {
+  sansei: ruby('酸性', 'さんせい'),
+  chuusei: ruby('中性', 'ちゅうせい'),
+  arukari: 'アルカリ' + ruby('性', 'せい'),
+  enan: ruby('塩酸', 'えんさん'),
+  shokuen: ruby('食塩水', 'しょくえんすい'),
+  tansan: ruby('炭酸水', 'たんさんすい'),
+  sekkai: ruby('石灰水', 'せっかいすい'),
+  anmonia: 'アンモニア' + ruby('水', 'すい'),
+  tetsu: ruby('鉄', 'てつ'),
+  suiso: ruby('水素', 'すいそ'),
+  jouhatsu: ruby('蒸発', 'じょうはつ'),
+  jishaku: ruby('磁石', 'じしゃく'),
+  kinzoku: ruby('金属', 'きんぞく'),
+  henka: ruby('変化', 'へんか'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+const NOUDO_PCT = [0.5, 1, 2, 3, 4, 5, 8, 15];
+
+// ---------- 判定ロジック ----------
+function judgeNouido(n) { // n: 1-8　塩酸のこさ
+  if (n <= 2) return { level: 'low' };
+  if (n >= 7) return { level: 'high' };
+  return { level: 'good' };
+}
+
+// ---------- 水よう液データ（本物の理科：教科書の定番7種のうち5種） ----------
+const LIQUIDS = [
+  { key: 'enan', name: W.enan, cat: 'acid', txt: `つんとした におい。青色のリトマス紙に ひたすと……<b>赤色</b>に かわった！` },
+  { key: 'shokuen', name: W.shokuen, cat: 'neutral', txt: `赤色のリトマス紙も、青色のリトマス紙も、色は かわらなかった。` },
+  { key: 'tansan', name: W.tansan, cat: 'acid', txt: `小さな あわ（気体）が ぷくぷく。青色のリトマス紙に ひたすと……<b>赤色</b>に かわった！` },
+  { key: 'sekkai', name: W.sekkai, cat: 'alkaline', txt: `赤色のリトマス紙に ひたすと……<b>青色</b>に かわった！` },
+  { key: 'anmonia', name: W.anmonia, cat: 'alkaline', txt: `鼻を つく つよい におい。赤色のリトマス紙に ひたすと……<b>青色</b>に かわった！` },
+];
+const CAT_LABEL = { acid: W.sansei, neutral: W.chuusei, alkaline: W.arukari };
+const CAT_COLOR = { acid: '#e2536e', neutral: '#5a8a4a', alkaline: '#3f74c2' };
+
+// ---------- 蒸発じっけん（気体か固体か） ----------
+const TOUMEI_ROUNDS = [
+  { key: 'shokuen', name: W.shokuen, result: 'solid',
+    resultTxt: `水が なくなると、白い つぶ（${ruby('食塩', 'しょくえん')}の ${ruby('結晶', 'けっしょう')}）が のこった！` },
+  { key: 'enan', name: W.enan, result: 'gas',
+    resultTxt: `水が なくなると……あとには <b>何も のこらなかった</b>！` },
+];
+
+// ---------- むらさきキャベツ液 ----------
+const CABBAGE_POINTS = [
+  { key: 0, letter: 'あ', name: 'レモン汁', col: '#e0455a',
+    txt: `むらさきキャベツ液に レモン汁を たらすと……あざやかな <b>赤色</b>に 変わった！ 強い ${W.sansei}の しるしだよ。` },
+  { key: 1, letter: 'い', name: 'お酢', col: '#c2445a',
+    txt: `お酢を たらすと……<b>赤むらさき色</b>に 変わった。お酢も ${W.sansei}の なかまなんだ。` },
+  { key: 2, letter: 'う', name: 'せっけん水', col: '#2f8a8a',
+    txt: `せっけん水を たらすと……<b>青緑色</b>に 変わった！ ${W.arukari}の しるしだよ。` },
+  { key: 3, letter: 'え', name: '重そう水', col: '#4a9a5a',
+    txt: `重そう水を たらすと……<b>緑色</b>に 変わった。せっけん水より すこし 弱い ${W.arukari}なんだ。` },
+];
+const CABBAGE_DEFAULT = '#7a4aa0';
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'nakama',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  heating: false,
+  phase: '',
+  // m_nakama
+  nakamaTested: new Set(),
+  curLiquid: null,
+  litmusAnimT: 0,
+  litmusShow: false,
+  // m_toumei
+  toumeiRoundIdx: 0,
+  toumeiPick: -1,
+  toumeiLevelT: 1,
+  toumeiResidue: null,
+  // m_kinzoku
+  kinLevel: 4,
+  kinBubbleT: 0,
+  kinResult: null,
+  kinTries: new Set(),
+  // m_betsumono
+  betsuPick: -1,
+  betsuLevelT: 1,
+  betsuResidueShown: false,
+  magnetTested: false,
+  acidTested: false,
+  // hakase
+  cabbageFound: new Set(),
+  cabbageColor: null,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sFizz = () => { tone(300, 0, 0.5, 'sawtooth', 0.03); tone(500, 0.1, 0.4, 'sawtooth', 0.03); };
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f0fbf9'); g.addColorStop(1, '#dceff0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#e6f6f2';
+  gctx.fillRect(X(0), Y(520), 1000 * sc, 120 * sc);
+}
+
+// ---------- フラスコ／ビーカーの共通描画 ----------
+function drawFlaskShape(X, Y, sc, cx, topY, botY, halfW) {
+  const p = new Path2D();
+  const nw = halfW * 0.34;
+  p.moveTo(X(cx - nw), Y(topY));
+  p.lineTo(X(cx - nw), Y(topY + (botY - topY) * 0.32));
+  p.lineTo(X(cx - halfW), Y(botY - 10));
+  p.quadraticCurveTo(X(cx - halfW), Y(botY), X(cx - halfW + 8), Y(botY));
+  p.lineTo(X(cx + halfW - 8), Y(botY));
+  p.quadraticCurveTo(X(cx + halfW), Y(botY), X(cx + halfW), Y(botY - 10));
+  p.lineTo(X(cx + nw), Y(topY + (botY - topY) * 0.32));
+  p.lineTo(X(cx + nw), Y(topY));
+  return p;
+}
+
+// ---------- 1．水よう液を なかまわけ ----------
+const BOTTLE_X = [150, 350, 500, 650, 850];
+function drawNakamaScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  gctx.fillStyle = '#0d3640'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('見た目は どれも にている……リトマス紙で しらべよう', X(500), Y(70));
+
+  LIQUIDS.forEach((li, i) => {
+    const cx = BOTTLE_X[i], topY = 110, botY = 230, halfW = 46;
+    const selected = S.curLiquid === li.key;
+    const tested = S.nakamaTested.has(li.key);
+    const p = drawFlaskShape(X, Y, sc, cx, topY, botY, halfW);
+    gctx.save();
+    gctx.clip(p);
+    gctx.fillStyle = 'rgba(190,220,225,.55)';
+    gctx.fillRect(X(cx - halfW), Y(topY + (botY - topY) * 0.42), halfW * 2 * sc, (botY - topY) * 0.6 * sc);
+    gctx.restore();
+    gctx.lineWidth = (selected ? 4 : 2) * sc;
+    gctx.strokeStyle = selected ? '#1f6a78' : '#163044';
+    gctx.stroke(p);
+    if (tested) {
+      gctx.fillStyle = CAT_COLOR[li.cat];
+      gctx.beginPath(); gctx.arc(X(cx + halfW - 4), Y(topY - 4), 15 * sc, 0, TAU); gctx.fill();
+      gctx.strokeStyle = '#fff'; gctx.lineWidth = 2 * sc; gctx.stroke();
+      gctx.fillStyle = '#fff'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+      gctx.fillText('✓', X(cx + halfW - 4), Y(topY - 3));
+    }
+    gctx.fillStyle = '#163044'; gctx.font = `700 ${15 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'alphabetic';
+    wrapText(li.name.replace(/<[^>]+>/g, ''), X(cx), Y(botY + 26), 100 * sc, 16 * sc);
+  });
+
+  // リトマス試験台
+  const stX = 500, stY = 400;
+  gctx.fillStyle = '#fff'; gctx.strokeStyle = '#a8dcd8'; gctx.lineWidth = 2 * sc;
+  roundRect(gctx, X(stX - 220), Y(stY - 10), 440 * sc, 150 * sc, 14 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#3a8a98'; gctx.font = `${15 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'alphabetic';
+  gctx.fillText('リトマス紙', X(stX), Y(stY + 10));
+
+  const li = LIQUIDS.find(l => l.key === S.curLiquid);
+  const t = S.litmusAnimT;
+  const RED_BASE = '#e2536e', BLUE_BASE = '#3f74c2';
+  let redPaper = RED_BASE, bluePaper = BLUE_BASE;
+  if (li && S.litmusShow) {
+    if (li.cat === 'alkaline') redPaper = lerpColor(RED_BASE, BLUE_BASE, t);
+    if (li.cat === 'acid') bluePaper = lerpColor(BLUE_BASE, RED_BASE, t);
+  }
+  drawPaperStrip(X, Y, sc, stX - 90, stY + 40, redPaper, '赤');
+  drawPaperStrip(X, Y, sc, stX + 90, stY + 40, bluePaper, '青');
+}
+function drawPaperStrip(X, Y, sc, cx, cy, col, label) {
+  gctx.fillStyle = col; gctx.strokeStyle = '#163044'; gctx.lineWidth = 1.6 * sc;
+  roundRect(gctx, X(cx - 18), Y(cy - 46), 36 * sc, 92 * sc, 5 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#fff'; gctx.font = `700 ${14 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(label, X(cx), Y(cy + 60));
+}
+function wrapText(text, x, y, maxW, lh) {
+  const chars = text.split('');
+  let line = '', ly = y;
+  const lines = [];
+  chars.forEach(ch => {
+    const test = line + ch;
+    if (gctx.measureText(test).width > maxW && line) { lines.push(line); line = ch; } else { line = test; }
+  });
+  if (line) lines.push(line);
+  lines.slice(0, 2).forEach((l, i) => gctx.fillText(l, x, ly + i * lh));
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+// ---------- 2．蒸発ざら（とけているのは 固体？ 気体？／betsumonoでも流用） ----------
+function drawEvapScene(X, Y, sc, levelT, residue, heating, titleTxt) {
+  bgFill(X, Y, sc);
+  const cx = 500, dishY = 420, standTopY = 470;
+  gctx.fillStyle = '#8a8f92'; gctx.fillRect(X(cx - 60), Y(standTopY), 120 * sc, 14 * sc);
+  gctx.fillRect(X(cx - 6), Y(standTopY + 14), 12 * sc, 60 * sc);
+  gctx.fillRect(X(cx - 60), Y(standTopY + 74), 120 * sc, 12 * sc);
+  if (heating) {
+    for (let i = 0; i < 3; i++) {
+      const fxx = cx + (i - 1) * 26;
+      gctx.fillStyle = `rgba(255,150,60,${0.5 + 0.3 * Math.sin(performance.now() / 90 + i)})`;
+      gctx.beginPath(); gctx.ellipse(X(fxx), Y(standTopY + 30), 10 * sc, 20 * sc, 0, 0, TAU); gctx.fill();
+    }
+  }
+  // 蒸発皿
+  gctx.fillStyle = '#e8e2d0'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.ellipse(X(cx), Y(dishY), 90 * sc, 26 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  // 液体（levelTに応じて縮む）
+  if (levelT > 0.02) {
+    gctx.fillStyle = 'rgba(180,210,230,.75)';
+    gctx.beginPath(); gctx.ellipse(X(cx), Y(dishY - 4), 76 * sc * levelT, 16 * sc * levelT, 0, 0, TAU); gctx.fill();
+    gctx.strokeStyle = 'rgba(255,255,255,.6)'; gctx.lineWidth = 1.4 * sc;
+    gctx.beginPath(); gctx.ellipse(X(cx), Y(dishY - 4), 76 * sc * levelT, 16 * sc * levelT, 0, 0, TAU); gctx.stroke();
+  }
+  // 残ったもの
+  if (residue === 'solid') {
+    gctx.fillStyle = '#fff'; gctx.strokeStyle = '#c9c2a8'; gctx.lineWidth = 1 * sc;
+    for (let i = 0; i < 10; i++) {
+      const rx = cx + Math.sin(i * 2.3) * 46, ry = dishY - 2 + Math.cos(i * 1.7) * 8;
+      gctx.save(); gctx.translate(X(rx), Y(ry)); gctx.rotate(i);
+      gctx.fillRect(-4 * sc, -4 * sc, 8 * sc, 8 * sc); gctx.strokeRect(-4 * sc, -4 * sc, 8 * sc, 8 * sc);
+      gctx.restore();
+    }
+  } else if (residue === 'yellow') {
+    gctx.fillStyle = '#d9a628'; gctx.strokeStyle = '#8a6a10'; gctx.lineWidth = 1.4 * sc;
+    gctx.beginPath();
+    for (let i = 0; i < 9; i++) {
+      const a = i / 9 * TAU;
+      const rr = 34 * (0.7 + 0.3 * Math.sin(i * 2.9));
+      const px = cx + Math.cos(a) * rr, py = dishY - 2 + Math.sin(a) * rr * 0.32;
+      i === 0 ? gctx.moveTo(X(px), Y(py)) : gctx.lineTo(X(px), Y(py));
+    }
+    gctx.closePath(); gctx.fill(); gctx.stroke();
+  }
+  gctx.fillStyle = '#0d3640'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(titleTxt, X(500), Y(70));
+}
+function drawToumeiScene(X, Y, sc) {
+  const r = TOUMEI_ROUNDS[S.toumeiRoundIdx];
+  drawEvapScene(X, Y, sc, S.toumeiLevelT, S.toumeiResidue, S.heating, `${r.name.replace(/<[^>]+>/g, '')}を 蒸発させよう`);
+}
+
+// ---------- 3．塩酸で 鉄を とかそう（メイン操作） ----------
+function drawKinzokuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, topY = 150, botY = 420, halfW = 130;
+  const idx = clamp((S.kinLevel || 1) - 1, 0, 7);
+  const pct = NOUDO_PCT[idx];
+  const p = drawFlaskShape(X, Y, sc, cx, topY, botY, halfW);
+  const liqTop = topY + (botY - topY) * 0.4;
+  const conc = clamp(idx / 7, 0, 1);
+  gctx.save(); gctx.clip(p);
+  const g = gctx.createLinearGradient(0, Y(liqTop), 0, Y(botY));
+  g.addColorStop(0, `rgba(${210 - conc * 40},${230 - conc * 60},${200 - conc * 90},.7)`);
+  g.addColorStop(1, `rgba(${180 - conc * 40},${205 - conc * 70},${175 - conc * 90},.85)`);
+  gctx.fillStyle = g;
+  gctx.fillRect(X(cx - halfW), Y(liqTop), halfW * 2 * sc, (botY - liqTop) * sc);
+  // 鉄（スチールウール）
+  gctx.strokeStyle = '#8a8f92'; gctx.lineWidth = 2.2 * sc;
+  const ironY = botY - 26 - (S.kinBubbleT > 0.85 ? (S.kinBubbleT - 0.85) * 30 : 0);
+  gctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const a0 = i * 1.7;
+    gctx.moveTo(X(cx - 20 + i * 8), Y(ironY - 6));
+    gctx.bezierCurveTo(X(cx - 10 + i * 8), Y(ironY - 16), X(cx + 6 + i * 8), Y(ironY + 4), X(cx - 4 + i * 8), Y(ironY + 10));
+  }
+  gctx.stroke();
+  // あわ
+  if (S.kinBubbleT > 0 && S.kinBubbleT < 1) {
+    const rate = idx <= 1 ? 3 : idx >= 6 ? 16 : 8;
+    const n = Math.round(rate * S.kinBubbleT);
+    gctx.fillStyle = 'rgba(255,255,255,.7)';
+    for (let i = 0; i < n; i++) {
+      const bx = cx + Math.sin(i * 2.1) * 40;
+      const by = ironY - ((S.kinBubbleT * 3 + i * 0.37) % 1) * (ironY - liqTop);
+      gctx.beginPath(); gctx.arc(X(bx), Y(by), (2 + (i % 3)) * sc, 0, TAU); gctx.fill();
+    }
+    if (idx >= 6) {
+      gctx.fillStyle = `rgba(200,200,200,${0.25 * S.kinBubbleT})`;
+      gctx.beginPath(); gctx.ellipse(X(cx), Y(liqTop - 10), 60 * sc, 20 * sc, 0, 0, TAU); gctx.fill();
+    }
+  }
+  gctx.restore();
+  gctx.lineWidth = 2.5 * sc; gctx.strokeStyle = '#163044'; gctx.stroke(p);
+
+  gctx.fillStyle = '#0d3640'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${W.enan.replace(/<[^>]+>/g, '')}の こさ ${NUMS[idx]}（やく${pct}%）`, X(500), Y(70));
+  if (S.kinResult === 'high') {
+    gctx.font = `${28 * sc}px sans-serif`; gctx.fillText('⚠️', X(cx + halfW + 30), Y(topY + 20));
+  }
+}
+
+// ---------- 4．とけた鉄の 正体（蒸発ざら流用＋テスト） ----------
+function drawBetsumonoScene(X, Y, sc) {
+  drawEvapScene(X, Y, sc, S.betsuLevelT, S.betsuResidueShown ? 'yellow' : null, S.heating, 'とかした 液を 蒸発させよう');
+  if (S.betsuResidueShown) {
+    if (S.magnetTested) {
+      gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+      gctx.fillText('🧲', X(360), Y(420));
+    }
+    if (S.acidTested) {
+      gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+      gctx.fillText('🧪', X(640), Y(400));
+    }
+  }
+}
+
+// ---------- 5．はかせ：むらさきキャベツ液 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, topY = 150, botY = 430, halfW = 110;
+  const p = drawFlaskShape(X, Y, sc, cx, topY, botY, halfW);
+  const liqTop = topY + (botY - topY) * 0.38;
+  gctx.save(); gctx.clip(p);
+  gctx.fillStyle = S.cabbageColor || CABBAGE_DEFAULT;
+  gctx.globalAlpha = 0.82;
+  gctx.fillRect(X(cx - halfW), Y(liqTop), halfW * 2 * sc, (botY - liqTop) * sc);
+  gctx.globalAlpha = 1;
+  gctx.restore();
+  gctx.lineWidth = 2.5 * sc; gctx.strokeStyle = '#163044'; gctx.stroke(p);
+
+  const vialXs = [200, 380, 620, 800];
+  CABBAGE_POINTS.forEach((cp, i) => {
+    const vx = vialXs[i], vy = 540;
+    const done = S.cabbageFound.has(cp.key);
+    gctx.beginPath(); gctx.arc(X(vx), Y(vy), 30 * sc, 0, TAU);
+    gctx.fillStyle = done ? cp.col : '#fff';
+    gctx.fill();
+    gctx.strokeStyle = '#163044'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = done ? '#fff' : '#163044';
+    gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(cp.letter, X(vx), Y(vy - 4));
+    gctx.font = `${12 * sc}px sans-serif`;
+    gctx.fillText(cp.name, X(vx), Y(vy + 46));
+  });
+  gctx.fillStyle = '#0d3640'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('むらさきキャベツ液に いろいろな 液を たらそう', X(500), Y(70));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'nakama') drawNakamaScene(X, Y, sc);
+  else if (S.scene === 'toumei') drawToumeiScene(X, Y, sc);
+  else if (S.scene === 'kinzoku') drawKinzokuScene(X, Y, sc);
+  else if (S.scene === 'betsumono') drawBetsumonoScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- イロめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f5fdfb'); grd.addColorStop(1, '#a8dcd8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = S.scope.color || '#1f6a78';
+    sctx.beginPath(); sctx.arc(R, R * 0.82, R * 0.42, 0, TAU); sctx.fill();
+    sctx.strokeStyle = '#163044'; sctx.lineWidth = R * 0.03; sctx.stroke();
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const idx = clamp((S.kinLevel || 1) - 1, 0, 7);
+    const r = judgeNouido(idx + 1);
+    const cx = R, cy = R * 1.05, rad = R * 0.72;
+    sctx.strokeStyle = '#dfeef2'; sctx.lineWidth = R * 0.13; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, 0); sctx.stroke();
+    const frac = idx / 7;
+    const ang = Math.PI - Math.PI * frac;
+    sctx.strokeStyle = r.level === 'good' ? '#2f9a5a' : r.level === 'low' ? '#e0a020' : '#c1442e';
+    sctx.lineWidth = R * 0.13;
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, ang, true); sctx.stroke();
+    sctx.strokeStyle = '#163044'; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx + Math.cos(ang) * rad * 0.88, cy + Math.sin(ang) * rad * 0.88); sctx.stroke();
+    sctx.fillStyle = '#163044'; sctx.beginPath(); sctx.arc(cx, cy, R * 0.05, 0, TAU); sctx.fill();
+    label(`こさ ${NUMS[idx]}（やく${NOUDO_PCT[idx]}%）`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#eafffb'); g2.addColorStop(1, 'rgba(234,255,251,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#1f6a78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🧪', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#1f6a78'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.9)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#163044';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1f6a78', '#ffe3a0', '#a8dcd8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    nakama: '🧪 水よう液を なかまわけ',
+    toumei: '🔥 とけているのは 何？',
+    kinzoku: '⚗️ 塩酸で 鉄を とかそう',
+    betsumono: '🔍 とけた鉄の 正体',
+    hakase: '🥬 むらさきキャベツの ふしぎ',
+    done: '🧪 いろみずの研究所 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '水よう液の せかい';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_nakama', 'm_toumei', 'm_kinzoku', 'm_betsumono', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null; S.heating = false;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'nakama', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🧪🥬🔬✨</div>
+        <h1>いろみずの研究所</h1>
+        <div class="sub">〜 水よう液の 正体を あばく 〜</div>
+        <p class="talk">ようこそ！ わたしは リトマス液の しずくから 生まれた 精霊、<b>イロ</b>。今日は 見た目では わからない <b>水よう液の 正体</b>を、いっしょに たしかめに いこう！<br>
+        リトマス紙、蒸発、そして 塩酸と 鉄の ふしぎな 関係……さいごは むらさきキャベツの 大発見も 待っているよ。</p>
+        <button class="btn" id="startBtn">研究を はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです（薬品は登場しません）。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">塩酸に 鉄を 入れて とかしたあと、その 液を 蒸発させたら……あとに 何が のこると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">⚙️</span><b>ア</b> 鉄のまま（金属の つぶ）が のこる</div>
+          <div class="vcard" data-v="1"><span class="vicon">💨</span><b>イ</b> 何も のこらない</div>
+          <div class="vcard" data-v="2"><span class="vicon">🟡</span><b>ウ</b> 鉄とは ちがう、黄色っぽい ものが のこる</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：水よう液を なかまわけ ---
+  m_nakama: {
+    enter() {
+      Object.assign(S, { scene: 'nakama', scope: { type: 'idle' }, nakamaTested: new Set(), curLiquid: null, litmusShow: false, litmusAnimT: 0 });
+      updateLoc();
+      setWish('🧪', `5つの 水よう液が ならんでいるよ。リトマス紙で しらべて、${W.sansei}・${W.chuusei}・${W.arukari}の 3つに なかまわけしよう。`);
+      say(`見た目は どれも にているね……下の ボタンを おして、ひとつずつ しらべよう！`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = LIQUIDS.map(li => ({
+        label: li.name.replace(/<[^>]+>/g, '') + (S.nakamaTested.has(li.key) ? ' ✓' : ''),
+        cls: 'pos' + (S.curLiquid === li.key ? ' sel' : ''),
+        cb: () => this.select(li),
+      }));
+      setControls(list);
+      if (S.nakamaTested.size >= LIQUIDS.length) {
+        setButtons([{ label: 'つぎへ（とけているのは何？）', cb: nextStep }]);
+      }
+    },
+    select(li) {
+      S.curLiquid = li.key;
+      S.scope = { type: 'idle' };
+      if (S.nakamaTested.has(li.key)) {
+        say(li.txt + `<br>もう なかまわけ ずみだよ。<b>${CAT_LABEL[li.cat]}</b>だったね。`);
+        this.refreshCtl();
+        return;
+      }
+      S.litmusShow = false; S.litmusAnimT = 0;
+      setControls([]);
+      say(`${li.name}に リトマス紙を ひたしてみよう……`);
+      startTween(0, 1, 1.1, v => { S.litmusAnimT = v; }, () => {
+        S.litmusShow = true;
+        hideWish();
+        say(li.txt + `<br>これは ${W.sansei}・${W.chuusei}・${W.arukari}の どれだと 思う？`);
+        setButtons(choiceRow([W.sansei.replace(/<[^>]+>/g, ''), W.chuusei.replace(/<[^>]+>/g, ''), W.arukari.replace(/<[^>]+>/g, '')], (i, el) => this.classify(li, i, el)));
+      });
+    },
+    classify(li, i, el) {
+      const catIdx = { acid: 0, neutral: 1, alkaline: 2 }[li.cat];
+      markPicked(el);
+      if (i === catIdx) {
+        sYes(); S.scope = { type: 'point', name: CAT_LABEL[li.cat].replace(/<[^>]+>/g, ''), color: CAT_COLOR[li.cat] }; scopeBurst();
+        S.nakamaTested.add(li.key);
+        say(`せいかい！ ${li.name}は <b>${CAT_LABEL[li.cat]}</b>だね。`);
+        setButtons([]);
+        if (S.nakamaTested.size >= LIQUIDS.length) {
+          award('m_nakama');
+          say(`せいかい！ ${li.name}は <b>${CAT_LABEL[li.cat]}</b>だね。<br><br>💡 <b>たいせつポイント</b><br>水よう液は <b>${W.sansei}・${W.chuusei}・${W.arukari}</b>の 3つに 分けられる。リトマス紙の 色の 変わり方が、その 手がかりに なるんだ。`);
+        }
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。リトマス紙の 色の 変わり方を もういちど 見てみよう。<br>${li.txt}`);
+        setButtons(choiceRow([W.sansei.replace(/<[^>]+>/g, ''), W.chuusei.replace(/<[^>]+>/g, ''), W.arukari.replace(/<[^>]+>/g, '')], (i2, el2) => this.classify(li, i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：とけているのは 何？（蒸発） ---
+  m_toumei: {
+    enter() {
+      Object.assign(S, { scene: 'toumei', scope: { type: 'idle' }, toumeiRoundIdx: 0 });
+      updateLoc();
+      this.startRound();
+    },
+    startRound() {
+      const r = TOUMEI_ROUNDS[S.toumeiRoundIdx];
+      Object.assign(S, { toumeiPick: -1, toumeiLevelT: 1, toumeiResidue: null, heating: false });
+      hideWish();
+      say(`${r.name}を 蒸発ざらに 入れて、熱で 水を 蒸発させると……あとに 何が のこると 思う？ シートに 予想を 書いたら、ボタンで えらんでね。`);
+      setControls([]);
+      setButtons(choiceRow(['白い つぶが のこる', '何も のこらない', '黄色い つぶが のこる'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      S.toumeiPick = i; markPicked(el);
+      say(`よし、じっさいに あたためて たしかめよう！`);
+      setButtons([{ label: '🔥 熱して 蒸発させる', cb: () => this.heat() }]);
+    },
+    heat() {
+      setButtons([]);
+      S.heating = true;
+      say(`ぐつぐつ……水が どんどん 蒸発していく……`);
+      startTween(1, 0, 2.0, v => { S.toumeiLevelT = v; }, () => this.reveal());
+    },
+    reveal() {
+      S.heating = false;
+      const r = TOUMEI_ROUNDS[S.toumeiRoundIdx];
+      S.toumeiResidue = r.result;
+      const hit = (r.result === 'solid' && S.toumeiPick === 0) || (r.result === 'gas' && S.toumeiPick === 1);
+      sYes(); S.scope = { type: 'point', name: r.result === 'solid' ? '固体が のこった' : '何も のこらない', color: r.result === 'solid' ? '#fff' : '#dcefe8' }; scopeBurst();
+      const isLast = S.toumeiRoundIdx >= TOUMEI_ROUNDS.length - 1;
+      let txt = `${r.resultTxt}${hit ? '　よそう どおり！' : ''}`;
+      if (isLast) {
+        award('m_toumei');
+        txt += `<br><br>💡 <b>たいせつポイント</b><br>水よう液には、${ruby('食塩', 'しょくえん')}のような <b>固体</b>が とけているものと、塩酸のような <b>気体</b>が とけているものが ある。蒸発させれば 見分けられるんだ。`;
+      }
+      say(txt);
+      setButtons([{ label: isLast ? 'つぎへ（塩酸で鉄をとかそう）' : 'つぎの えきたいへ', cb: () => isLast ? nextStep() : this.next() }]);
+    },
+    next() { S.toumeiRoundIdx++; this.startRound(); },
+  },
+
+  // --- M3：塩酸で 鉄を とかそう（メイン操作） ---
+  m_kinzoku: {
+    enter() {
+      Object.assign(S, { scene: 'kinzoku', scope: { type: 'gauge' }, kinLevel: 4, kinBubbleT: 0, kinResult: null, kinTries: new Set() });
+      updateLoc();
+      setWish('⚗️', `塩酸の こさを 目もり①〜⑧で えらんで、${W.tetsu}（スチールウール）を 入れてみよう。`);
+      say(`こさを えらんで「${W.tetsu}を 入れる」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.kinLevel === n ? ' sel' : ''), cb: () => { S.kinLevel = n; this.refreshCtl(); } });
+      list.push({ label: `⚗️ ${W.tetsu.replace(/<[^>]+>/g, '')}を 入れる`, cb: () => this.react() });
+      setControls(list);
+    },
+    react() {
+      setControls([]);
+      S.kinResult = null; S.kinBubbleT = 0;
+      say(`目もり ${NUMS[S.kinLevel - 1]}（やく${NOUDO_PCT[S.kinLevel - 1]}%）の 塩酸に、${W.tetsu}を 入れてみよう……`);
+      startTween(0, 1, 1.6, v => { S.kinBubbleT = v; }, () => this.judge());
+    },
+    judge() {
+      const r = judgeNouido(S.kinLevel);
+      S.kinTries.add(S.kinLevel); S.kinResult = r.level;
+      if (r.level === 'low') {
+        sHmm();
+        say(`うすすぎて、あわ（${W.suiso}）が ほとんど 出ない……${W.tetsu}は ほとんど かわらないみたい。もっと こい 塩酸で ためそう。`);
+        this.refreshCtl();
+      } else if (r.level === 'good') {
+        sYes(); scopeBurst(); award('m_kinzoku'); S.phase = 'done';
+        say(`✨ あわ（${W.suiso}）を 出しながら、${W.tetsu}が とけていく！ 液が すこし 黄色っぽく なった。<br><br>💡 <b>たいせつポイント</b><br>塩酸は ${W.tetsu}を とかす。とけると あわ（${W.suiso}）が 出る。この とけた液を、こんど 蒸発させて 正体を たしかめよう。`);
+        setButtons([{ label: 'つぎへ（とけた鉄の正体）', cb: nextStep }]);
+      } else {
+        sClank();
+        say(`こすぎて、あわが すごい いきおいで 出て、けむりのような ものも 見える……⚠️ 本当の 理科室では、こい 塩酸は とても きけんだから 使わないよ。もう少し うすい 塩酸で ためそう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：とけた鉄の 正体 ---
+  m_betsumono: {
+    enter() {
+      Object.assign(S, { scene: 'betsumono', scope: { type: 'idle' }, betsuLevelT: 1, betsuResidueShown: false, magnetTested: false, acidTested: false });
+      updateLoc();
+      hideWish();
+      say(`${W.tetsu}を とかした 塩酸を、こんど 蒸発させてみよう。あとに 何が のこると 思う？ シートに 予想を 書いたら、ボタンで えらんでね。`);
+      setButtons(choiceRow(['鉄のまま（金属の つぶ）が のこる', '何も のこらない', '鉄とは ちがう、黄色っぽい ものが のこる'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      S.betsuPick = i; markPicked(el);
+      say(`よし、じっさいに 蒸発させて たしかめよう！`);
+      setButtons([{ label: '🔥 熱して 蒸発させる', cb: () => this.heat() }]);
+    },
+    heat() {
+      setButtons([]);
+      S.heating = true;
+      say(`ぐつぐつ……水が どんどん 蒸発していく……`);
+      startTween(1, 0, 2.0, v => { S.betsuLevelT = v; }, () => this.reveal());
+    },
+    reveal() {
+      S.heating = false; S.betsuResidueShown = true;
+      sYes(); S.scope = { type: 'point', name: '黄色っぽい つぶ', color: '#d9a628' }; scopeBurst();
+      const hit = S.betsuPick === 2;
+      say(`あとには、黄色っぽい つぶが のこった！ これは ${W.tetsu}……なのかな？ ${hit ? 'よそう どおり！' : ''} 2つの 方法で たしかめよう。`);
+      setButtons(this.testButtons());
+    },
+    testButtons() {
+      return [
+        { label: `🧲 ${W.jishaku.replace(/<[^>]+>/g, '')}を 近づける` + (S.magnetTested ? ' ✓' : ''), cb: () => this.testMagnet() },
+        { label: '🧪 塩酸を たらす' + (S.acidTested ? ' ✓' : ''), cb: () => this.testAcid() },
+      ];
+    },
+    testMagnet() {
+      if (S.magnetTested) return;
+      S.magnetTested = true; sTap();
+      say(`🧲 ${W.jishaku}を 近づけても……くっつかない！ ${W.tetsu}なら ${W.jishaku}に くっつくはずなのに。`);
+      setButtons(this.testButtons());
+      this.checkDone();
+    },
+    testAcid() {
+      if (S.acidTested) return;
+      S.acidTested = true; sTap();
+      say(`🧪 塩酸を たらしても……さっきのような あわは 出ない！ ${W.tetsu}なら あわが 出るはずなのに。`);
+      setButtons(this.testButtons());
+      this.checkDone();
+    },
+    checkDone() {
+      if (S.magnetTested && S.acidTested) {
+        award('m_betsumono'); S.phase = 'done';
+        const votedRight = S.votePicked.has(2);
+        say(`💡 <b>たいせつポイント</b><br>とけた ${W.tetsu}は、${W.jishaku}に くっつかず、塩酸を かけても あわが 出ない……つまり <b>${W.tetsu}とは べつの ものに ${W.henka}している</b>んだ！ 水よう液には、${W.kinzoku}を べつの ものに ${W.henka}させる 力が あるんだね。<br><br>さいしょの よそうタイムの こたえは <b>ウ ${W.tetsu}とは べつの、黄色っぽい ものが のこる</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：むらさきキャベツ液 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, cabbageFound: new Set(), cabbageColor: null });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ むらさきキャベツの しるも、じつは リトマス紙と おなじ はたらきを する てんねんの 指示薬なんだ。いろいろな 液を たらして 色の 変化を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(CABBAGE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.cabbageFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.cabbageFound.size >= CABBAGE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.cabbageFound.add(p.key); S.cabbageColor = p.col;
+      S.scope = { type: 'point', name: p.name, color: p.col };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`むらさきキャベツ液が リトマス紙より すごいのは、どんな ところだろう？`);
+      setButtons(choiceRow(['色が 変わらないから べんり', '酸性・アルカリ性の 強さも、色の ちがいで わかるから', 'どんな 水よう液にも 使えないから'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ リトマス紙は 赤・青の 2色だけだけど、むらさきキャベツ液は 赤・むらさき・緑・黄色と、こさに よって 色が すこしずつ 変わる。だから ${W.sansei}・${W.arukari}の <b>強さ</b>まで 目で 見て わかるんだ。<br><br>⚠️ ${W.sansei}や ${W.arukari}の つよい 薬品は、目に 入ると とても きけん。理科室では 先生の 話を よく 聞いて、正しく あつかおうね。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['色が 変わらないから べんり', '酸性・アルカリ性の 強さも、色の ちがいで わかるから', 'どんな 水よう液にも 使えないから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' }, cabbageColor: CABBAGE_DEFAULT });
+      updateLoc();
+      const votedRight = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ いろみずの研究所 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 水よう液は、${W.sansei}・${W.chuusei}・${W.arukari}の 3つに 分けられる。しらべる 道具は（<span class="blankWord" data-a="リトマス紙">？？？</span>）。<br>
+        ② 水よう液には、固体が とけているものと（<span class="blankWord" data-a="気体">？？？</span>）が とけているものが ある。<br>
+        ③ 塩酸のような 水よう液には、金属を べつの ものに（<span class="blankWord" data-a="変化させる">？？？</span>）力が ある。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ 鉄とは ちがう、黄色っぽい ものが のこる</b>でした！ 塩酸に とけた 鉄は、磁石にも くっつかず あわも 出さない、まったく べつの ものに 変わっていたね。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>紅茶に レモン汁を 少し たらしてみよう。色が うすく 変わったら、それも 酸性の 力。おうちの人と いっしょに、あんぜんに 試してみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#0d3640'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' }, cabbageColor: CABBAGE_DEFAULT });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「炭酸水は ${W.sansei}？ ${W.chuusei}？」「とけた鉄が べつの ものに 変わった しょうこは？」`);
+      setButtons([
+        { label: '🧪 なかまわけの 図', cls: 'sub', cb: () => this.show('nakama') },
+        { label: '🔥 蒸発ざらの 図', cls: 'sub', cb: () => this.show('toumei') },
+        { label: '⚗️ 塩酸と 鉄の 図', cls: 'sub', cb: () => this.show('kinzoku') },
+        { label: '🥬 むらさきキャベツの 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kinzoku などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

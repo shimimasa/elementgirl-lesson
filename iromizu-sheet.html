@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>いろみずの研究所 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f6a78; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .catTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; text-align: center; }
+  .catTable th, .catTable td { border: .4mm solid #222; padding: 1.1mm 1mm; }
+  .catTable th { background: #dff3f0; }
+  .catTable td.item { text-align: left; font-weight: 700; white-space: nowrap; }
+  .catTable td.mk { width: 14mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #dff3f0; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.5mm 1mm; }
+  .levelTable th { background: #dff3f0; }
+  .levelTable td.res { height: 6mm; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🧪 いろみずの研究所 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      塩酸に 鉄を 入れて とかしたあと、その 液を 蒸発させたら……何が のこると 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> ⚙️ 鉄のまま（金属の つぶ）が のこる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 💨 何も のこらない</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🟡 鉄とは ちがう、黄色っぽい ものが のこる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．水よう液を なかまわけしよう</span>
+    <div class="secBody">
+      リトマス紙で しらべて、〇を つけよう。
+      <table class="catTable">
+        <tr><th>水よう液</th><th>酸性</th><th>中性</th><th>アルカリ性</th></tr>
+        <tr><td class="item">塩酸</td><td class="mk"></td><td class="mk"></td><td class="mk"></td></tr>
+        <tr><td class="item">食塩水</td><td class="mk"></td><td class="mk"></td><td class="mk"></td></tr>
+        <tr><td class="item">炭酸水</td><td class="mk"></td><td class="mk"></td><td class="mk"></td></tr>
+        <tr><td class="item">石灰水</td><td class="mk"></td><td class="mk"></td><td class="mk"></td></tr>
+        <tr><td class="item">アンモニア水</td><td class="mk"></td><td class="mk"></td><td class="mk"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．とけているのは 何？（蒸発じっけん）</span>
+    <div class="secBody">
+      蒸発させたあと、何が のこるか よそうしてから、じっさいに たしかめよう。
+      <table class="roundTable">
+        <tr><th>水よう液</th><th>よそう（〇を つけよう）</th><th>けっか</th></tr>
+        <tr><td>食塩水</td><td>白いつぶ ・ 何もなし ・ 黄色いつぶ</td><td class="fillLine sm"></td></tr>
+        <tr><td>塩酸</td><td>白いつぶ ・ 何もなし ・ 黄色いつぶ</td><td class="fillLine sm"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．塩酸で 鉄を とかそう</span>
+    <div class="secBody">
+      目もり①〜⑧で 塩酸の こさを えらんで 試してみよう。ちょうど よく とけた こさに 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．とけた鉄の 正体は？</span>
+    <div class="secBody">
+      蒸発させて のこった つぶは、鉄と おなじ？ ちがう？ たしかめた けっかを 書こう。<br>
+      磁石を 近づける：くっついた ／ くっつかなかった（どちらかに 〇）<br>
+      塩酸を たらす：あわが 出た ／ あわが 出なかった（どちらかに 〇）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（むらさきキャベツ液）</span>
+    <div class="secBody">
+      色の 変化を 見て、線で むすぼう。
+      <table class="roundTable">
+        <tr><th>レモン汁</th><th>お酢</th><th>せっけん水</th><th>重そう水</th></tr>
+        <tr><td>色：<span class="fillLine sm"></span></td><td>色：<span class="fillLine sm"></span></td><td>色：<span class="fillLine sm"></span></td><td>色：<span class="fillLine sm"></span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 水よう液は、酸性・中性・アルカリ性の 3つに 分けられる。しらべる 道具は（<span class="fillLine"></span>）。<br>
+      ② 水よう液には、固体が とけているものと（<span class="fillLine"></span>）が とけているものが ある。<br>
+      ③ 塩酸のような 水よう液には、金属を べつの ものに（<span class="fillLine"></span>）力が ある。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🍋</span>
+        <div>
+          紅茶に レモン汁を 少し たらして、色の 変化を おうちの人と いっしょに 見てみよう。<br>
+          ☐ 見た こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　いろみずの研究所 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】いろみずの研究所 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「水よう液の性質（酸性・中性・アルカリ性）」・学力幅あり・協力型／ 使うもの：「iromizu.html」・プロジェクタ・このノート（1ページ目を人数分）。実際の薬品は使いません（画面上のシミュレーションのみ）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kinzoku</b> などで途中再開（m_nakama／m_toumei／m_kinzoku／m_betsumono／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜12分</td><td>🧪 水よう液を なかまわけ</td><td>5つの水よう液（塩酸・食塩水・炭酸水・石灰水・アンモニア水）をボタンで選び、リトマス紙の色の変化を見て酸性/中性/アルカリ性に分類。見た目がそっくりでも性質は全く違うことに気づかせる</td></tr>
+      <tr><td class="min">12〜20分</td><td>🔥 とけているのは 何？（蒸発じっけん）</td><td>食塩水→白い結晶が残る、塩酸→何も残らない、の2ラウンド。予想→加熱→結果の順で。固体がとけているか気体がとけているかの見分け方を学ぶ</td></tr>
+      <tr><td class="min">20〜30分</td><td>⚗️ 塩酸で 鉄を とかそう（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で塩酸のこさを選び「鉄を入れる」→あわ（水素）の出方を判定。うすすぎ/こすぎでは失敗するので何度も挑戦させる。1人ずつ交代でこさを選ばせるとよい。⑦⑧の「こすぎて危険」演出で安全教育にもつなげる</td></tr>
+      <tr><td class="min">30〜37分</td><td>🔍 とけた鉄の 正体</td><td>とかした液を蒸発させ、残った黄色っぽいつぶを磁石・塩酸の2つの方法でテスト→鉄とは別の物質だと気づく。よそうタイムの答え合わせもここ</td></tr>
+      <tr><td class="min">37〜43分</td><td>🥬 はかせチャレンジ（むらさきキャベツ液）</td><td>レモン汁・お酢・せっけん水・重そう水の4つを発見してクイズ。リトマス紙より細かい色の変化＝強さも分かる、という発展的理解へ</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「紅茶にレモン汁」実験（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「はかせチャレンジ」を右下「つぎ▶」でスキップ可（<b>塩酸で鉄をとかそう・とけた鉄の正体・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ 鉄とは ちがう、黄色っぽい ものが のこる</b>／なかまわけ＝<b>酸性：塩酸・炭酸水／中性：食塩水／アルカリ性：石灰水・アンモニア水</b>／
+      蒸発じっけん＝<b>食塩水：白いつぶ（固体）が残る／塩酸：何も残らない（気体）</b>／塩酸で鉄をとかそう＝<b>③〜⑥（やく2〜5%）</b>／
+      とけた鉄の正体＝<b>磁石にくっつかない・塩酸をたらしてもあわが出ない → 鉄とは別の物質に変化している</b>／
+      はかせ＝<b>イ 酸性・アルカリ性の強さも色のちがいでわかるから</b>／
+      まとめ＝①<b>リトマス紙</b>　②<b>気体</b>　③<b>変化させる</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>水よう液は酸性・中性・アルカリ性の3つに分けられる。リトマス紙は、青色リトマス紙が赤色に変わると酸性、赤色リトマス紙が青色に変わるとアルカリ性、どちらも変わらなければ中性と判定する。教科書の定番7種のうち、塩酸・炭酸水は酸性、食塩水は中性、石灰水・アンモニア水はアルカリ性</li>
+      <li>水よう液には固体がとけているもの（食塩水・石灰水）と気体がとけているもの（塩酸＝塩化水素、炭酸水＝二酸化炭素、アンモニア水＝アンモニア）がある。蒸発させて何か残るかどうかで見分けられる（固体がとけていれば結晶が残り、気体がとけていれば何も残らない）</li>
+      <li>塩酸に鉄（スチールウール）を入れると、あわ（水素）を出しながら溶ける。この液を蒸発させると、鉄とは別の黄色っぽい物質（塩化鉄）が残る。この物質は磁石にくっつかず、塩酸を加えても反応しない＝鉄が化学変化して別の物質になったことを示す、小6理科の重要な到達点</li>
+      <li>むらさきキャベツ液（アントシアニン色素）はリトマス紙と同じ原理の天然の指示薬で、酸性・アルカリ性の強さに応じて赤→ピンク→むらさき→青緑→緑→黄色と連続的に色が変化する。強い酸性ほど赤に近く、強いアルカリ性ほど黄色に近づく</li>
+      <li>本授業では実際の薬品・実験器具は一切使用しない。画面上のシミュレーションのみで、本物の数値・現象（塩酸の濃度・反応の様子・色の変化）を再現している</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「塩酸で鉄をとかそう」が今日いちばんの見せ場。1人ずつ交代でこさを選ばせると全員が参加できる</li>
+      <li>塩酸のこさは「濃いほど良い」わけではなく設計している。①②はうすすぎてほとんど変化なし、⑦⑧は濃すぎて危険（実際の理科室でも濃い塩酸は扱わない）、というちょうどよい範囲（③〜⑥）を見つける過程を大事にする</li>
+      <li>本物の理科室で塩酸などの薬品を扱う際は、保護メガネの着用・換気・薬品を直接嗅がないなど安全指導が必須であることも一言添えるとよい</li>
+      <li>よそうタイムの答え（ウ：鉄とは別の黄色っぽいものが残る）は、多くの子が「溶けた金属は目に見えないだけでそこにある」と考えがちなため意外性がある。まとめで丁寧に振り返るとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「炭酸水は酸性？中性？」「とけた鉄が別のものに変わった証拠は？」「むらさきキャベツ液はリトマス紙より何がすごい？」</li>
+      <li>おうちミッションの紅茶＋レモン汁実験は、紅茶の色素（フラボノイド）が酸性で薄い色に変わる現象。安全で身近な酸性反応の実例として発展的に扱える</li>
+      <li>理科の物質分野は「もののとけ方」（まほう薬屋ほしずく）に続き本作で2単元目。エネルギー分野（光・音・磁石・電気）は理科の中でまだ未踏で、次の新規開拓候補</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
