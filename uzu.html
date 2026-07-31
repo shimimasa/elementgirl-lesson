@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ウズの実験室 — 電磁石のひみつたいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #1b2230 0%, #222b3d 55%, #2b3550 100%);
+    color: #eef2fa;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #ffb066; text-shadow: 0 0 14px rgba(255, 176, 102, .45);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8fb8e8; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #263049; border: 2px solid #3d4c6e;
+    font-size: clamp(16px, 1.8vw, 26px); color: #4a5a80;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe3a0, #d4900f);
+    border-color: #8a5a0a; color: #3a2a00;
+    box-shadow: 0 0 16px rgba(212, 144, 15, .8);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 25%, #2c374f 0%, #202737 70%, #171d29 100%);
+    border: 3px solid #4a5a80;
+    box-shadow: inset 0 0 40px rgba(79, 195, 247, .1), 0 4px 18px rgba(0, 0, 0, .35);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #cfe0f5; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #ffb066; color: #3a2200; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(10, 14, 24, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #6a7aa0; cursor: pointer;
+    background: linear-gradient(180deg, #c97a3d, #a8602a); color: #fff;
+    box-shadow: 0 3px 0 #5c3a18; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #3a7ab8, #245a90); border-color: #8fc8f0; box-shadow: 0 3px 0 #123a5c; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #ffb066; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .4), inset 0 0 24px rgba(0, 0, 0, .3);
+    flex-shrink: 0; background: #202737;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #8fb8e8;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #ffe9a8; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #1e2536d9; border: 2px solid #3d4c6e; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #8fb8e8; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fdfbf4; color: #222a3a;
+    border: 1.5px solid #3d4c6e;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fdfbf4;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #a8602a; background: #ffe3c2; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #2c3752, #232c3f); color: #eef2fa;
+    border: 2px solid #ffb066; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #ffb066; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #c97a3d, #a8602a); color: #fff;
+    box-shadow: 0 3px 0 #5c3a18, 0 5px 12px rgba(0, 0, 0, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #5c3a18; }
+  .btn.sub {
+    background: #2c3752; color: #cfe0f5; box-shadow: 0 3px 0 #171d29;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fdfbf4; color: #222a3a; box-shadow: 0 3px 0 #b5b0a0; font-weight: 400; border: 1.5px solid #ddd4c2; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe3c2; outline: 3px solid #c97a3d; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(6, 10, 20, .85);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #232c3f, #1b2230);
+    border: 3px solid #4a5a80; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, .5);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #ffb066; text-shadow: 0 0 22px rgba(255, 176, 102, .5);
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #ffb066; }
+  .panel .sub { color: #8fb8e8; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fdfbf4; color: #222a3a; border: 1.5px solid #ddd4c2; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8fb8e8; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 22vw, 220px); cursor: pointer;
+    background: #fdfbf4; color: #222a3a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ddd4c2; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #c97a3d; background: #ffe3c2; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #c97a3d; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #a8602a;
+    color: #a8602a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #8fb8e8;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #2c3752; color: #cfe0f5;
+    border: 1px solid #4a5a80; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #354168; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🌀 ウズの実験室<small>— 電磁石のひみつ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kiso" title="電磁石の正体">★</div>
+    <div class="badge" id="bd_m_kyoku" title="極を調べる">★</div>
+    <div class="badge" id="bd_m_makisuu" title="巻き数で強さを試す">★</div>
+    <div class="badge" id="bd_m_denryu" title="電流の大きさ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">電磁石の じっけん台</div>
+    <div id="locChip">じっけんしつ</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 ウズめがね 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="122" rx="28" ry="6" fill="rgba(0,0,0,.25)"/>
+            <circle cx="60" cy="70" r="42" fill="#2c2210" stroke="#ffb066" stroke-width="2.5"/>
+            <path d="M60 70 m0 -34 a34 34 0 0 1 24 58 a24 24 0 0 1 -41 -10 a14 14 0 0 1 20 -14" fill="none" stroke="#e0954a" stroke-width="4" stroke-linecap="round"/>
+            <path d="M60 70 m0 -22 a22 22 0 0 1 15 37" fill="none" stroke="#ffce8a" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+            <circle cx="60" cy="46" r="24" fill="#fff8ec" stroke="#163044" stroke-width="2.5"/>
+            <ellipse cx="46" cy="52" rx="5.5" ry="3.4" fill="#ffb066" opacity=".5"/>
+            <ellipse cx="74" cy="52" rx="5.5" ry="3.4" fill="#ffb066" opacity=".5"/>
+            <g class="eyes">
+              <circle cx="51" cy="44" r="5.2" fill="#fff"/>
+              <circle cx="69" cy="44" r="5.2" fill="#fff"/>
+              <circle cx="51.6" cy="44.6" r="3" fill="#0d3640"/>
+              <circle cx="69.6" cy="44.6" r="3" fill="#0d3640"/>
+              <circle cx="52.8" cy="42.8" r="1" fill="#fff"/>
+              <circle cx="70.8" cy="42.8" r="1" fill="#fff"/>
+            </g>
+            <path d="M48 58 Q60 65 72 58" fill="none" stroke="#163044" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="36" cy="34" r="7" fill="#3a7ab8" stroke="#163044" stroke-width="1.6"/>
+            <text x="36" y="38" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">N</text>
+            <circle cx="84" cy="34" r="7" fill="#c1442e" stroke="#163044" stroke-width="1.6"/>
+            <text x="84" y="38" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">S</text>
+            <path d="M55 8 L63 8 L58 18 L65 18 L52 32 L56 20 L49 20 Z" fill="#ffe066" stroke="#a8602a" stroke-width="1"/>
+          </svg>
+          <div class="catname"><ruby>渦<rt>うず</rt></ruby>まきの<ruby>精霊<rt>せいれい</rt></ruby> ウズ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌀 ウズの実験室ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ウズの実験室 — 電磁石のひみつ（小5理科・協力型・1ファイル）
+   電磁石の正体（電流が流れている間だけ磁石になる）→
+   極を調べる（電流の向きで極が入れかわる）→
+   巻き数で強さを試す（①〜⑧の数値階段シミュレーション、目標クリップ数）→
+   電流の大きさ（かん電池1こ/2こ直列）→
+   はかせ（身のまわりの電磁石利用）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  denjishaku: ruby('電磁石', 'でんじしゃく'),
+  denryuu: ruby('電流', 'でんりゅう'),
+  makisuu: ruby('巻', 'ま') + 'き' + ruby('数', 'すう'),
+  tesshin: ruby('鉄', 'てっ') + 'しん',
+  kyoku: ruby('極', 'きょく'),
+  eikyuu: ruby('永久磁石', 'えいきゅうじしゃく'),
+  houi: ruby('方位磁針', 'ほういじしん'),
+  chokuretsu: ruby('直列', 'ちょくれつ'),
+  kandenchi: 'かん' + ruby('電池', 'でんち'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+const MAKI_TURNS = [25, 50, 75, 100, 125, 150, 175, 200];
+const MAKI_CLIPS = [1, 2, 3, 4, 5, 6, 7, 8];
+const MAKI_TARGET = 6;
+
+// ---------- 身のまわりの電磁石 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: 'モーター', txt: `せんぷう機や せんたく機の 中では、モーターが 電磁石と ${W.eikyuu}の 間で 引き合ったり しりぞけ合ったり する 力を 使って 回転している。` },
+  { key: 1, letter: 'い', name: 'スピーカー', txt: `スピーカーは、${W.denryuu}の 変化に 合わせて 電磁石の 力が 変わり、しん動板を ふるわせて 音を 出している。` },
+  { key: 2, letter: 'う', name: 'くず鉄クレーン', txt: `工場では 強力な 電磁石で くず鉄を まとめて つり上げる。${W.denryuu}を 切れば すぐに 鉄を はなせるので、とても べんり。` },
+  { key: 3, letter: 'え', name: 'リニアモーターカー', txt: `リニアモーターカーは、強力な 電磁石の 引き合ったり しりぞけ合ったり する 力で 車体を うかせて すすむ、未来の 乗り物。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kiso',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  // m_kiso
+  circuitOn: false,
+  clipAttached: false,
+  kisoAnimT: 0,
+  // m_kyoku
+  battFlipped: false,
+  compassChecked: 0,
+  // m_makisuu
+  makiLevel: 4,
+  makiAnimT: 0,
+  makiResult: null,
+  makiTries: new Set(),
+  // m_denryu
+  battCount: 1,
+  denAnimT: 0,
+  denryuTested: new Set(),
+  denClips: 0,
+  // hakase
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sBuzz = () => { tone(140, 0, 0.35, 'sawtooth', 0.05); tone(180, 0.08, 0.3, 'sawtooth', 0.04); };
+const sPlop = () => { tone(220, 0, 0.12, 'sine', 0.1); tone(180, 0.06, 0.15, 'sine', 0.08); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#232c40'); g.addColorStop(1, '#1a2130');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#1c2436';
+  gctx.fillRect(X(0), Y(520), 1000 * sc, 120 * sc);
+}
+
+// ---------- コイル（電磁石本体）の共通描画 ----------
+function drawCoil(X, Y, sc, cx, topY, botY, glowT, nCoilsHint) {
+  const halfW = 40, coreW = 20;
+  // 鉄しん
+  gctx.fillStyle = '#8a8f92'; gctx.strokeStyle = '#4a4f52'; gctx.lineWidth = 1.6 * sc;
+  roundRect(gctx, X(cx - coreW / 2), Y(topY), coreW * sc, (botY - topY) * sc, 4 * sc);
+  gctx.fill(); gctx.stroke();
+  // コイル（どう線）
+  const n = nCoilsHint || 8;
+  gctx.strokeStyle = '#e0954a'; gctx.lineWidth = 4 * sc; gctx.lineCap = 'round';
+  for (let i = 0; i < n; i++) {
+    const yy = topY + (botY - topY) * (i + 0.5) / n;
+    gctx.beginPath();
+    gctx.ellipse(X(cx), Y(yy), halfW * sc, 7 * sc, 0, 0, TAU);
+    gctx.stroke();
+  }
+  // 電流の光（回路オン時）
+  if (glowT > 0.02) {
+    gctx.save();
+    gctx.globalAlpha = glowT;
+    gctx.shadowColor = '#4fc3f7'; gctx.shadowBlur = 18 * sc;
+    gctx.strokeStyle = '#4fc3f7'; gctx.lineWidth = 3 * sc;
+    for (let i = 0; i < n; i++) {
+      const yy = topY + (botY - topY) * (i + 0.5) / n;
+      gctx.beginPath();
+      gctx.ellipse(X(cx), Y(yy), halfW * sc, 7 * sc, 0, 0, TAU * glowT);
+      gctx.stroke();
+    }
+    gctx.restore();
+  }
+  return { halfW, coreW };
+}
+function drawClipPile(X, Y, sc, cx, y, n) {
+  gctx.strokeStyle = '#dfe4ea'; gctx.lineWidth = 2.2 * sc; gctx.lineCap = 'round';
+  for (let i = 0; i < n; i++) {
+    const cxx = cx + ((i % 5) - 2) * 18, cyy = y + Math.floor(i / 5) * 18;
+    gctx.save();
+    gctx.translate(X(cxx), Y(cyy));
+    // 実際のゼムクリップに近い、細長い二重ループの形
+    gctx.beginPath();
+    gctx.moveTo(-3 * sc, -8 * sc);
+    gctx.lineTo(3 * sc, -8 * sc);
+    gctx.arc(3 * sc, -4 * sc, 4 * sc, -Math.PI / 2, Math.PI / 2, false);
+    gctx.lineTo(-5 * sc, 0);
+    gctx.arc(-5 * sc, 4 * sc, 4 * sc, Math.PI, Math.PI * 2.5, false);
+    gctx.lineTo(1 * sc, 9 * sc);
+    gctx.stroke();
+    gctx.restore();
+  }
+}
+function drawBattery(X, Y, sc, cx, cy, count) {
+  const bw = 46, bh = 22;
+  for (let i = 0; i < count; i++) {
+    const bx = cx + (i - (count - 1) / 2) * (bw + 10);
+    gctx.fillStyle = '#3a4560'; gctx.strokeStyle = '#8fb8e8'; gctx.lineWidth = 2 * sc;
+    roundRect(gctx, X(bx - bw / 2), Y(cy - bh / 2), bw * sc, bh * sc, 5 * sc);
+    gctx.fill(); gctx.stroke();
+    gctx.fillStyle = '#ffe9a8'; gctx.fillRect(X(bx + bw / 2 - 2), Y(cy - bh * 0.22), 5 * sc, bh * 0.44 * sc);
+    gctx.fillStyle = '#cfe0f5'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('＋ −', X(bx), Y(cy));
+  }
+}
+function drawCompass(X, Y, sc, cx, cy, angle) {
+  gctx.fillStyle = '#fdfbf4'; gctx.strokeStyle = '#163044'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), 22 * sc, 0, TAU); gctx.fill(); gctx.stroke();
+  gctx.save();
+  gctx.translate(X(cx), Y(cy)); gctx.rotate(angle);
+  gctx.fillStyle = '#c1442e';
+  gctx.beginPath(); gctx.moveTo(0, -18 * sc); gctx.lineTo(5 * sc, 0); gctx.lineTo(-5 * sc, 0); gctx.closePath(); gctx.fill();
+  gctx.fillStyle = '#3a4560';
+  gctx.beginPath(); gctx.moveTo(0, 18 * sc); gctx.lineTo(5 * sc, 0); gctx.lineTo(-5 * sc, 0); gctx.closePath(); gctx.fill();
+  gctx.restore();
+}
+
+// ---------- 1．電磁石の正体 ----------
+function drawKisoScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, topY = 160, botY = 380;
+  drawCoil(X, Y, sc, cx, topY, botY, S.kisoAnimT, 8);
+  drawBattery(X, Y, sc, cx, 460, 1);
+  gctx.strokeStyle = S.circuitOn ? '#4fc3f7' : '#4a5a80'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(cx - 40), Y(botY)); gctx.lineTo(X(cx - 40), Y(440)); gctx.lineTo(X(cx - 23), Y(440));
+  gctx.moveTo(X(cx + 40), Y(botY)); gctx.lineTo(X(cx + 40), Y(440)); gctx.lineTo(X(cx + 23), Y(440));
+  gctx.stroke();
+  if (S.clipAttached) {
+    drawClipPile(X, Y, sc, cx, botY + 26, 1);
+  } else {
+    drawClipPile(X, Y, sc, cx + 140, 470, 3);
+  }
+  gctx.fillStyle = '#eef2fa'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(S.circuitOn ? '回路：つながっている（電流が流れている）' : '回路：切れている', X(500), Y(70));
+}
+
+// ---------- 2．極を調べる ----------
+function drawKyokuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, topY = 220, botY = 400;
+  drawCoil(X, Y, sc, cx, topY, botY, 0.6, 8);
+  drawBattery(X, Y, sc, cx, 470, 1);
+  const angle = S.battFlipped ? Math.PI : 0;
+  if (S.compassChecked > 0) {
+    drawCompass(X, Y, sc, cx - 90, 240, angle);
+    drawCompass(X, Y, sc, cx + 90, 340, angle + Math.PI);
+  }
+  gctx.fillStyle = '#eef2fa'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(S.battFlipped ? '電池の向き：ぎゃく' : '電池の向き：さいしょのまま', X(500), Y(70));
+}
+
+// ---------- 3．巻き数で強さをためす（メイン操作） ----------
+function drawMakisuuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, topY = 140, botY = 380;
+  const idx = clamp((S.makiLevel || 1) - 1, 0, 7);
+  const nCoils = 4 + idx;
+  drawCoil(X, Y, sc, cx, topY, botY, S.makiAnimT, nCoils);
+  drawBattery(X, Y, sc, cx, 450, 1);
+  const clips = Math.round(MAKI_CLIPS[idx] * S.makiAnimT);
+  if (clips > 0) drawClipPile(X, Y, sc, cx, botY + 26, clips);
+  gctx.fillStyle = '#eef2fa'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`巻き数 ${NUMS[idx]}（${MAKI_TURNS[idx]}回） クリップ ${clips}こ／目ひょう${MAKI_TARGET}こ`, X(500), Y(70));
+}
+
+// ---------- 4．電流の大きさ ----------
+function drawDenryuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, topY = 150, botY = 370;
+  drawCoil(X, Y, sc, cx, topY, botY, S.denAnimT, 7);
+  drawBattery(X, Y, sc, cx, 450, S.battCount);
+  const targetClips = S.battCount === 1 ? 6 : 12;
+  const clips = Math.round(targetClips * S.denAnimT);
+  if (clips > 0) drawClipPile(X, Y, sc, cx, botY + 26, clips);
+  gctx.fillStyle = '#eef2fa'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`かん電池 ${S.battCount}こ　クリップ ${clips}こ`, X(500), Y(70));
+}
+
+// ---------- 5．はかせ：身のまわりの電磁石 ----------
+const HAKASE_ICON = ['🌀', '🔊', '🏗️', '🚄'];
+function drawHakaseScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const xs = [220, 420, 620, 820];
+  HAKASE_POINTS.forEach((p, i) => {
+    const done = S.hakaseFound.has(p.key);
+    const px = xs[i], py = 300;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#c97a3d' : '#2c3752';
+    gctx.fill();
+    gctx.strokeStyle = '#ffb066'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(HAKASE_ICON[i], X(px), Y(py - 2));
+    gctx.fillStyle = '#eef2fa'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText(p.letter + ' ' + p.name, X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#eef2fa'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('電磁石は 身のまわりの いろいろな ところで 使われている', X(500), Y(70));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kiso') drawKisoScene(X, Y, sc);
+  else if (S.scene === 'kyoku') drawKyokuScene(X, Y, sc);
+  else if (S.scene === 'makisuu') drawMakisuuScene(X, Y, sc);
+  else if (S.scene === 'denryu') drawDenryuScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ウズめがね（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#2c3752'); grd.addColorStop(1, '#171d29');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#ffb066';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const idx = clamp((S.makiLevel || 1) - 1, 0, 7);
+    const clips = MAKI_CLIPS[idx];
+    const ok = clips >= MAKI_TARGET;
+    const cx = R, cy = R * 1.05, rad = R * 0.72;
+    sctx.strokeStyle = '#3a4560'; sctx.lineWidth = R * 0.13; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, 0); sctx.stroke();
+    const frac = clamp(clips / 8, 0, 1);
+    const ang = Math.PI - Math.PI * frac;
+    sctx.strokeStyle = ok ? '#2f9a5a' : '#e0a020';
+    sctx.lineWidth = R * 0.13;
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, ang, true); sctx.stroke();
+    sctx.strokeStyle = '#eef2fa'; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx + Math.cos(ang) * rad * 0.88, cy + Math.sin(ang) * rad * 0.88); sctx.stroke();
+    sctx.fillStyle = '#eef2fa'; sctx.beginPath(); sctx.arc(cx, cy, R * 0.05, 0, TAU); sctx.fill();
+    label(`クリップ ${clips}こ／目ひょう${MAKI_TARGET}こ`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#4fc3f733'); g2.addColorStop(1, 'rgba(79,195,247,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#ffb066'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌀', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#ffb066'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(20,26,40,.85)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#eef2fa';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ffb066', '#4fc3f7', '#ffe9a8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    kiso: '⚡ 電磁石の 正体',
+    kyoku: '🧭 極を 調べる',
+    makisuu: '🌀 巻き数で 強さを ためす',
+    denryu: '🔋 電流の 大きさ',
+    hakase: '🏗️ 身のまわりの 電磁石',
+    done: '🌀 ウズの実験室 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '電磁石の じっけん台';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kiso', 'm_kyoku', 'm_makisuu', 'm_denryu', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kiso', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌀⚡🧭✨</div>
+        <h1>ウズの実験室</h1>
+        <div class="sub">〜 電磁石の ひみつを たしかめる 〜</div>
+        <p class="talk">ようこそ！ わたしは どう線の 渦まきから 生まれた 精霊、<b>ウズ</b>。今日は <b>電磁石</b>の ひみつを、いっしょに たしかめに いこう！<br>
+        電流を 流すと 鉄しんが 磁石に 変わる、ふしぎな げんしょう……極の 入れかわり、強さの ひみつ、そして 身のまわりの 電磁石まで、たっぷり 実験するよ。</p>
+        <button class="btn" id="startBtn">実験を はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです（本物の電気は使いません）。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">電磁石は、かん電池を 外しても（回路を切っても）、そのあと ずっと 磁石のまま 使えると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🧲</span><b>ア</b> ずっと 磁石のまま 使える</div>
+          <div class="vcard" data-v="1"><span class="vicon">🔌</span><b>イ</b> 電流を 止めると 磁石でなくなる</div>
+          <div class="vcard" data-v="2"><span class="vicon">📉</span><b>ウ</b> だんだん 弱くなっていく</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：電磁石の正体 ---
+  m_kiso: {
+    enter() {
+      Object.assign(S, { scene: 'kiso', scope: { type: 'idle' }, circuitOn: false, clipAttached: false, kisoAnimT: 0 });
+      updateLoc();
+      setWish('🧲', `コイル（どう線を 巻いた つつ）の 中に、${W.tesshin}が 入っている。${W.denryuu}を 流すと どうなるか、ボタンで たしかめよう。`);
+      say(`「回路を つなぐ」ボタンを おして、クリップに 近づけてみよう。`);
+      setControls([{ label: '🔌 回路を つなぐ', cb: () => this.turnOn() }]);
+    },
+    turnOn() {
+      setControls([]);
+      say(`${W.denryuu}が 流れはじめた……`);
+      startTween(0, 1, 0.8, v => { S.kisoAnimT = v; }, () => {
+        S.circuitOn = true; S.clipAttached = true;
+        sYes(); scopeBurst();
+        say(`⚡ コイルが 電磁石に なって、クリップが くっついた！`);
+        setControls([{ label: '🔌 回路を 切る', cb: () => this.turnOff() }]);
+      });
+    },
+    turnOff() {
+      setControls([]);
+      say(`回路を 切ってみよう……`);
+      startTween(1, 0, 0.8, v => { S.kisoAnimT = v; }, () => {
+        S.circuitOn = false; S.clipAttached = false;
+        award('m_kiso'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        sHmm(); scopeBurst();
+        say(`クリップが ポロッと 落ちた！ ${W.denryuu}を 止めると、電磁石は 磁力を うしなう。<br><br>💡 <b>たいせつポイント</b><br>電磁石は ${W.denryuu}が 流れている 間だけ 磁石に なる。ふつうの 磁石（${W.eikyuu}）とは ちがう せいしつなんだ。<br><br>さいしょの よそうタイムの こたえは <b>イ ${W.denryuu}を 止めると 磁石でなくなる</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（極を調べる）', cb: nextStep }]);
+      });
+    },
+  },
+
+  // --- M2：極を調べる ---
+  m_kyoku: {
+    enter() {
+      Object.assign(S, { scene: 'kyoku', scope: { type: 'idle' }, battFlipped: false, compassChecked: 0 });
+      updateLoc();
+      setWish('🧭', `${W.houi}を 使って、電磁石の N極・S極を 調べよう。`);
+      say(`「${W.houi}で調べる」ボタンを おしてみよう。`);
+      setControls([{ label: '🧭 方位磁針で調べる', cb: () => this.check1() }]);
+    },
+    check1() {
+      S.compassChecked = 1; sTap();
+      say(`方位磁針を 近づけると……右がわが N極、左がわが S極 だと わかった！`);
+      setControls([{ label: '🔋 電池の向きを変える', cb: () => this.flip() }]);
+    },
+    flip() {
+      S.battFlipped = true; sTap();
+      say(`かん電池の 向きを 反対に つなぎかえた……${W.denryuu}の 向きが 変わったよ。もう一度 方位磁針で 調べてみよう。`);
+      setControls([{ label: '🧭 もういちど調べる', cb: () => this.check2() }]);
+    },
+    check2() {
+      sTap();
+      setControls([]); hideWish();
+      say(`あれ！？ 今度は 右がわが S極、左がわが N極に なっていた！ ${W.denryuu}の 向きを 変えると、電磁石の 極は どうなると 思う？`);
+      setButtons(choiceRow(['変わらない', '入れかわる', '両方Nになる'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_kyoku'); S.phase = 'done';
+        say(`せいかい！ ${W.denryuu}の 向きを 変えると、電磁石の N極・S極も 入れかわる。ふつうの 磁石と ちがって、電磁石は 極を 自由に 変えられるんだ。<br><br>⚠️ かん電池を つなぐ時、＋極どうし・－極どうしを つなぐと、${W.denryuu}が うまく 流れず 発熱したり はれつしたり する 危険が ある。向きに 気をつけよう。`);
+        setButtons([{ label: 'つぎへ（巻き数を変えてみよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['変わらない', '入れかわる', '両方Nになる'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：巻き数で強さをためす（メイン操作） ---
+  m_makisuu: {
+    enter() {
+      Object.assign(S, { scene: 'makisuu', scope: { type: 'gauge' }, makiLevel: 4, makiAnimT: 0, makiResult: null, makiTries: new Set() });
+      updateLoc();
+      setWish('🌀', `目もり①〜⑧で コイルの ${W.makisuu}を えらんで、クリップが 何こ 持ち上がるか 試そう。目ひょうは <b>${MAKI_TARGET}こ 以上</b>！`);
+      say(`${W.makisuu}を えらんで「持ち上げる」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.makiLevel === n ? ' sel' : ''), cb: () => { S.makiLevel = n; this.refreshCtl(); } });
+      list.push({ label: '🧲 持ち上げる', cb: () => this.lift() });
+      setControls(list);
+    },
+    lift() {
+      setControls([]);
+      S.makiResult = null; S.makiAnimT = 0;
+      say(`${W.makisuu} ${NUMS[S.makiLevel - 1]}（${MAKI_TURNS[S.makiLevel - 1]}回）の 電磁石で、クリップを 持ち上げてみよう……`);
+      startTween(0, 1, 1.0, v => { S.makiAnimT = v; }, () => this.judge());
+    },
+    judge() {
+      S.makiTries.add(S.makiLevel);
+      const clips = MAKI_CLIPS[S.makiLevel - 1];
+      const ok = clips >= MAKI_TARGET;
+      S.makiResult = ok ? 'good' : 'low';
+      if (ok) {
+        sYes(); scopeBurst(); award('m_makisuu'); S.phase = 'done';
+        say(`✨ クリップが ${clips}こ 持ち上がった！ 目ひょうの ${MAKI_TARGET}こを たっせい！ ✨<br><br>💡 <b>たいせつポイント</b><br>電磁石は ${W.makisuu}を 増やすほど 強くなる。${W.makisuu}と 強さは、ほぼ 比例の 関係なんだ。`);
+        setButtons([{ label: 'つぎへ（電流の大きさ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`クリップは ${clips}こしか 持ち上がらなかった……目ひょうの ${MAKI_TARGET}こには まだ とどかない。${W.makisuu}を もっと 増やして みよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：電流の大きさ ---
+  m_denryu: {
+    enter() {
+      Object.assign(S, { scene: 'denryu', scope: { type: 'idle' }, battCount: 1, denAnimT: 0, denryuTested: new Set() });
+      updateLoc();
+      setWish('🔋', `${W.makisuu}は 150回の ままで、かん電池の 数を 変えて、クリップの 持ち上がる 数が 変わるか 試そう。`);
+      say(`かん電池の 数を えらんで 試してみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setControls([
+        { label: '🔋 かん電池 1こ', cls: 'pos' + (S.battCount === 1 ? ' sel' : ''), cb: () => { S.battCount = 1; this.refreshCtl(); } },
+        { label: `🔋🔋 かん電池 2こ（${W.chokuretsu}）`, cls: 'pos' + (S.battCount === 2 ? ' sel' : ''), cb: () => { S.battCount = 2; this.refreshCtl(); } },
+        { label: '🧲 持ち上げる', cb: () => this.lift() },
+      ]);
+    },
+    lift() {
+      setControls([]);
+      S.denAnimT = 0;
+      const clipsTarget = S.battCount === 1 ? 6 : 12;
+      say(`かん電池 ${S.battCount}こで、クリップを 持ち上げてみよう……`);
+      startTween(0, 1, 1.0, v => { S.denAnimT = v; }, () => {
+        S.denryuTested.add(S.battCount);
+        sYes(); scopeBurst();
+        if (S.denryuTested.size >= 2) {
+          hideWish();
+          say(`クリップが ${clipsTarget}こ 持ち上がった！ かん電池を 2こに すると、1この時より ずっと 多く 持ち上がったね。なぜ 増えたと 思う？`);
+          setButtons(choiceRow(['巻き数が増えたから', '電流が大きくなったから', '鉄しんが増えたから'], (i, el) => this.pick(i, el)));
+        } else {
+          say(`クリップが ${clipsTarget}こ 持ち上がった！ もう一方の かん電池の 数も 試してみよう。`);
+          this.refreshCtl();
+        }
+      });
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_denryu'); S.phase = 'done';
+        say(`せいかい！ かん電池を 2こ ${W.chokuretsu}に つなぐと、流れる ${W.denryuu}が 大きくなる。${W.denryuu}が 大きいほど、電磁石は 強くなるんだ。<br><br>⚠️ かん電池を つなぐ時は、＋極と－極を 正しく そろえること。ぎゃくに つなぐと 発熱や はれつの きけんが ある。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['巻き数が増えたから', '電流が大きくなったから', '鉄しんが増えたから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：身のまわりの電磁石 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 電磁石は 身のまわりの いろいろな ところで 使われているよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`電磁石が こんなに 便利に 使われているのは、なぜだと 思う？`);
+      setButtons(choiceRow(['永久磁石より 安いから', '電流を 変えることで、強さや 向き、ON/OFFを 自由に あやつれるから', '形を 変えられるから'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 電磁石は ${W.denryuu}の 大きさや 向きを 変えるだけで、強さや 極を 自由に コントロールできる。くず鉄クレーンのように <b>${W.denryuu}を 切って パッと はなす</b>ことも、${W.eikyuu}には できない 電磁石ならではの 特ぎなんだ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['永久磁石より 安いから', '電流を 変えることで、強さや 向き、ON/OFFを 自由に あやつれるから', '形を 変えられるから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ウズの実験室 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 電磁石は、${W.denryuu}を 止めると 磁力が（<span class="blankWord" data-a="なくなる">？？？</span>）。ふつうの 磁石（${W.eikyuu}）とは ちがう。<br>
+        ② コイルの ${W.makisuu}を 増やすと、電磁石は（<span class="blankWord" data-a="強く">？？？</span>）なる。<br>
+        ③ ${W.denryuu}の 向きを 変えると、電磁石の（<span class="blankWord" data-a="極">？？？</span>）が 入れかわる。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ ${W.denryuu}を 止めると 磁石でなくなる</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>おうちに ある 磁石（冷蔵庫の マグネットなど）を、方位磁針（スマホの 方位アプリでも 可）で N極・S極を 調べてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#c97a3d'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「電磁石は かん電池を 外すと どうなる？」「強くするには どうすればいい？」`);
+      setButtons([
+        { label: '⚡ 電磁石の正体の 図', cls: 'sub', cb: () => this.show('kiso') },
+        { label: '🧭 極を調べるの 図', cls: 'sub', cb: () => this.show('kyoku') },
+        { label: '🌀 巻き数の 図', cls: 'sub', cb: () => this.show('makisuu') },
+        { label: '🏗️ 身のまわりの電磁石の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_makisuu などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

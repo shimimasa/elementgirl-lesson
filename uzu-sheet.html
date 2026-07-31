@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ウズの実験室 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #a8602a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.4mm 1mm; }
+  .levelTable th { background: #ffe3c2; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #ffe3c2; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌀 ウズの実験室 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      電磁石は、かん電池を 外しても（回路を切っても）、そのあと ずっと 磁石のまま 使えると 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🧲 ずっと 磁石のまま 使える</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🔌 電流を 止めると 磁石でなくなる</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 📉 だんだん 弱くなっていく</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．電磁石の 正体</span>
+    <div class="secBody">
+      回路を つないだ時と 切った時で、クリップは どうなった？<br>
+      回路を つないだ時：くっついた ／ くっつかなかった（どちらかに 〇）<br>
+      回路を 切った時：くっついたまま ／ 落ちた（どちらかに 〇）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．極を 調べる</span>
+    <div class="secBody">
+      方位磁針で 調べた けっかを 書こう。かん電池の 向きを 変えると、極は どうなった？（〇を つけよう）<br>
+      ア 変わらない　・　イ 入れかわる　・　ウ 両方Nになる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．巻き数で 強さを ためす</span>
+    <div class="secBody">
+      目もり①〜⑧で 巻き数を えらんで、クリップが 何こ 持ち上がるか 試そう。目ひょう（6こ以上）を たっせいした 巻き数に 〇を つけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．電流の 大きさ</span>
+    <div class="secBody">
+      かん電池の 数を 変えて、クリップの こ数を 書きくらべよう。
+      <table class="roundTable">
+        <tr><th>かん電池 1こ</th><th>かん電池 2こ（直列）</th></tr>
+        <tr><td>クリップ：<span class="fillLine sm"></span>こ</td><td>クリップ：<span class="fillLine sm"></span>こ</td></tr>
+      </table>
+      なぜ 増えたと 思う？　ア巻き数が増えたから　・　イ電流が大きくなったから　・　ウ鉄しんが増えたから（〇を つけよう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（身のまわりの電磁石）</span>
+    <div class="secBody">
+      見つけた 電磁石の なかまに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>モーター</th><th>スピーカー</th><th>くず鉄クレーン</th><th>リニアモーターカー</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 電磁石は、電流を 止めると 磁力が（<span class="fillLine"></span>）。ふつうの 磁石（永久磁石）とは ちがう。<br>
+      ② コイルの 巻き数を 増やすと、電磁石は（<span class="fillLine"></span>）なる。<br>
+      ③ 電流の 向きを 変えると、電磁石の（<span class="fillLine"></span>）が 入れかわる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🧭</span>
+        <div>
+          おうちに ある 磁石（冷蔵庫の マグネットなど）を、方位磁針（スマホの 方位アプリでも 可）で N極・S極を 調べてみよう。<br>
+          ☐ 調べた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ウズの実験室 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ウズの実験室 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5理科「電流のはたらき（電磁石の性質）」・学力幅あり・協力型／ 使うもの：「uzu.html」・プロジェクタ・このノート（1ページ目を人数分）。実際の電池・導線・クリップは使いません（画面上のシミュレーションのみ）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_makisuu</b> などで途中再開（m_kiso／m_kyoku／m_makisuu／m_denryu／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>⚡ 電磁石の 正体</td><td>「回路をつなぐ」→クリップが付く→「回路を切る」→クリップが落ちる、を実演。電流が流れている間だけ磁石になる、永久磁石との違いに気づかせる。よそうタイムの答え合わせもここ</td></tr>
+      <tr><td class="min">11〜18分</td><td>🧭 極を 調べる</td><td>方位磁針でN極・S極を確認→電池の向きを変えて再確認→極が入れかわることをクイズで確認。危険な電池のつなぎ方（＋同士・－同士）にも軽く触れる</td></tr>
+      <tr><td class="min">18〜28分</td><td>🌀 巻き数で 強さを ためす（<b>今日の見せ場</b>）</td><td>目もり①〜⑧で巻き数を選び「持ち上げる」→クリップの数を確認。目標6こ以上を目指して何度も挑戦させる。1人ずつ交代で巻き数を選ばせるとよい</td></tr>
+      <tr><td class="min">28〜35分</td><td>🔋 電流の 大きさ</td><td>かん電池1こ・2こ（直列）を両方試してクリップの数を比較→なぜ増えたかクイズ</td></tr>
+      <tr><td class="min">35〜43分</td><td>🏗️ はかせチャレンジ（身のまわりの電磁石）</td><td>モーター・スピーカー・くず鉄クレーン・リニアモーターカーの4つを発見してクイズ。電流のON/OFFで磁力を自在に操れる電磁石ならではの便利さに着地</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「おうちの磁石を方位磁針で調べる」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「電流の大きさ」を右下「つぎ▶」でスキップ可（<b>巻き数で強さをためす・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 電流を 止めると 磁石でなくなる</b>／極を調べる＝<b>イ 入れかわる</b>／
+      巻き数で強さをためす＝<b>⑥〜⑧（150〜200回、6こ以上）</b>／電流の大きさ＝<b>イ 電流が大きくなったから</b>／
+      はかせ＝<b>イ 電流を変えることで、強さや向き、ON/OFFを自由にあやつれるから</b>／
+      まとめ＝①<b>なくなる</b>　②<b>強く</b>　③<b>極</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>電磁石はコイル（導線を巻いたもの）の中に鉄しんを入れ、電流を流すことで鉄しんが磁化してできる。電流を止めると磁力を失う点が永久磁石との決定的な違い</li>
+      <li>電流の向きを変えると、電磁石のN極・S極も入れかわる。方位磁針を使うとこの極の変化を確認できる。かん電池を逆向き（＋同士・－同士）につなぐと電流がうまく流れず発熱・破裂の危険があるため、極性をそろえることが安全上重要</li>
+      <li>電磁石の強さはコイルの巻き数と電流の大きさに比例して強くなる。教科書の定番実験は100回巻きと200回巻き（または50回巻きと100回巻き）でクリップの持ち上がる数を比較するもの。電流を大きくする方法としては、かん電池を直列に2個つなぐ実験が定番</li>
+      <li>電磁石は身のまわりで幅広く利用されている：モーター（扇風機・洗濯機）、スピーカー（電流の変化で振動板を振るわせ音を出す）、くず鉄を扱うクレーン（電流を切ればすぐ鉄を離せる、永久磁石にはできない特技）、リニアモーターカー（強力な電磁石の反発・吸引力で車体を浮上させ推進する）</li>
+      <li>本授業では実際の電池・導線・方位磁針は一切使用しない。画面上のシミュレーションのみで、本物の数値・現象（巻き数と強さの比例関係、極の入れかわり）を再現している</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「巻き数で強さをためす」が今日いちばんの見せ場。1人ずつ交代で巻き数を選ばせると全員が参加できる</li>
+      <li>巻き数は「多いほど強くなる」という単調増加の関係で設計している（他の単元のような「多すぎると失敗」というジレンマ構造ではない）。目標の6こに届かない体験を経て、巻き数を増やす工夫にたどり着く過程を大事にする</li>
+      <li>本物の実験でかん電池をつなぐ際は、＋極と－極を正しくそろえることが安全上とても重要であることを一言添えるとよい（逆につなぐと発熱・破裂の危険）</li>
+      <li>よそうタイムの答え（イ：電流を止めると磁石でなくなる）は、多くの子が「一度磁石になったらずっと磁石のまま」とふつうの磁石と混同しがちなため意外性がある。まとめで丁寧に振り返るとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「電磁石はかん電池を外すとどうなる？」「強くするにはどうすればいい？」「電流の向きを変えると何が入れかわる？」</li>
+      <li>実際の理科室でモーターやスピーカーを分解して電磁石の部品を見せると理解が深まる</li>
+      <li>理科のエネルギー分野は本作が初開拓。残る光・音の性質、電気の利用（発電・蓄電）は理科の中でまだ未踏で、次の新規開拓候補</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
