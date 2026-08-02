@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>カゲロウの原 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #3a8e62; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.4mm 1mm; }
+  .levelTable th { background: #dcecdc; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #dcecdc; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌞 カゲロウの原 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      1日のうちで、影が いちばん 短くなるのは、いつだと 思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🌅 朝</div>
+        <div class="voteOpt"><span class="vnum">イ</span> ☀️ 正午ごろ</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🌇 夕方</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．影が できる しくみ</span>
+    <div class="secBody">
+      太陽の 位置を かえて 試した時、影は どちらに できた？（〇を つけよう）<br>
+      影は 太陽と 同じがわに できる ／ 影は 太陽と 反対がわに できる ／ 影は 太陽の 真下に できる
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．太陽と 影の １日</span>
+    <div class="secBody">
+      ①〜⑧の 時こくで、影の 長さ（cm）を 記録しよう。
+      <table class="levelTable">
+        <tr><th>①8時</th><th>②9時</th><th>③10時</th><th>④11時</th><th>⑤12時</th><th>⑥13時</th><th>⑦14時</th><th>⑧15時</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      いちばん 短かったのは　①・②・③・④・⑤・⑥・⑦・⑧（〇を つけよう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．方位で 影を 読む</span>
+    <div class="secBody">
+      その 時こくの 影は、どの方位を 向いていたかな？（北・東・南・西を 書こう）
+      <table class="roundTable">
+        <tr><th>朝（8時ごろ）</th><th>正午ごろ（12時）</th><th>夕方（15時ごろ）</th></tr>
+        <tr><td style="height:6mm"></td><td></td><td></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．日なたと 日かげ</span>
+    <div class="secBody">
+      地面の 温度を 記録しよう。あたたかいのは なぜだと 思う？（〇を つけよう）
+      <table class="roundTable">
+        <tr><th>日なたの 温度</th><th>日かげの 温度</th></tr>
+        <tr><td style="height:6mm"></td><td></td></tr>
+      </table>
+      日光が 地面を あたためるから　／　風の ふき方が ちがうから　／　地面の 色が ちがうから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（身のまわりの影と太陽）</span>
+    <div class="secBody">
+      見つけた ものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>日時計のしくみ</th><th>熱中症をふせぐ工夫</th><th>方角を知る知恵</th><th>影ふみ・かげ絵あそび</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 影は、太陽と（<span class="fillLine"></span>）がわに できる。<br>
+      ② 影の 向きは、朝は西、正午ごろは北、夕方は東と（<span class="fillLine"></span>）。<br>
+      ③ 影が いちばん 短くなるのは（<span class="fillLine"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌞</span>
+        <div>
+          晴れた 日に、朝と 夕方で 自分の 影の 向きや 長さを 見くらべてみよう。日なたと 日かげの 地面を さわって、あたたかさの ちがいも 感じてみよう。<br>
+          ☐ やってみた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　カゲロウの原 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】カゲロウの原 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小3理科「太陽と地面のようす（かげと太陽）」・学力幅あり・協力型／ 使うもの：「kagerou.html」・プロジェクタ・このノート（1ページ目を人数分）。実際の日光・方位磁針は使いません（画面上のシミュレーションのみ）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_taiyou</b> などで途中再開（m_dekikata／m_taiyou／m_houi／m_ondo／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>☀️ 影は どちらに できる？</td><td>「朝の太陽」「夕方の太陽」を両方試させ、影が太陽の反対がわにできることに気づかせる</td></tr>
+      <tr><td class="min">10〜19分</td><td>🕰️ 太陽と 影の１日（<b>今日の見せ場</b>）</td><td>「すすめる」ボタンで①8時→⑧15時まで進め、影の向きと長さが変わる様子を観察。シート３に記録。正午ごろ最短になることをクイズで確認</td></tr>
+      <tr><td class="min">19〜27分</td><td>🧭 方位で 影を 読む</td><td>朝・正午ごろ・夕方の3ラウンドで、影の向きを北東南西で答えさせる。シート４に記入</td></tr>
+      <tr><td class="min">27〜35分</td><td>🌡️ 日なたと 日かげ</td><td>地面の温度を調べ、日光が地面をあたためることに気づかせる。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🕶️ はかせチャレンジ</td><td>日時計・熱中症予防・方角を知る知恵・影あそびの4つを発見してクイズ。熱中症予防に着地</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「朝と夕方で影を見くらべる」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「方位で影を読む」を右下「つぎ▶」でスキップ可（<b>太陽と影の１日・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 正午ごろ</b>／影ができるしくみ＝<b>影は太陽と反対がわにできる</b>／
+      太陽と影の１日＝<b>正午ごろ（⑤12時）がいちばん短い（約73cm）</b>／方位で影を読む＝<b>朝=西・正午ごろ=北・夕方=東</b>／
+      日なたと日かげ＝<b>日光が地面をあたためるから</b>／はかせ＝<b>イ 日かげで休んだり水分をとったりする</b>／
+      まとめ＝①<b>反対</b>　②<b>かわっていく</b>　③<b>正午ごろ</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>光はまっすぐ進む性質があるため、しょうがい物（棒や体）にぶつかると、その反対がわに影ができる。太陽が東にあれば影は西に、太陽が西にあれば影は東にのびる</li>
+      <li>太陽は1日のうちで東→南（正午ごろ）→西と位置を変え（実際には地球の自転による見かけの動き）、それにともなって影の向きと長さも変わる。影は太陽が最も高くなる正午ごろにいちばん短くなる</li>
+      <li>本教材の数値（太陽の高さ・影の長さ・影の向き）は、東京（北緯35.7°）の春分・秋分（太陽赤緯0°）を基準に、高さ100cm(1m)の棒でシミュレーションした計算値。8時（高さ約24°・影約225cm）〜正午12時（高さ約54°・影約73cm）〜15時（高さ約35°・影約143cm）まで、実際の天文計算（sin高度=cos緯度×cosH）にもとづく。実際の教室では季節・場所・時こくによって数値は変わる</li>
+      <li>影の向きは、方位磁針の8方位（北・東・南・西など）で言い表すことができる。方位磁針は、いつも赤い針が北を指す</li>
+      <li>日なたの地面が日かげより温度が高くなるのは、太陽の光（日光）が地面をあたためるから。地面の温度は気温よりさらに高くなることがあり、夏の熱中症対策（日かげ・水分補給・帽子）につながる本物の生活の知恵</li>
+      <li>日時計は、棒（gnomon）の影の位置で時こくを知る、大昔からの道具。太陽の位置と時こくの関係を利用したものの一つ</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「太陽と影の１日」が今日いちばんの見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる</li>
+      <li>「太陽と影の１日」は影の長さが正午に向けて短くなり、その後また長くなる関係（両端が長く中央が短い）。「方位で影を読む」は同じデータを使い、向きに注目させる別の切り口になっている</li>
+      <li>日なたと日かげの温度差は、実際の校庭でも体感できる身近な現象。可能であれば、後日実際に地面を触って確かめる活動につなげるとよい</li>
+      <li>よそうタイムの答え（イ：正午ごろ）は、多くの子が「朝」や「夕方」と考えがちなため意外性がある。まとめで丁寧に振り返るとよい</li>
+      <li>夏の熱中症対策（日かげで休む・水分補給・帽子）は、はかせチャレンジで扱う本物の安全知識。実際の外遊びの場面でも一言添えるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「影は太陽のどちらがわにできる？」「正午ごろ、影はどっちを向く？」「日なたと日かげ、どっちがあたたかい？」</li>
+      <li>実際に晴れた日、校庭で棒や自分の影の向き・長さを朝と午後で見くらべる活動を追加すると理解が深まる</li>
+      <li>理科の天文・地学分野は「星めぐりの塔」（星の動き）「月よみ堂」（月の満ち欠け）に続く3単元目。小3では「アオバの葉かげ」（チョウの育ち方）「カガミの丘」（光の性質）に続く3単元目で、小3の理科ラインナップが充実した</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
