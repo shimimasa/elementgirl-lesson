@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>コドウの丘 — 呼吸と血液のはたらき たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fdeaea 0%, #fbd6d8 45%, #f0bcc0 100%);
+    color: #3a1414;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #b71c1c; text-shadow: 0 0 14px rgba(183, 28, 28, .22);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #2f7ab0; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #f6d9d9; border: 2px solid #e0a6a6;
+    font-size: clamp(16px, 1.8vw, 26px); color: #cf9a9a;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ff8a80, #b71c1c);
+    border-color: #7a0000; color: #fff5f0;
+    box-shadow: 0 0 16px rgba(183, 28, 28, .6);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #fff2f0 0%, #f6c6c8 70%, #e2a2a4 100%);
+    border: 3px solid #d98f8f;
+    box-shadow: inset 0 0 40px rgba(150, 60, 60, .16), 0 4px 18px rgba(90, 30, 30, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #7a2a2a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #b71c1c; color: #fff5f0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(90, 20, 20, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(210, 150, 150, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #ffab91; cursor: pointer;
+    background: linear-gradient(180deg, #ef5350, #c62828); color: #fff;
+    box-shadow: 0 3px 0 #7a0000; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.cool { background: linear-gradient(180deg, #6fc3e8, #2f8fc4); border-color: #a8e0f4; box-shadow: 0 3px 0 #14507a; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #ef5350; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(90, 20, 20, .28), inset 0 0 24px rgba(120, 40, 40, .14);
+    flex-shrink: 0; background: #fbeaea;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #8a4040;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(17px, 1.9vw, 26px);
+    color: #b71c1c; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fff6f6; border: 2px solid #f3caca; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #8a4040; }
+  .mascot { width: 100%; animation: floaty 3.6s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #3a1414;
+    border: 1.5px solid #f3caca;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #b71c1c; background: #ffdada; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fffdf8, #ffeaea); color: #6a1010;
+    border: 2px solid #b71c1c; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #b71c1c; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ef5350, #c62828); color: #fff5f0;
+    box-shadow: 0 3px 0 #7a0000, 0 5px 12px rgba(90, 20, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #7a0000; }
+  .btn.sub {
+    background: #ffdada; color: #8a2020; box-shadow: 0 3px 0 #e0b0b0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #3a1414; box-shadow: 0 3px 0 #e6c3c3; font-weight: 400; border: 1.5px solid #f3caca; }
+  .btn.choice.picked { background: #ffdada; outline: 3px solid #ef5350; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(58, 20, 20, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fff6f6, #ffdede);
+    border: 3px solid #d98f8f; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(60, 20, 20, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #b71c1c; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #b71c1c; }
+  .panel .sub { color: #8a4040; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #3a1414; border: 1.5px solid #f3caca; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8a4040; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #3a1414; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #f3caca; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #ef5350; background: #ffeaea; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #ef5350; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #ef5350;
+    color: #b71c1c; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #8a4040;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ffdada; color: #8a2020;
+    border: 1px solid #e0a6a6; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ffc4c4; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（2026-07-23／ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">💓 コドウの丘<small>— 呼吸と血液のはたらき —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kokyu" title="肺のはたらき">★</div>
+    <div class="badge" id="bd_m_shinzou" title="心臓のしくみ">★</div>
+    <div class="badge" id="bd_m_myaku" title="脈をはかろう">★</div>
+    <div class="badge" id="bd_m_junkan" title="血液の旅">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">コドウの丘</div>
+    <div id="locChip">コドウの丘</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔬 コドウスコープ 〜見えない体の中を見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
+            <ellipse cx="60" cy="106" rx="28" ry="6" fill="rgba(120,20,20,.16)"/>
+            <circle cx="60" cy="56" r="44" fill="url(#hemoGrad)" stroke="#7a0000" stroke-width="2.4"/>
+            <ellipse cx="60" cy="56" rx="18" ry="11" fill="#8a1010" opacity=".3"/>
+            <defs>
+              <radialGradient id="hemoGrad" cx="35%" cy="28%" r="75%">
+                <stop offset="0%" stop-color="#ff8a80"/>
+                <stop offset="58%" stop-color="#e53935"/>
+                <stop offset="100%" stop-color="#b71c1c"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="50" r="6" fill="#fff"/>
+              <circle cx="72" cy="50" r="6" fill="#fff"/>
+              <circle cx="49" cy="51" r="3" fill="#3a0000"/>
+              <circle cx="73" cy="51" r="3" fill="#3a0000"/>
+            </g>
+            <ellipse cx="42" cy="62" rx="4" ry="2.6" fill="#ffb3ab" opacity=".8"/>
+            <ellipse cx="78" cy="62" rx="4" ry="2.6" fill="#ffb3ab" opacity=".8"/>
+            <path d="M50 66 Q60 74 70 66" stroke="#5a0000" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M20 58 q-10 4 -12 14" stroke="#7a0000" fill="none" stroke-width="5" stroke-linecap="round"/>
+            <path d="M100 58 q10 4 12 14" stroke="#7a0000" fill="none" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>赤血球<rt>せっけっきゅう</rt></ruby>から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ヘモ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">💓 コドウの丘ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   コドウの丘 — 呼吸と血液のはたらき（小6理科・協力型・1ファイル）
+   「おなかのなか探検隊」（消化）の続編。体内の見えない働きを見せる。
+   肺のはたらき（発見型）→ 心臓のしくみ（発見型）→
+   脈をはかろう（メイン操作・数値階段①〜⑦・運動の強さと心拍数）→
+   血液の旅（発見型・肺循環と体循環）→ はかせ（本物の数値クイズ）。
+   数値：安静時心拍数は小学生でやく80〜90/分、心臓はやく1日10万回拍動、
+   吐く息は酸素21%→17%・二酸化炭素0.04%→4%、血液は全身をやく1分でめぐる、
+   血液の重さは体重のやく1/13。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  kokyu: ruby('呼吸', 'こきゅう'),
+  hai: ruby('肺', 'はい'),
+  shinzou: ruby('心臓', 'しんぞう'),
+  ketsueki: ruby('血液', 'けつえき'),
+  sanso: ruby('酸素', 'さんそ'),
+  nisan: ruby('二酸化炭素', 'にさんかたんそ'),
+  sekkekkyu: ruby('赤血球', 'せっけっきゅう'),
+  myakuhaku: ruby('脈拍', 'みゃくはく'),
+  junkan: ruby('循環', 'じゅんかん'),
+  zenshin: ruby('全身', 'ぜんしん'),
+  yobun: ruby('養分', 'ようぶん'),
+  seirei: ruby('精霊', 'せいれい'),
+  koukan: ruby('交換', 'こうかん'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+const IN_O2 = 21, IN_CO2 = 0.04;   // すう息（ふつうの空気）
+const OUT_O2 = 17, OUT_CO2 = 4.0;  // はく息（実測値）
+const HEART_RATE_REST = 85;        // 安静時心拍数（小学生平均、やく80〜90/分の中央値）
+const HEART_BEATS_PER_DAY = 100000; // 心臓はやく1日10万回
+const STROKE_VOL_ML = 70;          // 1回の拍動で送り出す血液量のめやす(mL)
+const BLOOD_CIRCLE_SEC = 60;       // 血液が全身をひとめぐりする時間のめやす
+const BLOOD_WEIGHT_FRAC = 13;      // 血液の重さは体重のやく1/フラク
+
+// m_myaku：運動の強さ①〜⑦での心拍数(回/分)。index0=スタート(安静時)
+const MYAKU_STEPS = [85, 92, 102, 118, 138, 158, 175, 190];
+function myakuState(bpm) {
+  if (bpm <= 100) return { key: 'low', txt: 'まだ ゆったり……もう少し 動いてみよう' };
+  if (bpm <= 170) return { key: 'good', txt: 'ちょうどよい 運動！ 心臓と 肺が げんきに はたらいている' };
+  return { key: 'high', txt: 'はげしすぎ！ 休けいと 水分ほきゅうが 必要' };
+}
+
+// ---------- 心臓の4つの部屋（発見型） ----------
+const HEART_CHAMBERS = [
+  { key: 'ra', num: '①', name: '右心房', kana: 'うしんぼう', x: 360, y: 250, txt: `${W.zenshin}から もどってきた 血液が、さいしょに 入る 部屋。` },
+  { key: 'rv', num: '②', name: '右心室', kana: 'うしんしつ', x: 360, y: 400, txt: `血液を ${W.hai}へ 送り出す 部屋。ここから ${W.hai}へ 向かう じゅんかんが 始まる。` },
+  { key: 'la', num: '③', name: '左心房', kana: 'さしんぼう', x: 640, y: 250, txt: `${W.hai}で ${W.sanso}を たっぷり 受けとった 血液が、もどってくる 部屋。` },
+  { key: 'lv', num: '④', name: '左心室', kana: 'さしんしつ', x: 640, y: 400, txt: `いちばん 力強く 血液を ${W.zenshin}へ 送り出す 部屋。かべが いちばん 厚い。` },
+];
+
+// ---------- 血液の旅（発見型・肺循環と体循環） ----------
+const JUNKAN_POINTS = [
+  { key: 0, num: '①', name: `${W.shinzou} → ${W.hai}`, txt: `右心室から 血液が ${W.hai}へ 送られる。まだ ${W.nisan}を 多く ふくんだ 血液。` },
+  { key: 1, num: '②', name: `${W.hai} → ${W.shinzou}`, txt: `${W.hai}で ${W.sanso}を たっぷり 受けとった 血液が、左心房へ もどってくる。` },
+  { key: 2, num: '③', name: `${W.shinzou} → ${W.zenshin}`, txt: `左心室から、${W.sanso}と ${W.yobun}を たっぷり ふくんだ 血液が、体じゅうへ 送り出される。` },
+  { key: 3, num: '④', name: `${W.zenshin} → ${W.shinzou}`, txt: `体じゅうの さいぼうに ${W.sanso}と ${W.yobun}を わたした 血液は、かわりに ${W.nisan}を 受けとって、右心房へ もどる。` },
+];
+
+// ---------- はかせチャレンジ：本物の数値クイズ ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '心臓は1日に何回打つ？', icon: '💓', txt: `心臓は 1分間に やく70〜90回、1日では やく<b>10万回</b>も うち続けている。休むことなく、きみが ねている間も はたらき続けているんだ。` },
+  { key: 1, letter: 'い', name: '血液は何分でひとめぐり？', icon: '🔄', txt: `血液は 心臓を 出て ${W.zenshin}を まわり、また 心臓に もどってくるまで、やく<b>1分</b>しか かからない。今も きみの血液は、もう 何回も 体を めぐっているよ。` },
+  { key: 2, letter: 'う', name: '体の血液の重さは？', icon: '⚖️', txt: `体の中を 流れる 血液の重さは、体重の やく<b>13分の1</b>。体重26kgの人なら、やく2kgの血液が 体の中を めぐっている計算になる。` },
+  { key: 3, letter: 'え', name: '安静時のみゃくはく数は？', icon: '🫀', txt: `じっとしている時の みゃくはく数は、小学生で 1分間に やく<b>80〜90回</b>。おとなに なると すこし ゆっくりに なって やく60〜80回になる。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kokyu',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  // m_kokyu
+  breathT: 0,
+  breathTried: new Set(),
+  // m_shinzou
+  chamberFound: new Set(),
+  // m_myaku
+  myakuIdx: 0,
+  myakuIdxDisplay: 0,
+  // m_junkan
+  junkanFound: new Set(),
+  // hakase
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sDoki = () => { tone(150, 0, 0.09, 'sine', 0.14); tone(120, 0.11, 0.13, 'sine', 0.11); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgHill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#fff2f0'); g.addColorStop(1, '#e2a2a4');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- 1．肺のはたらき ----------
+function drawLung(px, py, sc, scaleT, color) {
+  const w = (34 + scaleT * 14) * sc, h = (78 + scaleT * 22) * sc;
+  gctx.fillStyle = color; gctx.strokeStyle = '#7a0000'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(px, py - h * 0.5);
+  gctx.quadraticCurveTo(px - w, py - h * 0.3, px - w * 0.7, py + h * 0.4);
+  gctx.quadraticCurveTo(px - w * 0.4, py + h * 0.55, px, py + h * 0.5);
+  gctx.quadraticCurveTo(px + w * 0.4, py + h * 0.55, px + w * 0.7, py + h * 0.4);
+  gctx.quadraticCurveTo(px + w, py - h * 0.3, px, py - h * 0.5);
+  gctx.closePath();
+  gctx.fill(); gctx.stroke();
+}
+function drawKokyuScene(X, Y, sc) {
+  bgHill(X, Y, sc);
+  const cx = 500, cy = 330;
+  const t = S.breathT || 0;
+  const color = t > 0.5 ? 'rgba(239,83,80,.55)' : 'rgba(111,195,232,.55)';
+  gctx.strokeStyle = '#c98a8a'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(X(cx), Y(cy - 150)); gctx.lineTo(X(cx), Y(cy - 60)); gctx.stroke();
+  drawLung(X(cx - 70), Y(cy), sc, t, color);
+  drawLung(X(cx + 70), Y(cy), sc, t, color);
+  gctx.fillStyle = '#3a1414'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const label = t > 0.5 ? '大きく すって、肺が ふくらんでいる' : t < 0.5 && S.breathTried.size > 0 ? 'はき出して、肺が ちぢんでいる' : 'ボタンで すって・はいて 試してみよう';
+  gctx.fillText(label, X(500), Y(70));
+}
+
+// ---------- 2．心臓のしくみ（発見型） ----------
+function drawShinzouScene(X, Y, sc) {
+  bgHill(X, Y, sc);
+  const beat = 1 + Math.sin(performance.now() / 1000 * 3.2) * 0.03;
+  HEART_CHAMBERS.forEach(c => {
+    const found = S.chamberFound.has(c.key);
+    const r = 78 * sc * beat;
+    gctx.beginPath(); gctx.roundRect ? gctx.roundRect(X(c.x) - r, Y(c.y) - r, r * 2, r * 2, 16 * sc) : gctx.rect(X(c.x) - r, Y(c.y) - r, r * 2, r * 2);
+    gctx.fillStyle = found ? '#ef5350' : '#f6d9d9';
+    gctx.fill();
+    gctx.strokeStyle = '#7a0000'; gctx.lineWidth = 2.6 * sc; gctx.stroke();
+    gctx.fillStyle = found ? '#fff' : '#b71c1c';
+    gctx.font = `700 ${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.num, X(c.x), Y(c.y) - 10 * sc);
+    gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(found ? c.name : '？？？', X(c.x), Y(c.y) + 22 * sc);
+  });
+  gctx.strokeStyle = '#7a0000'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(500), Y(180)); gctx.lineTo(X(500), Y(470)); gctx.stroke();
+  gctx.fillStyle = '#3a1414'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('4つの部屋を タッチして 見つけよう', X(500), Y(70));
+}
+
+// ---------- 3．脈をはかろう（メイン操作・数値階段①〜⑦） ----------
+function drawMyakuScene(X, Y, sc) {
+  bgHill(X, Y, sc);
+  const bpm = lerpArr(MYAKU_STEPS, S.myakuIdxDisplay);
+  const st = myakuState(bpm);
+  const cx = 500, cy = 340;
+  const beatPerSec = bpm / 60;
+  const phase = (performance.now() / 1000 * beatPerSec) % 1;
+  const pulse = phase < 0.18 ? 1 + Math.sin(phase / 0.18 * Math.PI) * 0.22 : 1;
+  gctx.save();
+  gctx.translate(X(cx), Y(cy));
+  gctx.scale(pulse, pulse);
+  gctx.font = `${110 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('❤️', 0, 0);
+  gctx.restore();
+  gctx.fillStyle = '#3a1414'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const idxNow = Math.round(S.myakuIdxDisplay);
+  gctx.fillText(`${idxNow === 0 ? 'スタート（安静時）' : NUMS[idxNow - 1]}　1分間に ${Math.round(bpm)}回`, X(500), Y(55));
+  gctx.font = `700 ${15 * sc}px sans-serif`;
+  gctx.fillStyle = st.key === 'high' ? '#b71c1c' : '#3a1414';
+  gctx.fillText(st.txt, X(500), Y(430));
+}
+
+// ---------- 4．血液の旅（発見型・肺循環と体循環） ----------
+function drawJunkanScene(X, Y, sc) {
+  bgHill(X, Y, sc);
+  gctx.font = `${52 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🫀', X(500), Y(320));
+  gctx.fillText('🫁', X(230), Y(180)); gctx.fillText('🫁', X(770), Y(180));
+  gctx.fillText('🧍', X(500), Y(500));
+  const xs = [230, 500, 770, 500];
+  const ys = [180, 500, 180, 500];
+  JUNKAN_POINTS.forEach((p, i) => {
+    const found = S.junkanFound.has(p.key);
+    const px = 140 + i * 240, py = 560;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 42 * sc, 0, TAU);
+    gctx.fillStyle = found ? '#ef5350' : '#f6d9d9';
+    gctx.fill();
+    gctx.strokeStyle = '#7a0000'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.fillStyle = found ? '#fff' : '#b71c1c';
+    gctx.font = `700 ${24 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.num, X(px), Y(py));
+  });
+  gctx.fillStyle = '#3a1414'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('①〜④の じゅんに 血液の旅を たどろう', X(500), Y(70));
+}
+
+// ---------- 5．はかせ：本物の数値クイズ ----------
+function drawHakaseScene(X, Y, sc) {
+  bgHill(X, Y, sc);
+  const xs = [180, 380, 620, 820];
+  HAKASE_POINTS.forEach((p, i) => {
+    const done = S.hakaseFound.has(p.key);
+    const px = xs[i], py = 320;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#ef5350' : '#f6d9d9';
+    gctx.fill();
+    gctx.strokeStyle = '#b71c1c'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#3a1414'; gctx.font = `700 ${12 * sc}px sans-serif`;
+    gctx.fillText(p.letter + ' ' + p.name, X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#3a1414'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('体の中では、こんなことが おきている', X(500), Y(70));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kokyu') drawKokyuScene(X, Y, sc);
+  else if (S.scene === 'shinzou') drawShinzouScene(X, Y, sc);
+  else if (S.scene === 'myaku') drawMyakuScene(X, Y, sc);
+  else if (S.scene === 'junkan') drawJunkanScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- コドウスコープ（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fff2f0'); grd.addColorStop(1, '#e2b0b0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'particles') {
+    drawParticleGrid(R, S.scope.o2, S.scope.co2);
+    label(S.scope.label || '');
+  } else if (mode === 'blood') {
+    drawBloodFlow(R, S.scope.bpm || HEART_RATE_REST);
+    label(S.scope.label || '');
+  } else if (mode === 'point') {
+    sctx.fillStyle = '#b71c1c';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ff8a8a55'); g2.addColorStop(1, 'rgba(255,138,138,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#b71c1c'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('💓', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#b71c1c'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#3a1414';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawParticleGrid(R, o2, co2) {
+    const total = 25;
+    let nCo2 = co2 >= 1 ? Math.max(1, Math.round(total * co2 / 100)) : 0;
+    let nO2 = Math.max(0, Math.round(total * o2 / 100));
+    if (nO2 + nCo2 > total) nO2 = total - nCo2;
+    const nN2 = Math.max(0, total - nO2 - nCo2);
+    const colors = [];
+    for (let i = 0; i < nO2; i++) colors.push('#e05a3a');
+    for (let i = 0; i < nCo2; i++) colors.push('#3a7ab8');
+    for (let i = 0; i < nN2; i++) colors.push('#9aa0a6');
+    const cols = 5, rows = 5, cellSize = R * 0.26;
+    const startX = R - (cols - 1) * cellSize / 2, startY = R * 0.62 - (rows - 1) * cellSize / 2;
+    let idx = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (idx >= total) break;
+        const px = startX + c * cellSize, py = startY + r * cellSize;
+        sctx.beginPath(); sctx.arc(px, py, cellSize * 0.36, 0, TAU);
+        sctx.fillStyle = colors[idx] || '#9aa0a6'; sctx.fill();
+        sctx.strokeStyle = 'rgba(255,255,255,.6)'; sctx.lineWidth = 1; sctx.stroke();
+        idx++;
+      }
+    }
+  }
+
+  function drawBloodFlow(R, bpm) {
+    const cy = R * 0.62, rad = R * 0.5;
+    sctx.strokeStyle = 'rgba(183,28,28,.35)'; sctx.lineWidth = R * 0.1;
+    sctx.beginPath(); sctx.arc(R, cy, rad, 0, TAU); sctx.stroke();
+    const n = 8, speed = bpm / 60 * 0.55;
+    for (let i = 0; i < n; i++) {
+      const a = (t / (1 / speed) + i / n) % 1 * TAU;
+      const px = R + Math.cos(a) * rad, py = cy + Math.sin(a) * rad;
+      sctx.beginPath(); sctx.arc(px, py, R * 0.06, 0, TAU);
+      sctx.fillStyle = '#e53935'; sctx.fill();
+      sctx.strokeStyle = 'rgba(255,255,255,.7)'; sctx.lineWidth = 1.4; sctx.stroke();
+    }
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ff8a80', '#ef5350', '#b71c1c', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    kokyu: '🫁 肺のはたらき',
+    shinzou: '💓 心臓のしくみ',
+    myaku: '🏃 脈をはかろう',
+    junkan: '🩸 血液の旅',
+    hakase: '🔎 はかせチャレンジ',
+    done: '💓 コドウの丘 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'コドウの丘';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kokyu', 'm_shinzou', 'm_myaku', 'm_junkan', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kokyu', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">💓🫁🩸🔎</div>
+        <h1>コドウの丘</h1>
+        <div class="sub">〜 ${W.kokyu}と ${W.ketsueki}の はたらき たいけん 〜</div>
+        <p class="talk">ようこそ！ わたしは、血液の中を流れる ${W.sekkekkyu}から 生まれた ${W.seirei}、<b>ヘモ</b>。前回、おなかの探検隊で ビフィーと たべ物の旅を 見た人は おぼえているかな？ 小腸で とりこまれた ${W.yobun}は、じつは この 血液に 乗って 体じゅうへ 運ばれるんだ。<br>
+        きょうは その 血液と、血液に ${W.sanso}を わたす ${W.hai}の はたらきを、いっしょに たしかめに いこう！</p>
+        <button class="btn" id="startBtn">たんけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">体を うごかす（走る）と、${W.shinzou}の ドキドキ（みゃくはく）が 速くなるのは なぜだと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">😨</span><b>ア</b> こわいから</div>
+          <div class="vcard" data-v="1"><span class="vicon">💪</span><b>イ</b> 筋肉が たくさんの ${W.sanso}を ひつようとするから</div>
+          <div class="vcard" data-v="2"><span class="vicon">🤷</span><b>ウ</b> ただの くせ</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：肺のはたらき（発見型） ---
+  m_kokyu: {
+    enter() {
+      Object.assign(S, { scene: 'kokyu', scope: { type: 'particles', o2: IN_O2, co2: IN_CO2, label: `酸素 ${IN_O2}%` }, breathT: 0, breathTried: new Set() });
+      updateLoc();
+      setWish('🫁', `大きく 息を すって、はいて みよう。すう息と はく息で、${W.sanso}の 割合は 同じかな？`);
+      say(`さいしょは <b>${W.hai}</b>。よそう：はく息は すう息と くらべて、${W.sanso}は どうなると 思う？ シートに 〇！`);
+      setButtons([
+        { label: 'Ａ 増える', cls: 'choice', cb: el => this.pick(0, el) },
+        { label: 'Ｂ 変わらない', cls: 'choice', cb: el => this.pick(1, el) },
+        { label: 'Ｃ 減る', cls: 'choice', cb: el => this.pick(2, el) },
+      ]);
+    },
+    pick(n, el) {
+      markPicked(el);
+      say(`「${['Ａ 増える', 'Ｂ 変わらない', 'Ｃ 減る'][n]}」だね。<br>ボタンで すって→はいて、たしかめよう！`);
+      setButtons([]);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setControls([
+        { label: '🫁 大きく すう', cls: 'cool', disabled: S.breathT > 0.99, cb: () => this.breathe('in') },
+        { label: '💨 はき出す', disabled: S.breathT < 0.01 && S.breathTried.size === 0, cb: () => this.breathe('out') },
+      ]);
+    },
+    breathe(dir) {
+      setControls([]);
+      if (dir === 'in') {
+        startTween(S.breathT, 1, 1.1, v => {
+          S.breathT = v;
+          S.scope = { type: 'particles', o2: IN_O2, co2: IN_CO2, label: `酸素 ${IN_O2}%` };
+        }, () => this.after('in'));
+      } else {
+        startTween(S.breathT, 0, 1.1, v => {
+          S.breathT = v;
+          S.scope = { type: 'particles', o2: OUT_O2, co2: OUT_CO2, label: `酸素 ${OUT_O2}%　二酸化炭素 ${OUT_CO2}%` };
+        }, () => this.after('out'));
+      }
+    },
+    after(dir) {
+      S.breathTried.add(dir); sTap(); scopeBurst();
+      if (dir === 'in') say(`大きく すうと、肺が ふくらんで ${W.sanso}を たくさん とりこんだ。`);
+      else say(`はき出すと、肺が ちぢんで、${W.nisan}が 多い 空気が 出て いった。`);
+      if (S.breathTried.size >= 2) this.ask();
+      else this.refreshCtl();
+    },
+    ask() {
+      setControls([]);
+      say(`はく息は すう息と くらべて、${W.sanso}は どうなった？`);
+      setButtons(choiceRow(['増えた', '変わらなかった', '減った'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('m_kokyu'); S.phase = 'done';
+        say(`せいかい！ はく息は ${W.sanso}が ${IN_O2}%→${OUT_O2}%に 減り、${W.nisan}が ${IN_CO2}%→${OUT_CO2}%に 増える。<br><br>💡 <b>たいせつポイント</b><br>${W.hai}では、すった 空気の ${W.sanso}を 血液に わたし、血液から ${W.nisan}を 受けとっている。これを ガス${W.koukan}という。`);
+        setButtons([{ label: 'つぎへ（心臓のしくみ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['増えた', '変わらなかった', '減った'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：心臓のしくみ（発見型） ---
+  m_shinzou: {
+    enter() {
+      Object.assign(S, { scene: 'shinzou', scope: { type: 'point', icon: '💓', name: 'ヘモの心ぞうチェック' }, chamberFound: new Set() });
+      updateLoc();
+      setWish('💓', `${W.shinzou}には 4つの 部屋が ある。①〜④を タッチして 見つけよう。`);
+      say(`ここは <b>${W.shinzou}</b>。にぎりこぶし ぐらいの 大きさの、休まず うごき続ける 筋肉の ポンプだよ。番号を タッチしてね。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HEART_CHAMBERS.map(c => ({
+        label: c.num + ' ' + (S.chamberFound.has(c.key) ? c.name : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.chamberFound.size >= HEART_CHAMBERS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.chamberFound.add(c.key);
+      S.scope = { type: 'point', icon: '💓', name: ruby(c.name, c.kana) };
+      scopeBurst(); sDoki();
+      say(`${c.num} <b>${ruby(c.name, c.kana)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      setButtons([]);
+      say(`${W.shinzou}の いちばん大事な仕事は？`);
+      setButtons(choiceRow(['血液を全身に送り出すポンプ', '食べ物を消化する', '空気をきれいにする'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_shinzou'); S.phase = 'done';
+        say(`せいかい！ ${W.shinzou}は 1分間に やく${HEART_RATE_REST}回（小学生の 安静時）、規則正しく ちぢんだり ゆるんだり して、1回に やく${STROKE_VOL_ML}mLの 血液を 送り出す ポンプ。`);
+        setButtons([{ label: 'つぎへ（脈をはかろう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['血液を全身に送り出すポンプ', '食べ物を消化する', '空気をきれいにする'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：脈をはかろう（メイン操作・数値階段①〜⑦） ---
+  m_myaku: {
+    enter() {
+      Object.assign(S, { scene: 'myaku', myakuIdx: 0, myakuIdxDisplay: 0, scope: { type: 'blood', bpm: MYAKU_STEPS[0], label: `1分間に ${MYAKU_STEPS[0]}回` } });
+      updateLoc();
+      setWish('🏃', `運動の 強さを ①〜⑦の 段階で 変えて、みゃくはく（心拍数）が どう 変わるか くらべよう。`);
+      say(`さいしょは 安静時、1分間に ${MYAKU_STEPS[0]}回。「すすめる」ボタンで、運動を 強くしていくよ。じっさいに 自分の 手首の 脈を さわって、ドキドキを 感じてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.myakuIdx >= MYAKU_STEPS.length - 1) { this.finish(); return; }
+      setControls([{ label: `⏭️ すすめる(${NUMS[S.myakuIdx]} 運動を強く)`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.myakuIdx >= MYAKU_STEPS.length - 1) return;
+      setControls([]);
+      const fromV = S.myakuIdx, toV = S.myakuIdx + 1;
+      startTween(fromV, toV, 0.8, v => {
+        S.myakuIdxDisplay = v;
+        const bpm = lerpArr(MYAKU_STEPS, v);
+        S.scope = { type: 'blood', bpm, label: `1分間に ${Math.round(bpm)}回` };
+      }, () => {
+        S.myakuIdx++; S.myakuIdxDisplay = S.myakuIdx;
+        sTap(); sDoki();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑦まで、運動の 強さを 変えて みゃくはくを くらべたね。`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      setButtons([]);
+      say(`体を うごかす（走る）と、${W.shinzou}の ドキドキが 速くなるのは なぜ？`);
+      setButtons(choiceRow(['こわいから', '筋肉がたくさんの酸素をひつようとするから', 'ただのくせ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_myaku'); S.phase = 'done';
+        say(`せいかい！ 筋肉を うごかすには ${W.sanso}と ${W.yobun}が たくさん 必要になる。${W.shinzou}は 血液を はやく 送り出して、${W.sanso}を 筋肉に とどけようと するから、みゃくはくが 速くなるんだ。<br>ただし 速すぎる うんどうは 体に つらいから、休けいと 水分ほきゅうも 大切。`);
+        setButtons([{ label: 'つぎへ（血液の旅）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['こわいから', '筋肉がたくさんの酸素をひつようとするから', 'ただのくせ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：血液の旅（発見型・肺循環と体循環） ---
+  m_junkan: {
+    enter() {
+      Object.assign(S, { scene: 'junkan', scope: { type: 'point', icon: '🩸', name: 'けつえきの たび' }, junkanFound: new Set() });
+      updateLoc();
+      setWish('🩸', `①〜④の じゅんに タッチして、血液の旅を たどろう。`);
+      say(`血液は ${W.shinzou}から 出て、${W.hai}や ${W.zenshin}を めぐって、また もどってくる。番号を じゅんに タッチしてね。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(JUNKAN_POINTS.map(p => ({
+        label: p.num + ' ' + (S.junkanFound.has(p.key) ? p.name : '？？？'),
+        cb: () => this.reveal(p),
+      })));
+      if (S.junkanFound.size >= JUNKAN_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.junkanFound.add(p.key);
+      S.scope = { type: 'point', icon: '🩸', name: p.name };
+      scopeBurst();
+      say(`${p.num} <b>${p.name}</b>：${p.txt}`);
+      if (p.key === 2) say(`${p.num} <b>${p.name}</b>：${p.txt}<br>この ${W.yobun}、どこかで 聞いた ことないかな……そう、小腸で とりこまれた 養分だよ！ おなかの探検で 会った ビフィーの ことも 思い出してね。`);
+      this.refreshCtl();
+    },
+    ask() {
+      setButtons([]);
+      say(`血液が ${W.zenshin}に 運んでいる ものは？`);
+      setButtons(choiceRow(['酸素と養分', '消化液だけ', '何も運んでいない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_junkan'); S.phase = 'done';
+        say(`せいかい！ 血液は ${W.hai}で ${W.sanso}を、小腸で ${W.yobun}を 受けとって、体じゅうの さいぼうに とどけている。かわりに 不要になった ${W.nisan}を 受けとって、また ${W.hai}へ 運んでいく。この くりかえしが 「${W.junkan}」。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['酸素と養分', '消化液だけ', '何も運んでいない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：本物の数値クイズ ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.shinzou}と ${W.ketsueki}には、びっくりする 数字の ひみつが たくさん あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name, icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`${W.shinzou}が 1日に うつ回数は？`);
+      setButtons(choiceRow(['やく1万回', 'やく10万回', 'やく100万回'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.shinzou}は 1日に やく<b>10万回</b>も うち続けている。休むことなく はたらき続ける、すごい 筋肉なんだ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['やく1万回', 'やく10万回', 'やく100万回'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ コドウの丘 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 肺では、${W.sanso}を 血液に わたし、${W.nisan}を 受けとる（＝（<span class="blankWord" data-a="ガス交換">？？？</span>））。<br>
+        ② ${W.shinzou}は、血液を 送り出す（<span class="blankWord" data-a="ポンプ">？？？</span>）。<br>
+        ③ 運動を すると、みゃくはく（心拍数）は（<span class="blankWord" data-a="速くなる">？？？</span>）。<br>
+        ④ 血液は ${W.zenshin}を やく（<span class="blankWord" data-a="1分">？？</span>）で めぐる。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 筋肉が たくさんの 酸素を ひつようとするから</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>手首の 内がわに 反対の 手の 人さし指と 中指を そっと あてて、じっとしている時の みゃくを 10びょう 数えてみよう（6ばい すると 1分間の 回数）。そのあと 家族と いっしょに その場で 30びょう 足ぶみして、もう一回 みゃくを はかって くらべてみてね。きろくノートに 書こう！</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#b71c1c'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「はく息は 酸素が 増える？減る？」「${W.shinzou}は 何個の部屋がある？」「血液は 体を 何分で めぐる？」`);
+      setButtons([
+        { label: '🫁 肺のはたらきの図', cls: 'sub', cb: () => this.show('kokyu') },
+        { label: '💓 心臓のしくみの図', cls: 'sub', cb: () => this.show('shinzou') },
+        { label: '🏃 脈をはかろうの図', cls: 'sub', cb: () => this.show('myaku') },
+        { label: '🩸 血液の旅の図', cls: 'sub', cb: () => this.show('junkan') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_myaku などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

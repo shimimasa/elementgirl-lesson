@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>コドウの丘 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #b71c1c; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #f7d6d6; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #f7d6d6; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>💓 コドウの丘 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      体をうごかす（走る）と、心ぞうのドキドキ（みゃくはく）が速くなるのはなぜだと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 😨 こわいから</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 💪 筋肉がたくさんの酸素をひつようとするから</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🤷 ただのくせ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．肺のはたらき</span>
+    <div class="secBody">
+      はく息はすう息とくらべて、酸素はどうなった？（〇をつけよう）<br>
+      Ａ 増えた　／　Ｂ 変わらなかった　／　Ｃ 減った<br>
+      肺は、すった空気の（　　　　　　）を血液にわたし、血液から（　　　　　　）を受けとっている。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．心臓のしくみ</span>
+    <div class="secBody">
+      心臓の4つの部屋を見つけたら、名前を書こう。
+      <table class="roundTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th></tr>
+        <tr><td class="res" style="height:6mm"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      心臓のいちばん大事な仕事は（血液を全身に送り出すポンプ ／ 食べ物を消化する ／ 空気をきれいにする）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．脈をはかろう</span>
+    <div class="secBody">
+      「すすめる」ボタンで①〜⑦を進め、運動の強さごとのみゃくはく数（1分間）を記録しよう。
+      <table class="levelTable">
+        <tr><th>安静時</th><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      運動が強くなるほど、みゃくはくは（おそくなった ／ 変わらなかった ／ 速くなった）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．血液の旅</span>
+    <div class="secBody">
+      ①〜④を見つけて、血液が運ぶものを書こう。<br>
+      血液が全身に運んでいるのは（酸素と養分 ／ 消化液だけ ／ 何も運んでいない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（本物の数字のひみつ）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>心臓は1日に何回打つ？</th><th>血液は何分でひとめぐり？</th><th>血液の重さは？</th><th>安静時のみゃくはく数は？</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      心臓が1日にうつ回数は（やく1万回 ／ やく10万回 ／ やく100万回）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 肺では、酸素を血液にわたし、二酸化炭素を受けとる（＝（<span class="fillLine"></span>））。<br>
+      ② 心臓は、血液を送り出す（<span class="fillLine sm"></span>）。<br>
+      ③ 運動をすると、みゃくはく（心拍数）は（<span class="fillLine sm"></span>）。<br>
+      ④ 血液は全身をやく（<span class="fillLine sm"></span>）でめぐる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション（みゃくをはかろう）</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">💓</span>
+        <div>
+          手首の内がわに反対の手の人さし指と中指をそっとあてて、じっとしている時のみゃくを10びょう数えよう（6ばいすると1分間の回数）。そのあと家族といっしょにその場で30びょう足ぶみして、もう一回みゃくをはかってくらべてみよう。<br>
+          ☐ 安静時：<span style="border-bottom:.4mm solid #222;display:inline-block;width:16mm">　</span>回／10びょう　　☐ 運動後：<span style="border-bottom:.4mm solid #222;display:inline-block;width:16mm">　</span>回／10びょう
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　コドウの丘 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】コドウの丘 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「人の体のつくりと働き（呼吸・血液循環）」・学力幅あり・協力型／ 使うもの：「kodou.html」・プロジェクタ・このノート（1ページ目を人数分）。「おなかのなか探検隊」（消化）の続編にあたる単元です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_myaku</b> などで途中再開（m_kokyu／m_shinzou／m_myaku／m_junkan／hakase／ending）</li>
+      <li>☐ 可能であれば「脈をはかろう」ミッションの前に、自分の手首の脈をさわって数える練習を軽くしておくと、おうちミッションがスムーズ</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）。「おなかの探検隊」の続編であることに触れる</td></tr>
+      <tr><td class="min">4〜11分</td><td>🫁 肺のはたらき</td><td>「すう」「はく」の両方を試させ、はく息は酸素が減り二酸化炭素が増えることに気づかせる。シート２に記録</td></tr>
+      <tr><td class="min">11〜18分</td><td>💓 心臓のしくみ</td><td>4つの部屋（①〜④）を1人ずつ交代でタッチして発見。心臓がポンプであることを確認。シート３に記録</td></tr>
+      <tr><td class="min">18〜28分</td><td>🏃 脈をはかろう（<b>今日の見せ場</b>）</td><td>「すすめる」ボタンで①〜⑦を進め、運動が強いほどみゃくはくが速くなることを観察。よそうタイムをここで回収。シート４に記録</td></tr>
+      <tr><td class="min">28〜36分</td><td>🩸 血液の旅</td><td>①〜④の順で肺循環・体循環を発見。「小腸で吸収された養分もここで運ばれる」と消化の学習に接続。シート５に記録</td></tr>
+      <tr><td class="min">36〜43分</td><td>🔎 はかせチャレンジ</td><td>心臓の拍動数・血液がめぐる時間などの本物の数字を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「みゃくをはかろう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「心臓のしくみ」を右下「つぎ▶」でスキップ可（<b>脈をはかろう・血液の旅・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 筋肉がたくさんの酸素をひつようとするから</b>／肺のはたらき＝<b>Ｃ 減った（酸素）</b>／
+      心臓の4つの部屋＝<b>①右心房　②右心室　③左心房　④左心室</b>／心臓の仕事＝<b>血液を全身に送り出すポンプ</b>／
+      脈をはかろう＝<b>速くなった</b>／血液の旅＝<b>酸素と養分</b>／はかせ＝<b>やく10万回</b>／
+      まとめ＝①<b>ガス交換</b>　②<b>ポンプ</b>　③<b>速くなる</b>　④<b>1分</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>安静時の呼吸数は学童期でやく1分間20回、安静時の脈拍（心拍数）は小学生でやく1分間80〜90回（成人はそれぞれやく12〜18回・60〜80回とやや少なくなる）</li>
+      <li>吐く息（呼気）の組成は酸素がやく17%・二酸化炭素がやく4%で、吸う空気（酸素21%・二酸化炭素0.04%）と比べて酸素が減り二酸化炭素が増える。肺では血液との間で酸素と二酸化炭素を交換する「ガス交換」が行われている</li>
+      <li>心臓は1回の拍動でやく70mLの血液を送り出し、1分間ではやく5L（心拍出量）。心拍数を1分間70回とすると、1日ではやく10万回（70回×60分×24時間）打ち続けている計算になる</li>
+      <li>血液は心臓を出て全身をめぐり、また心臓にもどってくるまでやく1分。体の中を流れる血液の重さは体重のやく13分の1（体重26kgならやく2kg）</li>
+      <li>心臓には4つの部屋（右心房・右心室・左心房・左心室）があり、右心系は全身からもどった血液を肺へ送る「肺循環」、左心系は肺から受けとった血液を全身へ送る「体循環」を受け持つ</li>
+      <li>運動をすると筋肉がより多くの酸素と養分を必要とするため、心臓は血液を送る速さ（心拍数）を上げて対応する。同時に呼吸数も増え、体によりたくさんの酸素を取りこもうとする</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「脈をはかろう」が今日の見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる。可能なら画面の変化に合わせて自分の手首の脈にもさわらせると実感がわく</li>
+      <li>よそうタイムの答え（イ：筋肉がたくさんの酸素を必要とするから）は、「こわいから」という素朴な思い込みとの対比を意識して振り返るとよい</li>
+      <li>「血液の旅」ミッションでは、前作「おなかのなか探検隊」（消化）で吸収された養分がこの血液に乗って運ばれることに触れ、既習内容との接続を意識させる</li>
+      <li>運動を強くしすぎると心臓に負担がかかること（画面の⑥⑦の「はげしすぎ」表示）から、休けいと水分補給の大切さにも軽く触れられるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「はく息は酸素が増える？減る？」「心臓は何個の部屋がある？」「血液は体を何分でめぐる？」</li>
+      <li>おうちミッションでは実際に自分や家族の脈をはかり、安静時と運動後の変化を体感する。画面のシミュレーションと自分の体の実感を結びつける狙い</li>
+      <li>理科の人体分野は「おなかのなか探検隊」（消化）に続く2単元目。理科ロードマップの優先度A単元が引き続き充実する</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
