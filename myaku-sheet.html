@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ミャクの森 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2e7d32; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #dcedc8; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #dcedc8; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌿 ミャクの森 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      根から吸った水は、植物の体の中を、どうやって葉や花まで運ばれると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 💦 体全体にじわっとしみこんで広がる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🧪 決まった細い管を通って運ばれる</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🚫 水はほとんど運ばれず、根にとどまる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．水の通り道を発見</span>
+    <div class="secBody">
+      色水を すいこませた くきの輪切り断面で、見つけた点に 〇を つけよう。<br>
+      ① ② ③ ④ ⑤ ⑥ 　　色水は（くき全体にばらばら ／ 輪のように並んだ決まった管 ／ 表面だけ）を通っていた
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．水を吸い上げる時間</span>
+    <div class="secBody">
+      「すすめる」ボタンで①〜⑦を進め、色水がどこまで広がったか記録しよう。
+      <table class="levelTable">
+        <tr><th>①1分</th><th>②10分</th><th>③30分</th><th>④1時間</th><th>⑤3時間</th><th>⑥5時間</th><th>⑦24時間</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      時間が たつほど、色水の 色は（うすくなった ／ 濃く遠くまで広がった ／ 変わらなかった）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．水はどこへ行く？（蒸散）</span>
+    <div class="secBody">
+      ポリぶくろの中の ようすを 記録しよう。
+      <table class="roundTable">
+        <tr><th></th><th>あ 葉のある枝</th><th>い 葉を取った枝</th></tr>
+        <tr><td>ふくろの内側</td><td><span class="fillLine sm"></span></td><td><span class="fillLine sm"></span></td></tr>
+      </table>
+      毎日の蒸散で出る水の量は（体の中の水の方が多い ／ 体の中の水よりずっと多い(5〜10倍) ／ 同じくらい）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．養分をつくる（光合成）</span>
+    <div class="secBody">
+      ヨウ素液を つけた 結果を 記録しよう。
+      <table class="roundTable">
+        <tr><th></th><th>あ おおった葉</th><th>い おおわない葉</th></tr>
+        <tr><td>色の変化</td><td><span class="fillLine sm"></span></td><td><span class="fillLine sm"></span></td></tr>
+      </table>
+      でんぷんが できたのは（日光に当たった部分だけ ／ 当たらなかった部分だけ ／ どちらも同じ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（くらしの中の水と養分）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>木かげのすずしさ</th><th>みどりのカーテン</th><th>さんそをつくる葉</th><th>植物をたいせつに</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      木の下がすずしいのは、おもに（かげになるだけ ／ 葉が水を蒸散させる時、熱をうばうから ／ 木はもともと冷たいから）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 根から吸った水は、決まった細い管＝（<span class="fillLine"></span>）を通って運ばれる。<br>
+      ② 水は葉の気孔から水蒸気となって出ていく＝蒸散。その量は体の中の水より（<span class="fillLine sm"></span>）。<br>
+      ③ 葉に日光が当たると、葉の中で（<span class="fillLine"></span>）が作られる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌿</span>
+        <div>
+          セロリや小松菜のくきを、色水（食紅をとかした水）につけて、色の変わり方をおうちでかんさつしてみよう。<br>
+          ☐ やってみた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ミャクの森 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ミャクの森 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「植物の養分と水の通り道」・学力幅あり・協力型／ 使うもの：「myaku.html」・プロジェクタ・このノート（1ページ目を人数分）。実際の色水実験・ヨウ素液実験は使いません（画面上のシミュレーションのみ）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_jousan</b> などで途中再開（m_doukan／m_kyuusui／m_jousan／m_youbun／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🔍 水の通り道を発見</td><td>茎の輪切り断面で①〜⑥の道管を発見。色水は輪状に並んだ管を通ることに気づかせる。シート２に記録</td></tr>
+      <tr><td class="min">11〜21分</td><td>⏱️ 水を吸い上げる時間（<b>今日の見せ場①</b>）</td><td>「すすめる」ボタンで①〜⑦を進め、色水がくきから葉全体へ広がる様子を観察。シート３に記録</td></tr>
+      <tr><td class="min">21〜30分</td><td>💧 水はどこへ行く？（<b>今日の見せ場②</b>）</td><td>ポリぶくろの対照実験で蒸散を発見。体内の水の5〜10倍もの水を毎日出している意外性を伝える。シート４に記録</td></tr>
+      <tr><td class="min">30〜38分</td><td>🌞 養分をつくる</td><td>覆った葉・覆わない葉のヨウ素液反応の対照実験。日光が当たった部分だけ青むらさきに変わることを確認。シート５に記録</td></tr>
+      <tr><td class="min">38〜43分</td><td>🌳 はかせチャレンジ</td><td>木かげ・みどりのカーテン・さんそ・植物をたいせつに、の4つを発見してクイズ。くらしに着地</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「色水観察」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「養分をつくる」を右下「つぎ▶」でスキップ可（<b>水の通り道・水を吸い上げる時間・水はどこへ行く？・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 決まった細い管を通って運ばれる</b>／水の通り道＝<b>輪のように並んだ決まった管を通っていた</b>／
+      水を吸い上げる時間＝<b>だんだん濃く、遠くまで広がっていった</b>／水はどこへ行く？＝<b>体の中の水よりずっと多い(5〜10倍にもなる)</b>／
+      養分をつくる＝<b>日光に当たった部分だけ</b>／はかせ＝<b>葉が水を蒸散させる時、まわりの熱をうばうから</b>／
+      まとめ＝①<b>道管</b>　②<b>多い</b>　③<b>でんぷん（養分）</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>色水の吸水実験（セロリ）の実測経過：色水につけると1分もたたないうちに切り口の維管束が染まり始め、10分で葉脈まで、1時間で葉全体が染まる。5時間・24時間と時間を追うごとにさらに濃く染まり、植物が休みなく水を吸い上げ続けていることが分かる</li>
+      <li>茎の輪切り断面には、水の通り道である道管が輪のように並んでいる（双子葉類の特徴。ホウセンカ・セロリはともに双子葉類）</li>
+      <li>蒸散：葉から水が水蒸気となって出ていくはたらき。主に葉の裏にある気孔から出ていく。日本植物生理学会の資料によれば、植物は体内に含まれる水分の5〜10倍もの量を、1日の蒸散だけで空気中に出している</li>
+      <li>光合成のでんぷん検出実験：前日の夜に暗い所へ置いて葉の中のでんぷんを使い切らせておき、当日一部の葉をアルミホイルで覆って日光を当てる。エタノールで葉の緑色を抜いてからヨウ素液をつけると、日光が当たった部分だけが青むらさき色に変わる（ヨウ素デンプン反応）。これは、めばえた種の中に最初から蓄えられていた養分とは異なり、育った葉が日光を使って自分で新しく作り出す養分であることを示している</li>
+      <li>木かげがすずしいのは日かげになるだけでなく、木が葉から水を蒸散させる時にまわりの熱をうばうため（うち水と同じ気化熱の原理）。光合成で養分がつくられる時には同時に酸素も作られており、わたしたちが呼吸で吸う酸素は植物が作っている</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「水を吸い上げる時間」「水はどこへ行く？」が今日の二大見せ場。1人ずつ交代で「すすめる」ボタンやポリぶくろのボタンを押させると全員が参加できる</li>
+      <li>よそうタイムの答え（イ：決まった細い管を通る）は比較的直感に近いが、「体の中の水よりずっと多い水を毎日出している」（水はどこへ行く？のクイズ）は意外性が大きいので、まとめで丁寧に振り返るとよい</li>
+      <li>本教材はすべて画面上のシミュレーションで、実際の色水・ヨウ素液は使用しない。安心して操作させてよい</li>
+      <li>「めばえラボ」（発芽・種の中の養分）を先に学んでいる場合は、「種の中にもとからあった養分」と「葉が日光で新しく作る養分」の違いに触れると理解が深まる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「水はくきのどこを通る？」「葉は毎日どれくらい水を出す？」「養分はどうやって作られる？」</li>
+      <li>発展として「人の体のつくりと働き（呼吸・血液循環）」に進むと、おなかの探検隊（消化）に続く体内の見えない働きシリーズが充実し、理科ロードマップの優先度A単元が引き続き進む</li>
+      <li>理科は小6の単元が「おなかの探検隊」「ちそう発掘隊」「てこの工房」「いろみずの研究所」「ホムラの炉」に続く6単元目となり、生命分野は「めばえラボ」「アオバの葉かげ」「シズクの淵」に続く4作目となった</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
