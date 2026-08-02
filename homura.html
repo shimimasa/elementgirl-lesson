@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ホムラの炉 — ものの燃え方と空気たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f2ece2 0%, #ece2d4 45%, #ded2c2 100%);
+    color: #2a2a2a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #c62828; text-shadow: 0 0 14px rgba(198, 40, 40, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3a7ab8; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e4dccd; border: 2px solid #cbb89c;
+    font-size: clamp(16px, 1.8vw, 26px); color: #b8a890;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffab73, #c62828);
+    border-color: #7a1414; color: #4a0f00;
+    box-shadow: 0 0 16px rgba(198, 40, 40, .6);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 25%, #ffffff 0%, #efe7da 70%, #ddd0be 100%);
+    border: 3px solid #c9a888;
+    box-shadow: inset 0 0 40px rgba(120, 100, 80, .14), 0 4px 18px rgba(0, 0, 0, .12);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #6a4a2a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #ffb74d; color: #5a3a00; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(220, 205, 185, .6) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #e8a98a; cursor: pointer;
+    background: linear-gradient(180deg, #ff7043, #c62828); color: #fff;
+    box-shadow: 0 3px 0 #7a1414; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.cool { background: linear-gradient(180deg, #6fb0dd, #3a7ab8); border-color: #a8d0ec; box-shadow: 0 3px 0 #1a4a70; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #ffb74d; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .18), inset 0 0 24px rgba(0, 0, 0, .1);
+    flex-shrink: 0; background: #efe7da;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6a4a2a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #c62828; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffdf7e0; border: 2px solid #cbb89c; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6a4a2a; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #ffffff; color: #2a2a2a;
+    border: 1.5px solid #cbb89c;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #ffffff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #c62828; background: #ffe0d0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #f2ece2, #e4dccd); color: #2a2a2a;
+    border: 2px solid #ffb74d; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #c62828; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ff7043, #c62828); color: #fff;
+    box-shadow: 0 3px 0 #7a1414, 0 5px 12px rgba(0, 0, 0, .15);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #7a1414; }
+  .btn.sub {
+    background: #e4dccd; color: #6a4a2a; box-shadow: 0 3px 0 #c4b49c;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #ffffff; color: #2a2a2a; box-shadow: 0 3px 0 #cabcae; font-weight: 400; border: 1.5px solid #ddceba; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe0c2; outline: 3px solid #ff7043; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(40, 30, 24, .55);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #f2ece2);
+    border: 3px solid #c9a888; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, .25);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #c62828; text-shadow: 0 0 22px rgba(198, 40, 40, .3);
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #3a7ab8; }
+  .panel .sub { color: #6a4a2a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #ffffff; color: #2a2a2a; border: 1.5px solid #ddceba; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6a4a2a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 22vw, 220px); cursor: pointer;
+    background: #ffffff; color: #2a2a2a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ddceba; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #c62828; background: #ffe0d0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #c62828; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #c62828;
+    color: #c62828; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6a4a2a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e4dccd; color: #4a3420;
+    border: 1px solid #cbb89c; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #d8cbb0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🔥 ホムラの炉<small>— ものの燃え方と空気 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_futa" title="燃え続けるための条件">★</div>
+    <div class="badge" id="bd_m_sanso" title="酸素の割合と燃え方">★</div>
+    <div class="badge" id="bd_m_kikan" title="燃える前と燃えた後の空気">★</div>
+    <div class="badge" id="bd_m_naze" title="なぜ消える？">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">じっけん炉</div>
+    <div id="locChip">ホムラの炉</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔥 気体つぶビューア 〜 赤=酸素・青=二酸化炭素 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 132" aria-hidden="true">
+            <path d="M60 14 C42 34 34 54 34 76 C34 102 46 118 60 118 C74 118 86 102 86 76 C86 60 78 48 70 40 C71 54 64 62 58 60 C53 58 52 50 55 42 C58 34 62 26 60 14 Z" fill="url(#homuraGrad)" stroke="#8a1c0a" stroke-width="2.4"/>
+            <defs>
+              <linearGradient id="homuraGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffe08a"/>
+                <stop offset="55%" stop-color="#ff7043"/>
+                <stop offset="100%" stop-color="#c62828"/>
+              </linearGradient>
+            </defs>
+            <g class="eyes">
+              <ellipse cx="51" cy="80" rx="5.4" ry="6.8" fill="#fff"/>
+              <ellipse cx="69" cy="80" rx="5.4" ry="6.8" fill="#fff"/>
+              <circle cx="51.6" cy="80.6" r="2.9" fill="#5a1200"/>
+              <circle cx="69.6" cy="80.6" r="2.9" fill="#5a1200"/>
+            </g>
+            <path d="M52 94 Q60 99 68 94" fill="none" stroke="#5a1200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="catname"><ruby>炎<rt>ほのお</rt></ruby>から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ホムラ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🔥 ホムラの炉ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ホムラの炉 — ものの燃え方と空気（小6理科・協力型・1ファイル）
+   燃え続けるための条件（発見型）→
+   酸素の割合と燃え方（メイン操作・数値階段①〜⑦）→
+   燃える前と燃えた後の空気（時間送り①〜⑦・気体検知管シミュレーション）→
+   なぜ消える？（発見型・誤概念くずし）→
+   はかせ（くらしの中の燃焼と安全）。
+   数値は静岡県総合教育センター資料の気体検知管実測値（酸素21%→17%・二酸化炭素0.03%→4%、
+   ろうそくの消える限界16〜17%）に基づく。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  nensho: ruby('燃焼', 'ねんしょう'),
+  sanso: ruby('酸素', 'さんそ'),
+  nisan: ruby('二酸化炭素', 'にさんかたんそ'),
+  chisso: ruby('窒素', 'ちっそ'),
+  kenchikan: ruby('検知管', 'けんちかん'),
+  sanka: ruby('酸化', 'さんか'),
+  seirei: ruby('精霊', 'せいれい'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度：静岡県総合教育センター資料） ----------
+const AIR_O2 = 21, AIR_CO2 = 0.03; // ふつうの空気
+const LIMIT_O2 = 17; // ろうそくの火が消える限界(16〜17%)
+const AFTER_O2 = 17, AFTER_CO2 = 4.0; // 燃やした後の実測値
+
+// m_sanso: 酸素の割合(%)。index0=スタート(0%)、①〜⑦は残り7値
+const SANSO_STEPS = [0, 5, 10, 15, 17, 21, 40, 100];
+// m_kikan: 経過時間(秒)。index0=スタート(0秒)、①〜⑦は残り7値
+const KIKAN_ELAPSED = [0, 10, 20, 30, 40, 50, 60, 70];
+const KIKAN_O2 = [21.0, 20.4, 19.9, 19.3, 18.7, 18.1, 17.6, 17.0];
+const KIKAN_CO2 = [0.03, 0.6, 1.2, 1.7, 2.3, 2.9, 3.4, 4.0];
+
+function flameFactor(o2) {
+  if (o2 < LIMIT_O2) return 0;
+  if (o2 <= AIR_O2) return lerp(0.15, 1, (o2 - LIMIT_O2) / (AIR_O2 - LIMIT_O2));
+  return lerp(1, 2.3, clamp((o2 - AIR_O2) / (100 - AIR_O2), 0, 1));
+}
+
+// ---------- くらしの中の燃焼と安全 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '天ぷら油の火', icon: '🍳', txt: `天ぷら油から 火が 出たら、水を かけては いけない。水が 一気に 蒸発して 油が 飛び散り、火が 大きく 燃え広がって しまう。ぬれタオルで なべ全体を おおって 新しい ${W.sanso}を さえぎるのが 正しい。` },
+  { key: 1, letter: 'い', name: 'コップで消える火', icon: '🥤', txt: `火が ついた ろうそくに コップを かぶせると、数秒で 消える。コップの 中の せまい 空気は すぐに ${W.sanso}が うすくなって しまうから。` },
+  { key: 2, letter: 'う', name: '消火器のあわ', icon: '🧯', txt: `消火器の あわや 粉は、燃えている ものを おおって ${W.sanso}を さえぎる「${ruby('窒息', 'ちっそく')}${ruby('消火', 'しょうか')}」の しくみ。` },
+  { key: 3, letter: 'え', name: '火事の時に窓を閉める', icon: '🚪', txt: `火事の とき 窓や 戸を 閉めるのは、新しい 空気（${W.sanso}）が 入るのを ふせぎ、火が 燃え広がるのを おくらせるため。ただし、にげおくれないよう まず ひなんを 一番に。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'futa',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  // m_futa
+  futaState: null, // 'sealed' | 'gap'
+  futaAnimT: 0,
+  futaTried: new Set(),
+  // m_sanso
+  sansoIdx: 0,
+  sansoIdxDisplay: 0,
+  // m_kikan
+  kikanIdx: 0,
+  kikanIdxDisplay: 0,
+  // hakase
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgFurnace(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f2ece2'); g.addColorStop(1, '#ded2c2');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#3a3a3a';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 80 * sc);
+}
+function drawFlame(px, py, sc, factor) {
+  if (factor <= 0) return;
+  const now = performance.now() / 1000;
+  const flick = 1 + Math.sin(now * 9 + px * 0.01) * 0.06;
+  const hBase = 58 * Math.min(factor, 1) + Math.max(0, factor - 1) * 46;
+  const wBase = 22 * Math.min(factor, 1.3) + Math.max(0, factor - 1.3) * 9;
+  const h = hBase * sc * flick, w = wBase * sc * flick;
+  const g = gctx.createLinearGradient(px, py, px, py - h);
+  g.addColorStop(0, '#c62828'); g.addColorStop(0.55, '#ff7043'); g.addColorStop(1, '#ffe08a');
+  gctx.fillStyle = g;
+  gctx.beginPath();
+  gctx.moveTo(px, py);
+  gctx.quadraticCurveTo(px - w, py - h * 0.55, px, py - h);
+  gctx.quadraticCurveTo(px + w, py - h * 0.55, px, py);
+  gctx.closePath();
+  gctx.fill();
+}
+function drawCandle(px, py, sc, factor) {
+  const cw = 26 * sc, ch = 120 * sc;
+  gctx.fillStyle = '#fdf3df'; gctx.strokeStyle = '#c9a888'; gctx.lineWidth = 2 * sc;
+  roundRect(gctx, px - cw / 2, py - ch, cw, ch, 4 * sc);
+  gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = '#5a4020'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(px, py - ch); gctx.lineTo(px, py - ch - 14 * sc); gctx.stroke();
+  drawFlame(px, py - ch - 14 * sc, sc, factor);
+}
+function drawGaugeTube(px, py, sc, label, value, minV, maxV, color) {
+  const tubeW = 30 * sc, tubeH = 160 * sc;
+  const top = py - tubeH, bot = py;
+  gctx.strokeStyle = '#8a7a68'; gctx.lineWidth = 2.4 * sc;
+  gctx.strokeRect(px - tubeW / 2, top, tubeW, tubeH);
+  const frac = clamp((value - minV) / (maxV - minV), 0, 1);
+  const fillH = tubeH * frac;
+  gctx.fillStyle = color;
+  gctx.fillRect(px - tubeW / 2, bot - fillH, tubeW, fillH);
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(label, px, top - 18 * sc);
+  gctx.fillText(`${value < 1 ? value.toFixed(2) : value.toFixed(1)}%`, px, top - 2 * sc);
+}
+
+// ---------- 1．燃え続けるための条件 ----------
+function drawFutaScene(X, Y, sc) {
+  bgFurnace(X, Y, sc);
+  const cx = 500, baseY = 470;
+  let factor;
+  if (!S.futaState) factor = 1;
+  else if (S.futaState === 'gap') factor = 1 + Math.sin(performance.now() / 1000 * 2) * 0.05;
+  else factor = lerp(1, 0, S.futaAnimT);
+  const jarR = 100, jarTop = baseY - 190, jarBot = baseY + 40;
+  gctx.strokeStyle = 'rgba(143,176,204,.9)'; gctx.lineWidth = 4 * sc;
+  gctx.fillStyle = 'rgba(207,232,251,.14)';
+  roundRect(gctx, X(cx - jarR), Y(jarTop), jarR * 2 * sc, (jarBot - jarTop) * sc, 24 * sc);
+  gctx.fill(); gctx.stroke();
+  drawCandle(X(cx), Y(baseY), sc, factor);
+  if (S.futaState === 'gap') {
+    gctx.font = `${22 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    const flow = (performance.now() / 1000 * 40) % 40;
+    gctx.fillText('→', X(cx - jarR - 30 + flow), Y(jarBot - 10));
+    gctx.fillText('→', X(cx - jarR - 50 + flow), Y(jarBot - 10));
+  }
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const label = !S.futaState ? 'ボタンで ふた・すきまを 試してみよう'
+    : S.futaState === 'sealed' ? 'ふたをして 密閉中……' : 'すきまから 新しい 空気が 入っている';
+  gctx.fillText(label, X(500), Y(70));
+}
+
+// ---------- 2．酸素の割合と燃え方（メイン操作） ----------
+function drawSansoScene(X, Y, sc) {
+  bgFurnace(X, Y, sc);
+  const cx = 500, baseY = 470;
+  const o2now = lerpArr(SANSO_STEPS, S.sansoIdxDisplay);
+  const factor = flameFactor(o2now);
+  const jarR = 110, jarTop = baseY - 210, jarBot = baseY + 40;
+  gctx.strokeStyle = 'rgba(143,176,204,.9)'; gctx.lineWidth = 4 * sc;
+  gctx.fillStyle = 'rgba(207,232,251,.14)';
+  roundRect(gctx, X(cx - jarR), Y(jarTop), jarR * 2 * sc, (jarBot - jarTop) * sc, 24 * sc);
+  gctx.fill(); gctx.stroke();
+  drawCandle(X(cx), Y(baseY), sc, factor);
+  const idxNow = Math.round(S.sansoIdxDisplay);
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${19 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${idxNow === 0 ? 'スタート' : NUMS[idxNow - 1]}　酸素 ${o2now.toFixed(0)}%`, X(500), Y(55));
+  gctx.font = `700 ${14 * sc}px sans-serif`;
+  const stateTxt = o2now < LIMIT_O2 ? '燃えない・消える'
+    : o2now === AIR_O2 ? 'ふつうの空気と同じ、ふつうに燃える'
+    : o2now <= LIMIT_O2 + 2 ? 'ぎりぎり、消えそう'
+    : o2now <= 40 ? 'ふつうより勢いよく燃える'
+    : 'とても激しく燃える';
+  gctx.fillText(stateTxt, X(500), Y(84));
+}
+
+// ---------- 3．燃える前と燃えた後の空気（気体検知管シミュレーション） ----------
+function drawKikanScene(X, Y, sc) {
+  bgFurnace(X, Y, sc);
+  const cx = 380, baseY = 470;
+  const o2now = lerpArr(KIKAN_O2, S.kikanIdxDisplay), co2now = lerpArr(KIKAN_CO2, S.kikanIdxDisplay);
+  const elapsed = lerpArr(KIKAN_ELAPSED, S.kikanIdxDisplay);
+  const atEnd = S.kikanIdx >= KIKAN_ELAPSED.length - 1 && Math.abs(S.kikanIdxDisplay - S.kikanIdx) < 1e-6;
+  const factor = atEnd ? 0 : flameFactor(o2now);
+  const jarR = 100, jarTop = baseY - 200, jarBot = baseY + 40;
+  gctx.strokeStyle = 'rgba(143,176,204,.9)'; gctx.lineWidth = 4 * sc;
+  gctx.fillStyle = 'rgba(207,232,251,.14)';
+  roundRect(gctx, X(cx - jarR), Y(jarTop), jarR * 2 * sc, (jarBot - jarTop) * sc, 24 * sc);
+  gctx.fill(); gctx.stroke();
+  drawCandle(X(cx), Y(baseY), sc, factor);
+  drawGaugeTube(X(720), Y(baseY - 30), sc, '酸素', o2now, 15, 22, '#3a7ab8');
+  drawGaugeTube(X(840), Y(baseY - 30), sc, '二酸化炭素', co2now, 0, 5, '#e07a2a');
+  const idxNow = Math.round(S.kikanIdxDisplay);
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(idxNow === 0 ? 'スタート　0びょう経過' : `${NUMS[idxNow - 1]}　${Math.round(elapsed)}びょう経過`, X(500), Y(55));
+}
+
+// ---------- 4．なぜ消える？（誤概念くずし） ----------
+function drawNazeScene(X, Y, sc) {
+  bgFurnace(X, Y, sc);
+  const y = 340;
+  gctx.font = `${60 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🕯️', X(340), Y(y));
+  gctx.fillText('🔩', X(660), Y(y));
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${15 * sc}px sans-serif`;
+  gctx.fillText('ろうそく（はげしい酸化）', X(340), Y(y + 70));
+  gctx.fillText('鉄がさびる（ゆっくりした酸化）', X(660), Y(y + 70));
+  gctx.font = `700 ${13 * sc}px sans-serif`;
+  gctx.fillText('酸素が薄いと反応が続かない', X(340), Y(y + 96));
+  gctx.fillText('酸素が0%になるまで進む', X(660), Y(y + 96));
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('2つの 酸化を くらべてみよう', X(500), Y(70));
+}
+
+// ---------- 5．はかせ：くらしの中の燃焼と安全 ----------
+function drawHakaseScene(X, Y, sc) {
+  bgFurnace(X, Y, sc);
+  const xs = [180, 380, 620, 820];
+  HAKASE_POINTS.forEach((p, i) => {
+    const done = S.hakaseFound.has(p.key);
+    const px = xs[i], py = 320;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#ffb74d' : '#e4dccd';
+    gctx.fill();
+    gctx.strokeStyle = '#c62828'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(p.letter + ' ' + p.name, X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('燃焼のしくみは、くらしの安全にもいかされている', X(500), Y(70));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'futa') drawFutaScene(X, Y, sc);
+  else if (S.scene === 'sanso') drawSansoScene(X, Y, sc);
+  else if (S.scene === 'kikan') drawKikanScene(X, Y, sc);
+  else if (S.scene === 'naze') drawNazeScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- 気体つぶビューア（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f2ece2'); grd.addColorStop(1, '#cfc2ae');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'particles') {
+    drawParticleGrid(R, S.scope.o2, S.scope.co2);
+    label(S.scope.label || '');
+  } else if (mode === 'point') {
+    sctx.fillStyle = '#c62828';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffb74d55'); g2.addColorStop(1, 'rgba(255,183,77,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#c62828'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔥', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#c62828'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2a2a2a';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawParticleGrid(R, o2, co2) {
+    const total = 25;
+    let nCo2 = co2 >= 1 ? Math.max(1, Math.round(total * co2 / 100)) : 0;
+    let nO2 = Math.max(0, Math.round(total * o2 / 100));
+    if (nO2 + nCo2 > total) nO2 = total - nCo2;
+    const nN2 = Math.max(0, total - nO2 - nCo2);
+    const colors = [];
+    for (let i = 0; i < nO2; i++) colors.push('#e05a3a');
+    for (let i = 0; i < nCo2; i++) colors.push('#3a7ab8');
+    for (let i = 0; i < nN2; i++) colors.push('#9aa0a6');
+    const cols = 5, rows = 5, cellSize = R * 0.26;
+    const startX = R - (cols - 1) * cellSize / 2, startY = R * 0.62 - (rows - 1) * cellSize / 2;
+    let idx = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (idx >= total) break;
+        const px = startX + c * cellSize, py = startY + r * cellSize;
+        sctx.beginPath(); sctx.arc(px, py, cellSize * 0.36, 0, TAU);
+        sctx.fillStyle = colors[idx] || '#9aa0a6'; sctx.fill();
+        sctx.strokeStyle = 'rgba(255,255,255,.6)'; sctx.lineWidth = 1; sctx.stroke();
+        idx++;
+      }
+    }
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ffb74d', '#ff7043', '#c62828', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    futa: '🔥 燃え続けるための 条件',
+    sanso: '💨 酸素の 割合と 燃え方',
+    kikan: '🧪 燃える前と 燃えた後の 空気',
+    naze: '❓ なぜ 消えるの？',
+    hakase: '🧯 くらしの中の 燃焼と 安全',
+    done: '🔥 ホムラの炉 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'じっけん炉';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_futa', 'm_sanso', 'm_kikan', 'm_naze', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'futa', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🔥💨🧪🧯</div>
+        <h1>ホムラの炉</h1>
+        <div class="sub">〜 ものの${W.nensho}と 空気の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは、ろうそくの ${ruby('炎', 'ほのお')}から 生まれた ${W.seirei}、<b>ホムラ</b>。今日は、ものが 燃える時 空気に 何が おきているのか、いっしょに たしかめに いこう！<br>
+        ろうそくの 火は なぜ 燃え続けたり、消えたり するのかな……たっぷり 実験するよ。</p>
+        <button class="btn" id="startBtn">実験を はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです（本物の火は使いません）。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">集気びんの中で ろうそくを 燃やし続けると、火が 消えた時、びんの中の ${W.sanso}は どれくらい 残っていると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">💨</span><b>ア</b> 0%（すっかり なくなる）</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌬️</span><b>イ</b> 17%くらい（まだ かなり 残っている）</div>
+          <div class="vcard" data-v="2"><span class="vicon">➡️</span><b>ウ</b> 21%のまま（変わらない）</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：燃え続けるための条件 ---
+  m_futa: {
+    enter() {
+      Object.assign(S, { scene: 'futa', scope: { type: 'particles', o2: AIR_O2, co2: AIR_CO2, label: `酸素 ${AIR_O2}%` }, futaState: null, futaAnimT: 0, futaTried: new Set() });
+      updateLoc();
+      setWish('🔥', `ろうそくに びんを かぶせて、「ふたをする」「すきまをあける」の 両方を 試して、火が どうなるか たしかめよう。`);
+      say(`ボタンを おして、ためしてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setControls([
+        { label: '🫙 ふたをして 密閉する', cb: () => this.run('sealed') },
+        { label: '🌬️ すきまをあけておく', cls: 'cool', cb: () => this.run('gap') },
+      ]);
+    },
+    run(state) {
+      setControls([]);
+      S.futaState = state; S.futaAnimT = 0;
+      say(state === 'sealed' ? `ふたをして 密閉すると……` : `すきまを あけておくと……`);
+      if (state === 'sealed') {
+        startTween(0, 1, 2.6, v => {
+          S.futaAnimT = v;
+          const o2now = lerp(AIR_O2, LIMIT_O2, v);
+          S.scope = { type: 'particles', o2: o2now, co2: lerp(AIR_CO2, 3.0, v), label: `酸素 ${o2now.toFixed(1)}%` };
+        }, () => this.after(state));
+      } else {
+        startTween(0, 1, 1.6, v => { S.futaAnimT = v; }, () => this.after(state));
+      }
+    },
+    after(state) {
+      S.futaTried.add(state); sTap(); scopeBurst();
+      if (state === 'sealed') say(`火が だんだん 小さくなって、消えてしまった！ 新しい 空気が 入ってこないから。`);
+      else say(`すきまから 新しい 空気が 入ってくるので、火は 燃え続けている。`);
+      if (S.futaTried.size >= 2) this.ask(); else this.refreshCtl();
+    },
+    ask() {
+      setControls([]);
+      say(`ろうそくの 火が 燃え続けるために 必要なことは？`);
+      setButtons(choiceRow(['二酸化炭素を増やす', '新しい空気(酸素)を入れかえる', '何もしなくてよい'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_futa'); S.phase = 'done';
+        say(`せいかい！ ものが 燃え続けるには、新しい 空気（${W.sanso}）の 入れかえが 必要。びんを ふさぐと、まわりの 空気と 入れかわらなくなるから 火が 消える。`);
+        setButtons([{ label: 'つぎへ（酸素の割合と燃え方）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['二酸化炭素を増やす', '新しい空気(酸素)を入れかえる', '何もしなくてよい'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：酸素の割合と燃え方（メイン操作・数値階段①〜⑦） ---
+  m_sanso: {
+    enter() {
+      Object.assign(S, { scene: 'sanso', sansoIdx: 0, sansoIdxDisplay: 0, scope: { type: 'particles', o2: SANSO_STEPS[0], co2: AIR_CO2, label: `酸素 ${SANSO_STEPS[0]}%` } });
+      updateLoc();
+      setWish('💨', `びんの中の ${W.sanso}の 割合を ①〜⑦の 段階で 変えて、ろうそくの 燃え方を くらべよう。`);
+      say(`さいしょは ${W.sanso} 0%（${W.chisso}だけ）。「すすめる」ボタンで、割合を 増やしていくよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.sansoIdx >= SANSO_STEPS.length - 1) { this.finish(); return; }
+      setControls([{ label: `⏭️ すすめる(${NUMS[S.sansoIdx]} ${SANSO_STEPS[S.sansoIdx + 1]}%へ)`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.sansoIdx >= SANSO_STEPS.length - 1) return;
+      setControls([]);
+      const fromV = S.sansoIdx, toV = S.sansoIdx + 1;
+      startTween(fromV, toV, 0.8, v => {
+        S.sansoIdxDisplay = v;
+        const o2now = lerpArr(SANSO_STEPS, v);
+        S.scope = { type: 'particles', o2: o2now, co2: AIR_CO2, label: `酸素 ${o2now.toFixed(0)}%` };
+      }, () => {
+        S.sansoIdx++; S.sansoIdxDisplay = S.sansoIdx;
+        sTap();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑦まで、${W.sanso}の 割合を 変えて 燃え方を くらべたね。`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      setButtons([]);
+      say(`${W.sanso}の 割合が 多いほど、ろうそくの 燃え方は どうなった？`);
+      setButtons(choiceRow(['おだやかになった', '変わらなかった', '激しくなった'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('m_sanso'); S.phase = 'done';
+        say(`せいかい！ ${W.sanso}には、ものを 燃やす はたらきが ある。ふつうの 空気（${W.sanso} 21%）より 割合が 多いと 激しく 燃え、17%より 少ないと 燃え続けられない。`);
+        setButtons([{ label: 'つぎへ（燃える前と燃えた後の空気）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['おだやかになった', '変わらなかった', '激しくなった'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：燃える前と燃えた後の空気（時間送り①〜⑦・気体検知管シミュレーション） ---
+  m_kikan: {
+    enter() {
+      Object.assign(S, { scene: 'kikan', kikanIdx: 0, kikanIdxDisplay: 0, scope: { type: 'particles', o2: KIKAN_O2[0], co2: KIKAN_CO2[0], label: `酸素 ${KIKAN_O2[0]}%　二酸化炭素 ${KIKAN_CO2[0]}%` } });
+      updateLoc();
+      setWish('🧪', `${W.kenchikan}で、ろうそくを 燃やす前と 燃やしている間の 空気を くらべよう。「すすめる」ボタンで 時間を 進めるよ。`);
+      say(`さいしょは 0びょう。「すすめる」ボタンで、10びょうずつ 時間を 進めるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.kikanIdx >= KIKAN_ELAPSED.length - 1) { this.finish(); return; }
+      setControls([{ label: '⏱️ すすめる(10びょう進む)', cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.kikanIdx >= KIKAN_ELAPSED.length - 1) return;
+      setControls([]);
+      const fromV = S.kikanIdx, toV = S.kikanIdx + 1;
+      startTween(fromV, toV, 0.8, v => {
+        S.kikanIdxDisplay = v;
+        const o2now = lerpArr(KIKAN_O2, v), co2now = lerpArr(KIKAN_CO2, v);
+        S.scope = { type: 'particles', o2: o2now, co2: co2now, label: `酸素 ${o2now.toFixed(1)}%　二酸化炭素 ${co2now.toFixed(1)}%` };
+      }, () => {
+        S.kikanIdx++; S.kikanIdxDisplay = S.kikanIdx;
+        sTap();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`${KIKAN_ELAPSED[KIKAN_ELAPSED.length - 1]}びょうで 火が 消えた。${W.kenchikan}で 調べると、${W.sanso}は ${KIKAN_O2[0]}%から ${AFTER_O2}%に、${W.nisan}は ${KIKAN_CO2[0]}%から ${AFTER_CO2}%に 変わっていた。`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      say(`びんの中の ${W.sanso}と ${W.nisan}は、燃やす前と 燃やした後で どう 変わった？`);
+      setButtons(choiceRow(['酸素が増え、二酸化炭素が減った', '酸素が減り、二酸化炭素が増えた', 'どちらも変わらなかった'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_kikan'); S.phase = 'done';
+        say(`せいかい！ ものが 燃えると、${W.sanso}の 一部が 使われて 減り、かわりに ${W.nisan}が できて 増える。`);
+        setButtons([{ label: 'つぎへ（なぜ消える？）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['酸素が増え、二酸化炭素が減った', '酸素が減り、二酸化炭素が増えた', 'どちらも変わらなかった'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：なぜ消える？（誤概念くずし） ---
+  m_naze: {
+    enter() {
+      Object.assign(S, { scene: 'naze', scope: { type: 'point', name: 'ぎもん', icon: '❓' } });
+      updateLoc();
+      say(`ホムラの炉で さっき 見た通り、火が 消えた時、${W.sanso}は まだ ${AFTER_O2}%も 残っていた。これって ふしぎだと 思わない？`);
+      setButtons([{ label: 'くらべてみる', cb: () => this.reveal() }]);
+    },
+    reveal() {
+      sTap();
+      S.scope = { type: 'point', name: 'はやい酸化とおそい酸化', icon: '⚖️' };
+      scopeBurst();
+      say(`ろうそくが 燃えるのは 「はげしい ${W.sanka}」。${W.sanso}が うすくなると 反応が 続けられず 消えてしまう（16〜17%が 限界）。<br>${ruby('鉄', 'てつ')}が さびるのは 「ゆっくりした ${W.sanka}」。こちらは ${W.sanso}が 0%に なるまで、ずっと 反応が 進む。`);
+      this.ask();
+    },
+    ask() {
+      say(`${W.sanso}が 17%も 残っているのに、ろうそくの 火が 消えてしまうのは なぜ？`);
+      setButtons(choiceRow(['0%にならないと消えないはずなので、これは間違い', 'はげしい酸化は、酸素がうすいと反応が続けられないから', '二酸化炭素に火を消す特別な力があるから'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_naze'); S.phase = 'done';
+        say(`せいかい！ ろうそくの ような はげしい ${W.sanka}(${W.nensho})は、${W.sanso}が うすくなると 反応が 続けられない。ちなみに この 17%・4%という 数字は、わたしたちが はく 息(呼気)の 濃さと ほぼ 同じ。おもしろいね！`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['0%にならないと消えないはずなので、これは間違い', 'はげしい酸化は、酸素がうすいと反応が続けられないから', '二酸化炭素に火を消す特別な力があるから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：くらしの中の燃焼と安全 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.nensho}の しくみは、くらしの 安全にも いかされているよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name, icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`天ぷら油から 火が 出た時、正しい たいおうは？`);
+      setButtons(choiceRow(['水をかけて消す', 'ぬれタオルでおおって酸素を断つ', 'そのままにする'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ぬれタオルで おおって ${W.sanso}を さえぎれば 火は 消える。水を かけると 大きく 燃え広がるので 絶対に しないこと。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['水をかけて消す', 'ぬれタオルでおおって酸素を断つ', 'そのままにする'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ホムラの炉 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ものが 燃え続けるには、新しい 空気の（<span class="blankWord" data-a="入れかえ">？？？</span>）が 必要。<br>
+        ② ものが 燃えると、${W.sanso}は（<span class="blankWord" data-a="減り">？？？</span>）、${W.nisan}は（<span class="blankWord" data-a="増える">？？？</span>）。<br>
+        ③ ろうそくの 火が 消えても、${W.sanso}は（<span class="blankWord" data-a="まだ残っている">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 17%くらい（まだ かなり 残っている）</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>お部屋の 換気扇を 回したり 窓を あけたりすると、空気が どんな風に 動くか、湯気や せんこうの けむりなどで 見つけてみよう（火は 使わず、おうちの人と いっしょに）。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#c62828'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「ものが 燃え続けるには 何が 必要？」「${W.sanso}の 割合が 多いと 燃え方は どうなる？」「火が 消えても ${W.sanso}は 0%に なる？」`);
+      setButtons([
+        { label: '🔥 燃え続けるための図', cls: 'sub', cb: () => this.show('futa') },
+        { label: '💨 酸素の割合と燃え方の図', cls: 'sub', cb: () => this.show('sanso') },
+        { label: '🧪 燃える前と後の空気の図', cls: 'sub', cb: () => this.show('kikan') },
+        { label: '❓ なぜ消える？の図', cls: 'sub', cb: () => this.show('naze') },
+        { label: '🧯 くらしの中の燃焼と安全の図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kikan などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

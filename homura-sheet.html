@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ホムラの炉 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #c62828; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #f7ded0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #f7ded0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🔥 ホムラの炉 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      集気びんの中でろうそくを燃やし続けると、火が消えた時、びんの中の酸素はどれくらい残っていると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 💨 0%（すっかりなくなる）</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 🌬️ 17%くらい（まだかなり残っている）</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> ➡️ 21%のまま（変わらない）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．燃え続けるための条件</span>
+    <div class="secBody">
+      ろうそくにびんをかぶせた時、火はどうなった？（〇をつけよう）<br>
+      ふたをして密閉：燃え続けた ／ 消えた　　すきまをあけた：燃え続けた ／ 消えた<br>
+      燃え続けるために必要なのは（二酸化炭素を増やす ／ 新しい空気を入れかえる ／ 何もしなくてよい）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．酸素の割合と燃え方</span>
+    <div class="secBody">
+      「すすめる」ボタンで①〜⑦を進め、それぞれの酸素の割合でろうそくがどう燃えたか記録しよう。
+      <table class="levelTable">
+        <tr><th>①5%</th><th>②10%</th><th>③15%</th><th>④17%</th><th>⑤21%</th><th>⑥40%</th><th>⑦100%</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      酸素の割合が多いほど、燃え方は（おだやかになった ／ 変わらなかった ／ 激しくなった）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．燃える前と燃えた後の空気</span>
+    <div class="secBody">
+      気体検知管で調べた結果を記録しよう。
+      <table class="roundTable">
+        <tr><th></th><th>燃やす前</th><th>燃やした後</th></tr>
+        <tr><td>酸素</td><td><span class="fillLine sm"></span>%</td><td><span class="fillLine sm"></span>%</td></tr>
+        <tr><td>二酸化炭素</td><td><span class="fillLine sm"></span>%</td><td><span class="fillLine sm"></span>%</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．なぜ消える？</span>
+    <div class="secBody">
+      酸素が17%も残っているのに、ろうそくの火が消えてしまうのはなぜ？（〇をつけよう）<br>
+      ア 0%にならないと消えないはずなので、これは間違い<br>
+      イ はげしい酸化は、酸素がうすいと反応が続けられないから<br>
+      ウ 二酸化炭素に火を消す特別な力があるから
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（くらしの中の燃焼と安全）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>天ぷら油の火</th><th>コップで消える火</th><th>消火器のあわ</th><th>火事の時に窓を閉める</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      天ぷら油から火が出た時、正しいたいおうは（水をかける ／ ぬれタオルでおおう ／ そのままにする）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① ものが燃え続けるには、新しい空気の（<span class="fillLine"></span>）が必要。<br>
+      ② ものが燃えると、酸素は（<span class="fillLine sm"></span>）、二酸化炭素は（<span class="fillLine sm"></span>）。<br>
+      ③ ろうそくの火が消えても、酸素は（<span class="fillLine"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🔥</span>
+        <div>
+          お部屋の換気扇を回したり窓をあけたりすると、空気がどんな風に動くか、湯気やせんこうのけむりなどで、おうちの人といっしょに見つけてみよう（火は使わず安全に）。<br>
+          ☐ やってみた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ホムラの炉 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ホムラの炉 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「ものの燃え方と空気」・学力幅あり・協力型／ 使うもの：「homura.html」・プロジェクタ・このノート（1ページ目を人数分）。実際の火・気体検知管は使いません（画面上のシミュレーションのみ）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kikan</b> などで途中再開（m_futa／m_sanso／m_kikan／m_naze／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>🔥 燃え続けるための条件</td><td>「ふたをする」「すきまをあける」の両方を試させ、新しい空気の入れかえが必要なことに気づかせる</td></tr>
+      <tr><td class="min">11〜21分</td><td>💨 酸素の割合と燃え方（<b>今日の見せ場①</b>）</td><td>「すすめる」ボタンで①〜⑦を進め、酸素の割合が多いほど激しく燃えることを観察。シート３に記録</td></tr>
+      <tr><td class="min">21〜31分</td><td>🧪 燃える前と燃えた後の空気（<b>今日の見せ場②</b>）</td><td>気体検知管シミュレーションで酸素21%→17%・二酸化炭素0.03%→4%の変化を観察。シート４に記録</td></tr>
+      <tr><td class="min">31〜37分</td><td>❓ なぜ消える？</td><td>「17%も残っているのに消える」誤概念くずし。はげしい酸化とゆっくりした酸化の対比</td></tr>
+      <tr><td class="min">37〜43分</td><td>🧯 はかせチャレンジ</td><td>天ぷら油・コップ・消火器・窓を閉める、の4つを発見してクイズ。防災・安全に着地</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「換気を見つける」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「なぜ消える？」を右下「つぎ▶」でスキップ可（<b>酸素の割合と燃え方・燃える前と燃えた後の空気・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 17%くらい（まだかなり残っている）</b>／燃え続けるための条件＝<b>新しい空気（酸素）を入れかえる</b>／
+      酸素の割合と燃え方＝<b>激しくなった</b>／燃える前と燃えた後の空気＝<b>酸素が減り、二酸化炭素が増えた</b>／
+      なぜ消える？＝<b>イ はげしい酸化は、酸素がうすいと反応が続けられないから</b>／はかせ＝<b>イ ぬれタオルでおおって酸素を断つ</b>／
+      まとめ＝①<b>入れかえ</b>　②<b>減り／増える</b>　③<b>まだ残っている</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>気体検知管の実測値（静岡県総合教育センター資料）：ろうそくを燃やす前の空気は酸素約21%・二酸化炭素約0.03%。燃やした後（火が消えた直後）は酸素約17%・二酸化炭素約4%。ものが燃えると酸素の一部が使われて減り、二酸化炭素ができて増える</li>
+      <li>ろうそくの火が消える酸素濃度の限界は、燃焼物によって多少異なるが16〜17%程度（0%にはならない）。「17%も残っているのに消える」のは、燃焼が「はげしい酸化」であり、酸素がうすくなると反応が続けられなくなるため。鉄がさびるような「ゆっくりした酸化」は、酸素が0%になるまで反応が進み続ける</li>
+      <li>おもしろい豆知識：この17%・二酸化炭素4%という数字は、わたしたちが吐く息（呼気）の濃度とほぼ一致する</li>
+      <li>酸素にはものを燃やすはたらきがあり、割合が多いほど激しく燃える（純酸素中では非常に激しく燃焼する）。本教材の酸素割合①〜⑦（5・10・15・17・21・40・100%）と燃え方の対応は、実際の集気びんを使った酸素・ちっ素・二酸化炭素中での燃焼実験の結果をふまえた教育的な簡略化モデル</li>
+      <li>くらしの中の応用：天ぷら油の火に水をかけると急激な水蒸気爆発で油が飛び散り燃え広がる。ぬれタオルで覆う、消火器の泡や粉で覆うのはいずれも新しい酸素の供給を断つ「窒息消火」の原理。火事の時に窓や戸を閉めるのも同じ原理だが、避難が最優先であることを必ず伝える</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「酸素の割合と燃え方」「燃える前と燃えた後の空気」が今日の二大見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる</li>
+      <li>よそうタイムの答え（イ：17%くらい残っている）は、「酸素がなくなるまで燃え続けるはず」という直感に反するため意外性がある。まとめで丁寧に振り返るとよい</li>
+      <li>天ぷら油の火に水をかけてはいけないことは、実際の家庭内事故防止に直結する重要な安全知識。「ぬれタオルでおおう」という正しい対応をはっきり伝える</li>
+      <li>本教材はすべて画面上のシミュレーションで、実際の火や気体検知管は使用しない。安心して操作させてよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「ものが燃え続けるには何が必要？」「酸素の割合が多いと燃え方はどうなる？」「火が消えても酸素は0%になる？」</li>
+      <li>発展として「植物の養分と水の通り道」（見えない水・養分の流れを色で可視化）に進むと、理科ロードマップの優先度A単元が引き続き充実する</li>
+      <li>理科は小6の単元が「おなかの探検隊」「ちそう発掘隊」「てこの工房」「いろみずの研究所」に続く5単元目となり、粒子分野は「ダンダンの実験場」に続く2作目となった</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
