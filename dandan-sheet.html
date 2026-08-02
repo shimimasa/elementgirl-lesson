@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ダンダンの実験場 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #d9502f; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.4mm 1mm; }
+  .levelTable th { background: #f7ded0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #f7ded0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌡️ ダンダンの実験場 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      金属も、水や空気と同じように、あたためると温まった部分が動いて全体に伝わると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🔄 動いて全体に伝わる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> ➡️ 動かず順番に伝わる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．空気の温度と体積</span>
+    <div class="secBody">
+      お湯・氷水に つけた時、せっけんの膜は どうなった？（〇を つけよう）<br>
+      お湯：ふくらんだ ／ 変わらなかった　　氷水：へこんだ ／ 変わらなかった<br>
+      空気を あたためると、体積は（ふえる ／ へる ／ 変わらない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．金属の温度と体積</span>
+    <div class="secBody">
+      金属の球を あたためた時、輪を くぐれた？（〇を つけよう）
+      <table class="roundTable">
+        <tr><th>お湯であたためた時</th><th>火であぶった時</th></tr>
+        <tr><td>くぐれた ／ くぐれなかった</td><td>くぐれた ／ くぐれなかった</td></tr>
+      </table>
+      体積の変化が わかりやすいのは　ア お湯　・　イ 火（〇を つけよう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．金属のあたたまり方＝伝導</span>
+    <div class="secBody">
+      「すすめる」ボタンを おして、①〜⑧の どこで 示温インクの 色が 変わったか 記録しよう。
+      <table class="levelTable">
+        <tr><th>①10秒</th><th>②20秒</th><th>③30秒</th><th>④40秒</th><th>⑤50秒</th><th>⑥60秒</th><th>⑦70秒</th><th>⑧80秒</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      熱した点から 遠い場所ほど、あたたまるのは　ア 早い　・　イ 遅い　・　ウ 同時（〇を つけよう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．水と空気のあたたまり方＝対流</span>
+    <div class="secBody">
+      水そうの 底を 熱した時、あたたかい水は どう動いた？（〇を つけよう）<br>
+      その場に とどまった ／ 上に動いて、全体が ぐるぐる動いた
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（くらしの中の伝導・対流）</span>
+    <div class="secBody">
+      見つけた ものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>フライパンの取っ手</th><th>エアコンの設置</th><th>魔法びんのしくみ</th><th>線路のつなぎ目</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 空気を あたためると、体積は（<span class="fillLine"></span>）。<br>
+      ② 金属は 熱した点から（<span class="fillLine"></span>）あたたまる。これを伝導という。<br>
+      ③ 水や 空気は、あたたまった 部分が（<span class="fillLine"></span>）全体に伝わる。これを対流という。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌡️</span>
+        <div>
+          あたたかい お茶や スープに 金属の スプーンを 入れて、持ち手まで だんだん 熱くなるか、おうちの人と いっしょに 確かめてみよう（やけどに注意）。<br>
+          ☐ やってみた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ダンダンの実験場 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ダンダンの実験場 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4理科「温度と体積・もののあたたまり方」・学力幅あり・協力型／ 使うもの：「dandan.html」・プロジェクタ・このノート（1ページ目を人数分）。実際の火・お湯・金属は使いません（画面上のシミュレーションのみ）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_dendou</b> などで途中再開（m_kuki／m_kinzoku／m_dendou／m_tairyu／hakase／ending）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>💨 空気の 温度と 体積</td><td>お湯・氷水を両方試させ、空気の体積が温度で変わることに気づかせる（せっけんの膜がふくらむ/へこむ）</td></tr>
+      <tr><td class="min">11〜18分</td><td>🔩 金属の 温度と 体積</td><td>お湯とあぶり火の両方を試させ、金属も体積は変わるが空気ほど大きくは変わらないことに気づかせる（膨張球の実験）</td></tr>
+      <tr><td class="min">18〜28分</td><td>🔥 金属のあたたまり方＝伝導（<b>今日の見せ場</b>）</td><td>「すすめる」ボタンで①〜⑧を進め、熱した点に近い方から順に示温インクの色が変わる様子を観察。シート４に記録</td></tr>
+      <tr><td class="min">28〜35分</td><td>🌊 水と空気のあたたまり方＝対流</td><td>底を熱して、あたたまった水が上へ動き全体がぐるぐる循環する様子を観察。よそうタイムの答え合わせもここ</td></tr>
+      <tr><td class="min">35〜43分</td><td>🍳 はかせチャレンジ</td><td>フライパンの取っ手・エアコンの設置・魔法びん・線路のつなぎ目の4つを発見してクイズ。やけど・安全に着地</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「金属スプーンで伝導を感じる」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「金属の温度と体積」を右下「つぎ▶」でスキップ可（<b>金属のあたたまり方・水と空気のあたたまり方・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 動かず順番に伝わる</b>／空気の温度と体積＝<b>あたためると増える・冷やすと減る</b>／
+      金属の温度と体積＝<b>火であぶった時の方が変化がわかりやすい</b>／金属のあたたまり方＝<b>遠い場所ほど遅い（伝導）</b>／
+      水と空気のあたたまり方＝<b>あたたまった部分が動いて全体に伝わる（対流）</b>／はかせ＝<b>イ なべつかみや厚手の布を使う</b>／
+      まとめ＝①<b>増える</b>　②<b>順番に</b>　③<b>動いて</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>空気はシャルルの法則にしたがい、圧力が一定なら0℃の体積を基準に1℃ごとに約1/273ずつ増える。本教材では20℃を基準(100)とし、80℃で約120(20%増)、0℃で約93(7%減)というシミュレーション値を使用</li>
+      <li>金属（黄銅）の体積膨張率は約57×10⁻⁶/℃で、100℃上がっても体積は約0.57%しか増えない。空気（100℃で約37%増）と比べてはるかに小さいが、ゼロではない。実際の「金属球膨張実験（グラベサンドの実験）」では、お湯（約80℃）程度ではほとんど変化がわからないが、直火（約300℃以上）で熱すると明らかに膨張し、輪をくぐれなくなることが知られている</li>
+      <li>金属は熱した点から順番にあたたまる（伝導）。水や空気は、あたたまった部分が上に動き、全体がぐるぐる循環しながらあたたまる（対流）。この違いが、金属と水・空気であたたまり方が異なる理由</li>
+      <li>本教材の伝導の時間（示温インクが40℃で変色するまでの時間、5cm=5秒・10cm=20秒・15cm=45秒・20cm=80秒）は、距離の2乗に比例するモデル値（実際の金属棒はもっと速く伝わるが、観察しやすいよう時間を引き伸ばしたモデル）。示温インク（サーモインク）は実在の教材で、約40℃を境に色が変わる製品が販売されている</li>
+      <li>くらしの中の応用：フライパンの取っ手は熱伝導率の低い木・樹脂でやけどを防ぐ。エアコンは対流を利用し、冷房は上・暖房は下に設置すると効率的。魔法びんは真空の層で熱を伝えにくくする（断熱）。電車の線路のつなぎ目のすき間は、金属レールの熱膨張（夏に伸びる）を吸収するためのもの</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「金属のあたたまり方＝伝導」が今日いちばんの見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる</li>
+      <li>金属の温度と体積では「お湯だとあまり変わらないのに、火だとはっきり変わる」という体験が、温度差が大きいほど変化も大きいという量的な感覚につながる</li>
+      <li>よそうタイムの答え（イ：金属は動かず順番に伝わる）は、水や空気の対流のイメージから「金属も動いて伝わる」と考えがちなため意外性がある。まとめで丁寧に振り返るとよい</li>
+      <li>実際に熱いなべやフライパン、金属製のスプーンなどに触れる場面では、「なべつかみや厚手の布を使う」「素手で触らない」ことが安全上とても重要であることを一言添えるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「空気をあたためると体積はどうなる？」「金属はどうやってあたたまる？」「水や空気はどうやってあたたまる？」</li>
+      <li>実際に金属のスプーンやフォークをあたたかい飲み物に入れ、持ち手が徐々に熱くなる伝導を安全に体感する活動を追加すると理解が深まる</li>
+      <li>理科は小4の単元が「星めぐりの塔」（星の動き）に続く2単元目となり、星めぐりの塔１作のみだった小4のラインナップが充実した</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
