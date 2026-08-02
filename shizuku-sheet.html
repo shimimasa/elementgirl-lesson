@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>シズクの淵 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #178a76; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 26mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.4mm 1mm; }
+  .levelTable th { background: #f0ded0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #f0ded0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>💧 シズクの淵 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      メダカのたまごと、人の赤ちゃん。生まれるまでの時間が長いのはどっち？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 🐟 メダカのたまごの方が長い</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 👶 人の赤ちゃんの方が長い</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🤝 どちらも同じくらい</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．メダカのおす・めすを見分けよう</span>
+    <div class="secBody">
+      せびれ・しりびれの形をくらべてみよう。
+      <table class="roundTable">
+        <tr><th>せびれに切れこみがあるのは</th><th>しりびれが大きく四角に近いのは</th></tr>
+        <tr><td>オス ／ メス</td><td>オス ／ メス</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．メダカのたまごの変化</span>
+    <div class="secBody">
+      「すすめる」ボタンをおして、①〜⑧で何が起きたか、気づいたことを書こう。
+      <table class="levelTable">
+        <tr><th>①1日目</th><th>②2日目</th><th>③3日目</th><th>④4日目</th><th>⑤5日目</th><th>⑥8日目</th><th>⑦9日目</th><th>⑧10日目</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      メダカは受精してから約（<span class="fillLine sm"></span>）日でふ化する。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．人がうまれるまで</span>
+    <div class="secBody">
+      「すすめる」ボタンをおして、①〜⑦で何が起きたか、気づいたことを書こう。
+      <table class="levelTable">
+        <tr><th>①1週</th><th>②7週</th><th>③9週</th><th>④14週</th><th>⑤16週</th><th>⑥32週</th><th>⑦38週</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      人は受精してから約（<span class="fillLine sm"></span>）週でうまれる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．へそのお・たいばんの ひみつ</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。赤ちゃんは、これらを通して何をもらう？
+      <table class="roundTable">
+        <tr><th>あ 羊水</th><th>い たいばん</th><th>う へそのお</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      赤ちゃんがもらうもの：（<span class="fillLine"></span>）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（動物の妊娠期間くらべ）</span>
+    <div class="secBody">
+      見つけた動物に 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>メダカ</th><th>イヌ</th><th>ネコ</th><th>人</th><th>ウマ</th><th>ゾウ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      体が大きい動物ほど、生まれるまでの日数は（ 長い ／ 短い ／ 関係ない ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① メダカは 受精してから 約（<span class="fillLine sm"></span>）日で ふ化する。<br>
+      ② 人は 受精してから 約（<span class="fillLine sm"></span>）週で 誕生する。<br>
+      ③ 赤ちゃんは おなかの中で、へそのお・たいばんを通して（<span class="fillLine"></span>）をもらう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">💧</span>
+        <div>
+          池や 川、田んぼ、水そうなど 近くで メダカや 小さな 生き物を 見つけたら、そっと かんさつしてみよう。図鑑や 写真で 調べるのも いいね。<br>
+          ☐ やってみた こと：<span style="border-bottom:.4mm solid #222;display:inline-block;width:60mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　シズクの淵 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】シズクの淵 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5理科「動物のたんじょう」・学力幅あり・協力型／ 使うもの：「shizuku.html」・プロジェクタ・このノート（1ページ目を人数分）。人のたんじょうは教科書レベルの生物学的事実（受精・子宮内での成長・出産）のみを扱い、性教育的な内容には踏み込みません。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_ninshin</b> などで途中再開（m_seibetsu／m_tamago／m_ninshin／m_hozo／hakase／ending）</li>
+      <li>☐ 「人のたんじょう」は命の話につながる単元。生い立ちや家族に複雑な事情を持つ子がいる前提で、家庭に関する質問（自分が生まれた時の体重を聞く等）はしない構成にしてある</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🐟 メダカの おす・めす</td><td>オス・メス両方の特徴を見せ、せびれ・しりびれの違いで見分けられることに気づかせる</td></tr>
+      <tr><td class="min">10〜18分</td><td>🥚 メダカの たまごの変化</td><td>「すすめる」ボタンで①〜⑧を進め、日がたつごとに目・心臓・ひれができていく様子を観察。シート３に記録</td></tr>
+      <tr><td class="min">18〜28分</td><td>👶 人が うまれるまで（<b>今日の見せ場</b>）</td><td>「すすめる」ボタンで①〜⑦を進め、お母さんのおなかの中で約38週かけて育つ様子を観察。シート４に記録</td></tr>
+      <tr><td class="min">28〜35分</td><td>💞 へそのお・たいばんの ひみつ</td><td>羊水・たいばん・へそのおを発見し、赤ちゃんが自分で食べたり呼吸したりしないことに気づかせる</td></tr>
+      <tr><td class="min">35〜43分</td><td>📖 はかせチャレンジ</td><td>メダカ〜ゾウまでの妊娠期間をくらべ、体の大きさと日数の関係に気づく。命を大切にする話に着地</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「生き物をかんさつしてみよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「メダカのおす・めす」を右下「つぎ▶」でスキップ可（<b>メダカのたまごの変化・人がうまれるまで・へそのお/たいばん・はかせチャレンジ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 人の赤ちゃんの方が長い</b>／メダカのおす・めす＝<b>せびれに切れこみがあるのはオス</b>／
+      メダカのたまご＝<b>約10日でふ化</b>／人がうまれるまで＝<b>約38週で誕生</b>／
+      へそのお・たいばん＝<b>イ へそのお・たいばんを通して母からもらっている</b>／
+      はかせ＝<b>ア 大きい動物ほど日数が長い</b>／
+      まとめ＝①<b>10</b>　②<b>38</b>　③<b>栄養や酸素</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>メダカの受精卵の変化（水温約23℃）：1日目=胚盤の反対側に油球がたまる／2日目=眼胞が形成される／3日目=心臓の拍動が始まる／4日目=血液循環が始まる／5日目=胸びれができる／8日目=眼球や口を動かす／9日目=体の向きを変える／10日目=動きが活発になる→ふ化。教育委員会系の理科観察資料に基づく実測値</li>
+      <li>メダカのおす・めすの見分け方：せびれに切れこみがあるのがオス、しりびれが後ろまで幅広く四角に近いのがオス。メスはせびれに切れこみがなく、しりびれは後ろがせまい三角に近い</li>
+      <li>人のたんじょう：受精後、卵子(約0.2mm)は子宮のかべに着床。約7週で身長約2cm・目や耳ができ体を動かし始める。9週で体全体を動かす。14週で回転するように。16週で身長約18cm・人間らしい姿にほぼ仕上がりお母さんが胎動を感じられるように。32週で体が大きくなり回転できないくらいに（頭を下にすることが多い）。約38週(約266日)で誕生。出典：学研教育情報資料センター「5年理科・人と動物のたんじょう」教材</li>
+      <li>赤ちゃんは、たいばん（母の血液と赤ちゃんの血液が近くを流れ栄養・酸素を受けわたす場所）とへそのお（たいばんと赤ちゃんをつなぐ管）を通して栄養と酸素をもらう。羊水は赤ちゃんを外からのしょうげきから守る水。赤ちゃんは口や鼻で自分で食べたり呼吸したりはしない（肺呼吸は誕生後に初めて始まる）</li>
+      <li>いろいろな動物の妊娠期間（一般的な畜産・動物学資料の概数）：メダカ約10日／イヌ約58〜65日／ネコ約65〜69日／人約266日（約38週）／ウマ約350日／ゾウ約650日。体が大きい動物ほど妊娠期間が長い傾向がある</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「人がうまれるまで」が今日いちばんの見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる</li>
+      <li>よそうタイムの答え（イ：人の方が長い）は、メダカ約10日・人約266日で約24倍もの差があり、子どもにとって意外性が大きい。まとめで丁寧に振り返るとよい</li>
+      <li>「人のたんじょう」は、受精・子宮内での成長・出産という教科書レベルの生物学的事実のみを扱い、妊娠の経緯など性教育的な内容には踏み込まない。おうちミッションも家庭状況を問わない「生き物のかんさつ」にしてあるので、そのまま進行して問題ない</li>
+      <li>はかせチャレンジの最後は「小さないのちも、大きないのちも、ちゃんと育つまでには時間がかかる。生まれてきたいのちを大切にしよう」というメッセージで締める。命を大切にする前向きな話として伝える</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「メダカのおす・めすはどこで見分ける？」「メダカのたまごは何日でふ化する？」「人は何週でうまれる？」</li>
+      <li>学校や施設でメダカを飼育している環境があれば、実際の卵の観察と組み合わせるとさらに理解が深まる</li>
+      <li>理科は生命分野が「めばえラボ」（発芽）・「アオバの葉かげ」（チョウの育ち方）に続く3単元目となり、植物→昆虫→動物（人をふくむ）の誕生・成長の学びがつながった</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
