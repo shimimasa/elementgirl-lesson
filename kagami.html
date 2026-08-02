@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>カガミの丘 — 光のひみつたいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6ff 0%, #d6ecfb 55%, #c3e2f5 100%);
+    color: #1c3a52;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #e8940a; text-shadow: 0 0 14px rgba(232, 148, 10, .3);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3a7ab8; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dce8f5; border: 2px solid #a8d0ec;
+    font-size: clamp(16px, 1.8vw, 26px); color: #8fb0cc;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe3a0, #d4900f);
+    border-color: #8a5a0a; color: #3a2a00;
+    box-shadow: 0 0 16px rgba(212, 144, 15, .6);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 25%, #ffffff 0%, #eaf4fb 70%, #d8e8f5 100%);
+    border: 3px solid #7ab8e0;
+    box-shadow: inset 0 0 40px rgba(122, 184, 224, .15), 0 4px 18px rgba(0, 0, 0, .12);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #2a5a80; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #ffd166; color: #5a3a00; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(200, 224, 245, .55) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #8fd0f0; cursor: pointer;
+    background: linear-gradient(180deg, #5bb8e8, #3a8ec2); color: #fff;
+    box-shadow: 0 3px 0 #1a5a80; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #ffe28a, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a0700a; color: #4a3a10; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #ff9a5a, #d4600f); border-color: #ffd8b0; box-shadow: 0 3px 0 #8a3a08; color: #fff; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #ffd166; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .18), inset 0 0 24px rgba(0, 0, 0, .1);
+    flex-shrink: 0; background: #eaf4fb;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #3a7ab8;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #c26a0a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffdf7e0; border: 2px solid #a8d0ec; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #3a7ab8; }
+  .mascot { width: 100%; animation: floaty 3.8s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #ffffff; color: #1c3a52;
+    border: 1.5px solid #a8d0ec;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #ffffff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #c26a0a; background: #fff0d0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #eaf6ff, #d6ecfb); color: #1c3a52;
+    border: 2px solid #ffd166; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #e8940a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #5bb8e8, #3a8ec2); color: #fff;
+    box-shadow: 0 3px 0 #1a5a80, 0 5px 12px rgba(0, 0, 0, .15);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1a5a80; }
+  .btn.sub {
+    background: #dce8f5; color: #2a5a80; box-shadow: 0 3px 0 #a8c4dd;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #ffffff; color: #1c3a52; box-shadow: 0 3px 0 #b8ccdc; font-weight: 400; border: 1.5px solid #cfe0ee; display: inline-flex; align-items: center; gap: .3em; }
+  .btn.choice.picked { background: #ffe9c2; outline: 3px solid #e0a020; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(30, 60, 90, .55);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #eaf6ff);
+    border: 3px solid #7ab8e0; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, .25);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #e8940a; text-shadow: 0 0 22px rgba(232, 148, 10, .35);
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #2a7ab8; }
+  .panel .sub { color: #3a7ab8; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #ffffff; color: #1c3a52; border: 1.5px solid #cfe0ee; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #3a7ab8; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(150px, 22vw, 220px); cursor: pointer;
+    background: #ffffff; color: #1c3a52; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cfe0ee; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #3a8ec2; background: #d6ecfb; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #3a8ec2; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #c26a0a;
+    color: #c26a0a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #3a7ab8;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dce8f5; color: #2a5a80;
+    border: 1px solid #a8d0ec; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #c8def0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🪞 カガミの丘<small>— 光のひみつ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_chokushin" title="光はまっすぐ進む">★</div>
+    <div class="badge" id="bd_m_hansha" title="鏡ではね返す">★</div>
+    <div class="badge" id="bd_m_kasane" title="鏡を重ねて試す">★</div>
+    <div class="badge" id="bd_m_mushimegane" title="虫眼鏡で光を集める">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">光の じっけん台</div>
+    <div id="locChip">カガミの丘</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔍 カガミのぞき窓 〜 くわしく 見る 〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="122" rx="28" ry="6" fill="rgba(0,0,0,.15)"/>
+            <rect x="54" y="88" width="12" height="30" rx="5" fill="#e0a020" stroke="#a0700a" stroke-width="1.6"/>
+            <circle cx="60" cy="62" r="46" fill="#f0a020" opacity=".18"/>
+            <circle cx="60" cy="62" r="40" fill="url(#mirrorGrad)" stroke="#e0a020" stroke-width="5"/>
+            <defs>
+              <radialGradient id="mirrorGrad" cx="38%" cy="32%" r="75%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="45%" stop-color="#cfe8fb"/>
+                <stop offset="100%" stop-color="#8fc2e6"/>
+              </radialGradient>
+            </defs>
+            <path d="M30 40 Q45 30 60 38" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+            <g class="eyes">
+              <circle cx="48" cy="60" r="5.6" fill="#fff"/>
+              <circle cx="72" cy="60" r="5.6" fill="#fff"/>
+              <circle cx="48.6" cy="60.6" r="3.1" fill="#1c3a52"/>
+              <circle cx="72.6" cy="60.6" r="3.1" fill="#1c3a52"/>
+              <circle cx="49.8" cy="58.8" r="1" fill="#fff"/>
+              <circle cx="73.8" cy="58.8" r="1" fill="#fff"/>
+            </g>
+            <path d="M50 74 Q60 80 70 74" fill="none" stroke="#1c3a52" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M60 6 L64 16 L74 16 L66 22 L69 32 L60 26 L51 32 L54 22 L46 16 L56 16 Z" fill="#ffd166" stroke="#c26a0a" stroke-width="1"/>
+          </svg>
+          <div class="catname"><ruby>鏡<rt>かがみ</rt></ruby>から生まれた<ruby>精霊<rt>せいれい</rt></ruby> カガミ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🪞 カガミの丘ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   カガミの丘 — 光のひみつ（小3理科・協力型・1ファイル）
+   光はまっすぐ進む（発見型・影のしくみ）→
+   鏡で光をはね返す（的あて・角度①〜⑧）→
+   鏡を重ねて明るさ・あたたかさアップ（メイン操作・①〜⑧の数値階段・単調増加型）→
+   虫眼鏡で光を集める（距離①〜⑧・中間が正解型）→
+   はかせ（身のまわりの光の利用と安全）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const W = {
+  chokushin: ruby('直進', 'ちょくしん'),
+  hansha: ruby('反射', 'はんしゃ'),
+  kagami: ruby('鏡', 'かがみ'),
+  mushimegane: ruby('虫眼鏡', 'むしめがね'),
+  shouten: ruby('焦点', 'しょうてん'),
+  totsu: ruby('凸', 'とつ') + 'レンズ',
+  seirei: ruby('精霊', 'せいれい'),
+  hansharitsu: ruby('反射率', 'はんしゃりつ'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// 鏡の的あて：正解の角度は⑤（鏡の傾きと反射の関係を試行錯誤で見つける）
+const HANSHA_CORRECT = 5;
+// 鏡を重ねる：日なた27℃を基準に、鏡1枚ごとにおよそ+3℃（学校実験で確認されている「枚数が多いほど明るく暖かい」傾向のモデル値）
+const KASANE_BASE = 27;
+const KASANE_STEP = 3;
+const KASANE_TEMPS = [1,2,3,4,5,6,7,8].map(n => KASANE_BASE + n * KASANE_STEP);
+const KASANE_TARGET = 40; // お湯につかった時と同じくらいの40℃をめざす
+// 虫眼鏡：レンズと紙のきょり(cm)。実際の虫眼鏡の焦点距離(およそ12〜15cm)を④⑤に設定
+const MEGANE_DIST = [3, 6, 9, 12, 15, 18, 21, 24];
+const MEGANE_FOCUS_LO = 4, MEGANE_FOCUS_HI = 5; // ④⑤がちょうどの焦点距離
+
+// ---------- 身のまわりの光の利用 ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '太陽光発電', txt: `屋根の 上の ソーラーパネルは、太陽の 光を 集めて 電気に かえている。光の エネルギーを 利用する くらしの 知恵。` },
+  { key: 1, letter: 'い', name: '灯台のレンズ', txt: `灯台は、大きな とつレンズを 何まいも 組み合わせて 光を 一つの 向きに まとめ、遠くの 船まで 光を とどけている。` },
+  { key: 2, letter: 'う', name: '自転車の反射板', txt: `自転車の うしろに ある 反射板（キャッツアイ）は、鏡のように 光を はね返して、夜でも 車から 見えるように している。` },
+  { key: 3, letter: 'え', name: 'カーブミラー', txt: `見通しの わるい 交差点の カーブミラーは、鏡で 反射させて、見えない 場所の ようすを 見えるように している。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'chokushin',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  // m_chokushin
+  obstacleOn: false,
+  chokushinAnimT: 0,
+  // m_hansha
+  hanshaAngle: 4,
+  hanshaAnimT: 0,
+  hanshaTries: new Set(),
+  hanshaHit: false,
+  // m_kasane
+  kasaneLevel: 3,
+  kasaneAnimT: 0,
+  kasaneResult: null,
+  kasaneTries: new Set(),
+  // m_mushimegane
+  meganeLevel: 1,
+  meganeAnimT: 0,
+  meganeTries: new Set(),
+  // hakase
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sPlop = () => { tone(220, 0, 0.12, 'sine', 0.1); tone(180, 0.06, 0.15, 'sine', 0.08); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eaf6ff'); g.addColorStop(1, '#cfe6f7');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#dcefdc';
+  gctx.fillRect(X(0), Y(540), 1000 * sc, 100 * sc);
+}
+function drawSun(X, Y, sc, cx, cy, r) {
+  gctx.save();
+  gctx.shadowColor = '#ffd166'; gctx.shadowBlur = 18 * sc;
+  gctx.fillStyle = '#ffd166';
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), r * sc, 0, TAU); gctx.fill();
+  gctx.restore();
+  gctx.strokeStyle = '#f0a020'; gctx.lineWidth = 2.4 * sc;
+  for (let i = 0; i < 8; i++) {
+    const a = i * TAU / 8;
+    gctx.beginPath();
+    gctx.moveTo(X(cx) + Math.cos(a) * r * 1.25 * sc, Y(cy) + Math.sin(a) * r * 1.25 * sc);
+    gctx.lineTo(X(cx) + Math.cos(a) * r * 1.65 * sc, Y(cy) + Math.sin(a) * r * 1.65 * sc);
+    gctx.stroke();
+  }
+}
+function drawMirrorDisc(X, Y, sc, cx, cy, r, angle, active) {
+  gctx.save();
+  gctx.translate(X(cx), Y(cy)); gctx.rotate(angle);
+  // 持ち手（スタンド）
+  gctx.strokeStyle = '#c9902a'; gctx.lineWidth = 5 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(0, r * 0.42 * sc); gctx.lineTo(0, r * 0.85 * sc); gctx.stroke();
+  // 鏡面（縦長の丸角の板）
+  gctx.fillStyle = active === false ? '#c9d6e0' : '#eaf6ff';
+  gctx.strokeStyle = active === false ? '#a8b8c4' : '#e0a020'; gctx.lineWidth = r * 0.055 * sc;
+  roundRect(gctx, -r * 0.19 * sc, -r * 0.42 * sc, r * 0.38 * sc, r * 0.84 * sc, r * 0.12 * sc);
+  gctx.fill(); gctx.stroke();
+  if (active !== false) {
+    gctx.fillStyle = 'rgba(255,255,255,.75)';
+    roundRect(gctx, -r * 0.1 * sc, -r * 0.34 * sc, r * 0.09 * sc, r * 0.44 * sc, r * 0.045 * sc);
+    gctx.fill();
+  }
+  gctx.restore();
+}
+function drawTarget(X, Y, sc, cx, cy, r, hit) {
+  const rings = ['#c1442e', '#fff', '#c1442e', '#fff'];
+  for (let i = 0; i < 4; i++) {
+    gctx.fillStyle = rings[i];
+    gctx.beginPath(); gctx.arc(X(cx), Y(cy), r * (1 - i * 0.24) * sc, 0, TAU); gctx.fill();
+  }
+  if (hit) {
+    gctx.save(); gctx.shadowColor = '#ffd166'; gctx.shadowBlur = 20 * sc;
+    gctx.fillStyle = '#ffe9a0';
+    gctx.beginPath(); gctx.arc(X(cx), Y(cy), r * 0.3 * sc, 0, TAU); gctx.fill();
+    gctx.restore();
+  }
+}
+
+// ---------- 1．光はまっすぐ進む ----------
+function drawChokushinScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const sunX = 90, sunY = 220, endX = 900;
+  drawSun(X, Y, sc, sunX, sunY, 34);
+  const beamEndY = 220;
+  const obsX = 480;
+  const litEnd = S.obstacleOn ? obsX : endX;
+  gctx.save();
+  gctx.strokeStyle = '#ffd166'; gctx.lineWidth = 10 * sc; gctx.lineCap = 'round';
+  gctx.globalAlpha = 0.85 * S.chokushinAnimT;
+  for (let i = -1; i <= 1; i++) {
+    gctx.beginPath();
+    gctx.moveTo(X(sunX + 30), Y(beamEndY + i * 26));
+    gctx.lineTo(X(sunX + 30 + (litEnd - sunX - 30) * S.chokushinAnimT), Y(beamEndY + i * 26));
+    gctx.stroke();
+  }
+  gctx.restore();
+  if (S.obstacleOn) {
+    // 障害物（本）
+    gctx.fillStyle = '#8a6a3a'; gctx.strokeStyle = '#5a4020'; gctx.lineWidth = 2 * sc;
+    roundRect(gctx, X(obsX - 18), Y(140), 36 * sc, 160 * sc, 4 * sc);
+    gctx.fill(); gctx.stroke();
+    // かげ
+    gctx.fillStyle = 'rgba(30,50,70,.35)';
+    gctx.fillRect(X(obsX + 18), Y(140), (endX - obsX - 18) * sc, 160 * sc);
+    gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText('かげ', X((obsX + endX) / 2), Y(320));
+  }
+  gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(S.obstacleOn ? 'しょうがい物：あり（光がさえぎられている）' : 'しょうがい物：なし（光が奥まで届いている）', X(500), Y(70));
+}
+
+// ---------- 2．鏡で光をはね返す（的あて） ----------
+function drawHanshaScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const sunX = 130, sunY = 150, mirX = 500, mirY = 380, tgtX = 860, tgtY = 150;
+  drawSun(X, Y, sc, sunX, sunY, 30);
+  // 太陽→鏡（固定の光線）
+  gctx.strokeStyle = '#ffd166'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round'; gctx.globalAlpha = .85;
+  gctx.beginPath(); gctx.moveTo(X(sunX + 26), Y(sunY + 18)); gctx.lineTo(X(mirX), Y(mirY)); gctx.stroke();
+  gctx.globalAlpha = 1;
+  // 鏡（角度で傾く）
+  const angle = (S.hanshaAngle - HANSHA_CORRECT) * (Math.PI / 16);
+  drawMirrorDisc(X, Y, sc, mirX, mirY, 110, angle);
+  // 的
+  drawTarget(X, Y, sc, tgtX, tgtY, 48, S.hanshaHit && S.hanshaAnimT >= 1);
+  // 鏡→反射光（正解角度に近いほど的に近づく演出）
+  if (S.hanshaAnimT > 0.02) {
+    const missOffset = (S.hanshaAngle - HANSHA_CORRECT) * 70;
+    const endX2 = tgtX + missOffset, endY2 = tgtY;
+    const curX = lerp(mirX, endX2, S.hanshaAnimT), curY = lerp(mirY, endY2, S.hanshaAnimT);
+    gctx.strokeStyle = '#4fc3f7'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+    gctx.beginPath(); gctx.moveTo(X(mirX), Y(mirY)); gctx.lineTo(X(curX), Y(curY)); gctx.stroke();
+  }
+  gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`鏡の むき ${NUMS[S.hanshaAngle - 1]}`, X(500), Y(70));
+}
+
+// ---------- 3．鏡を重ねて明るさ・あたたかさアップ（メイン操作） ----------
+function drawKasaneScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const cx = 500, cy = 420, r = 300;
+  const n = S.kasaneLevel;
+  // 的（黒い紙＋温度計）
+  gctx.fillStyle = '#2c2c2c'; gctx.fillRect(X(cx - 44), Y(cy - 44), 88 * sc, 88 * sc);
+  const temp = KASANE_TEMPS[n - 1] * S.kasaneAnimT + KASANE_BASE * (1 - S.kasaneAnimT);
+  if (S.kasaneAnimT > 0.05) {
+    const glowR = 40 + 90 * S.kasaneAnimT * (n / 8);
+    const g = gctx.createRadialGradient(X(cx), Y(cy), 0, X(cx), Y(cy), glowR * sc);
+    g.addColorStop(0, `rgba(255,230,150,${0.55 * S.kasaneAnimT})`);
+    g.addColorStop(1, 'rgba(255,230,150,0)');
+    gctx.fillStyle = g;
+    gctx.beginPath(); gctx.arc(X(cx), Y(cy), glowR * sc, 0, TAU); gctx.fill();
+  }
+  gctx.strokeStyle = '#fff'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(cx + 60), Y(cy - 30)); gctx.lineTo(X(cx + 60), Y(cy + 30)); gctx.stroke();
+  gctx.fillStyle = '#c1442e';
+  gctx.beginPath(); gctx.arc(X(cx + 60), Y(cy + 30), 8 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${15 * sc}px sans-serif`; gctx.textAlign = 'left'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${temp.toFixed(0)}℃`, X(cx + 78), Y(cy));
+  // 鏡（枚数分、円弧状に配置。各鏡は温度計の方を向く）
+  for (let i = 0; i < 8; i++) {
+    const a = Math.PI * 0.62 + (Math.PI * 0.76) * (i / 7);
+    const mx = cx + Math.cos(a) * r, my = cy - Math.sin(a) * (r * 0.62);
+    const active = i < n;
+    const mAngle = Math.atan2(cy - my, cx - mx);
+    if (active && S.kasaneAnimT > 0.05) {
+      gctx.save();
+      gctx.strokeStyle = '#ffd166'; gctx.lineWidth = 3 * sc; gctx.globalAlpha = .8 * S.kasaneAnimT;
+      gctx.beginPath(); gctx.moveTo(X(mx), Y(my)); gctx.lineTo(X(cx), Y(cy)); gctx.stroke();
+      gctx.restore();
+    }
+    drawMirrorDisc(X, Y, sc, mx, my, 62, mAngle, active);
+  }
+  gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`鏡 ${NUMS[n - 1]}（${n}まい） 温度計 ${temp.toFixed(0)}℃／目ひょう${KASANE_TARGET}℃`, X(500), Y(70));
+}
+
+// ---------- 4．虫眼鏡で光を集める ----------
+function drawMushimeganeScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const sunX = 500, sunY = 90, lensY = 260, paperY = 470;
+  drawSun(X, Y, sc, sunX, sunY, 28);
+  const dist = MEGANE_DIST[S.meganeLevel - 1];
+  const isFocus = S.meganeLevel >= MEGANE_FOCUS_LO && S.meganeLevel <= MEGANE_FOCUS_HI;
+  // 光線
+  gctx.strokeStyle = '#ffd166'; gctx.lineWidth = 4 * sc; gctx.globalAlpha = .8;
+  for (let i = -2; i <= 2; i++) {
+    gctx.beginPath(); gctx.moveTo(X(sunX + i * 26), Y(sunY + 24)); gctx.lineTo(X(sunX), Y(lensY)); gctx.stroke();
+  }
+  gctx.globalAlpha = 1;
+  // レンズ
+  gctx.fillStyle = 'rgba(207,232,251,.55)'; gctx.strokeStyle = '#3a8ec2'; gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.ellipse(X(sunX), Y(lensY), 60 * sc, 26 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  // レンズ→紙（収束）
+  const spotR = isFocus ? 6 : (10 + Math.abs(S.meganeLevel - (MEGANE_FOCUS_LO + MEGANE_FOCUS_HI) / 2) * 9);
+  gctx.strokeStyle = '#ffd166'; gctx.lineWidth = 3 * sc; gctx.globalAlpha = .8;
+  gctx.beginPath(); gctx.moveTo(X(sunX - 55), Y(lensY)); gctx.lineTo(X(sunX), Y(paperY)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(sunX + 55), Y(lensY)); gctx.lineTo(X(sunX), Y(paperY)); gctx.stroke();
+  gctx.globalAlpha = 1;
+  // 黒い紙
+  gctx.fillStyle = '#2c2c2c'; gctx.fillRect(X(sunX - 90), Y(paperY - 6), 180 * sc, 12 * sc);
+  // 光点
+  const t = S.meganeAnimT;
+  if (t > 0.05) {
+    gctx.save();
+    if (isFocus && t > 0.6) { gctx.shadowColor = '#ff7a3a'; gctx.shadowBlur = 26 * sc; gctx.fillStyle = '#ff7a3a'; }
+    else { gctx.shadowColor = '#ffe9a0'; gctx.shadowBlur = 10 * sc; gctx.fillStyle = 'rgba(255,230,150,.7)'; }
+    gctx.beginPath(); gctx.arc(X(sunX), Y(paperY), spotR * sc * t, 0, TAU); gctx.fill();
+    gctx.restore();
+    if (isFocus && t >= 1) {
+      gctx.fillStyle = '#8a8a8a'; gctx.font = `${22 * sc}px sans-serif`; gctx.textAlign = 'center';
+      gctx.fillText('〜', X(sunX - 14), Y(paperY - 26));
+      gctx.fillText('〜', X(sunX + 14), Y(paperY - 34));
+    }
+  }
+  gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`レンズと紙の きょり ${NUMS[S.meganeLevel - 1]}（${dist}cm）`, X(500), Y(70));
+}
+
+// ---------- 5．はかせ：身のまわりの光の利用 ----------
+const HAKASE_ICON = ['☀️', '🗼', '🚲', '🪞'];
+function drawHakaseScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const xs = [220, 420, 620, 820];
+  HAKASE_POINTS.forEach((p, i) => {
+    const done = S.hakaseFound.has(p.key);
+    const px = xs[i], py = 300;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#ffd166' : '#dce8f5';
+    gctx.fill();
+    gctx.strokeStyle = '#e0a020'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(HAKASE_ICON[i], X(px), Y(py - 2));
+    gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText(p.letter + ' ' + p.name, X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#1c3a52'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('光の 性質は 身のまわりの いろいろな ところで 使われている', X(500), Y(70));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'chokushin') drawChokushinScene(X, Y, sc);
+  else if (S.scene === 'hansha') drawHanshaScene(X, Y, sc);
+  else if (S.scene === 'kasane') drawKasaneScene(X, Y, sc);
+  else if (S.scene === 'mushimegane') drawMushimeganeScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- カガミのぞき窓（スコープ） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#eaf6ff'); grd.addColorStop(1, '#c3e2f5');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#e8940a';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'gauge') {
+    const temp = KASANE_TEMPS[S.kasaneLevel - 1];
+    const ok = temp >= KASANE_TARGET;
+    const cx = R, cy = R * 1.05, rad = R * 0.72;
+    sctx.strokeStyle = '#c9d6e0'; sctx.lineWidth = R * 0.13; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, 0); sctx.stroke();
+    const frac = clamp((temp - KASANE_BASE) / (KASANE_TEMPS[7] - KASANE_BASE), 0, 1);
+    const ang = Math.PI - Math.PI * frac;
+    sctx.strokeStyle = ok ? '#2f9a5a' : '#e0a020';
+    sctx.lineWidth = R * 0.13;
+    sctx.beginPath(); sctx.arc(cx, cy, rad, Math.PI, ang, true); sctx.stroke();
+    sctx.strokeStyle = '#1c3a52'; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx + Math.cos(ang) * rad * 0.88, cy + Math.sin(ang) * rad * 0.88); sctx.stroke();
+    sctx.fillStyle = '#1c3a52'; sctx.beginPath(); sctx.arc(cx, cy, R * 0.05, 0, TAU); sctx.fill();
+    label(`${temp}℃／目ひょう${KASANE_TARGET}℃`);
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffd16655'); g2.addColorStop(1, 'rgba(255,209,102,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#e8940a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🪞', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#e8940a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#1c3a52';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ffd166', '#4fc3f7', '#ffe9a8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    chokushin: '☀️ 光は まっすぐ 進む',
+    hansha: '🪞 鏡で 光を はね返す',
+    kasane: '✨ 鏡を 重ねて 試す',
+    mushimegane: '🔍 虫眼鏡で 光を 集める',
+    hakase: '🚲 身のまわりの 光の 利用',
+    done: '🪞 カガミの丘 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || '光の じっけん台';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_chokushin', 'm_hansha', 'm_kasane', 'm_mushimegane', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'chokushin', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🪞☀️🔍✨</div>
+        <h1>カガミの丘</h1>
+        <div class="sub">〜 光の ひみつを たしかめる 〜</div>
+        <p class="talk">ようこそ！ わたしは 鏡から 生まれた ${W.seirei}、<b>カガミ</b>。今日は <b>光</b>の ひみつを、いっしょに たしかめに いこう！<br>
+        光は まっすぐ 進む？ 鏡で はね返すと どうなる？ 鏡を たくさん 重ねたら？ 虫眼鏡で 光を 集めたら？……たっぷり 実験するよ。</p>
+        <button class="btn" id="startBtn">実験を はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作は画面のボタンとタッチです（本物の日光・鏡・虫眼鏡は使いません）。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">鏡を 2まい、3まいと 重ねて 日光を 当てると、明るさは どんどん 増えるけど、あたたかさは 1まいの時と 変わらないと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">⏸️</span><b>ア</b> 明るさも あたたかさも 変わらない</div>
+          <div class="vcard" data-v="1"><span class="vicon">🔥</span><b>イ</b> 明るさも あたたかさも 両方 増える</div>
+          <div class="vcard" data-v="2"><span class="vicon">💡</span><b>ウ</b> 明るさは 増えるが、あたたかさは 変わらない</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：光はまっすぐ進む ---
+  m_chokushin: {
+    enter() {
+      Object.assign(S, { scene: 'chokushin', scope: { type: 'idle' }, obstacleOn: false, chokushinAnimT: 0 });
+      updateLoc();
+      setWish('☀️', `太陽から 出た 光を、しょうがい物（本）を 置く/どけるで 試して、光の 進み方を たしかめよう。`);
+      say(`まずは「光を 通す」ボタンを おしてみよう。`);
+      setControls([{ label: '☀️ 光を通す', cb: () => this.beam() }]);
+    },
+    beam() {
+      setControls([]);
+      say(`光が すすんでいく……`);
+      startTween(0, 1, 0.9, v => { S.chokushinAnimT = v; }, () => {
+        sYes(); scopeBurst();
+        say(`光は まっすぐ 奥まで 届いた！ 今度は しょうがい物（本）を 置いて、もう一度 試してみよう。`);
+        setControls([{ label: '📕 しょうがい物を置く', cb: () => this.obstacle() }]);
+      });
+    },
+    obstacle() {
+      setControls([]);
+      S.obstacleOn = true; S.chokushinAnimT = 0;
+      say(`本を 置いた……もう一度 光を 通してみよう。`);
+      setControls([{ label: '☀️ 光を通す', cb: () => this.beam2() }]);
+    },
+    beam2() {
+      setControls([]);
+      startTween(0, 1, 0.9, v => { S.chokushinAnimT = v; }, () => {
+        sHmm(); scopeBurst();
+        say(`あれ！ 本の 先に 「かげ」が できた。光が 本の 先まで 届かなかったのは なぜだと 思う？`);
+        setButtons(choiceRow(['光が曲がったから', '光はまっすぐ進み、さえぎられたから', '光が消えたから'], (i, el) => this.pick(i, el)));
+      });
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_chokushin'); S.phase = 'done';
+        say(`せいかい！ 光は まっすぐ 進む せいしつ（${W.chokushin}）を もっている。しょうがい物に ぶつかると その先に 進めず、「かげ」が できるんだ。`);
+        setButtons([{ label: 'つぎへ（鏡で光をはね返す）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['光が曲がったから', '光はまっすぐ進み、さえぎられたから', '光が消えたから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：鏡で光をはね返す（的あて） ---
+  m_hansha: {
+    enter() {
+      Object.assign(S, { scene: 'hansha', scope: { type: 'idle' }, hanshaAngle: 4, hanshaAnimT: 0, hanshaTries: new Set(), hanshaHit: false });
+      updateLoc();
+      setWish('🪞', `鏡の むき ①〜⑧を えらんで、はね返した 光を 的に 当てよう。`);
+      say(`鏡の むきを えらんで「光を当てる」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.hanshaAngle === n ? ' sel' : ''), cb: () => { S.hanshaAngle = n; this.refreshCtl(); } });
+      list.push({ label: '🪞 光を当てる', cb: () => this.shoot() });
+      setControls(list);
+    },
+    shoot() {
+      setControls([]);
+      S.hanshaAnimT = 0; S.hanshaHit = false;
+      say(`鏡の むき ${NUMS[S.hanshaAngle - 1]}で、光を はね返してみよう……`);
+      startTween(0, 1, 0.8, v => { S.hanshaAnimT = v; }, () => this.judge());
+    },
+    judge() {
+      S.hanshaTries.add(S.hanshaAngle);
+      const ok = S.hanshaAngle === HANSHA_CORRECT;
+      S.hanshaHit = ok;
+      if (ok) {
+        sYes(); scopeBurst(); award('m_hansha'); S.phase = 'done';
+        say(`✨ 命中！ はね返った 光が 的に 当たった！ ✨<br><br>💡 <b>たいせつポイント</b><br>鏡で はね返した 光も、まっすぐ 進む。鏡の むきを 変えると、光の 進む 向きも 変わるんだ。`);
+        setButtons([{ label: 'つぎへ（鏡を重ねてみよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        const hint = S.hanshaAngle < HANSHA_CORRECT ? 'もう少し ⑧の方へ むきを 変えてみよう。' : 'もう少し ①の方へ むきを 変えてみよう。';
+        say(`外れてしまった……的の 横を 通りすぎたよ。${hint}`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M3：鏡を重ねて明るさ・あたたかさアップ（メイン操作） ---
+  m_kasane: {
+    enter() {
+      Object.assign(S, { scene: 'kasane', scope: { type: 'gauge' }, kasaneLevel: 3, kasaneAnimT: 0, kasaneResult: null, kasaneTries: new Set() });
+      updateLoc();
+      setWish('✨', `鏡の まい数 ①〜⑧を えらんで、的の 温度を 試そう。目ひょうは <b>${KASANE_TARGET}℃ 以上</b>（お湯に つかった時と 同じくらい）！`);
+      say(`鏡の まい数を えらんで「光を集める」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.kasaneLevel === n ? ' sel' : ''), cb: () => { S.kasaneLevel = n; this.refreshCtl(); } });
+      list.push({ label: '✨ 光を集める', cb: () => this.gather() });
+      setControls(list);
+    },
+    gather() {
+      setControls([]);
+      S.kasaneResult = null; S.kasaneAnimT = 0;
+      say(`鏡 ${NUMS[S.kasaneLevel - 1]}（${S.kasaneLevel}まい）で、的に 光を 集めてみよう……`);
+      startTween(0, 1, 1.0, v => { S.kasaneAnimT = v; }, () => this.judge());
+    },
+    judge() {
+      S.kasaneTries.add(S.kasaneLevel);
+      const temp = KASANE_TEMPS[S.kasaneLevel - 1];
+      const ok = temp >= KASANE_TARGET;
+      S.kasaneResult = ok ? 'good' : 'low';
+      if (ok) {
+        sYes(); scopeBurst(); award('m_kasane'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`✨ 温度計が ${temp}℃に なった！ 目ひょうの ${KASANE_TARGET}℃を たっせい！ 明るさも あたたかさも どんどん 増えたね。 ✨<br><br>💡 <b>たいせつポイント</b><br>鏡の まい数を 増やすほど、明るさも あたたかさも 両方 増える。<br><br>さいしょの よそうタイムの こたえは <b>イ 明るさも あたたかさも 両方 増える</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（虫眼鏡で光を集める）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`温度計は ${temp}℃までしか 上がらなかった……目ひょうの ${KASANE_TARGET}℃には まだ とどかない。鏡の まい数を もっと 増やして みよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：虫眼鏡で光を集める（中間が正解） ---
+  m_mushimegane: {
+    enter() {
+      Object.assign(S, { scene: 'mushimegane', scope: { type: 'idle' }, meganeLevel: 1, meganeAnimT: 0, meganeTries: new Set() });
+      updateLoc();
+      setWish('🔍', `${W.mushimegane}（${W.totsu}）と 紙の きょり ①〜⑧を えらんで、紙が どうなるか 試そう。`);
+      say(`きょりを えらんで「光を集める」ボタンを おそう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.meganeLevel === n ? ' sel' : ''), cb: () => { S.meganeLevel = n; this.refreshCtl(); } });
+      list.push({ label: '🔍 光を集める', cb: () => this.gather() });
+      setControls(list);
+    },
+    gather() {
+      setControls([]);
+      S.meganeAnimT = 0;
+      say(`きょり ${NUMS[S.meganeLevel - 1]}（${MEGANE_DIST[S.meganeLevel - 1]}cm）で、光を 集めてみよう……`);
+      startTween(0, 1, 1.0, v => { S.meganeAnimT = v; }, () => this.judge());
+    },
+    judge() {
+      S.meganeTries.add(S.meganeLevel);
+      const isFocus = S.meganeLevel >= MEGANE_FOCUS_LO && S.meganeLevel <= MEGANE_FOCUS_HI;
+      if (isFocus) {
+        sYes(); scopeBurst();
+        say(`🔥 光が 一点に 集まって、黒い紙から けむりが 出はじめた！ この 一点のことを <b>${W.shouten}</b>と いう。<br><br>紙が こげはじめる 温度は 紙の しゅるいで ちがうが、およそ 300℃前後（新聞紙で 約290℃）。黒い紙は 白い紙より 熱を 吸収しやすいので、こげやすいんだ。`);
+        setButtons([{ label: 'つぎへ（黒い紙と白い紙）', cb: () => this.ask() }]);
+      } else {
+        sHmm();
+        const hint = S.meganeLevel < MEGANE_FOCUS_LO ? 'レンズと紙を もう少し はなしてみよう。' : 'レンズと紙を もう少し 近づけてみよう。';
+        say(`光が 広がったまま、ぼんやりした 丸に なった……このままでは 熱く ならない。${hint}`);
+        this.refreshCtl();
+      }
+    },
+    ask() {
+      say(`黒い紙と 白い紙、同じように 虫眼鏡で 光を 集めたら、こげやすいのは どっちだと 思う？`);
+      setButtons(choiceRow(['黒い紙', '白い紙', 'どちらも同じ'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_mushimegane'); S.phase = 'done';
+        say(`せいかい！ 黒い紙は 光を 吸収しやすく、白い紙は 光を はね返しやすい。だから 黒い紙の 方が 熱く なりやすいんだ。<br><br>⚠️ 虫眼鏡で 太陽を 直接 見ては いけない。目を いためる きけんが ある。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['黒い紙', '白い紙', 'どちらも同じ'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：身のまわりの光の利用 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 光の 性質は 身のまわりの いろいろな ところで 使われているよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`虫眼鏡や 鏡を 使う 時、いちばん 気をつけることは 何だと 思う？`);
+      setButtons(choiceRow(['できるだけ大きい声で使う', '人の目や服、燃えやすい物に光を向けない', '毎回ちがう場所で使う'], (i, el) => this.pick(i, el)));
+    },
+    pick(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 虫眼鏡や 鏡で 集めたり はね返したり した 光は、人の 目を いためたり、物を こがしたり する 力を 持っている。安全に 気をつけて 使おう。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['できるだけ大きい声で使う', '人の目や服、燃えやすい物に光を向けない', '毎回ちがう場所で使う'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ カガミの丘 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>3つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 光は（<span class="blankWord" data-a="まっすぐ">？？？</span>）進む。<br>
+        ② 鏡を 重ねると、明るさも あたたかさも（<span class="blankWord" data-a="増える">？？？</span>）。<br>
+        ③ 虫眼鏡は、光を 一点（${W.shouten}）に（<span class="blankWord" data-a="集める">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 明るさも あたたかさも 両方 増える</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>晴れた 日に、鏡で 日光を かべに 映してみよう（人の目には ぜったいに 向けないこと！）。かげが できる 場所も さがしてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#c26a0a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「光は どんな 進み方を する？」「鏡を 増やすと どうなる？」「虫眼鏡は なぜ 熱くなる？」`);
+      setButtons([
+        { label: '☀️ 光はまっすぐ進むの 図', cls: 'sub', cb: () => this.show('chokushin') },
+        { label: '🪞 鏡で光をはね返すの 図', cls: 'sub', cb: () => this.show('hansha') },
+        { label: '✨ 鏡を重ねるの 図', cls: 'sub', cb: () => this.show('kasane') },
+        { label: '🔍 虫眼鏡の 図', cls: 'sub', cb: () => this.show('mushimegane') },
+        { label: '🚲 身のまわりの光の利用の 図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) {
+      S.scene = scene;
+      updateLoc(); sTap();
+    },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kasane などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
