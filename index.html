@@ -21,20 +21,172 @@
     margin: 0 0 8px;
   }
   p.lead{
-    margin: 0 0 clamp(20px,3vw,32px);
+    margin: 0 0 14px;
     color:#555;
   }
+  .stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom: clamp(18px,3vw,28px);
+  }
+  .stats span{
+    background:#fff;
+    border:1px solid #e3ddce;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    color:#665;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  }
+  .stats span b{ color:#c76b2c; }
+
+  /* ---- controls ---- */
+  .controls{
+    background: rgba(255,255,255,.6);
+    border:1px solid #e8e2d2;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    backdrop-filter: none;
+  }
+  .search-row{
+    display:flex;
+    margin-bottom: 12px;
+  }
+  #searchBox{
+    width:100%;
+    max-width: 420px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    font-family: inherit;
+    background:#fff;
+  }
+  #searchBox:focus{
+    outline: 2px solid #4a7fd6;
+    outline-offset: 1px;
+  }
+  .row-label{
+    font-size: 12px;
+    color:#888;
+    font-weight:bold;
+    margin: 8px 0 6px;
+  }
+  .chiprow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .tab-btn, .chip{
+    border:none;
+    cursor:pointer;
+    font-family: inherit;
+    font-weight:bold;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 14px;
+    background:#f1f1f1;
+    color:#555;
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .tab-btn:hover, .chip:hover{ transform: translateY(-1px); }
+  .tab-btn.active{
+    background:#4a7fd6;
+    color:#fff;
+    box-shadow: 0 2px 8px rgba(74,127,214,.4);
+  }
+  .chip{
+    background: var(--chip-bg,#f1f1f1);
+    color: var(--chip-fg,#555);
+    border: 1px solid var(--chip-fg,#ccc);
+  }
+  .chip.active{
+    background: var(--chip-fg,#555);
+    color:#fff;
+  }
+  .grade-row .chip{
+    --chip-bg:#f1f1f1;
+    --chip-fg:#777;
+  }
+
+  .result-count{
+    font-size: 13px;
+    color:#888;
+    margin: 4px 0 16px;
+  }
+
+  /* ---- subject section ---- */
+  .subject-block{
+    margin-bottom: 8px;
+  }
+  .subject-title{
+    font-size: 18px;
+    font-weight:bold;
+    margin: 22px 0 12px;
+    padding-bottom:6px;
+    border-bottom: 3px solid #ddd;
+  }
+  .subject-title.science{ color:#2c5c8a; border-color:#bcd7ee; }
+  .subject-title.society{ color:#a05a20; border-color:#f0d3ae; }
+
+  .field-heading{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:15px;
+    font-weight:bold;
+    margin: 16px 0 10px;
+    color:#444;
+  }
+  .field-heading .fi-badge{
+    width:26px; height:26px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    background: var(--fc-bg);
+  }
+  .field-heading .fi-count{
+    font-weight:normal;
+    color:#999;
+    font-size:13px;
+  }
+
   .grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
     gap: 16px;
+    margin-bottom: 6px;
   }
   .card{
     background:#fff;
     border-radius: 14px;
-    padding: 18px 20px;
+    padding: 14px 18px 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,.08);
     border:1px solid #eee;
+    border-top: 4px solid var(--fc, #ccc);
+    position:relative;
+  }
+  .card-top{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom: 6px;
+  }
+  .card-top .fi-badge{
+    width:24px; height:24px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px;
+    background: var(--fc-bg);
+    flex-shrink:0;
+  }
+  .card-top .fi-label{
+    font-size:12px;
+    font-weight:bold;
+    color: var(--fc);
   }
   .card h2{
     margin: 0 0 4px;
@@ -63,412 +215,269 @@
     color:#333;
   }
   .card a:hover{ opacity:.85; }
+
+  .empty-state{
+    color:#999;
+    font-size:14px;
+    padding: 24px 4px;
+    text-align:center;
+  }
 </style>
 </head>
 <body>
   <h1>ゲーム型授業 一覧</h1>
   <p class="lead">画面をタップして遊ぶだけで、じゅぎょう画面が開きます。</p>
-  <div class="grid">
+  <div class="stats" id="statsRow"></div>
 
-    <div class="card">
-      <h2>月よみ堂</h2>
-      <div class="meta">月の満ち欠け ／ 理科小6</div>
-      <a class="main" href="tsukiyomido.html">じゅぎょう画面</a>
-      <a class="sheet" href="tsukiyomido-sheet.html">きろくシート</a>
+  <div class="controls">
+    <div class="search-row">
+      <input type="search" id="searchBox" placeholder="キーワードで検索（例：歴史、電気、小6）">
     </div>
 
-    <div class="card">
-      <h2>まほう薬屋ほしずく</h2>
-      <div class="meta">もののとけ方 ／ 理科小5</div>
-      <a class="main" href="mahou.html">じゅぎょう画面</a>
-      <a class="sheet" href="mahou-sheet.html">きろくシート</a>
+    <div class="row-label">教科</div>
+    <div class="chiprow" id="subjectTabs"></div>
+
+    <div id="fieldRowWrap">
+      <div class="row-label">分野</div>
+      <div class="chiprow" id="fieldChips"></div>
     </div>
 
-    <div class="card">
-      <h2>ひだまり探偵社</h2>
-      <div class="meta">地図の見方 ／ 社会小4</div>
-      <a class="main" href="hidamari.html">じゅぎょう画面</a>
-      <a class="sheet" href="hidamari-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>おなかの探検隊</h2>
-      <div class="meta">消化 ／ 理科小6</div>
-      <a class="main" href="onaka.html">じゅぎょう画面</a>
-      <a class="sheet" href="onaka-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>星めぐりの塔</h2>
-      <div class="meta">星の動き ／ 理科小4</div>
-      <a class="main" href="hoshimeguri.html">じゅぎょう画面</a>
-      <a class="sheet" href="hoshimeguri-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>みずの旅</h2>
-      <div class="meta">水はどこから ／ 社会小4</div>
-      <a class="main" href="mizunotabi.html">じゅぎょう画面</a>
-      <a class="sheet" href="mizunotabi-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ながれる水の探検隊</h2>
-      <div class="meta">流れる水のはたらき ／ 理科小5</div>
-      <a class="main" href="nagareru.html">じゅぎょう画面</a>
-      <a class="sheet" href="nagareru-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ちそう発掘隊</h2>
-      <div class="meta">大地のつくり・地層 ／ 理科小6</div>
-      <a class="main" href="chisou.html">じゅぎょう画面</a>
-      <a class="sheet" href="chisou-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ふりこの間</h2>
-      <div class="meta">振り子 ／ 理科小5</div>
-      <a class="main" href="furiko.html">じゅぎょう画面</a>
-      <a class="sheet" href="furiko-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>めばえラボ</h2>
-      <div class="meta">植物の発芽 ／ 理科小5</div>
-      <a class="main" href="mebae.html">じゅぎょう画面</a>
-      <a class="sheet" href="mebae-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>てこの工房</h2>
-      <div class="meta">てこのはたらき ／ 理科小6</div>
-      <a class="main" href="teko.html">じゅぎょう画面</a>
-      <a class="sheet" href="teko-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>みのりの村</h2>
-      <div class="meta">お米づくり（食料生産） ／ 社会小5</div>
-      <a class="main" href="kome.html">じゅぎょう画面</a>
-      <a class="sheet" href="kome-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>大仏づくり工房</h2>
-      <div class="meta">奈良の大仏・歴史 ／ 社会小6</div>
-      <a class="main" href="daibutsu.html">じゅぎょう画面</a>
-      <a class="sheet" href="daibutsu-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>かさねの宮</h2>
-      <div class="meta">貴族の暮らしと国風文化・歴史 ／ 社会小6</div>
-      <a class="main" href="kasane.html">じゅぎょう画面</a>
-      <a class="sheet" href="kasane-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ツイジの砦</h2>
-      <div class="meta">元寇と博多の防塁・歴史 ／ 社会小6</div>
-      <a class="main" href="genko.html">じゅぎょう画面</a>
-      <a class="sheet" href="genko-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>しおさいの湊</h2>
-      <div class="meta">水産業（とる漁業・育てる漁業） ／ 社会小5</div>
-      <a class="main" href="shiosai.html">じゅぎょう画面</a>
-      <a class="sheet" href="shiosai-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ひとつぶ村</h2>
-      <div class="meta">せんきょと一票のねうち（公民） ／ 社会小6</div>
-      <a class="main" href="hitotsubu.html">じゅぎょう画面</a>
-      <a class="sheet" href="hitotsubu-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ぎんしゃの庭</h2>
-      <div class="meta">金閣・銀閣と室町の文化・歴史 ／ 社会小6</div>
-      <a class="main" href="muromachi.html">じゅぎょう画面</a>
-      <a class="sheet" href="muromachi-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ボルトの町工場</h2>
-      <div class="meta">自動車をつくる工業 ／ 社会小5</div>
-      <a class="main" href="jidosha.html">じゅぎょう画面</a>
-      <a class="sheet" href="jidosha-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ヒナワの陣</h2>
-      <div class="meta">戦国時代・鉄砲伝来〜長篠の戦い・歴史 ／ 社会小6</div>
-      <a class="main" href="sengoku.html">じゅぎょう画面</a>
-      <a class="sheet" href="sengoku-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ドグウの丘</h2>
-      <div class="meta">縄文・弥生時代・むらからくにへ・歴史 ／ 社会小6</div>
-      <a class="main" href="jomon.html">じゅぎょう画面</a>
-      <a class="sheet" href="jomon-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ケヤリの道</h2>
-      <div class="meta">江戸幕府と参勤交代・歴史 ／ 社会小6</div>
-      <a class="main" href="edo.html">じゅぎょう画面</a>
-      <a class="sheet" href="edo-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>オウギの島</h2>
-      <div class="meta">鎖国と貿易統制・歴史 ／ 社会小6</div>
-      <a class="main" href="sakoku.html">じゅぎょう画面</a>
-      <a class="sheet" href="sakoku-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>テンビンの間</h2>
-      <div class="meta">国の政治のしくみ・三権分立（公民） ／ 社会小6</div>
-      <a class="main" href="sanken.html">じゅぎょう画面</a>
-      <a class="sheet" href="sanken-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>マルの蔵</h2>
-      <div class="meta">税金とくらし（公民） ／ 社会小6</div>
-      <a class="main" href="zeikin.html">じゅぎょう画面</a>
-      <a class="sheet" href="zeikin-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ミハシラの杜</h2>
-      <div class="meta">日本国憲法と基本的人権（公民） ／ 社会小6</div>
-      <a class="main" href="mihashira.html">じゅぎょう画面</a>
-      <a class="sheet" href="mihashira-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ムスビの丘</h2>
-      <div class="meta">国際社会とSDGs（公民） ／ 社会小6</div>
-      <a class="main" href="musubi.html">じゅぎょう画面</a>
-      <a class="sheet" href="musubi-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ケムリの港</h2>
-      <div class="meta">黒船来航と開国・歴史 ／ 社会小6</div>
-      <a class="main" href="kurofune.html">じゅぎょう画面</a>
-      <a class="sheet" href="kurofune-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ミズヤの里</h2>
-      <div class="meta">低い土地のくらし・輪中 ／ 社会小4〜5</div>
-      <a class="main" href="mizuya.html">じゅぎょう画面</a>
-      <a class="sheet" href="mizuya-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>カンラの畑</h2>
-      <div class="meta">高い土地のくらし・高原野菜 ／ 社会小5</div>
-      <a class="main" href="kanra.html">じゅぎょう画面</a>
-      <a class="sheet" href="kanra-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>シーサの家</h2>
-      <div class="meta">あたたかい土地のくらし・沖縄県 ／ 社会小5</div>
-      <a class="main" href="okinawa.html">じゅぎょう画面</a>
-      <a class="sheet" href="okinawa-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>リュウヒョウの岸</h2>
-      <div class="meta">寒い土地のくらし・北海道 ／ 社会小5</div>
-      <a class="main" href="ryuhyo.html">じゅぎょう画面</a>
-      <a class="sheet" href="ryuhyo-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ネンリンの杜</h2>
-      <div class="meta">森林とわたしたちのくらし ／ 社会小5</div>
-      <a class="main" href="nenrin.html">じゅぎょう画面</a>
-      <a class="sheet" href="nenrin-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ホシゾラの街</h2>
-      <div class="meta">環境を守る・公害 ／ 社会小5</div>
-      <a class="main" href="hoshizora.html">じゅぎょう画面</a>
-      <a class="sheet" href="hoshizora-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ガイトウの町</h2>
-      <div class="meta">明治維新と文明開化・歴史 ／ 社会小6</div>
-      <a class="main" href="gaitou.html">じゅぎょう画面</a>
-      <a class="sheet" href="gaitou-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>カンムリの都</h2>
-      <div class="meta">聖徳太子と大化の改新・歴史 ／ 社会小6</div>
-      <a class="main" href="kanmuri.html">じゅぎょう画面</a>
-      <a class="sheet" href="kanmuri-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>キリドオシの関</h2>
-      <div class="meta">鎌倉幕府の成立・歴史 ／ 社会小6</div>
-      <a class="main" href="kiridoshi.html">じゅぎょう画面</a>
-      <a class="sheet" href="kiridoshi-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ニスジの都</h2>
-      <div class="meta">室町幕府の成立と南北朝・歴史 ／ 社会小6</div>
-      <a class="main" href="nisuji.html">じゅぎょう画面</a>
-      <a class="sheet" href="nisuji-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>タイトウの丘</h2>
-      <div class="meta">日清・日露戦争と条約改正・歴史 ／ 社会小6</div>
-      <a class="main" href="taitou.html">じゅぎょう画面</a>
-      <a class="sheet" href="taitou-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ズキンの家</h2>
-      <div class="meta">昭和の戦争と銃後のくらし・歴史 ／ 社会小6</div>
-      <a class="main" href="zukin.html">じゅぎょう画面</a>
-      <a class="sheet" href="zukin-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ホナミの田</h2>
-      <div class="meta">戦後の民主化と復興・歴史 ／ 社会小6</div>
-      <a class="main" href="honami.html">じゅぎょう画面</a>
-      <a class="sheet" href="honami-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>マスの野</h2>
-      <div class="meta">秀吉の全国統一・太閤検地と刀狩・歴史 ／ 社会小6</div>
-      <a class="main" href="masu.html">じゅぎょう画面</a>
-      <a class="sheet" href="masu-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ニシキの座</h2>
-      <div class="meta">江戸の産業と文化・元禄文化と化政文化・歴史 ／ 社会小6</div>
-      <a class="main" href="nishiki.html">じゅぎょう画面</a>
-      <a class="sheet" href="nishiki-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>タワラの辻</h2>
-      <div class="meta">大正デモクラシー・米騒動と普通選挙法・歴史 ／ 社会小6</div>
-      <a class="main" href="tawara.html">じゅぎょう画面</a>
-      <a class="sheet" href="tawara-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ハヤテの駅</h2>
-      <div class="meta">高度経済成長と現代・東京オリンピックと新幹線・歴史 ／ 社会小6</div>
-      <a class="main" href="hayate.html">じゅぎょう画面</a>
-      <a class="sheet" href="hayate-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>アオバの葉かげ</h2>
-      <div class="meta">チョウの育ち方（昆虫の成長） ／ 理科小3</div>
-      <a class="main" href="chou.html">じゅぎょう画面</a>
-      <a class="sheet" href="chou-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>いろみずの研究所</h2>
-      <div class="meta">水よう液の性質（酸性・中性・アルカリ性） ／ 理科小6</div>
-      <a class="main" href="iromizu.html">じゅぎょう画面</a>
-      <a class="sheet" href="iromizu-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ウズの実験室</h2>
-      <div class="meta">電磁石のひみつ（電流のはたらき） ／ 理科小5</div>
-      <a class="main" href="uzu.html">じゅぎょう画面</a>
-      <a class="sheet" href="uzu-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>カガミの丘</h2>
-      <div class="meta">光のひみつ（光の性質） ／ 理科小3</div>
-      <a class="main" href="kagami.html">じゅぎょう画面</a>
-      <a class="sheet" href="kagami-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>カゲロウの原</h2>
-      <div class="meta">影と太陽のひみつ（太陽と地面のようす） ／ 理科小3</div>
-      <a class="main" href="kagerou.html">じゅぎょう画面</a>
-      <a class="sheet" href="kagerou-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ダンダンの実験場</h2>
-      <div class="meta">温度と体積・あたたまり方 ／ 理科小4</div>
-      <a class="main" href="dandan.html">じゅぎょう画面</a>
-      <a class="sheet" href="dandan-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>シズクの淵</h2>
-      <div class="meta">動物のたんじょう（メダカ・人） ／ 理科小5</div>
-      <a class="main" href="shizuku.html">じゅぎょう画面</a>
-      <a class="sheet" href="shizuku-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ホムラの炉</h2>
-      <div class="meta">ものの燃え方と空気 ／ 理科小6</div>
-      <a class="main" href="homura.html">じゅぎょう画面</a>
-      <a class="sheet" href="homura-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>ミャクの森</h2>
-      <div class="meta">植物の養分と水の通り道 ／ 理科小6</div>
-      <a class="main" href="myaku.html">じゅぎょう画面</a>
-      <a class="sheet" href="myaku-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>コドウの丘</h2>
-      <div class="meta">人の体のつくりと働き（呼吸・血液循環） ／ 理科小6</div>
-      <a class="main" href="kodou.html">じゅぎょう画面</a>
-      <a class="sheet" href="kodou-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>カザミの丘</h2>
-      <div class="meta">天気の変化（雲と天気・台風） ／ 理科小5</div>
-      <a class="main" href="kazami.html">じゅぎょう画面</a>
-      <a class="sheet" href="kazami-sheet.html">きろくシート</a>
-    </div>
-
-    <div class="card">
-      <h2>クルルの発電所</h2>
-      <div class="meta">電気の利用（発電・蓄電・センサー） ／ 理科小6</div>
-      <a class="main" href="kururu.html">じゅぎょう画面</a>
-      <a class="sheet" href="kururu-sheet.html">きろくシート</a>
-    </div>
-
+    <div class="row-label">学年</div>
+    <div class="chiprow grade-row" id="gradeChips"></div>
   </div>
+
+  <div class="result-count" id="resultCount"></div>
+  <div id="sections"></div>
+
+<script>
+const ITEMS = [
+  {t:"月よみ堂", u:"月の満ち欠け", subj:"science", f:"tenmon", g:[6], gt:"小6", slug:"tsukiyomido"},
+  {t:"まほう薬屋ほしずく", u:"もののとけ方", subj:"science", f:"busshitsu", g:[5], gt:"小5", slug:"mahou"},
+  {t:"ひだまり探偵社", u:"地図の見方", subj:"society", f:"chiri", g:[4], gt:"小4", slug:"hidamari"},
+  {t:"おなかの探検隊", u:"消化", subj:"science", f:"jintai", g:[6], gt:"小6", slug:"onaka"},
+  {t:"星めぐりの塔", u:"星の動き", subj:"science", f:"tenmon", g:[4], gt:"小4", slug:"hoshimeguri"},
+  {t:"みずの旅", u:"水はどこから", subj:"society", f:"chiri", g:[4], gt:"小4", slug:"mizunotabi"},
+  {t:"ながれる水の探検隊", u:"流れる水のはたらき", subj:"science", f:"chigaku", g:[5], gt:"小5", slug:"nagareru"},
+  {t:"ちそう発掘隊", u:"大地のつくり・地層", subj:"science", f:"chigaku", g:[6], gt:"小6", slug:"chisou"},
+  {t:"ふりこの間", u:"振り子", subj:"science", f:"rikigaku", g:[5], gt:"小5", slug:"furiko"},
+  {t:"めばえラボ", u:"植物の発芽", subj:"science", f:"seimei", g:[5], gt:"小5", slug:"mebae"},
+  {t:"てこの工房", u:"てこのはたらき", subj:"science", f:"rikigaku", g:[6], gt:"小6", slug:"teko"},
+  {t:"みのりの村", u:"お米づくり（食料生産）", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"kome"},
+  {t:"大仏づくり工房", u:"奈良の大仏・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"daibutsu"},
+  {t:"かさねの宮", u:"貴族の暮らしと国風文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kasane"},
+  {t:"ツイジの砦", u:"元寇と博多の防塁・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"genko"},
+  {t:"しおさいの湊", u:"水産業（とる漁業・育てる漁業）", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"shiosai"},
+  {t:"ひとつぶ村", u:"せんきょと一票のねうち（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"hitotsubu"},
+  {t:"ぎんしゃの庭", u:"金閣・銀閣と室町の文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"muromachi"},
+  {t:"ボルトの町工場", u:"自動車をつくる工業", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"jidosha"},
+  {t:"ヒナワの陣", u:"戦国時代・鉄砲伝来〜長篠の戦い・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"sengoku"},
+  {t:"ドグウの丘", u:"縄文・弥生時代・むらからくにへ・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"jomon"},
+  {t:"ケヤリの道", u:"江戸幕府と参勤交代・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"edo"},
+  {t:"オウギの島", u:"鎖国と貿易統制・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"sakoku"},
+  {t:"テンビンの間", u:"国の政治のしくみ・三権分立（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"sanken"},
+  {t:"マルの蔵", u:"税金とくらし（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"zeikin"},
+  {t:"ミハシラの杜", u:"日本国憲法と基本的人権（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"mihashira"},
+  {t:"ムスビの丘", u:"国際社会とSDGs（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"musubi"},
+  {t:"ケムリの港", u:"黒船来航と開国・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kurofune"},
+  {t:"ミズヤの里", u:"低い土地のくらし・輪中", subj:"society", f:"chiri", g:[4,5], gt:"小4〜5", slug:"mizuya"},
+  {t:"カンラの畑", u:"高い土地のくらし・高原野菜", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"kanra"},
+  {t:"シーサの家", u:"あたたかい土地のくらし・沖縄県", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"okinawa"},
+  {t:"リュウヒョウの岸", u:"寒い土地のくらし・北海道", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"ryuhyo"},
+  {t:"ネンリンの杜", u:"森林とわたしたちのくらし", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"nenrin"},
+  {t:"ホシゾラの街", u:"環境を守る・公害", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"hoshizora"},
+  {t:"ガイトウの町", u:"明治維新と文明開化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"gaitou"},
+  {t:"カンムリの都", u:"聖徳太子と大化の改新・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kanmuri"},
+  {t:"キリドオシの関", u:"鎌倉幕府の成立・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kiridoshi"},
+  {t:"ニスジの都", u:"室町幕府の成立と南北朝・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"nisuji"},
+  {t:"タイトウの丘", u:"日清・日露戦争と条約改正・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"taitou"},
+  {t:"ズキンの家", u:"昭和の戦争と銃後のくらし・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"zukin"},
+  {t:"ホナミの田", u:"戦後の民主化と復興・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"honami"},
+  {t:"マスの野", u:"秀吉の全国統一・太閤検地と刀狩・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"masu"},
+  {t:"ニシキの座", u:"江戸の産業と文化・元禄文化と化政文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"nishiki"},
+  {t:"タワラの辻", u:"大正デモクラシー・米騒動と普通選挙法・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"tawara"},
+  {t:"ハヤテの駅", u:"高度経済成長と現代・東京オリンピックと新幹線・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"hayate"},
+  {t:"アオバの葉かげ", u:"チョウの育ち方（昆虫の成長）", subj:"science", f:"seimei", g:[3], gt:"小3", slug:"chou"},
+  {t:"いろみずの研究所", u:"水よう液の性質（酸性・中性・アルカリ性）", subj:"science", f:"busshitsu", g:[6], gt:"小6", slug:"iromizu"},
+  {t:"ウズの実験室", u:"電磁石のひみつ（電流のはたらき）", subj:"science", f:"energy", g:[5], gt:"小5", slug:"uzu"},
+  {t:"カガミの丘", u:"光のひみつ（光の性質）", subj:"science", f:"energy", g:[3], gt:"小3", slug:"kagami"},
+  {t:"カゲロウの原", u:"影と太陽のひみつ（太陽と地面のようす）", subj:"science", f:"tenmon", g:[3], gt:"小3", slug:"kagerou"},
+  {t:"ダンダンの実験場", u:"温度と体積・あたたまり方", subj:"science", f:"ryushi", g:[4], gt:"小4", slug:"dandan"},
+  {t:"シズクの淵", u:"動物のたんじょう（メダカ・人）", subj:"science", f:"seimei", g:[5], gt:"小5", slug:"shizuku"},
+  {t:"ホムラの炉", u:"ものの燃え方と空気", subj:"science", f:"ryushi", g:[6], gt:"小6", slug:"homura"},
+  {t:"ミャクの森", u:"植物の養分と水の通り道", subj:"science", f:"seimei", g:[6], gt:"小6", slug:"myaku"},
+  {t:"コドウの丘", u:"人の体のつくりと働き（呼吸・血液循環）", subj:"science", f:"jintai", g:[6], gt:"小6", slug:"kodou"},
+  {t:"カザミの丘", u:"天気の変化（雲と天気・台風）", subj:"science", f:"kisho", g:[5], gt:"小5", slug:"kazami"},
+  {t:"クルルの発電所", u:"電気の利用（発電・蓄電・センサー）", subj:"science", f:"energy", g:[6], gt:"小6", slug:"kururu"},
+];
+
+const SUBJECT_LABEL = {science:"理科", society:"社会"};
+
+const FIELD_INFO = {
+  tenmon:    {label:"天文",     icon:"🌙", fc:"#2c4a7c", bg:"#e4ecf7"},
+  busshitsu: {label:"物質",     icon:"🧪", fc:"#6a3f96", bg:"#ede3f7"},
+  jintai:    {label:"人体",     icon:"❤️", fc:"#b83b52", bg:"#fbe4e8"},
+  chigaku:   {label:"地学",     icon:"🪨", fc:"#7c5a2e", bg:"#f3e9d8"},
+  rikigaku:  {label:"力学",     icon:"⚙️", fc:"#4a525c", bg:"#e7e9eb"},
+  seimei:    {label:"生命",     icon:"🌱", fc:"#3f8a52", bg:"#e3f3e6"},
+  energy:    {label:"エネルギー", icon:"⚡", fc:"#a8790b", bg:"#fbf1d6"},
+  ryushi:    {label:"粒子",     icon:"⚛️", fc:"#1f8a8a", bg:"#ddf3f3"},
+  kisho:     {label:"気象",     icon:"☁️", fc:"#3d7ab5", bg:"#e2eef8"},
+  rekishi:   {label:"歴史",     icon:"🏯", fc:"#8c3f3f", bg:"#f6e4e4"},
+  chiri:     {label:"地理",     icon:"🗾", fc:"#1f6e58", bg:"#ddf0ea"},
+  komin:     {label:"公民",     icon:"🏛️", fc:"#4a3f7c", bg:"#e9e4f5"},
+};
+const SCIENCE_FIELDS = ["tenmon","busshitsu","jintai","chigaku","rikigaku","seimei","energy","ryushi","kisho"];
+const SOCIETY_FIELDS = ["rekishi","chiri","komin"];
+const GRADES = [3,4,5,6];
+
+const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"" };
+
+const statsRow = document.getElementById("statsRow");
+const subjectTabsEl = document.getElementById("subjectTabs");
+const fieldChipsEl = document.getElementById("fieldChips");
+const fieldRowWrap = document.getElementById("fieldRowWrap");
+const gradeChipsEl = document.getElementById("gradeChips");
+const resultCountEl = document.getElementById("resultCount");
+const sectionsEl = document.getElementById("sections");
+const searchBox = document.getElementById("searchBox");
+
+function initStats(){
+  const scienceCount = ITEMS.filter(it=>it.subj==="science").length;
+  const societyCount = ITEMS.filter(it=>it.subj==="society").length;
+  statsRow.innerHTML = `
+    <span>全<b>${ITEMS.length}</b>作品</span>
+    <span>理科 <b>${scienceCount}</b></span>
+    <span>社会 <b>${societyCount}</b></span>
+  `;
+}
+
+function initSubjectTabs(){
+  const tabs = [
+    {key:"all", label:`すべて`},
+    {key:"science", label:`理科`},
+    {key:"society", label:`社会`},
+  ];
+  subjectTabsEl.innerHTML = tabs.map(tb=>
+    `<button type="button" class="tab-btn" data-subject="${tb.key}">${tb.label}</button>`
+  ).join("");
+  subjectTabsEl.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      state.subject = btn.dataset.subject;
+      state.fields.clear();
+      render();
+    });
+  });
+}
+
+function fieldsForCurrentSubject(){
+  if(state.subject === "science") return SCIENCE_FIELDS;
+  if(state.subject === "society") return SOCIETY_FIELDS;
+  return [...SCIENCE_FIELDS, ...SOCIETY_FIELDS];
+}
+
+function renderFieldChips(){
+  const fields = fieldsForCurrentSubject();
+  fieldChipsEl.innerHTML = fields.map(fk=>{
+    const info = FIELD_INFO[fk];
+    const active = state.fields.has(fk) ? "active" : "";
+    return `<button type="button" class="chip ${active}" data-field="${fk}" style="--chip-bg:${info.bg};--chip-fg:${info.fc}">${info.icon} ${info.label}</button>`;
+  }).join("");
+  fieldChipsEl.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const fk = btn.dataset.field;
+      if(state.fields.has(fk)) state.fields.delete(fk);
+      else state.fields.add(fk);
+      render();
+    });
+  });
+}
+
+function initGradeChips(){
+  gradeChipsEl.innerHTML = GRADES.map(g=>
+    `<button type="button" class="chip" data-grade="${g}">小${g}</button>`
+  ).join("");
+  gradeChipsEl.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const g = Number(btn.dataset.grade);
+      if(state.grades.has(g)) state.grades.delete(g);
+      else state.grades.add(g);
+      render();
+    });
+  });
+}
+
+function cardHTML(it){
+  const info = FIELD_INFO[it.f];
+  return `
+    <div class="card" style="--fc:${info.fc}">
+      <div class="card-top">
+        <span class="fi-badge" style="--fc-bg:${info.bg}">${info.icon}</span>
+        <span class="fi-label">${info.label}</span>
+      </div>
+      <h2>${it.t}</h2>
+      <div class="meta">${it.u} ／ ${SUBJECT_LABEL[it.subj]}${it.gt}</div>
+      <a class="main" href="${it.slug}.html">じゅぎょう画面</a>
+      <a class="sheet" href="${it.slug}-sheet.html">きろくシート</a>
+    </div>`;
+}
+
+function matchesFilter(it){
+  if(state.subject !== "all" && it.subj !== state.subject) return false;
+  if(state.fields.size > 0 && !state.fields.has(it.f)) return false;
+  if(state.grades.size > 0 && !it.g.some(g=>state.grades.has(g))) return false;
+  if(state.keyword){
+    const hay = `${it.t} ${it.u} ${SUBJECT_LABEL[it.subj]} ${it.gt} ${FIELD_INFO[it.f].label}`;
+    if(!hay.includes(state.keyword)) return false;
+  }
+  return true;
+}
+
+function render(){
+  // subject tab active state
+  subjectTabsEl.querySelectorAll("button").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.subject === state.subject);
+  });
+  fieldRowWrap.style.display = "block";
+  renderFieldChips();
+  gradeChipsEl.querySelectorAll("button").forEach(btn=>{
+    btn.classList.toggle("active", state.grades.has(Number(btn.dataset.grade)));
+  });
+
+  const filtered = ITEMS.filter(matchesFilter);
+  resultCountEl.textContent = `全${ITEMS.length}作品中 ${filtered.length}作品を表示`;
+
+  const subjectOrder = state.subject === "all" ? ["science","society"] : [state.subject];
+  let html = "";
+  subjectOrder.forEach(subj=>{
+    const fieldOrder = subj === "science" ? SCIENCE_FIELDS : SOCIETY_FIELDS;
+    const subjItems = filtered.filter(it=>it.subj===subj);
+    if(subjItems.length === 0) return;
+    html += `<div class="subject-block"><div class="subject-title ${subj}">${SUBJECT_LABEL[subj]}（${subjItems.length}）</div>`;
+    fieldOrder.forEach(fk=>{
+      const items = subjItems.filter(it=>it.f===fk);
+      if(items.length === 0) return;
+      const info = FIELD_INFO[fk];
+      html += `<div class="field-heading"><span class="fi-badge" style="--fc-bg:${info.bg}">${info.icon}</span>${info.label}<span class="fi-count">（${items.length}）</span></div>`;
+      html += `<div class="grid">${items.map(cardHTML).join("")}</div>`;
+    });
+    html += `</div>`;
+  });
+
+  if(filtered.length === 0){
+    html = `<div class="empty-state">条件に合う作品が見つかりませんでした。検索や絞り込みを変えてみてください。</div>`;
+  }
+  sectionsEl.innerHTML = html;
+}
+
+searchBox.addEventListener("input", ()=>{
+  state.keyword = searchBox.value.trim();
+  render();
+});
+
+initStats();
+initSubjectTabs();
+initGradeChips();
+render();
+</script>
 </body>
 </html>
