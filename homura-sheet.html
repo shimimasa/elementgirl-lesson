@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <title>ホムラの炉 きろくノート（A4印刷用）</title>
 <style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
   @page { size: A4 portrait; margin: 10mm; }
   * { box-sizing: border-box; }
   body {
@@ -93,6 +98,7 @@
 </head>
 <body>
 <div id="printBar">
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
   <button onclick="window.print()">🖨 いんさつする</button>
   <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
 </div>

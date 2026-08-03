@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ながれる水の探検隊 — 流れる水のはたらき たいけん</title>
 <style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
   * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
   html, body { height: 100%; margin: 0; overflow: hidden; }
   body {
@@ -279,6 +290,7 @@
 })();
 </script>
 
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
 <header>
   <div id="logo">🏞 ながれる<ruby>水<rt>みず</rt></ruby>の<ruby>探検隊<rt>たんけんたい</rt></ruby><small>— <ruby>流<rt>なが</rt></ruby>れる<ruby>水<rt>みず</rt></ruby>のはたらき たいけん —</small></div>
   <div id="badges">
