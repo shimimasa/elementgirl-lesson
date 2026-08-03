@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>カザミの丘 — 雲と天気・台風 たいけん</title>
+<style>
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6fb 0%, #cfe7f5 45%, #a9d3e8 100%);
+    color: #12324a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #0d47a1; text-shadow: 0 0 14px rgba(13, 71, 161, .2);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #2f7ab0; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #d7ecf7; border: 2px solid #a3cbe0;
+    font-size: clamp(16px, 1.8vw, 26px); color: #8fb9d0;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #64b5f6, #0d47a1);
+    border-color: #08306b; color: #f0f8ff;
+    box-shadow: 0 0 16px rgba(13, 71, 161, .6);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #f5fbff 0%, #bfe0f0 70%, #8ec3dc 100%);
+    border: 3px solid #8fbcd4;
+    box-shadow: inset 0 0 40px rgba(40, 90, 130, .16), 0 4px 18px rgba(20, 50, 80, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #1a4a6e; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #0d47a1; color: #f0f8ff; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(10, 40, 70, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(140, 180, 210, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #90caf9; cursor: pointer;
+    background: linear-gradient(180deg, #42a5f5, #1565c0); color: #fff;
+    box-shadow: 0 3px 0 #08306b; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.warn { background: linear-gradient(180deg, #ff8a50, #e65100); border-color: #ffcc80; box-shadow: 0 3px 0 #8a3200; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #42a5f5; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(20, 50, 80, .28), inset 0 0 24px rgba(40, 90, 130, .14);
+    flex-shrink: 0; background: #eaf6fb;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #3a6f8f;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(17px, 1.9vw, 26px);
+    color: #0d47a1; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f6fbfe; border: 2px solid #cbe4f2; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #3a6f8f; }
+  .mascot { width: 100%; animation: floaty 3.6s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #12324a;
+    border: 1.5px solid #cbe4f2;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #0d47a1; background: #d7ecf7; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fbfeff, #eaf6fb); color: #0d3a5c;
+    border: 2px solid #0d47a1; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #0d47a1; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #42a5f5, #1565c0); color: #f0f8ff;
+    box-shadow: 0 3px 0 #08306b, 0 5px 12px rgba(10, 40, 70, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #08306b; }
+  .btn.sub {
+    background: #d7ecf7; color: #14507a; box-shadow: 0 3px 0 #a8cfe0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #12324a; box-shadow: 0 3px 0 #c3dcec; font-weight: 400; border: 1.5px solid #cbe4f2; }
+  .btn.choice.picked { background: #d7ecf7; outline: 3px solid #42a5f5; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(15, 40, 60, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f6fbfe, #dcf0fa);
+    border: 3px solid #8fbcd4; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(10, 30, 50, .45);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #0d47a1; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #0d47a1; }
+  .panel .sub { color: #3a6f8f; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #12324a; border: 1.5px solid #cbe4f2; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #3a6f8f; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #12324a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cbe4f2; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #42a5f5; background: #eaf6fb; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #42a5f5; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #42a5f5;
+    color: #0d47a1; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #3a6f8f;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #d7ecf7; color: #14507a;
+    border: 1px solid #a3cbe0; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #bfe0f0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（2026-07-23／ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<header>
+  <div id="logo">🌀 カザミの丘<small>— 雲と天気・台風 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kumo" title="雲の観察">★</div>
+    <div class="badge" id="bd_m_ugoki" title="雲の動きと天気">★</div>
+    <div class="badge" id="bd_m_taifu" title="台風の強さ">★</div>
+    <div class="badge" id="bd_m_bousai" title="台風のそなえ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">カザミの丘</div>
+    <div id="locChip">カザミの丘</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🌬️ カザミスコープ 〜見えない空のようすを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
+            <ellipse cx="60" cy="106" rx="28" ry="6" fill="rgba(20,60,90,.16)"/>
+            <path d="M58 30 L64 10 L70 30 Z" fill="#1565c0" stroke="#08306b" stroke-width="1.6"/>
+            <circle cx="38" cy="68" r="22" fill="url(#kazamiGrad)" stroke="#0d47a1" stroke-width="2.2"/>
+            <circle cx="82" cy="66" r="24" fill="url(#kazamiGrad)" stroke="#0d47a1" stroke-width="2.2"/>
+            <circle cx="60" cy="52" r="30" fill="url(#kazamiGrad)" stroke="#0d47a1" stroke-width="2.2"/>
+            <defs>
+              <radialGradient id="kazamiGrad" cx="35%" cy="28%" r="75%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="55%" stop-color="#bfe3f7"/>
+                <stop offset="100%" stop-color="#5fa8d3"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="47" cy="52" r="6" fill="#fff"/>
+              <circle cx="73" cy="52" r="6" fill="#fff"/>
+              <circle cx="48" cy="53" r="3" fill="#0d3060"/>
+              <circle cx="74" cy="53" r="3" fill="#0d3060"/>
+            </g>
+            <ellipse cx="40" cy="64" rx="4" ry="2.6" fill="#ffb3ab" opacity=".75"/>
+            <ellipse cx="80" cy="64" rx="4" ry="2.6" fill="#ffb3ab" opacity=".75"/>
+            <path d="M50 66 Q60 74 70 66" stroke="#0d3060" fill="none" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+          <div class="catname">風を読む<ruby>精霊<rt>せいれい</rt></ruby> カザミ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌀 カザミの丘ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   カザミの丘 — 雲と天気・台風（小5理科・協力型・1ファイル）
+   雲の観察（発見型）→ 雲の動きと天気の変化（メイン操作・時間送り①〜⑦）→
+   台風の強さ（メイン操作・数値階段①〜⑦・山型の勢力変化）→
+   台風のそなえ（発見型）→ はかせ（本物の数値クイズ）。
+   数値：雲量0〜8=晴れ・9〜10=くもり、天気はおよそ西から東へ変化、
+   台風は最大風速およそ17.2m/s以上の熱帯低気圧、
+   強さの階級=強い(33〜44m/s未満)/非常に強い(44〜54m/s未満)/猛烈な(54m/s以上)、
+   台風は年間やく25個発生し8月が最多、南のあたたかい海上で生まれ北上後に東へ曲がる。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  tenki: ruby('天気', 'てんき'),
+  kumo: ruby('雲', 'くも'),
+  kumoryou: ruby('雲量', 'うんりょう'),
+  taifu: ruby('台風', 'たいふう'),
+  fuusoku: ruby('風速', 'ふうそく'),
+  nettei: ruby('熱帯低気圧', 'ねったいていきあつ'),
+  nishi: ruby('西', 'にし'),
+  higashi: ruby('東', 'ひがし'),
+  bousai: ruby('防災', 'ぼうさい'),
+  hinan: ruby('避難', 'ひなん'),
+  seirei: ruby('精霊', 'せいれい'),
+  hassei: ruby('発生', 'はっせい'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// 雲量の決め方：空全体を10として、0〜8=晴れ、9〜10=くもり（気象庁の天気の決め方）
+function kumoTenki(ryou) { return ryou <= 8 ? '晴れ' : 'くもり'; }
+
+// m_kumo：雲の観察カード（発見型）
+const CLOUD_CARDS = [
+  { key: 0, num: '①', ryou: 2, txt: '雲が すこしだけ。雲の量は<b>2</b>。0〜8だから、天気は「晴れ」。' },
+  { key: 1, num: '②', ryou: 5, txt: '雲が 空の半分くらい。雲の量は<b>5</b>。まだ 0〜8なので「晴れ」。' },
+  { key: 2, num: '③', ryou: 8, txt: '雲が だいぶ多い。雲の量は<b>8</b>。ギリギリ「晴れ」。' },
+  { key: 3, num: '④', ryou: 10, txt: '空いちめん 雲。雲の量は<b>10</b>。9〜10だから「くもり」。' },
+];
+
+// m_ugoki：雲の動きと天気の変化（メイン操作・時間送り①〜⑦）西→東
+// 地点：西=ふくおか(200) 中=おおさか(500) 東=とうきょう(800)、雲の半径=150
+const UGOKI_POINTS = [
+  { key: 'nishi', name: 'ふくおか', x: 160 },
+  { key: 'naka', name: 'おおさか', x: 500 },
+  { key: 'higashi', name: 'とうきょう', x: 840 },
+];
+const CLOUD_X_STEPS = [-80, 60, 200, 340, 480, 620, 760, 900, 1080]; // index0=スタート〜7=⑦
+const CLOUD_RADIUS = 150;
+function weatherAt(cloudX, ptX) {
+  const d = Math.abs(cloudX - ptX);
+  if (d < CLOUD_RADIUS * 0.55) return { icon: '🌧️', name: '雨・くもり' };
+  if (d < CLOUD_RADIUS) return { icon: '☁️', name: 'くもり' };
+  return { icon: '☀️', name: '晴れ' };
+}
+
+// m_taifu：台風の強さ（メイン操作・数値階段①〜⑦・山型の勢力変化、単位m/s）
+const TYPHOON_STEPS = [8, 15, 22, 35, 48, 40, 25, 14];
+function typhoonState(v) {
+  if (v < 17.2) return { key: 'low', label: '熱帯低気圧（まだ台風ではない）', txt: 'まだ 風が弱く、台風の 仲間入り前。' };
+  if (v < 33) return { key: 'typhoon', label: '台風', txt: '最大風速が17.2m/sをこえて、「台風」に なった！' };
+  if (v < 44) return { key: 'strong', label: '強い台風', txt: '風速33m/s以上、「強い」台風。' };
+  if (v < 54) return { key: 'vstrong', label: '非常に強い台風', txt: '風速44m/s以上、「非常に強い」台風。いちばん 勢力が強い！' };
+  return { key: 'violent', label: '猛烈な台風', txt: '風速54m/s以上、「猛烈な」台風。' };
+}
+
+// m_bousai：台風のそなえ（発見型）
+const BOUSAI_CARDS = [
+  { key: 0, num: '①', icon: '💨', name: '強い風', txt: 'かんばんや ものが 飛ばされることがある。外に出ない、窓から はなれる。' },
+  { key: 1, num: '②', icon: '🌧️', name: '大雨', txt: '川の水が あふれることがある。川や 地下に 近づかない。' },
+  { key: 2, num: '③', icon: '🌊', name: '高潮', txt: '海の水位が上がり 海岸近くが しん水することがある。海に 近づかない。' },
+  { key: 3, num: '④', icon: '🎒', name: 'そなえ', txt: '懐中電灯・水・食料を 用意し、早めに ひなんする じゅんびを しておく。' },
+];
+
+// ---------- はかせチャレンジ：本物の数値クイズ ----------
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', name: '台風は1年に何こくらい発生する？', icon: '🌀', txt: `台風は 1年間に やく<b>25こ</b> 発生している（1991〜2020年の平均）。そのうち 日本に 近づくのは やく11こ。` },
+  { key: 1, letter: 'い', name: '台風がいちばん多く発生する月は？', icon: '📅', txt: `いちばん多く 発生するのは <b>8月</b>（平均5.7こ）。ただし 日本に上陸する数は、9月の方が多い。` },
+  { key: 2, letter: 'う', name: '台風は、どこで生まれる？', icon: '🌊', txt: `台風は 日本の <b>南の あたたかい海上</b>（フィリピンの東の海上など）で 生まれる。海水が あたたかいほど 発達しやすい。` },
+  { key: 3, letter: 'え', name: '台風はどちらへ進むことが多い？', icon: '🧭', txt: `南で生まれた台風は、はじめ <b>北</b>へ 向かい、そのあと 上空の風（へん西風）に のって <b>東寄り</b>へ 曲がることが多い。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kumo',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  // m_kumo
+  cloudFound: new Set(),
+  // m_ugoki
+  ugokiIdx: 0,
+  ugokiIdxDisplay: 0,
+  // m_taifu
+  taifuIdx: 0,
+  taifuIdxDisplay: 0,
+  // m_bousai
+  bousaiFound: new Set(),
+  // hakase
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sKaze = () => { tone(220, 0, 0.22, 'sawtooth', 0.05); tone(180, 0.14, 0.3, 'sawtooth', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgSky(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f5fbff'); g.addColorStop(1, '#8ec3dc');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+function drawCloudPuff(px, py, r, alpha) {
+  gctx.fillStyle = `rgba(230,240,246,${alpha})`;
+  gctx.strokeStyle = `rgba(140,170,190,${alpha})`; gctx.lineWidth = 1.6;
+  [[-0.7, 0, 0.6], [0.5, -0.25, 0.7], [0, 0.15, 0.85], [1.1, 0.1, 0.5], [-1.3, 0.15, 0.45]].forEach(([dx, dy, s]) => {
+    gctx.beginPath(); gctx.arc(px + dx * r, py + dy * r, r * s, 0, TAU); gctx.fill(); gctx.stroke();
+  });
+}
+
+// ---------- 1．雲の観察（発見型） ----------
+function drawKumoScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  const xs = [180, 400, 620, 840];
+  CLOUD_CARDS.forEach((c, i) => {
+    const found = S.cloudFound.has(c.key);
+    const px = xs[i], py = 300;
+    gctx.beginPath(); gctx.roundRect ? gctx.roundRect(X(px) - 70 * sc, Y(py) - 90 * sc, 140 * sc, 180 * sc, 16 * sc) : gctx.rect(X(px) - 70 * sc, Y(py) - 90 * sc, 140 * sc, 180 * sc);
+    gctx.fillStyle = found ? '#eaf6fb' : '#dcedf6';
+    gctx.fill(); gctx.strokeStyle = '#0d47a1'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    // 雲つぶを雲量分だけ描く（10マス）
+    const cols = 5, cellR = 11 * sc;
+    for (let k = 0; k < 10; k++) {
+      const cx2 = px - 44 + (k % cols) * 22, cy2 = py - 44 + Math.floor(k / cols) * 24;
+      gctx.beginPath(); gctx.arc(X(cx2), Y(cy2), cellR, 0, TAU);
+      gctx.fillStyle = found && k < c.ryou ? '#5fa8d3' : '#f0f6fa';
+      gctx.fill(); gctx.strokeStyle = '#8fbcd4'; gctx.lineWidth = 1 * sc; gctx.stroke();
+    }
+    gctx.fillStyle = '#0d47a1'; gctx.font = `700 ${24 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.num, X(px), Y(py + 46));
+    gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText(found ? `雲量${c.ryou}・${kumoTenki(c.ryou)}` : '？？？', X(px), Y(py + 72));
+  });
+  gctx.fillStyle = '#12324a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('①〜④をタッチして、空の雲の量をくらべよう', X(500), Y(70));
+}
+
+// ---------- 2．雲の動きと天気の変化（メイン操作・時間送り①〜⑦） ----------
+function drawUgokiScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  const cloudX = lerpArr(CLOUD_X_STEPS, S.ugokiIdxDisplay);
+  drawCloudPuff(X(cloudX), Y(200), 90 * sc, 0.92);
+  gctx.strokeStyle = '#5f8fa8'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(X(0), Y(430)); gctx.lineTo(X(1000), Y(430)); gctx.stroke();
+  UGOKI_POINTS.forEach(p => {
+    const wt = weatherAt(cloudX, p.x);
+    gctx.beginPath(); gctx.arc(X(p.x), Y(430), 8 * sc, 0, TAU); gctx.fillStyle = '#0d47a1'; gctx.fill();
+    gctx.font = `${54 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(wt.icon, X(p.x), Y(340));
+    gctx.fillStyle = '#12324a'; gctx.font = `700 ${16 * sc}px sans-serif`;
+    gctx.fillText(p.name, X(p.x), Y(470));
+    gctx.font = `700 ${13 * sc}px sans-serif`; gctx.fillStyle = '#0d47a1';
+    gctx.fillText(wt.name, X(p.x), Y(494));
+  });
+  gctx.fillStyle = '#12324a'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'left';
+  gctx.fillText(`${'にし'}`, X(30), Y(70));
+  gctx.textAlign = 'right';
+  gctx.fillText(`${'ひがし'}`, X(970), Y(70));
+  gctx.textAlign = 'center';
+  gctx.font = `700 ${17 * sc}px sans-serif`;
+  const idxNow = Math.round(S.ugokiIdxDisplay);
+  gctx.fillText(`${idxNow === 0 ? 'スタート' : NUMS[idxNow - 1]}　雲が 西から東へ 動いていく`, X(500), Y(40));
+}
+
+// ---------- 3．台風の強さ（メイン操作・数値階段①〜⑦・山型） ----------
+function drawTaifuScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  const v = lerpArr(TYPHOON_STEPS, S.taifuIdxDisplay);
+  const st = typhoonState(v);
+  const cx = 500, cy = 330;
+  const spin = performance.now() / 1000 * (1 + v / 30);
+  const rad = (60 + v * 1.6) * sc;
+  const col = st.key === 'violent' ? '#c62828' : st.key === 'vstrong' ? '#e65100' : st.key === 'strong' ? '#ef6c00' : st.key === 'typhoon' ? '#1565c0' : '#5f8fa8';
+  gctx.save();
+  gctx.translate(X(cx), Y(cy));
+  for (let arm = 0; arm < 3; arm++) {
+    gctx.beginPath();
+    for (let i = 0; i <= 40; i++) {
+      const a = spin + arm * (TAU / 3) + i * 0.22;
+      const r = rad * (i / 40);
+      const px = Math.cos(a) * r, py = Math.sin(a) * r;
+      if (i === 0) gctx.moveTo(px, py); else gctx.lineTo(px, py);
+    }
+    gctx.strokeStyle = col; gctx.lineWidth = 8 * sc; gctx.lineCap = 'round'; gctx.stroke();
+  }
+  gctx.beginPath(); gctx.arc(0, 0, 16 * sc, 0, TAU); gctx.fillStyle = '#fff'; gctx.fill();
+  gctx.strokeStyle = col; gctx.lineWidth = 3 * sc; gctx.stroke();
+  gctx.restore();
+  gctx.fillStyle = '#12324a'; gctx.font = `700 ${22 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const idxNow = Math.round(S.taifuIdxDisplay);
+  gctx.fillText(`${idxNow === 0 ? 'スタート' : NUMS[idxNow - 1]}　最大風速 ${Math.round(v)}m/s`, X(500), Y(55));
+  gctx.font = `700 ${18 * sc}px sans-serif`; gctx.fillStyle = col;
+  gctx.fillText(st.label, X(500), Y(430));
+  gctx.font = `700 ${14 * sc}px sans-serif`; gctx.fillStyle = '#12324a';
+  gctx.fillText(st.txt, X(500), Y(460));
+}
+
+// ---------- 4．台風のそなえ（発見型） ----------
+function drawBousaiScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  const xs = [180, 380, 620, 820];
+  BOUSAI_CARDS.forEach((c, i) => {
+    const done = S.bousaiFound.has(c.key);
+    const px = xs[i], py = 320;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1565c0' : '#dcedf6';
+    gctx.fill(); gctx.strokeStyle = '#0d47a1'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#12324a'; gctx.font = `700 ${12 * sc}px sans-serif`;
+    gctx.fillText(c.num + ' ' + c.name, X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#12324a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('台風が近づくと、どんなことが起きる？', X(500), Y(70));
+}
+
+// ---------- 5．はかせ：本物の数値クイズ ----------
+function drawHakaseScene(X, Y, sc) {
+  bgSky(X, Y, sc);
+  const xs = [180, 380, 620, 820];
+  HAKASE_POINTS.forEach((p, i) => {
+    const done = S.hakaseFound.has(p.key);
+    const px = xs[i], py = 320;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1565c0' : '#dcedf6';
+    gctx.fill(); gctx.strokeStyle = '#0d47a1'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(p.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#12324a'; gctx.font = `700 ${12 * sc}px sans-serif`;
+    gctx.fillText(p.letter + ' ' + p.name, X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#12324a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('空のむこうでは、こんなことが起きている', X(500), Y(70));
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kumo') drawKumoScene(X, Y, sc);
+  else if (S.scene === 'ugoki') drawUgokiScene(X, Y, sc);
+  else if (S.scene === 'taifu') drawTaifuScene(X, Y, sc);
+  else if (S.scene === 'bousai') drawBousaiScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- カザミスコープ（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f5fbff'); grd.addColorStop(1, '#b0d4e6');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'cloudgrid') {
+    drawCloudGrid(R, S.scope.ryou);
+    label(S.scope.label || '');
+  } else if (mode === 'wind') {
+    drawWindMeter(R, S.scope.v);
+    label(S.scope.label || '');
+  } else if (mode === 'point') {
+    sctx.fillStyle = '#0d47a1';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#64b5f655'); g2.addColorStop(1, 'rgba(100,181,246,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#0d47a1'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌀', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#0d47a1'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.09}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#12324a';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawCloudGrid(R, ryou) {
+    const cols = 5, rows = 2, cellSize = R * 0.28;
+    const startX = R - (cols - 1) * cellSize / 2, startY = R * 0.62 - (rows - 1) * cellSize / 2;
+    let idx = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const px = startX + c * cellSize, py = startY + r * cellSize;
+        sctx.beginPath(); sctx.arc(px, py, cellSize * 0.36, 0, TAU);
+        sctx.fillStyle = idx < ryou ? '#5fa8d3' : '#eaf6fb';
+        sctx.fill();
+        sctx.strokeStyle = '#0d47a1'; sctx.lineWidth = 1.4; sctx.stroke();
+        idx++;
+      }
+    }
+  }
+
+  function drawWindMeter(R, v) {
+    const cx = R, cy = R * 0.78, mr = R * 0.55;
+    const maxV = 60;
+    const frac = clamp(v / maxV, 0, 1);
+    sctx.lineWidth = R * 0.1; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.arc(cx, cy, mr, Math.PI, 0); sctx.strokeStyle = 'rgba(13,71,161,.18)'; sctx.stroke();
+    sctx.beginPath(); sctx.arc(cx, cy, mr, Math.PI, Math.PI + Math.PI * frac);
+    const col = v >= 54 ? '#c62828' : v >= 44 ? '#e65100' : v >= 33 ? '#ef6c00' : v >= 17.2 ? '#1565c0' : '#5f8fa8';
+    sctx.strokeStyle = col; sctx.stroke();
+    const ang = Math.PI + Math.PI * frac;
+    sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx + Math.cos(ang) * mr * 0.85, cy + Math.sin(ang) * mr * 0.85);
+    sctx.strokeStyle = '#12324a'; sctx.lineWidth = R * 0.03; sctx.stroke();
+    sctx.beginPath(); sctx.arc(cx, cy, R * 0.05, 0, TAU); sctx.fillStyle = '#12324a'; sctx.fill();
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#90caf9', '#42a5f5', '#0d47a1', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    kumo: '☁️ 雲の観察',
+    ugoki: '🌬️ 雲の動きと天気',
+    taifu: '🌀 台風の強さ',
+    bousai: '🎒 台風のそなえ',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🌀 カザミの丘 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'カザミの丘';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kumo', 'm_ugoki', 'm_taifu', 'm_bousai', 'hakase', 'ending', 'free'];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kumo', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌀☁️🌬️🎒</div>
+        <h1>カザミの丘</h1>
+        <div class="sub">〜 ${W.kumo}と ${W.tenki}・${W.taifu}の たいけん 〜</div>
+        <p class="talk">ようこそ！ わたしは 風を読む ${W.seirei}、<b>カザミ</b>。空を 見上げると、いつも ${W.kumo}が うごいているのに 気づくかな？<br>
+        じつは その ${W.kumo}の 動きから、あすの ${W.tenki}を 予想することが できるんだ。きょうは ${W.kumo}と ${W.tenki}、そして 大きな ${W.kumo}の かたまり「${W.taifu}」の ひみつを、いっしょに たしかめに いこう！</p>
+        <button class="btn" id="startBtn">たんけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">あすの ${W.tenki}を 予想するとき、いちばんの てがかりに なるのは どれだと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">📆</span><b>ア</b> 前の日と 同じ${W.tenki}だと 思えばよい</div>
+          <div class="vcard" data-v="1"><span class="vicon">☁️</span><b>イ</b> ${W.kumo}が どちらから 動いてくるかを 見る</div>
+          <div class="vcard" data-v="2"><span class="vicon">🎲</span><b>ウ</b> 当てずっぽうで 決める</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：雲の観察（発見型） ---
+  m_kumo: {
+    enter() {
+      Object.assign(S, { scene: 'kumo', scope: { type: 'idle' }, cloudFound: new Set() });
+      updateLoc();
+      setWish('☁️', `①〜④の 空の絵を タッチして、${W.kumoryou}（雲の量）を くらべよう。空全体を 10としたとき、雲は いくつ分かな？`);
+      say(`空全体の 広さを 10と 数えたとき、雲が どれくらい あるかで ${W.tenki}が 決まる。まずは 「0〜8なら 晴れ、9〜10なら くもり」という きまりを おぼえよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(CLOUD_CARDS.map(c => ({
+        label: c.num + ' ' + (S.cloudFound.has(c.key) ? `雲量${c.ryou}` : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.cloudFound.size >= CLOUD_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.cloudFound.add(c.key);
+      S.scope = { type: 'cloudgrid', ryou: c.ryou, label: `雲量${c.ryou}・${kumoTenki(c.ryou)}` };
+      scopeBurst();
+      say(`${c.num} ${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      setButtons([]);
+      say(`雲の量が 0〜8のとき、${W.tenki}は？`);
+      setButtons(choiceRow(['晴れ', 'くもり', '雨'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_kumo'); S.phase = 'done';
+        say(`せいかい！ 空全体を 10としたとき、雲の量が <b>0〜8なら 晴れ、9〜10なら くもり</b>。雲の量を 数えれば、いまの ${W.tenki}が わかるんだ。`);
+        setButtons([{ label: 'つぎへ（雲の動きと天気）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['晴れ', 'くもり', '雨'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：雲の動きと天気の変化（メイン操作・時間送り①〜⑦） ---
+  m_ugoki: {
+    enter() {
+      Object.assign(S, { scene: 'ugoki', ugokiIdx: 0, ugokiIdxDisplay: 0, scope: { type: 'wind', v: 0, label: 'ふくおか：晴れ' } });
+      updateLoc();
+      setWish('🌬️', `「すすめる」ボタンで 時こくを 進めて、${W.kumo}が ${W.nishi}から ${W.higashi}へ 動くようすと、3つの まちの ${W.tenki}が どう変わるかを 見よう。`);
+      say(`${W.kumo}は、いつも 同じ 向きに 動くわけではないけれど、日本の あたりでは よく <b>${W.nishi}から ${W.higashi}へ</b> 動いていく。3つの まちの ${W.tenki}を くらべてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.ugokiIdx >= CLOUD_X_STEPS.length - 1) { this.finish(); return; }
+      setControls([{ label: `⏭️ すすめる(${NUMS[S.ugokiIdx]})`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.ugokiIdx >= CLOUD_X_STEPS.length - 1) return;
+      setControls([]);
+      const fromV = S.ugokiIdx, toV = S.ugokiIdx + 1;
+      startTween(fromV, toV, 0.9, v => {
+        S.ugokiIdxDisplay = v;
+        const cx = lerpArr(CLOUD_X_STEPS, v);
+        const wt = weatherAt(cx, UGOKI_POINTS[0].x);
+        S.scope = { type: 'wind', v: 0, label: `ふくおか：${wt.name}` };
+      }, () => {
+        S.ugokiIdx++; S.ugokiIdxDisplay = S.ugokiIdx;
+        sTap(); sKaze();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑦まで、${W.kumo}が ${W.nishi}から ${W.higashi}へ 動くのを 見たね。ふくおか→おおさか→とうきょうの じゅんに ${W.tenki}が 変わったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      setButtons([]);
+      say(`あすの ${W.tenki}を 予想するとき、いちばんの てがかりに なるのは？`);
+      setButtons(choiceRow(['前の日と同じ天気だと思えばよい', '雲がどちらから動いてくるかを見る', '当てずっぽうで決める'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_ugoki'); S.phase = 'done';
+        say(`せいかい！ 日本付近では ${W.tenki}は およそ ${W.nishi}から ${W.higashi}へ 変わっていく。だから 「${W.nishi}の 今の ${W.tenki}」が「あすの じぶんの まちの ${W.tenki}」の ヒントに なるんだ。`);
+        setButtons([{ label: 'つぎへ（台風の強さ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['前の日と同じ天気だと思えばよい', '雲がどちらから動いてくるかを見る', '当てずっぽうで決める'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：台風の強さ（メイン操作・数値階段①〜⑦・山型） ---
+  m_taifu: {
+    enter() {
+      Object.assign(S, { scene: 'taifu', taifuIdx: 0, taifuIdxDisplay: 0, scope: { type: 'wind', v: TYPHOON_STEPS[0], label: typhoonState(TYPHOON_STEPS[0]).label } });
+      updateLoc();
+      setWish('🌀', `「すすめる」ボタンで ${W.taifu}の 一生を 進めて、${W.fuusoku}が どう 変わっていくかを 見よう。`);
+      say(`南の あたたかい 海で 生まれた ${W.nettei}は、育つと ${W.taifu}に なる。「すすめる」で、${W.taifu}が うまれてから 弱まるまでを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.taifuIdx >= TYPHOON_STEPS.length - 1) { this.finish(); return; }
+      setControls([{ label: `⏭️ すすめる(${NUMS[S.taifuIdx]})`, cls: 'warn', cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.taifuIdx >= TYPHOON_STEPS.length - 1) return;
+      setControls([]);
+      const fromV = S.taifuIdx, toV = S.taifuIdx + 1;
+      startTween(fromV, toV, 0.9, v => {
+        S.taifuIdxDisplay = v;
+        const val = lerpArr(TYPHOON_STEPS, v);
+        S.scope = { type: 'wind', v: val, label: `${Math.round(val)}m/s` };
+      }, () => {
+        S.taifuIdx++; S.taifuIdxDisplay = S.taifuIdx;
+        sTap(); sKaze();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑦まで、${W.taifu}の 勢力の 変化を 見たね。いちばん 風速が 強かったのは どこだったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      setButtons([]);
+      say(`${W.taifu}は、最大${W.fuusoku}が どれくらいから 「${W.taifu}」と よばれる？`);
+      setButtons(choiceRow(['およそ10m/s', 'およそ17m/s', 'およそ50m/s'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_taifu'); S.phase = 'done';
+        say(`せいかい！ ${W.nettei}の 最大${W.fuusoku}が およそ<b>17.2m/s</b>を こえると、「${W.taifu}」と よばれる。さらに 強くなると 「強い」「非常に強い」「猛烈な」と よび名が 変わっていく。`);
+        setButtons([{ label: 'つぎへ（台風のそなえ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['およそ10m/s', 'およそ17m/s', 'およそ50m/s'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：台風のそなえ（発見型） ---
+  m_bousai: {
+    enter() {
+      Object.assign(S, { scene: 'bousai', scope: { type: 'idle' }, bousaiFound: new Set() });
+      updateLoc();
+      setWish('🎒', `①〜④を タッチして、${W.taifu}が 近づくと 何が 起きるかを 見つけよう。`);
+      say(`${W.taifu}は 強い風と 大雨で、時に 大きな ひがいを もたらす。番号を タッチして、どんな ことが 起きるか たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(BOUSAI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.bousaiFound.has(c.key) ? c.name : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.bousaiFound.size >= BOUSAI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.bousaiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: c.name };
+      scopeBurst();
+      say(`${c.num} <b>${c.name}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      setButtons([]);
+      say(`${W.taifu}が 近づいたら、安全の ために いちばん 大切なことは？`);
+      setButtons(choiceRow(['川や海のようすを見に行く', '早めにひなんや準備をする', 'いつも通り外で遊ぶ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_bousai'); S.phase = 'done';
+        say(`せいかい！ ${W.taifu}が 近づく前に、早めに ${W.hinan}や 準備を しておくことが いちばん 大切。川や海の ようすを 見に行くのは とても きけん、ぜったいに しないこと。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['川や海のようすを見に行く', '早めにひなんや準備をする', 'いつも通り外で遊ぶ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：本物の数値クイズ ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.kumo}と ${W.taifu}には、びっくりする 数字の ひみつが たくさん あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + p.name + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: p.name, icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      say(`${W.taifu}は、1年間に およそ 何こ 発生する？`);
+      setButtons(choiceRow(['やく5こ', 'やく25こ', 'やく100こ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.taifu}は 1年間に およそ<b>25こ</b>も 発生している。そのうち 日本に 近づくのは やく11こだよ。`);
+        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['やく5こ', 'やく25こ', 'やく100こ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ カザミの丘 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 雲の量が（<span class="blankWord" data-a="0〜8">？？？</span>）なら 晴れ、（<span class="blankWord" data-a="9〜10">？？？</span>）なら くもり。<br>
+        ② 日本付近の ${W.tenki}は、およそ（<span class="blankWord" data-a="西">？？</span>）から（<span class="blankWord" data-a="東">？？</span>）へ 変わっていく。<br>
+        ③ ${W.taifu}は、最大${W.fuusoku}が（<span class="blankWord" data-a="17.2m/s">？？？</span>）以上に なった ${W.nettei}。<br>
+        ④ ${W.taifu}が 近づいたら、早めの（<span class="blankWord" data-a="ひなん・そなえ">？？？</span>）が 大切。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 雲が どちらから 動いてくるかを 見る</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>きょうか あす、空を 見上げて 雲の量を 10段階で 数えてみよう。0〜8なら「晴れ」、9〜10なら「くもり」。きろくノートに 書いて、じっさいの ${W.tenki}と くらべてみてね。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#0d47a1'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「雲の量が9〜10だと どんな天気？」「${W.taifu}は 何m/sから 台風になる？」「${W.taifu}は どちらの海で 生まれる？」`);
+      setButtons([
+        { label: '☁️ 雲の観察の図', cls: 'sub', cb: () => this.show('kumo') },
+        { label: '🌬️ 雲の動きの図', cls: 'sub', cb: () => this.show('ugoki') },
+        { label: '🌀 台風の強さの図', cls: 'sub', cb: () => this.show('taifu') },
+        { label: '🎒 台風のそなえの図', cls: 'sub', cb: () => this.show('bousai') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_taifu などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

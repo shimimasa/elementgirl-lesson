@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>カザミの丘 きろくノート（A4印刷用）</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #0d47a1; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffe3a0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #d7ecf7; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #d7ecf7; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌀 カザミの丘 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      あすの天気を予想するとき、いちばんの手がかりになるのはどれだと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 📆 前の日と同じ天気だと思えばよい</div>
+        <div class="voteOpt"><span class="vnum">イ</span> ☁️ 雲がどちらから動いてくるかを見る</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 🎲 当てずっぽうで決める</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．雲の観察</span>
+    <div class="secBody">
+      ①〜④の空を見て、雲の量と天気を書こう（空全体を10としたとき、0〜8は晴れ、9〜10はくもり）。
+      <table class="roundTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th></tr>
+        <tr><td class="res" style="height:6mm"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      雲の量が0〜8のとき、天気は（晴れ ／ くもり ／ 雨）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．雲の動きと天気の変化</span>
+    <div class="secBody">
+      「すすめる」ボタンで①〜⑦を進め、ふくおか・おおさか・とうきょうの天気の変わり方を見よう。
+      <table class="levelTable">
+        <tr><th>まち</th><th>はじめ</th><th>雲が来たとき</th><th>雲が通り過ぎたあと</th></tr>
+        <tr><td>ふくおか</td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+        <tr><td>おおさか</td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+        <tr><td>とうきょう</td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      あすの天気を予想するときの手がかりは（雲がどちらから動いてくるかを見る ／ 前の日と同じ天気だと思えばよい ／ 当てずっぽう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．台風の強さ</span>
+    <div class="secBody">
+      「すすめる」ボタンで①〜⑦を進め、台風の最大風速（m/s）を記録しよう。
+      <table class="levelTable">
+        <tr><th>スタート</th><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      台風は、最大風速がおよそ（10m/s ／ 17m/s ／ 50m/s）をこえると「台風」とよばれる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．台風のそなえ</span>
+    <div class="secBody">
+      ①〜④を見つけて、台風が近づくと起きることを書こう。
+      <table class="roundTable">
+        <tr><th>①強い風</th><th>②大雨</th><th>③高潮</th><th>④そなえ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      台風が近づいたら安全のため大切なことは（川や海を見に行く ／ 早めにひなんや準備をする ／ いつも通り遊ぶ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（本物の数字のひみつ）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>台風は1年に何こ発生する？</th><th>いちばん多く発生する月は？</th><th>台風はどこで生まれる？</th><th>どちらへ進むことが多い？</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      台風が1年間に発生する数は（やく5こ ／ やく25こ ／ やく100こ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 雲の量が（<span class="fillLine sm"></span>）なら晴れ、（<span class="fillLine sm"></span>）ならくもり。<br>
+      ② 日本付近の天気は、およそ（<span class="fillLine sm"></span>）から（<span class="fillLine sm"></span>）へ変わっていく。<br>
+      ③ 台風は、最大風速が（<span class="fillLine"></span>）以上になった熱帯低気圧。<br>
+      ④ 台風が近づいたら、早めの（<span class="fillLine"></span>）が大切。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション（空を見て雲を数えよう）</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">☁️</span>
+        <div>
+          きょうかあす、空を見上げて雲の量を10段階で数えてみよう。0〜8なら「晴れ」、9〜10なら「くもり」。じっさいの天気とくらべて記録しよう。<br>
+          ☐ 雲の量：<span style="border-bottom:.4mm solid #222;display:inline-block;width:16mm">　</span>　　☐ 天気：<span style="border-bottom:.4mm solid #222;display:inline-block;width:24mm">　</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　カザミの丘 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】カザミの丘 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5理科「天気の変化（雲と天気・台風）」・学力幅あり・協力型／ 使うもの：「kazami.html」・プロジェクタ・このノート（1ページ目を人数分）。理科では初の「気象」分野の単元です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_taifu</b> などで途中再開（m_kumo／m_ugoki／m_taifu／m_bousai／hakase／ending）</li>
+      <li>☐ 台風のニュース映像や新聞の天気図が手元にあれば、導入や発展で見せると実感がわく（必須ではない）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>☁️ 雲の観察</td><td>①〜④を1人ずつ交代でタッチし、雲量0〜8=晴れ・9〜10=くもりの基準を確認。シート２に記録</td></tr>
+      <tr><td class="min">11〜20分</td><td>🌬️ 雲の動きと天気（<b>今日の見せ場①</b>）</td><td>「すすめる」ボタンで①〜⑦を進め、雲が西→東へ動くのに合わせ3つのまちの天気が順に変わることを観察。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">20〜29分</td><td>🌀 台風の強さ（<b>今日の見せ場②</b>）</td><td>「すすめる」で台風の発生〜最盛期〜衰弱までを進め、風速の変化と「台風」「強い」「非常に強い」「猛烈な」の呼び名の変化を観察。シート４に記録</td></tr>
+      <tr><td class="min">29〜37分</td><td>🎒 台風のそなえ</td><td>①〜④を発見し、強風・大雨・高潮・そなえの内容を確認。シート５に記録</td></tr>
+      <tr><td class="min">37〜43分</td><td>🔎 はかせチャレンジ</td><td>台風の発生数・発生する月・発生場所・進路など本物の数字を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「空を見て雲を数えよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「雲の観察」を右下「つぎ▶」でスキップ可（<b>雲の動きと天気・台風の強さ・台風のそなえ・はかせ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 雲がどちらから動いてくるかを見る</b>／雲の観察＝<b>晴れ</b>（雲量0〜8）／
+      雲の動きと天気＝<b>雲がどちらから動いてくるかを見る</b>／台風の強さ＝<b>17m/s</b>（正確には17.2m/s）／
+      台風のそなえ＝<b>早めにひなんや準備をする</b>／はかせ＝<b>やく25こ</b>／
+      まとめ＝①<b>0〜8／9〜10</b>　②<b>西／東</b>　③<b>17.2m/s</b>　④<b>ひなん・そなえ</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>天気の決め方：空全体を10としたとき、雲の量が0〜8なら「晴れ」、9〜10なら「くもり」（雨や雪が降っているときは「雨」「雪」）</li>
+      <li>日本付近の天気は、上空をふく西寄りの風（へん西風）の影響で、雲や天気のようすがおよそ西から東へ変わっていくことが多い。西の地域の今の天気が、翌日の自分の地域の天気予想の手がかりになる</li>
+      <li>台風の定義：北西太平洋・南シナ海にある熱帯低気圧のうち、最大風速がおよそ17.2m/s（34ノット）以上のもの（気象庁の定義）</li>
+      <li>台風の強さの階級：最大風速33m/s以上44m/s未満は「強い」、44m/s以上54m/s未満は「非常に強い」、54m/s以上は「猛烈な」台風とよばれる</li>
+      <li>台風は日本の南のあたたかい海上（フィリピンの東方海上など）で発生し、海水温が高いほど発達しやすい。太平洋高気圧のふちに沿って北上したのち、上空のへん西風に乗って東寄りに進路を変えることが多い</li>
+      <li>台風は1年間に平均およそ25個発生する（1991〜2020年の平年値は25.1個）。8月に発生する数がもっとも多いが、日本に上陸する数は9月の方が多い傾向がある</li>
+      <li>台風が近づくと、強い風で物が飛ばされたり、大雨で川があふれたり、高潮で海岸近くが浸水したりする災害が起こることがある。早めのひなんや備え（懐中電灯・水・食料の準備など）が大切</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント・安全</h2>
+    <ul>
+      <li>「雲の動きと天気」「台風の強さ」が今日の2つの見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる</li>
+      <li>よそうタイムの答え（イ：雲がどちらから動いてくるかを見る）は、「前の日と同じ」という素朴な思い込みとの対比を意識して振り返るとよい</li>
+      <li>台風のそなえミッションでは、「川や海のようすを見に行くのは絶対にしない」という安全教育に必ずつなげる（過去の水難事故はこの行動が原因になることが多い）</li>
+      <li>台風は「風が強いだけ」ではなく大雨・高潮も伴うこと、そして接近前の早めの備えが命を守ることに触れられるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「雲の量が9〜10だとどんな天気？」「台風は何m/sから台風になる？」「台風はどちらの海で生まれる？」</li>
+      <li>おうちミッションでは実際に空を見上げて雲の量を数え、画面のシミュレーションと自分の目で見た空を結びつける狙い</li>
+      <li>理科では「気象」分野を新規開拓した単元。次の発展としては「電気の利用（発電・蓄電・センサー）」（小6）などが理科ロードマップの優先候補</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
