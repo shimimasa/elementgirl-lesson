@@ -862,7 +862,23 @@ const MISSIONS = {
 };
 
 // ---------- ステップ（授業の流れ） ----------
-const FLOW = ['intro', 'vote', 'practice', 'm_full', 'm_new', 'm_half', 'm_crescent', 'cycle', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'practice', 'm_full', 'm_new', 'm_half', 'm_crescent', 'cycle', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4つのミッションの月を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { icon: '🐇', title: () => W.mangetsu, video: 'vM8yKr4lJoY',
+    setup: () => { S.moonA = 0; S.targetA = 0; },
+    text: () => `${W.tsuki}が ${W.taiyo}の <b>はんたいがわ</b>に あるとき、${W.hikari}っている${ruby('面', 'めん')}が ぜんぶ 見えて ${W.mangetsu}に なったね。` },
+  { icon: '🌠', title: () => W.shingetsu,
+    setup: () => { S.moonA = Math.PI; S.targetA = Math.PI; },
+    text: () => `${W.tsuki}は きえたんじゃ ないよ。${W.taiyo}と <b>おなじ ほうこう</b>に あると、${W.hikari}る がわが うらがわに なって 見えなかったね。これが <b>${W.shingetsu}</b>！` },
+  { icon: '🐭', title: () => W.hangetsu,
+    setup: () => { S.moonA = Math.PI / 2; S.targetA = Math.PI / 2; },
+    text: () => `${W.taiyo}と ちょうど <b>90${ruby('度', 'ど')}</b>の ばしょだと ${W.hangetsu}に なったね。みぎ${ruby('半分', 'はんぶん')}が${W.hikari}る${W.hangetsu}は「${ruby('上弦', 'じょうげん')}の${W.tsuki}」、ひだりは「${ruby('下弦', 'かげん')}の${W.tsuki}」って よぶんだよ。` },
+  { icon: '🧚', title: () => W.mikazuki,
+    setup: () => { S.moonA = 3 * Math.PI / 4; S.targetA = 3 * Math.PI / 4; },
+    text: () => `${W.taiyo}に <b>ちかい</b>ほど、${W.tsuki}は ほそく 見えたね。${W.mikazuki}は ゆうがたの にしの そらで 見つけやすいよ！` },
+];
 
 function gotoStep(i) {
   S.stepIndex = Math.max(0, Math.min(FLOW.length - 1, i));
@@ -947,6 +963,52 @@ const STEPS = {
         { label: `Ｂ もっと ふくらんでいく`, cls: 'choice', cb: el => cycleChoose(1, el) },
         { label: `Ｃ ${ruby('日', 'ひ')}によって バラバラに かわる`, cls: 'choice', cb: el => cycleChoose(2, el) },
       ]);
+    },
+  },
+
+  // --- ふりかえりタイム：4つのミッションの月を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.dragEnabled = false;
+      S.cyclePhase = '';
+      S.furikaeriIdx = 0;
+      $('dayChip').style.display = 'none';
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title()}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#8f96c8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        skyBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title()}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+      }
     },
   },
 
@@ -1079,7 +1141,7 @@ function cycleEnd() {
   S.moonA = 0; S.targetA = 0;
   sYes(); skyBurst();
   say(`${W.mangetsu}に もどった！ ${W.mangetsu}から つぎの ${W.mangetsu}まで <b>やく1か${ruby('月', 'げつ')}（29.5${ruby('日', 'にち')}）</b>。<br>だから ${W.tsuki}の ${W.katachi}は、まいにち すこしずつ、<b>きまった じゅんばん</b>で かわるんだね！`);
-  setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+  setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
 }
 
 // ---------- こんやの本物の月 ----------
