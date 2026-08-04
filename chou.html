@@ -963,7 +963,27 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_tamago', 'm_youchu', 'm_sanagi', 'm_uka', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_tamago', 'm_youchu', 'm_sanagi', 'm_uka', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { stageMode: 'field', icon: '🥚', title: '卵を見つける', video: 'QRIopJCnyrc',
+    setup: () => { Object.assign(S, { larvaLv: 0, larvaF: 0, eggFound: true }); },
+    scope: () => ({ type: 'egg' }),
+    text: () => `モンシロチョウは、幼虫が 食べられる キャベツなどの <b>${W.shokusou}</b>（食べる草）を えらんで ${W.tamago}を 産んだね。` },
+  { stageMode: 'field', icon: '🐛', title: '幼虫の成長', video: 'AAXWc26LhuQ',
+    setup: () => { Object.assign(S, { larvaLv: 5, larvaF: 5, eggFound: true }); },
+    scope: () => ({ type: 'larva', label: LARVA_STAGES[4].name, mm: LARVA_STAGES[4].midmm }),
+    text: () => `幼虫は 皮が のびない かたい体。だから 大きくなるには <b>4回の${W.dappi}</b>を くりかえして、しゅうれい幼虫（体長 ${LARVA_STAGES[4].mm}）に なったね。` },
+  { stageMode: 'hentai', icon: '📦', title: 'さなぎになる',
+    setup: () => { Object.assign(S, { hentaiPhase: 2, hentaiF: 2 }); },
+    scope: () => ({ type: 'inside' }),
+    text: () => `育ちきった 幼虫は、糸で 体を えだに くっつけて 前<ruby>蛹<rt>よう</rt></ruby>に なり、さいごに もう1回 皮を 脱いで <b>${W.sanagi}</b>に なったね。` },
+  { stageMode: 'hentai', icon: '🦋', title: '羽化する', video: 'ATUqlNKgfGU',
+    setup: () => { Object.assign(S, { hentaiPhase: 4, hentaiF: 4 }); },
+    scope: () => ({ type: 'butterfly' }),
+    text: () => `さなぎの中では、体が いちど どろどろに とける ぐらい 大きく すがたを かえて、羽や 足など 成虫の 体に ぜんぶ 作りなおされていたね。そして ${W.ukashi}！` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1201,7 +1221,52 @@ const STEPS = {
       award('hakase');
       sYes();
       say(`${hit ? 'せいかい！' : 'こたえは イ だよ。'} ✨<br><br>💡 <b>たいせつポイント</b><br>チョウのように たまご→幼虫→さなぎ→成虫と、すがたが 大きく かわる そだち方を <b>${W.kanzen}</b>と いうよ。<br>バッタは たまご→幼虫（若虫）→成虫で、${W.sanagi}に ならず 脱皮を くりかえすだけ。これを <b>${W.fukanzen}</b>と いうんだ。図を 見て くらべてみよう。`);
-      setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+      setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { stageMode: slide.stageMode, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#6a8a50;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+      }
     },
   },
 
