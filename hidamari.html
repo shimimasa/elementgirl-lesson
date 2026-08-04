@@ -391,6 +391,7 @@ const NROWS = 4;                               // たて 1〜4（上→下）
 const CELL = 200;                              // 論理サイズ
 const MAPW = 1000, MAPH = 800;
 const cellId = (c, r) => COLS[c] + (r + 1);
+const cellFromId = cid => ({ c: COLS.indexOf(cid[0]), r: +cid[1] - 1 });
 
 // 地図記号のしゅるい
 const TYPES = {
@@ -970,7 +971,23 @@ const HAKASE_Q = [
 ];
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'practice', 'm_cat', 'm_letter', 'm_treasure', 'm_thief', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'practice', 'm_cat', 'm_letter', 'm_treasure', 'm_thief', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4つのいらい（ミッション）を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { id: 'm_cat', icon: '🐈', title: () => 'ネコさがし', video: '_Oe4HnxyYEE',
+    setup: () => { S.sel = cellFromId(MISSIONS.m_cat.target); },
+    text: () => MISSIONS.m_cat.point },
+  { id: 'm_letter', icon: '💌', title: () => 'まいご手紙',
+    setup: () => { S.sel = cellFromId(MISSIONS.m_letter.target); },
+    text: () => MISSIONS.m_letter.point },
+  { id: 'm_treasure', icon: '🎁', title: () => 'たからさがし',
+    setup: () => { S.sel = cellFromId(MISSIONS.m_treasure.target); },
+    text: () => MISSIONS.m_treasure.point },
+  { id: 'm_thief', icon: '🎩', title: () => '怪盗たいほ',
+    setup: () => { S.sel = cellFromId(MISSIONS.m_thief.target); },
+    text: () => MISSIONS.m_thief.point },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1076,6 +1093,49 @@ const STEPS = {
       } else {
         sHmm();
         say(`うーん、「${dir}」かな？ ${ruby('駅', 'えき')}から ${ruby('見', 'み')}て、${ruby('金', 'きん')}のわくは ${ruby('上', 'うえ')}？${ruby('下', 'した')}？ ${ruby('右', 'みぎ')}？${ruby('左', 'ひだり')}？<br>${W.chizu}の ${ruby('上', 'うえ')}＝${W.kita} を ヒントに、もういちど！`);
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4つのいらいを1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title()}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#8a7350;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        stageBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title()}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
