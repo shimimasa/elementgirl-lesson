@@ -898,7 +898,26 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_dam', 'm_chinden', 'm_roka', 'm_shodoku', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_dam', 'm_chinden', 'm_roka', 'm_shodoku', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5つのミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { icon: '⛰️', title: '森・ダムのひみつ', video: 'fBBSuVMTrHA',
+    setup: () => { Object.assign(S, { loc: 'yama', scopeMode: 'rain', reservoir: 1, gateOpen: true }); scopeDots.length = 0; },
+    text: () => `${ruby('森', 'もり')}は ふった${ruby('雨', 'あめ')}を たくわえて すこしずつ ながす「<b>みどりのダム</b>」。ダムは その${ruby('水', 'みず')}を ためて、つかう${ruby('量', 'りょう')}に あわせて ${ruby('調節', 'ちょうせつ')}して いたね。` },
+  { icon: '🕳', title: 'ちんでん池のひみつ',
+    setup: () => { Object.assign(S, { loc: 'chinden', scopeMode: 'settled', gateOpen: true, reservoir: 0.6, chindenProg: 1 }); scopeDots.length = 0; },
+    text: () => `${ruby('薬', 'くすり')}を ${ruby('入', 'い')}れると、${ruby('小', 'ちい')}さな よごれが くっついて ${ruby('大', 'おお')}きな かたまりに なって、${ruby('底', 'そこ')}に しずんだね。これが「<b>ちんでん</b>」。でも むしめがねを見ると、まだ ${ruby('細', 'こま')}かい よごれと ${W.kin}が いたね。` },
+  { icon: '🏖', title: 'ろか池のひみつ', video: 'jQxU4i1SplM',
+    setup: () => { Object.assign(S, { loc: 'roka', scopeMode: 'filtered', gateOpen: true, chindenProg: 1, rokaProg: 1 }); scopeDots.length = 0; },
+    text: () => `すなと ${ruby('小石', 'こいし')}の${ruby('層', 'そう')}に とおすと、${ruby('水', 'みず')}は とうめいに なったね。これが「<b>ろか</b>」。でも ${ruby('見', 'み')}た${ruby('目', 'め')}が きれいでも、まだ ${ruby('目', 'め')}に ${ruby('見', 'み')}えない ${W.kin}が いて、のめる${ruby('水', 'みず')}では なかったね。` },
+  { icon: '✨', title: '消どくのひみつ',
+    setup: () => { Object.assign(S, { loc: 'tap', scopeMode: 'clean', gateOpen: true, chindenProg: 1, rokaProg: 1, shodokuProg: 1, towerFill: 1, tapOn: true, cupFill: 1 }); scopeDots.length = 0; },
+    text: () => `${ruby('消', 'しょう')}どくの${ruby('薬', 'くすり')}を ${ruby('入', 'い')}れると、${ruby('目', 'め')}に ${ruby('見', 'み')}えない ${W.kin}も いなくなって、やっと <b>のめる${ruby('水', 'みず')}</b>が かんせい！ ${ruby('高', 'たか')}い ${W.haisui}に くみあげて、その${ruby('高', 'たか')}さの ${ruby('力', 'ちから')}で ${ruby('町', 'まち')}じゅうの おうちに とどけて いたね。` },
+  { icon: '🔄', title: '使った水のゆくえ', video: 'Jn7Ob4yDCUA',
+    setup: () => { Object.assign(S, { loc: 'tap', scopeMode: 'clean', gateOpen: true, chindenProg: 1, rokaProg: 1, shodokuProg: 1, towerFill: 1, tapOn: false, cupFill: 1 }); scopeDots.length = 0; },
+    text: () => `つかった${ruby('水', 'みず')}は <b>${W.gesui}</b>で きれいに してから ${ruby('川', 'かわ')}へ もどしていたね。${ruby('川', 'かわ')}の${ruby('水', 'みず')}は ${W.umi}へ、${W.umi}の${ruby('水', 'みず')}は じょうはつして ${ruby('雲', 'くも')}に、そして また ${ruby('雨', 'あめ')}に——${ruby('水', 'みず')}は <b>ぐるぐる めぐって</b> いるんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1175,6 +1194,50 @@ const STEPS = {
       sYes(); scopeBurst(); award('hakase');
       say(`こたえは <b>Ｂ</b>！ ${hit}<br><br>💡 <b>たいせつポイント</b><br>つかった${ruby('水', 'みず')}は <b>${W.gesui}</b>で きれいに してから ${ruby('川', 'かわ')}へ。${ruby('川', 'かわ')}の${ruby('水', 'みず')}は ${W.umi}へ、${W.umi}の${ruby('水', 'みず')}は じょうはつして ${ruby('雲', 'くも')}に、そして また ${ruby('雨', 'あめ')}に——<b>${ruby('水', 'みず')}は ぐるぐる めぐっている</b>んだ！<br><span style="font-size:.85em">ちなみに、1${ruby('人', 'り')}が 1${ruby('日', 'にち')}に つかう ${ruby('水', 'みず')}は やく<b>200リットル</b>。2リットルの ペットボトル <b>100${ruby('本', 'ぽん')}ぶん</b>だよ！</span>`);
       setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  // --- ふりかえりタイム：5つのミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#3a7a9c;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+      }
     },
   },
 
