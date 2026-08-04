@@ -798,7 +798,23 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_taue', 'm_water', 'm_hiryo', 'm_taifu', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_taue', 'm_water', 'm_hiryo', 'm_taifu', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4つのミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { icon: '🌱', title: '田植えの時期のひみつ', video: 'P_BpqDo1B_4',
+    setup: () => { Object.assign(S, { field: { month: 2, growth: 1.0, stage: 'ripe', lodged: false, flooded: true, wind: 0 }, scope: { type: 'grow', value: 1.0 } }); },
+    text: () => `${W.taue}は <b>${MONTHS[1]}（②）</b>ごろが ちょうどよい。稲は 夏の間 太陽の光と 暖かさを たっぷり あびて、<b>約5か月</b>で 育ったね。` },
+  { icon: '💧', title: '水の管理のひみつ', video: 'MX3vBRKvwp0',
+    setup: () => { Object.assign(S, { field: { month: 6, growth: 0.85, stage: 'ripe', lodged: false, flooded: false, wind: 0 }, scope: { type: 'root', strong: true } }); },
+    text: () => `そだつ間は <b>たっぷり水</b>、${W.inekari}前は <b>水を抜いて 土を かわかす</b>（${W.nakaboshi}）。すると 根が しっかり張って、田んぼも 乾いて 稲刈りしやすくなったね。` },
+  { icon: '🌾', title: '肥料の量のひみつ', video: 'quhQMZsD_6Y',
+    setup: () => { Object.assign(S, { field: { month: 3, growth: 1.0, stage: 'ripe', lodged: false, flooded: true, wind: 0 }, scope: { type: 'grow', value: 1.0 } }); },
+    text: () => `${W.hiryo}は <b>多すぎても 少なすぎても だめ</b>。多すぎると 茎が のびすぎて ${W.touhuku}してしまう。ちょうどよい 量が いちばん よく みのったね。` },
+  { icon: '🌀', title: '台風から守るひみつ', video: 'Z6tR8ZyODls',
+    setup: () => { Object.assign(S, { field: { month: 5, growth: 0.9, stage: 'ripe', lodged: false, flooded: false, wind: 0 }, scope: { type: 'grain' } }); },
+    text: () => `${W.taihuu}は 稲を たおす（${W.touhuku}）ことが ある。じゅうぶん みのっていたら <b>早めの ${W.inekari}</b>、まだなら <b>水を抜いて 土を かためる</b>と 被害を へらせたね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1046,6 +1062,50 @@ const STEPS = {
     more() {
       say(`でも、日本ぜんたいの 食べ物の ${W.jikyu}は <b>やく38%</b>しかないんだ。野菜や 肉、麦などは 外国からの 輸入に たよっている ものが 多いんだよ。<br><br>それに、お米を つくる ${W.nouka}さんの 数は 年々 少なくなっていて、${ruby('高齢化', 'こうれいか')}も すすんでいる。<b>ほぼ 自給できる お米</b>は、日本にとって とても 大切な 作物なんだ。`);
       setButtons([{ label: 'まとめへ すすむ', cb: () => { award('hakase'); sFanfare(); scopeBurst(); nextStep(); } }]);
+    },
+  },
+
+  // --- ふりかえりタイム：4つのミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#4a8a1f;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+      }
     },
   },
 
