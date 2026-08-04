@@ -838,7 +838,23 @@ function hideOverlay() { overlayEl.classList.remove('show'); }
 function setView(v) { S.view = v; S.sel = null; $('stateName').innerHTML = ''; }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_bright', 'm_triangle', 'm_cassio', 'm_rotate', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_bright', 'm_triangle', 'm_cassio', 'm_rotate', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4つのミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { icon: '🧚', title: 'あかるさと色をしらべよう', video: 'iTu-kKV7Z2A',
+    setup: () => { Object.assign(S, { view: 'south', linesTri: false, collected: new Set(), sel: { list: 'south', idx: 0 }, timeH: 20 }); },
+    text: () => `${W.minami}の そらで いちばん ${ruby('明', 'あか')}るい ${W.hoshi}は <b>ベガ</b>（${W.itto}）。${ruby('赤', 'あか')}い ${W.hoshi}は <b>アンタレス</b>だったね。${W.hoshi}には ${ruby('明', 'あか')}るさと ${ruby('色', 'いろ')}の ちがいが あったね。` },
+  { icon: '🎋', title: `${W.natsu}の${W.daisankaku}を つくろう`, video: 'Hzo42XtmnAo',
+    setup: () => { Object.assign(S, { view: 'south', linesTri: true, collected: new Set(TRI), sel: { list: 'south', idx: 0 }, timeH: 20 }); },
+    text: () => `<b>ベガ・アルタイル・デネブ</b>の 3つを つないで、${W.natsu}の${W.daisankaku}が かんせい！ 3つは べつべつの ${W.seiza}の ${W.hoshi}だったね。` },
+  { icon: '👑', title: 'カシオペヤ座を見つけよう', video: 'VxgijPBwuBk',
+    setup: () => { Object.assign(S, { view: 'north', linesCas: true, linesDip: true, showDial: false, rotN: 0, collected: new Set(CAS), sel: { list: 'north', idx: 0 }, timeH: 20 }); },
+    text: () => `${W.kita}の そらの Ｗの かたち、<b>カシオペヤ${ruby('座', 'ざ')}</b>を 見つけたね。まん中には <b>${W.hokkyokusei}</b>も 見えたね。` },
+  { icon: '🌙', title: '星の回転を観察しよう', video: 'XuutLe2GR1E',
+    setup: () => { Object.assign(S, { view: 'north', linesCas: true, linesDip: true, showDial: true, rotN: 45, collected: new Set(CAS), sel: { list: 'north', idx: 0 }, timeH: 23 }); },
+    text: () => `${W.kita}の そらの ${W.hoshi}は、${W.hokkyokusei}を ${ruby('中心', 'ちゅうしん')}に ${ruby('回', 'まわ')}る。でも <b>ならび${ruby('方', 'かた')}（かたち）は かわらない</b>！ ${W.hokkyokusei}じしんは ほとんど ${ruby('動', 'うご')}かなかったね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1048,6 +1064,50 @@ const STEPS = {
       sYes(); stageBurst(); award('hakase');
       say(`こたえは <b>Ａ</b>！ ${hit} ${ruby('南', 'みなみ')}の そらの ${W.hoshi}は、${W.higashi}から のぼって ${W.minami}の ${ruby('高', 'たか')}いところを とおり、${W.nishi}へ しずんでいく——<b>おひさまと おなじ むき</b>だね。<br>そして ${W.natsu}の${W.daisankaku}の <b>かたちは そのまま</b>だった！<br><span style="font-size:.85em">ちなみに、${ruby('朝', 'あさ')}になると ${W.hoshi}が きえるのは、おひさまの ${ruby('光', 'ひかり')}で 見えなくなるだけ。${W.hoshi}は ひるまも そこに いるんだよ。</span>`);
       setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  // --- ふりかえりタイム：4つのミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      updateTime();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#8f96c8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        stageBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+      }
     },
   },
 
