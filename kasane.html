@@ -844,7 +844,27 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_dono', 'm_kasane', 'm_kana', 'm_sakusha', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_dono', 'm_kasane', 'm_kana', 'm_sakusha', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'dono', icon: '🏯', title: 'お屋敷たんけん', video: 'mTvSA38iPpA',
+    setup: () => { S.donoFound = new Set(ROOMS.map(r => r.key)); },
+    scope: () => ({ type: 'room', name: ROOMS[0].name }),
+    text: () => `寝殿造は、真ん中の ${W.shinden}を 中心に、${W.tainoya}や ${W.tsuridono}を ${W.watadono}で つないだ つくりだったね。` },
+  { scene: 'kasane', icon: '👘', title: '色のかさね', video: 'qCLvh6a_SZI',
+    setup: () => { S.kasaneRound = SEASONS.length; S.kasaneDone = SEASONS.map(s => ({ name: s.name, omote: s.omote, ura: s.ura })); },
+    scope: () => ({ type: 'swatch', omote: SEASONS[3].omote, ura: SEASONS[3].ura, name: SEASONS[3].label }),
+    text: () => `うすい 絹を 何まいも 重ねて、表と 裏の 色の 組み合わせで 季節を 表す「かさねの色目」。四季すべて そろったね。` },
+  { scene: 'kana', icon: '✒️', title: 'かな文字の たんじょう', video: 'I1NrN4nYzZY',
+    setup: () => { S.kanaStage = 3; },
+    scope: () => ({ type: 'glyph', ch: 'あ', label: 'ひらがな' }),
+    text: () => `漢字を くずして 書くうちに、「${ruby('安', 'あん')}」が「あ」に なっていったね。ひらがなは ${W.onnade}とも 呼ばれ、貴族の 女性たちが よく 使ったよ。` },
+  { scene: 'sakusha', icon: '📖', title: 'だれが 書いた？', video: 'JWMDELwlDIE',
+    setup: () => { S.sakushaRound = QUOTES.length; },
+    scope: () => ({ type: 'book', name: QUOTES[1].bookPlain }),
+    text: () => `${W.sei}の ${W.makura}と、${W.murasaki}の ${W.genji}。どちらも 平安時代を 代表する、ひらがなの 名作だったね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1109,11 +1129,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 1018年、${W.michinaga}の 娘が きさきに なった お祝いの 席で 詠まれた 歌。欠けたところが 何もない 満月のように、思い通りに いく 幸せを 表しているよ。<br><br>💡 <b>たいせつポイント</b><br>藤原氏は 娘を 天皇の きさきに し、生まれた 子を 次の 天皇に することで 力を にぎった。これを ${W.sekkan}と いうよ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 今夜は 月が きれいですね', 'イ 自分の 思い通りに ならないことは 何もない、満月のような 幸せだ', 'ウ 早く 月が 満ちて ほしい'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#a56a94;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
