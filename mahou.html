@@ -1041,7 +1041,23 @@ function updateChips() {
 }
 
 // ---------- ステップ（授業の流れ） ----------
-const FLOW = ['intro', 'vote', 'm_weight', 'm_limit', 'm_temp', 'm_crystal', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_weight', 'm_limit', 'm_temp', 'm_crystal', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4つのミッションのポーションを1つずつ見せ直す
+const FURIKAERI_SLIDES = [
+  { icon: '🌟', title: () => 'きらきらポーション（重さの保存）', video: 'fYxoSlSPTiw',
+    setup: () => { setStateDirect({ mat: 'shio', added: 10, temp: 20, dissolvedAuto: true }); },
+    text: () => `${W.shio}を 2さじ（10g）とかしても、はかりは <b>110gの まま</b>だったね。とけて 見えなくなっても、つぶは 水の中に ちゃんと いる——だから ${W.omosa}は きえないんだ。` },
+  { icon: '🫧', title: () => 'まんぷくポーション（とける量の限度）', video: 'VlWN_i09Frk',
+    setup: () => { const lim = MATS.shio.sol(20); setStateDirect({ mat: 'shio', added: 40, temp: 20, dissolved: lim, crystal: 0 }); },
+    text: () => `水100g（20℃）に ${W.shio}が とけるのは <b>7さじ（やく35g）まで</b>。いくら まぜても、それいじょうは とけのこりに なったね。とける${W.ryou}には <b>かぎり</b>が あるんだ。` },
+  { icon: '🔥', title: () => 'ほかほかポーション（温度とものによるちがい）', video: '2j0zCaJx1jw',
+    setup: () => { setStateDirect({ mat: 'myoban', added: 15, temp: 60, dissolvedAuto: true }); },
+    text: () => `${W.shio}は あたためても とける${W.ryou}が ほとんど ふえなかったけど、ミョウバンは 60℃なら <b>11さじ（57g）</b>も とけたね。あたためた ときの とけかたは <b>ものに よって ちがう</b>んだ。` },
+  { icon: '💎', title: () => 'よあけのほうせきポーション（さいけっしょう）',
+    setup: () => { const lim = MATS.myoban.sol(10); setStateDirect({ mat: 'myoban', added: 50, temp: 10, dissolved: lim, crystal: 50 - lim }); },
+    text: () => `あつい ミョウバンポーションを ひとばん ひやしたら、とけきれなく なった ぶんが <b>${W.kessho}（ほうせきの つぶ）</b>に なって あらわれたね。つめたく なると、とける かぎりが ちいさく なるんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1309,6 +1325,51 @@ const STEPS = {
           say(`✨ どこから とっても <b>つぶは 8こ</b>！ こたえは <b>Ｃ</b>！<br><br>💡 <b>たいせつポイント</b><br>とけた つぶは、じかんが たっても しずまず、<b>ぜんたいに ひろがった まま</b>。だから ポーションは どこを のんでも <b>おなじ こさ・おなじ あじ</b>なんだ。`);
           setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
         }, 2800);
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4つのポーションを1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.phase = ''; setControls({});
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      updateChips();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title()}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#8f96c8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        magBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title()}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
