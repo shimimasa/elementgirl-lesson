@@ -997,7 +997,44 @@ function markPicked(el) {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_nakama', 'm_toumei', 'm_kinzoku', 'm_betsumono', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_nakama', 'm_toumei', 'm_kinzoku', 'm_betsumono', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'nakama', icon: '🧪', title: '水よう液を なかまわけ', video: 'JCnUFacx0Jc',
+    setup: () => {
+      Object.assign(S, {
+        nakamaTested: new Set(LIQUIDS.map(li => li.key)),
+        curLiquid: 'anmonia', litmusShow: true, litmusAnimT: 1,
+      });
+    },
+    scope: () => ({ type: 'point', name: CAT_LABEL.alkaline.replace(/<[^>]+>/g, ''), color: CAT_COLOR.alkaline }),
+    text: () => `5つの 水よう液を、リトマス紙で ${W.sansei}・${W.chuusei}・${W.arukari}の 3つに なかまわけ できたね。` },
+  { scene: 'toumei', icon: '🔥', title: 'とけているのは 何？', video: 'fC5fTMapBFQ',
+    setup: () => {
+      Object.assign(S, { toumeiRoundIdx: 1, toumeiLevelT: 0, toumeiResidue: 'gas', heating: false });
+    },
+    scope: () => ({ type: 'point', name: '何も のこらない', color: '#dcefe8' }),
+    text: () => `${W.shokuen}を 蒸発させると 白い つぶが のこったけど、${W.enan}を 蒸発させると 何も のこらなかった。水よう液には <b>固体</b>が とけているものと <b>気体</b>が とけているものが あるんだ。` },
+  { scene: 'kinzoku', icon: '⚗️', title: '塩酸で 鉄を とかそう', video: 'Uflc70Q_S1Y',
+    setup: () => {
+      Object.assign(S, { kinLevel: 4, kinBubbleT: 1, kinResult: 'good' });
+    },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `塩酸の こさが ちょうど よいと、あわ（${W.suiso}）を 出しながら ${W.tetsu}が とけていったね。うすすぎると 変化なし、こすぎると きけんだったね。` },
+  { scene: 'betsumono', icon: '🔍', title: 'とけた鉄の 正体', video: 'UMRVSGQ0x-I',
+    setup: () => {
+      Object.assign(S, { betsuLevelT: 0, betsuResidueShown: true, magnetTested: true, acidTested: true });
+    },
+    scope: () => ({ type: 'point', name: '黄色っぽい つぶ', color: '#d9a628' }),
+    text: () => `とかした ${W.tetsu}を 蒸発させると、黄色っぽい つぶが のこった。${W.jishaku}にも くっつかず、塩酸を たらしても あわが 出ない……${W.tetsu}とは <b>べつの もの</b>に ${W.henka}していたんだね。` },
+  { scene: 'hakase', icon: '🥬', title: 'むらさきキャベツの ふしぎ', video: 'oC3JNIOAW_g',
+    setup: () => {
+      Object.assign(S, { cabbageFound: new Set(CABBAGE_POINTS.map(p => p.key)), cabbageColor: CABBAGE_POINTS[0].col });
+    },
+    scope: () => ({ type: 'point', name: CABBAGE_POINTS[0].name, color: CABBAGE_POINTS[0].col }),
+    text: () => `むらさきキャベツ液は、リトマス紙とはちがって、${W.sansei}・${W.arukari}の <b>強さ</b>まで 色の ちがいで わかる 天然の 指示薬だったね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1283,11 +1320,56 @@ const STEPS = {
       if (i === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ リトマス紙は 赤・青の 2色だけだけど、むらさきキャベツ液は 赤・むらさき・緑・黄色と、こさに よって 色が すこしずつ 変わる。だから ${W.sansei}・${W.arukari}の <b>強さ</b>まで 目で 見て わかるんだ。<br><br>⚠️ ${W.sansei}や ${W.arukari}の つよい 薬品は、目に 入ると とても きけん。理科室では 先生の 話を よく 聞いて、正しく あつかおうね。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['色が 変わらないから べんり', '酸性・アルカリ性の 強さも、色の ちがいで わかるから', 'どんな 水よう液にも 使えないから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#3a8a98;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
