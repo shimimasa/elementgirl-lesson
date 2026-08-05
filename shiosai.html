@@ -828,7 +828,27 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kaiiki', 'm_shurui', 'm_shigen', 'm_sodateru', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kaiiki', 'm_shurui', 'm_shigen', 'm_sodateru', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kaiiki', icon: '🌊', title: '好漁場さがし', video: 'bJZko4yDhHc',
+    setup: () => { S.kaiikiFound = new Set(KAIIKI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.danryuu}と ${W.kanryuu}が ぶつかる「${W.shiome}」、そして 浅くて 広い「${W.tairikudana}」——このふたつが 重なる 場所が、魚の 集まる 好漁場に なるんだったね。` },
+  { scene: 'shurui', icon: '🚢', title: '漁業の種類', video: 'cSfyZ3cQRRw',
+    setup: () => { S.shuruiFound = new Set(SHURUI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.engan}・${W.okiai}・${W.enyou}・${W.yousyoku}、4つの 漁業には それぞれ ちがう ふねと 海の 使い方が あったね。日本の 漁業の 中心は ${W.okiai}だったよ。` },
+  { scene: 'shigen', icon: '🐟', title: '資源を守れ！',
+    setup: () => { S.shigenLevel = 4; S.fishStock = 60; },
+    scope: () => ({ type: 'fish' }),
+    text: () => `獲る量が 多すぎても 少なすぎても うまく いかない。ちょうどよい 量を 守りながら 漁を する「資源管理」の 考え方、おぼえてるかな？` },
+  { scene: 'sodateru', icon: '🐣', title: '育てる漁業', video: '0izta32HVTw',
+    setup: () => { S.sodateru = { stage: 3 }; },
+    scope: () => ({ type: 'flow' }),
+    text: () => `たまご→${W.chigyo}→${W.houryuu}→漁、これが「${W.saibai}」の しくみ。${W.yousyoku}（養殖業）とは、とちゅうで 海に 放すか どうかが ちがったね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1080,11 +1100,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.amime}の 大きさを 決めたり、産卵期を 禁漁に したり、国が 魚の しゅるいごとに 獲れる 量の 上限（TAC）を 決めたり……「とる漁業」と「育てる漁業」を くみあわせて、海の めぐみを 守りながら 使う 工夫が 大切なんだ。<br><br>💡 <b>たいせつポイント</b><br>これは 世界共通の 目標「海の 豊かさを 守ろう」にも つながっているよ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 安い 外国の 魚だけ 食べる', 'イ 旬の魚を えらんだり、獲れすぎない 量を 守る 漁業を おうえんする', 'ウ 魚を 食べるのを やめる'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#12666f;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の公式・公的な発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
