@@ -1073,7 +1073,23 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_tsubu', 'm_kasanaru', 'm_kaseki', 'm_yomu', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_tsubu', 'm_kasanaru', 'm_kaseki', 'm_yomu', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4つのミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { icon: '🌊', title: 'つぶで分かれる', video: 'i8AIh9Rquco',
+    setup: () => { Object.assign(S, { view: 'sea', scopeMode: 'mix', repeats: 1, fillProg: 1, flowing: false, drain: 0, dug: new Set() }); },
+    text: () => `${ruby('大', 'おお')}きくて ${ruby('重', 'おも')}い <b>れき</b>は ${W.kako}の ちかくに すぐ しずみ、${ruby('細', 'こま')}かい <b>どろ</b>は かるいから おきまで ながされて ゆっくり しずんだね。<b>${W.tsubu}の${ruby('大', 'おお')}きさ</b>で 分かれて つもったんだ。` },
+  { icon: '⛰', title: '層が重なる', video: 'i8AIh9Rquco',
+    setup: () => { Object.assign(S, { view: 'cliff', scopeMode: 'mix', drain: 1, dug: new Set() }); },
+    text: () => `${ruby('土', 'つち')}が ${ruby('何', 'なん')}ども ながれてきて ${ruby('前', 'まえ')}の${ruby('層', 'そう')}の <b>${ruby('上', 'うえ')}</b>に かさなり、なん${ruby('万年', 'まんねん')}も たって <b>がけ</b>に なったね。${W.chiso}は ${ruby('水', 'みず')}の${W.soko}で できる、${ruby('大地', 'だいち')}の${ruby('日記', 'にっき')}なんだ。` },
+  { icon: '🐚', title: '化石のなぞ', video: '5-CPufpi57E',
+    setup: () => { Object.assign(S, { view: 'cliff', scopeMode: 'suna', drain: 1, dug: new Set(['kai', 'ha', 'ammo']) }); },
+    text: () => `${ruby('貝', 'かい')}・${ruby('木', 'き')}の${ruby('葉', 'は')}・アンモナイトの ${W.kaseki}が ${ruby('山', 'やま')}の がけから ${ruby('出', 'で')}たのは、そこが ${ruby('大昔', 'おおむかし')} <b>${ruby('海', 'うみ')}だった</b> しょうこ。${W.kaseki}は「むかし ここが どんな ばしょだったか」を おしえてくれる しゃしんなんだね。` },
+  { icon: '🔢', title: 'じゅんばんのひみつ',
+    setup: () => { Object.assign(S, { view: 'cliff', scopeMode: 'reki', drain: 1, dug: new Set(['kai', 'ha', 'ammo']), selLayer: -1 }); },
+    text: () => `${W.chiso}は <b>${ruby('下', 'した')}から ${ruby('順', 'じゅん')}に</b> できていく。だから いちばん${ruby('下', 'した')}の <b>⑥</b>が いちばん ${W.furui}、いちばん${ruby('上', 'うえ')}の <b>①</b>が いちばん ${ruby('新', 'あたら')}しい。${W.chiso}を ${ruby('下', 'した')}から よめば、${ruby('大地', 'だいち')}の${ruby('歴史', 'れきし')}が わかるんだ！` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1309,6 +1325,50 @@ const STEPS = {
       sYes(); scopeBurst(); award('hakase');
       say(`${ruby('見', 'み')}よ、${W.tsubu}が <b>かくばっておる</b>！ こたえは <b>Ａ ${W.kazanbai}</b>じゃ。${hit}<br><br>💡 <b>たいせつポイント</b><br>${ruby('川', 'かわ')}を ${ruby('旅', 'たび')}した すなの${W.tsubu}は、ころがって <b>${ruby('丸', 'まる')}く</b>なる（${ruby('前', 'まえ')}の${ruby('授業', 'じゅぎょう')}の ${ruby('石', 'いし')}と おなじ！）。じゃが この${W.tsubu}は <b>かくばったまま</b>——つまり ${ruby('水', 'みず')}を ${ruby('通', 'とお')}らず、<b>${ruby('空', 'そら')}から ふってきた</b>。${ruby('大昔', 'おおむかし')}、ちかくで ${ruby('火山', 'かざん')}の <b>${W.funka}</b>が あった しょうこ なんじゃ！`);
       setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  // --- ふりかえりタイム：4つのミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#6e4e28;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+      }
     },
   },
 
