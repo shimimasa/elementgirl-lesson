@@ -843,7 +843,27 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_riyu', 'm_bunei', 'm_bourui', 'm_kouan', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_riyu', 'm_bunei', 'm_bourui', 'm_kouan', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'riyu', icon: '✉️', title: 'なぜ 攻めてきたのか',
+    setup: () => { S.riyuFound = new Set(RIYU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.gen}の 皇帝 ${W.fubirai}から とどいた 手紙に、${W.tokimune}は きっぱりと 断る 返事を したね。国を 守るための、若き18さいの ${W.shikken}の 決断だったんだ。` },
+  { scene: 'bunei', icon: '⚓', title: '文永の役',
+    setup: () => { S.buneiPhase = 'result'; S.buneiT = 1; S.boomT = 1; },
+    scope: () => ({ type: 'idle' }),
+    text: () => `元軍の 集団戦法と「${W.tetsuhau}」に、武士たちは 苦戦した。この 経験が、つぎの 防塁づくりへと つながっていくよ。` },
+  { scene: 'bourui', icon: '🧱', title: '防塁づくり', video: '2TlwXbhpIkE',
+    setup: () => { S.build = { level: 6, levelF: 6 }; S.tryT = 0; S.bouruiHeight = 6; },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `博多湾に 築かれた ${W.ishitsuiji}（${W.bourui}）は、高さ 約2〜3m、長さ 約20km。ちょうどよい 高さで、元軍の 上陸を 防ぎつづけたね。` },
+  { scene: 'kouan', icon: '🌀', title: '弘安の役', video: 'WBTa4UB0uO8',
+    setup: () => { S.kouanDay = 7; S.kouanStorm = true; },
+    scope: () => ({ type: 'storm' }),
+    text: () => `${W.ishitsuiji}に 上陸を はばまれた 元軍は、長い にらみあいの すえ、大きな あらしで 大きな 被害を 受けた。今も 長崎県 鷹島の 海底で、当時の 船が 見つかっているよ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1117,11 +1137,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.takezaki}は、恩賞を 求めて 幕府に じかに 訴えたんだ。<br><br>💡 <b>たいせつポイント</b><br>元寇は 日本を 守る 戦い（防衛戦）。勝っても 新しい 土地は 手に 入らない。だから 幕府は ${W.gokenin}たちに 十分な ${W.onshou}を あたえられなかった。<br>「${W.goon}と ${W.houkou}」の 関係が くずれはじめ、これが のちの ${W.bakufu}の おとろえに つながっていく……`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 自分の 武勇を 自慢したかったから', 'イ 手柄に 見合う 恩賞を 求めて 幕府に 訴えるため', 'ウ 絵を かくのが 好きだったから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#3d7d92;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の公式・公的な発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
