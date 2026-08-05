@@ -845,7 +845,27 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kotei', 'm_buntan', 'm_jit', 'm_kensa', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kotei', 'm_buntan', 'm_jit', 'm_kensa', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kotei', icon: '🏭', title: '工程さがし', video: 'qHI04moOnTE',
+    setup: () => { S.koteiFound = new Set(KOTEI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: KOTEI_POINTS[0].name }),
+    text: () => `工場の 中には、${W.press}→${W.yousetsu}→${W.tosou}→${W.kumitate}→${W.kensa}の 5つの 工程が あったね。この 順番で、1台の 車が 少しずつ かんせいに 近づいていくよ。` },
+  { scene: 'buntan', icon: '🤖', title: 'ロボットと 人の しごと', video: 'qHI04moOnTE',
+    setup: () => { S.buntanFound = new Set(BUNTAN_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: BUNTAN_POINTS[0].name }),
+    text: () => `力強く 正確な くり返しは <b>ロボット</b>が、細かい 確認や とっさの 判断は <b>人</b>が。それぞれの 得意な ことを 生かして 力を 合わせていたね。` },
+  { scene: 'jit', icon: '🚚', title: 'ジャストインタイム',
+    setup: () => { S.jitLevel = 4; S.jit = { levelF: 4 }; S.tryT = 0.85; S.jitTries = new Set([4]); },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `目もり ${NUMS[3]} の ちょうど よい タイミングで 部品を とどけてもらうと、ラインが 止まらず 進んだね。💡「${W.jit}」は、必要な 部品を、必要な 時に、必要な 分だけ とどける くふうなんだ。` },
+  { scene: 'kensa', icon: '🔍', title: '出荷前 けんさ', video: 'qHI04moOnTE',
+    setup: () => { S.kensaFound = new Set(KENSA_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: KENSA_POINTS[0].name }),
+    text: () => `ドアの すきま・${W.tosou}の むら・配線と ライト……機械だけでなく、人の 目や 手でも 細かい ところまで しっかり ${W.kensa}して いたね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1103,6 +1123,50 @@ const STEPS = {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 軽い 方が かっこいいから', 'イ 使う 燃料が 少なくて すみ、かんきょうに やさしいから', 'ウ 運びやすいから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#7a6420;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
