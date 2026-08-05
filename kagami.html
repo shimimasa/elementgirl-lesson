@@ -928,7 +928,31 @@ function markPicked(el) {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_chokushin', 'm_hansha', 'm_kasane', 'm_mushimegane', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_chokushin', 'm_hansha', 'm_kasane', 'm_mushimegane', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'chokushin', icon: '☀️', title: '光は まっすぐ 進む', video: 'Myc0_E9CJPo',
+    setup: () => { Object.assign(S, { obstacleOn: true, chokushinAnimT: 1 }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `光は まっすぐ 進む せいしつ（${W.chokushin}）を もっている。しょうがい物に ぶつかると その先に 進めず、「かげ」が できたね。` },
+  { scene: 'hansha', icon: '🪞', title: '鏡で 光を はね返す', video: 'xyq3exo0edI',
+    setup: () => { Object.assign(S, { hanshaAngle: HANSHA_CORRECT, hanshaAnimT: 1, hanshaHit: true }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `鏡で はね返した 光も、まっすぐ 進む。鏡の むきを 変えると、光の 進む 向きも 変わったね。` },
+  { scene: 'kasane', icon: '✨', title: '鏡を 重ねて 明るさ・あたたかさアップ', video: 'Myc0_E9CJPo',
+    setup: () => { Object.assign(S, { kasaneLevel: 5, kasaneAnimT: 1, kasaneResult: 'good' }); },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `鏡の まい数を 増やすほど、明るさも あたたかさも 両方 増える。温度計は ${KASANE_TEMPS[4]}℃まで 上がったね。` },
+  { scene: 'mushimegane', icon: '🔍', title: '虫眼鏡で 光を 集める', video: 'Myc0_E9CJPo',
+    setup: () => { Object.assign(S, { meganeLevel: MEGANE_FOCUS_LO, meganeAnimT: 1 }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.mushimegane}で 光を 一点（${W.shouten}）に 集めると、黒い紙から けむりが 出はじめた。黒い紙は 白い紙より 熱く なりやすかったね。` },
+  { scene: 'hakase', icon: '🚲', title: '身のまわりの 光の 利用', video: null,
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: HAKASE_POINTS[0].name }),
+    text: () => `太陽光発電・灯台・反射板・カーブミラー……光の せいしつは 身のまわりの いろいろな ところで 使われていたね。虫眼鏡や 鏡を 使う時は、人の 目や 服、燃えやすい物に 光を 向けないこと。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1190,11 +1214,56 @@ const STEPS = {
       if (i === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 虫眼鏡や 鏡で 集めたり はね返したり した 光は、人の 目を いためたり、物を こがしたり する 力を 持っている。安全に 気をつけて 使おう。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['できるだけ大きい声で使う', '人の目や服、燃えやすい物に光を向けない', '毎回ちがう場所で使う'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#3a7ab8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
