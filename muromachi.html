@@ -879,7 +879,27 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kinkaku', 'm_shoin', 'm_ginkaku', 'm_noh', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kinkaku', 'm_shoin', 'm_ginkaku', 'm_noh', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kinkaku', icon: '🏯', title: '金閣を 見る', video: 'NaYo5AJu4bY',
+    setup: () => { S.kinkakuFound = new Set(KINKAKU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: KINKAKU_POINTS[2].name }),
+    text: () => `${W.kinkaku}は ${W.yoshimitsu}の すまい・べっそう「北山第」だった。3層に 3つの 世界が 重なる ${W.kitayama}を 代表する たてものだったね。` },
+  { scene: 'shoin', icon: '🏠', title: '書院造さがし', video: 'm_wa5tMdQBY',
+    setup: () => { S.shoinFound = new Set(SHOIN_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: SHOIN_POINTS[3].name }),
+    text: () => `畳・床の間・障子・ふすまが そろった ${W.shoin}は、今の <b>和室</b>の もとに なったね。` },
+  { scene: 'ginkaku', icon: '🌕', title: '銀閣を 見る', video: 'NaYo5AJu4bY',
+    setup: () => { S.ginkakuRevealed = true; },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.ginkaku}には 銀ぱくが はられていなかった。${W.yoshimasa}が えらんだのは、はでさより ${ruby('静けさ', 'しずけさ')}だったね。` },
+  { scene: 'noh', icon: '🎭', title: '能面の ひみつ', video: 'GeOXwBmB618',
+    setup: () => { S.nohAngle = 0; S.nohTried = new Set([-2, -1, 0, 1, 2]); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `同じ 面なのに、上に むけると 明るく（<b>照らす</b>）、下に むけると 悲しく（<b>曇らす</b>）見える。光の 当たり方だけで 表情が 変わって 見えるんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1133,11 +1153,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.higashiyama}は 見た目の はでさより、<b>わび・さび</b>という しずかで ふかい 美しさを 大切に したんだ。<br><br>💡 <b>たいせつポイント</b><br>この時代、${W.sesshu}は 墨の こさ・うすさだけで 山や 川を えがく「水墨画」を 完成させた。色を つかわないのに、ゆたかな 世界が 見える——これも 東山文化の わび・さびと 同じ 考え方だよ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア はでで 目立つこと', 'イ 見た目より 心や 静けさ', 'ウ お金を かけること'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#7d8a5c;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
