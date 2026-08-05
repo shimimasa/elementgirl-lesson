@@ -923,7 +923,26 @@ function startGrow() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_water', 'm_air', 'm_temp', 'm_light', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_water', 'm_air', 'm_temp', 'm_light', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5つのミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { icon: '💧', title: '水のなぞ', video: '9EwnTaSCtlA',
+    setup: () => { Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_water.A }, B: { ...MISSIONS.m_water.B } }, growT: 1, growDay: GROW_DUR, scope: { type: 'sprout' } }); },
+    text: () => `②だけ めが 出たね。たねが めを 出すには <b>${W.mizu}</b>が ひつようだったね。` },
+  { icon: '🌬️', title: '空気のなぞ',
+    setup: () => { Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_air.A }, B: { ...MISSIONS.m_air.B } }, growT: 1, growDay: GROW_DUR, scope: { type: 'sprout' } }); },
+    text: () => `④だけ めが 出たね。めを 出すにも <b>${W.kuuki}</b>が ひつようだったね。` },
+  { icon: '🌡️', title: '温度のなぞ',
+    setup: () => { Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_temp.A }, B: { ...MISSIONS.m_temp.B } }, growT: 1, growDay: GROW_DUR, scope: { type: 'sprout' } }); },
+    text: () => `⑥だけ めが 出たね。ちょうどよい <b>${W.ondo}</b>も ひつようだったね。` },
+  { icon: '☀️', title: '日光・肥料のなぞ',
+    setup: () => { Object.assign(S, { stageMode: 'pots', mission: { A: { ...MISSIONS.m_light.A }, B: { ...MISSIONS.m_light.B } }, growT: 1, growDay: GROW_DUR, scope: { type: 'sprout' } }); },
+    text: () => `⑦⑧、りょうほう めが 出たね。${W.nikkou}や ${W.hiryou}は 発芽そのものには <b>${W.kankei}ない</b>！ ${ruby('育', 'そだ')}つ（${W.seichou}）ときに ひつようになるんだったね。` },
+  { icon: '🔬', title: 'たねの中のなぞ', video: 'Ak6k5IT_PAk',
+    setup: () => { Object.assign(S, { stageMode: 'cut', iodine: 1, dropY: 1, scope: { type: 'starch' } }); },
+    text: () => `${ruby('青紫色', 'あおむらさきいろ')}に かわったね。たねの中には <b>${W.youbun}（でんぷん）</b>が たくわえられていたんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1154,6 +1173,50 @@ const STEPS = {
       sYes(); scopeBurst(); award('hakase');
       say(`✨ ${ruby('青紫色', 'あおむらさきいろ')}に かわった！ ✨ ${hit}<br><br>💡 <b>たいせつポイント</b><br>青むらさき色に なったのは <b>${W.youbun}（でんぷん）</b>が ある しょうこ！ たねの中の ${W.shiyou}（ふたばに なる ところ）に、めを 出す ための エネルギーが たくわえられて いたんだ。フタバの はっぱの もとにも、この でんぷんが つかわれたんだよ。`);
       setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+    },
+  },
+
+  // --- ふりかえりタイム：5つのミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#3f8a2e;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+      }
     },
   },
 
