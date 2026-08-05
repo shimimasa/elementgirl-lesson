@@ -870,7 +870,31 @@ function markPicked(el) {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kiso', 'm_kyoku', 'm_makisuu', 'm_denryu', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kiso', 'm_kyoku', 'm_makisuu', 'm_denryu', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kiso', icon: '🧲', title: '電磁石の正体', video: 'fW-s3PWhNO8',
+    setup: () => { Object.assign(S, { circuitOn: true, clipAttached: true, kisoAnimT: 1 }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.denryuu}を 流すと、コイルが 電磁石に なって クリップが くっついた。回路を 切ると、クリップは ポロッと 落ちたね。${W.denryuu}が 流れている 間だけ 磁石に なるのが、電磁石の ひみつだったね。` },
+  { scene: 'kyoku', icon: '🧭', title: '極を調べる', video: '4EgeaWnOFuM',
+    setup: () => { Object.assign(S, { battFlipped: true, compassChecked: 1 }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.houi}で 極を 調べると、電池の 向きを 変えた とき、電磁石の N極・S極が 入れかわったね。${W.denryuu}の 向きを 変えると、極も 入れかわるんだったね。` },
+  { scene: 'makisuu', icon: '🌀', title: '巻き数で強さをためす', video: '-FugogntY2w',
+    setup: () => { Object.assign(S, { makiLevel: MAKI_TARGET, makiAnimT: 1, makiResult: 'good' }); },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `${W.makisuu}を ふやしていくと、目ひょうの ${MAKI_TARGET}こを こえて クリップが 持ち上がったね。${W.makisuu}を 増やすほど、電磁石は 強くなるんだったね。` },
+  { scene: 'denryu', icon: '🔋', title: '電流の大きさ', video: '-FugogntY2w',
+    setup: () => { Object.assign(S, { battCount: 2, denAnimT: 1, denryuTested: new Set([1, 2]) }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `かん電池を 2こ ${W.chokuretsu}に すると、1こより ずっと 多く クリップが 持ち上がったね。${W.denryuu}が 大きいほど、電磁石は 強くなるんだったね。` },
+  { scene: 'hakase', icon: '🏗️', title: '身のまわりの電磁石',
+    setup: () => { Object.assign(S, { hakaseFound: new Set(HAKASE_POINTS.map(p => p.key)) }); },
+    scope: () => ({ type: 'point', name: HAKASE_POINTS[0].name }),
+    text: () => `モーター・スピーカー・くず鉄クレーン・リニアモーターカー……電磁石は 身のまわりの いろいろな ところで 使われていたね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1114,11 +1138,56 @@ const STEPS = {
       if (i === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 電磁石は ${W.denryuu}の 大きさや 向きを 変えるだけで、強さや 極を 自由に コントロールできる。くず鉄クレーンのように <b>${W.denryuu}を 切って パッと はなす</b>ことも、${W.eikyuu}には できない 電磁石ならではの 特ぎなんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['永久磁石より 安いから', '電流を 変えることで、強さや 向き、ON/OFFを 自由に あやつれるから', '形を 変えられるから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#8fb8e8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
