@@ -841,7 +841,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kankyo', 'm_kaitaku', 'm_shukka', 'm_relay', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kankyo', 'm_kaitaku', 'm_shukka', 'm_relay', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッション+はかせの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kankyo', icon: '🏔️', title: '高原の 環境発見', video: 'vvcodVcaWRg',
+    setup: () => { S.kankyoFound = new Set(KANKYO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.tsumagoi}の 畑は、標高700〜1400mという 高い ところに あり、ふもとの まちより ずっと すずしい。キャベツが 好む 15〜20℃くらいの 気温と、昼と 夜の 大きな 気温差が、あまみの ある キャベツを 育てる ひみつだったね。` },
+  { scene: 'kaitaku', icon: '🏘️', title: '村の 開拓',
+    setup: () => { S.kaitakuFound = new Set(KAITAKU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `今から 約90年前、${W.tsumagoi}は「日本一 まずしい 村」と 言われるほど 苦しかった。土地を 改良する 人、野菜づくりを 教える 人、道を 作る 人……みんなが 力を 合わせて、今の キャベツの村を 作り上げたんだ。` },
+  { scene: 'shukka', icon: '📅', title: '出荷カレンダー',
+    setup: () => { S.shukka = { month: 5, priceF: 94 }; },
+    scope: () => ({ type: 'price' }),
+    text: () => `他の 産地では あつすぎて キャベツが 作れない 夏（7〜9月）だからこそ、すずしい 高原の ${W.tsumagoi}は 高い ねだんで 出荷できる。${W.tsumagoi}は 夏秋キャベツの 出荷量、日本一だったね。` },
+  { scene: 'relay', icon: '🗾', title: '産地リレー',
+    setup: () => { S.relayFound = new Set(RELAY_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `春は 関東、夏〜秋は ${W.tsumagoi}などの 高原、冬は 愛知や 千葉……季節ごとに 適した 場所で 作られた キャベツが、リレーの ように バトンを つないで、一年中 とどけられているんだ。` },
+  { scene: 'hakase', icon: '🚚', title: '畑から 食たくまで',
+    setup: () => { S.truckT = 1; },
+    scope: () => ({ type: 'truck' }),
+    text: () => `${W.horeitr}の 中は 温度が 一定に 保たれ、キャベツは とれたての 新鮮さの まま、何百kmも はなれた 都市の お店まで とどけられる。道路が 整備された ことも、この しくみを ささえて いるんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1114,11 +1138,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.horeitr}の 中は 温度が 一定に 保たれ、キャベツは とれたての 新鮮さの まま、何百kmも はなれた 都市の お店まで とどけられる。道路が 整備された ことも、この しくみを ささえて いるんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 収穫して すぐ 冷凍して しまうから', 'イ 保冷トラックと 整った 道路で、すばやく 新鮮な まま 運ぶから', 'ウ キャベツは もともと 日もちが するから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッション+はかせの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#5a4020;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
