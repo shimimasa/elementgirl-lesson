@@ -922,7 +922,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_taifu', 'm_kufuu', 'm_mamoru', 'm_ima', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_taifu', 'm_kufuu', 'm_mamoru', 'm_ima', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッション+はかせの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'taifu', icon: '🌀', title: '台風を 知る', video: 'r0RuGmwYdeU',
+    setup: () => { S.taifuFound = new Set(TAIFU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `沖縄は 南の あたたかい海で 生まれた ${W.taifu}が 日本へ 向かう「通り道」に あり、毎年 何こも やってくる。1966年には ${W.miyako}で ${W.fuusoku}（秒速85.3m）という、日本一の 記録も 残っているよ。` },
+  { scene: 'kufuu', icon: '🏠', title: '家の 工夫', video: 'r0RuGmwYdeU',
+    setup: () => { S.kufuuFound = new Set(KUFUU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.akagawara}を ${W.shikkui}で 固め、${W.ishigaki}や ${W.fukugi}で 家を かこう。屋根を 低く 平らに つくることも、強い 風を 受け流す 昔ながらの 知恵だったね。` },
+  { scene: 'mamoru', icon: '🦁', title: '台風から 家を 守れ',
+    setup: () => { Object.assign(S, { windLevel: 5, windAnimT: 1, windResult: 'ok', windDoneT: 0 }); },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `風の 強さ ⑤（秒速 約35m）くらいまでなら、工夫を こらした 家は しっかり 持ちこたえた。でも 目もり⑦⑧の 猛烈な 風には、さすがに 瓦が 飛ばされてしまったね。工夫にも 限界が あるんだ。` },
+  { scene: 'ima', icon: '🏢', title: '今の くらし',
+    setup: () => { S.imaFound = new Set(IMA_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `今の 沖縄は 8わり以上の 家が ${W.tekkin}づくり。1949年の 大きな 台風の 経験も きっかけの ひとつ。屋上の 貯水タンクも、断水に そなえる 今の 工夫だったね。` },
+  { scene: 'hakase', icon: '🌼', title: 'あたたかい気候をいかした産業', video: 'r0RuGmwYdeU',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.denshougiku}は 出荷量 日本一、${W.satoukibi}は 台風にも 強い 沖縄いちばんの 作物。あたたかい 気候を うまく 生かす、それが 沖縄の くらしの 知恵なんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1191,11 +1215,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.denshougiku}は 出荷量 日本一、${W.satoukibi}は 台風にも 強い 沖縄いちばんの 作物、そして 美しい ${W.sango}の 海は 観光や 漁業の めぐみに。<br><br>💡 <b>たいせつポイント</b><br>台風と 向き合いながら、あたたかい 気候を うまく 生かす……それが 沖縄の くらしの 知恵なんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア こまった ことしか ない', 'イ あたたかさを 生かした 産業が たくさん 生まれている', 'ウ 何も 関係ない'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッション+はかせの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#7a5230;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
