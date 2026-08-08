@@ -870,7 +870,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kokuren', 'm_sdgs', 'm_tsunagari', 'm_kyouryoku', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kokuren', 'm_sdgs', 'm_tsunagari', 'm_kyouryoku', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッション(はかせ含む)の場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kokuren', icon: '🏛️', title: '国連の しくみさがし', video: 'ybpzOUNoEyE',
+    setup: () => { S.kokurenFound = new Set(KOKUREN.map(k => k.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.kokuren}には、みんなで 話しあう ${W.sokai}や、世界の 平和を 守る ${W.anpori}、子どもを 守る ユニセフなど、いろいろな 役目の 場所が あったね。` },
+  { scene: 'sdgs', icon: '🎯', title: 'SDGs17の 目標さがし', video: 'ybpzOUNoEyE',
+    setup: () => { S.sdgsFound = new Set(SDGS.map(s => s.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `SDGsには 17の 目標が あったね。貧困・教育・水・気候変動……どれも 世界中の 人が 力を あわせないと 解決できない 課題なんだ。` },
+  { scene: 'tsunagari', icon: '🚰', title: '井戸プロジェクトの つながり', video: null,
+    setup: () => { S.tsunagariFound = new Set(TSUNAGARI.map(t => t.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1つの 井戸が、水・健康・教育・平等……いくつもの SDGs目標に つながったね。世界の 課題は、たがいに つながりあっているんだ。` },
+  { scene: 'kyouryoku', icon: '🤝', title: '日本の 国際協力さがし', video: 'JTb20Ajxc7E',
+    setup: () => { S.kyouryokuFound = new Set(KYOURYOKU.map(k => k.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.oda}・${W.jica}・${W.kyoryokutai}……日本も 世界の 課題解決に 協力していたね。` },
+  { scene: 'hakase', icon: '🌍', title: '世界と 助けあう 日本', video: null,
+    setup: () => {},
+    scope: () => ({ type: 'stat' }),
+    text: () => `東日本大震災の とき、159の 国・地域と、43の 国際機関から「支援したい」という 申し出が あったね。国際協力は、いつも 一方通行では ないんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1130,11 +1154,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 国際協力は、いつも 一方通行では ないんだ。日本が 世界を 助けることも、世界が 日本を 助けてくれることも ある。そうやって、世界は みんな つながっているんだね。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 日本が 一方的に 助けてあげる 関係', 'イ 世界中の 国と 国が、おたがいに 助けあう 関係', 'ウ お金が ある 国だけが 得を する 関係'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッション(はかせ含む)の場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#4f7f8f;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
