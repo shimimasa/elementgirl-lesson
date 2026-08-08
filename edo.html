@@ -843,7 +843,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_ieyasu', 'm_hatto', 'm_sankin', 'm_kaido', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_ieyasu', 'm_hatto', 'm_sankin', 'm_kaido', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッション+はかせの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'ieyasu', icon: '⚔️', title: '家康の 天下統一', video: '7TZrx3uT3wY',
+    setup: () => { S.ieyasuFound = new Set(IEYASU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.ieyasu}は ${W.sekigahara}に 勝利し、1603年に ${W.seiitaishougun}に 任命されて ${W.bakufu}を 開いた。ここから 江戸時代が 始まったんだ。` },
+  { scene: 'hatto', icon: '📜', title: '大名統制の しくみ', video: '9F9UbIoiZDk',
+    setup: () => { S.hattoFound = new Set(HATTO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.buke}で 大名たちを 取りしまり、信頼できる ${W.fudai}は 江戸の 近くに、${W.tozama}は 遠くに 置いて、反乱を 起こしにくくしたんだ。` },
+  { scene: 'sankin', icon: '🎌', title: '参勤交代', video: '9F9UbIoiZDk',
+    setup: () => { S.sankin = { levelF: 4 }; S.sankinLevel = 4; S.tryT = 1; },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `大名は 1年おきに 江戸と 領地を 行き来した。${W.kaga}のような 大きな 大名ほど、行列も 大がかりに なる。石高に 見合った 行列を 整えるのは、大名に とって 大きな 負担だったんだ。` },
+  { scene: 'kaido', icon: '🛤️', title: '五街道と 宿場町',
+    setup: () => { S.kaidoFound = new Set(KAIDO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.sankinkoutai}の おかげで ${W.gokaidou}が 整備され、${W.shukubamachi}は 大いに にぎわった。大名を おさえこむ しくみが、思わぬ 交流も 生み出したんだね。` },
+  { scene: 'hakase', icon: '🏯', title: '家光と 幕藩体制', video: '9PLGGS54YsU',
+    setup: () => {},
+    scope: () => ({ type: 'idle' }),
+    text: () => `3代将軍・${W.iemitsu}が ${W.sankinkoutai}を 制度化し、大名統制の しくみが しっかり 機能した。こうして 江戸幕府は 約260年もの 長い間、続くことに なるよ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1092,11 +1116,56 @@ const STEPS = {
       if (n === 2) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 大名統制の しくみが しっかり 機能し、江戸幕府は 約260年もの 長い間 続いた。<br><br>💡 <b>たいせつポイント</b><br>この 長く 安定した 世の中の しくみを「${W.bakuhan}」と いうよ。大きな 戦が ない 平和な 時代が、長く 続いたんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 約30年', 'イ 約100年', 'ウ 約260年'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッション+はかせの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#8a4a3a;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
