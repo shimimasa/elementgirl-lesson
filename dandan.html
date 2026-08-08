@@ -883,7 +883,31 @@ function markPicked(el) {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kuki', 'm_kinzoku', 'm_dendou', 'm_tairyu', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kuki', 'm_kinzoku', 'm_dendou', 'm_tairyu', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kuki', icon: '💨', title: '空気の温度と体積', video: 'V7vAHjhG7Uo',
+    setup: () => { Object.assign(S, { kukiState: 'hot', kukiAnimT: 1, kukiTried: new Set(['hot', 'cold']) }); },
+    scope: () => ({ type: 'thermo', temp: KUKI_HOT_T }),
+    text: () => `お湯につけると せっけんの膜が ふくらみ、氷水につけると へこんだね。空気は あたためると ${W.taiseki}が 増え、冷やすと 減る。` },
+  { scene: 'kinzoku', icon: '🔩', title: '金属の温度と体積', video: 'tIkWzJZDV24',
+    setup: () => { Object.assign(S, { kinzokuState: 'fire', kinzokuAnimT: 1, kinzokuTried: new Set(['hotwater', 'fire']) }); },
+    scope: () => ({ type: 'thermo', temp: 100, over: true }),
+    text: () => `火であぶった ${W.kinzoku}の球は 大きくなって 輪を 通らなくなったね。${W.kinzoku}も 温度で ${W.taiseki}が 変わるけど、空気ほど 大きくは 変わらないんだ。` },
+  { scene: 'dendou', icon: '🔥', title: '金属のあたたまり方', video: 'U_S7xY2TD2c',
+    setup: () => { Object.assign(S, { dendouIdx: 8, dendouIdxDisplay: 8, scope: { type: 'thermo', temp: 60 } }); },
+    scope: () => ({ type: 'thermo', temp: 60 }),
+    text: () => `熱した点に 近い方から 順番に、示温インクの 色が 変わっていったね。${W.kinzoku}は 熱した点から 順番に あたたまる。これを <b>${W.dendou}</b>と いう。` },
+  { scene: 'tairyu', icon: '🌊', title: '水と空気のあたたまり方', video: '-ScD_zoxc-M',
+    setup: () => { Object.assign(S, { tairyuAnimT: 1, tairyuHeated: true }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `水そうの底を 熱すると、あたたまった 水が 上へ 動いて、全体に 伝わっていったね。水や 空気は あたたまった 部分が 動いて 全体に 伝わる。これを <b>${W.tairyu}</b>と いう。` },
+  { scene: 'hakase', icon: '🍳', title: 'くらしの中の伝導・対流', video: null,
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: HAKASE_POINTS[0].name, icon: HAKASE_POINTS[0].icon }),
+    text: () => `フライパンの取っ手・エアコンの設置・魔法びんのしくみ・線路のつなぎ目……${W.dendou}と ${W.tairyu}の ひみつは、くらしの いろいろな ところに いかされていたね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1152,11 +1176,56 @@ const STEPS = {
       if (i === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ なべつかみや 厚手の 布を 使って、やけどに 気をつけよう。急に 冷やすと 割れることも あるので 注意。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['素手ですぐ持つ', 'なべつかみや厚手の布を使う', '冷たい水で急に冷やす'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#3a7ab8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
