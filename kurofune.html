@@ -854,7 +854,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kurofune', 'm_riyu', 'm_kaikou', 'm_joyaku', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kurofune', 'm_riyu', 'm_kaikou', 'm_joyaku', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kurofune', icon: '⚓', title: '黒船の正体', video: '7rEBMlJWVHc',
+    setup: () => { S.kurofuneFound = new Set(KUROFUNE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: KUROFUNE_POINTS[0].name }),
+    text: () => `蒸気船と 大砲の 力、真っ黒い 煙……見たことも ない 黒船に、江戸の 人々は 大さわぎに なったね。` },
+  { scene: 'riyu', icon: '✉️', title: '開国を せまる わけ', video: '98Q3f6jmNmM',
+    setup: () => { S.riyuFound = new Set(RIYU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: RIYU_POINTS[0].name }),
+    text: () => `燃料・食料の 補給地が ほしい、貿易も したい……アメリカの 願いから、${W.washin}が むすばれたね。` },
+  { scene: 'kaikou', icon: '🗺️', title: '開港地さがし',
+    setup: () => { S.kaikouFound = new Set(KAIKOU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'map', name: '下田・箱館' }),
+    text: () => `${W.washin}で、下田と 箱館の 2つの 港が 開かれたね。下田は すぐに、箱館は 1年後に 開港されたよ。` },
+  { scene: 'joyaku', icon: '⚖️', title: '見えない 不平等',
+    setup: () => { S.joyakuFound = new Set(JOYAKU_POINTS.map(p => p.key)); S.joyakuTilt = 1; },
+    scope: () => ({ type: 'tilt' }),
+    text: () => `${W.chigaihouken}も ${W.kanzeijishu}が ないことも、どちらも 外国側に 有利な しくみ。だから「不平等条約」と よばれたね。` },
+  { scene: 'hakase', icon: '📜', title: '条約改正への みちのり',
+    setup: () => {},
+    scope: () => ({ type: 'scroll', name: '条約改正' }),
+    text: () => `${W.mutsu}は 1894年に ${W.chigaihouken}の 撤廃に、${W.komura}は 1911年に ${W.kanzeijishu}の 回復に 成功した。半世紀 かけて、対等な 国づくりを 目ざしたんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1124,11 +1148,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.mutsu}は 1894年に ${W.chigaihouken}の 撤廃に、${W.komura}は 1911年に ${W.kanzeijishu}の 回復に 成功した。<br><br>💡 <b>たいせつポイント</b><br>黒船来航から 条約改正まで、じつに 半世紀 以上。日本は 近代化を 進めながら、こつこつと 対等な 国づくりを 目ざしていったんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 外国と 戦争を して 無理やり 変えさせた', 'イ 近代的な 制度を 整え、対等な 国だと 認めて もらえるよう 努力した', 'ウ 何も せずに そのままに した'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#7a6420;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
