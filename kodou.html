@@ -889,7 +889,31 @@ function markPicked(el) {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kokyu', 'm_shinzou', 'm_myaku', 'm_junkan', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kokyu', 'm_shinzou', 'm_myaku', 'm_junkan', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kokyu', icon: '🫁', title: '肺のはたらき', video: 'VCym-8rUp3s',
+    setup: () => { Object.assign(S, { breathT: 0, breathTried: new Set(['in', 'out']), scope: { type: 'particles', o2: OUT_O2, co2: OUT_CO2, label: `酸素 ${OUT_O2}%　二酸化炭素 ${OUT_CO2}%` } }); },
+    scope: () => ({ type: 'particles', o2: OUT_O2, co2: OUT_CO2, label: `酸素 ${OUT_O2}%　二酸化炭素 ${OUT_CO2}%` }),
+    text: () => `大きく すって、はき出して たしかめたね。はく息は ${W.sanso}が ${IN_O2}%→${OUT_O2}%に 減り、${W.nisan}が 増えていた。${W.hai}では、すった 空気の ${W.sanso}を 血液に わたす ガス${W.koukan}が おきている。` },
+  { scene: 'shinzou', icon: '💓', title: '心臓のしくみ', video: 'qBNuk9lmrdA',
+    setup: () => { Object.assign(S, { chamberFound: new Set(HEART_CHAMBERS.map(c => c.key)), scope: { type: 'point', icon: '💓', name: ruby('左心室', 'さしんしつ') } }); },
+    scope: () => ({ type: 'point', icon: '💓', name: ruby('左心室', 'さしんしつ') }),
+    text: () => `${W.shinzou}には 4つの 部屋が あったね。1分間に やく${HEART_RATE_REST}回、規則正しく うごく 休まない ポンプ。1回に やく${STROKE_VOL_ML}mLの 血液を 送り出す。` },
+  { scene: 'myaku', icon: '🏃', title: '脈をはかろう', video: 'zg9lLbP3r3g',
+    setup: () => { Object.assign(S, { myakuIdx: 4, myakuIdxDisplay: 4, scope: { type: 'blood', bpm: MYAKU_STEPS[4], label: `1分間に ${MYAKU_STEPS[4]}回` } }); },
+    scope: () => ({ type: 'blood', bpm: MYAKU_STEPS[4], label: `1分間に ${MYAKU_STEPS[4]}回` }),
+    text: () => `運動が 強くなるほど、みゃくはくが 速くなったね。筋肉が たくさんの ${W.sanso}を 必要と するから、${W.shinzou}が 血液を はやく 送り出す。` },
+  { scene: 'junkan', icon: '🩸', title: '血液の旅', video: 'hiIw5SmNAyI',
+    setup: () => { Object.assign(S, { junkanFound: new Set(JUNKAN_POINTS.map(p => p.key)), scope: { type: 'point', icon: '🩸', name: JUNKAN_POINTS[2].name } }); },
+    scope: () => ({ type: 'point', icon: '🩸', name: JUNKAN_POINTS[2].name }),
+    text: () => `血液は ${W.shinzou}→${W.hai}→${W.shinzou}→${W.zenshin}→${W.shinzou}と めぐっていたね。${W.sanso}と ${W.yobun}を 全身に とどけ、${W.nisan}を 受けとって もどる、この くりかえしが ${W.junkan}。` },
+  { scene: 'hakase', icon: '🔎', title: 'はかせチャレンジ', video: null,
+    setup: () => { Object.assign(S, { hakaseFound: new Set(HAKASE_POINTS.map(p => p.key)), scope: { type: 'point', name: HAKASE_POINTS[0].name, icon: HAKASE_POINTS[0].icon } }); },
+    scope: () => ({ type: 'point', name: HAKASE_POINTS[0].name, icon: HAKASE_POINTS[0].icon }),
+    text: () => `${W.shinzou}は 1日に やく10万回。血液は ${W.zenshin}を やく1分で ひとめぐり。血液の重さは 体重の やく13分の1。びっくりする 数字が いっぱいだったね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1180,11 +1204,56 @@ const STEPS = {
       if (i === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.shinzou}は 1日に やく<b>10万回</b>も うち続けている。休むことなく はたらき続ける、すごい 筋肉なんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['やく1万回', 'やく10万回', 'やく100万回'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#3a7ab8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
