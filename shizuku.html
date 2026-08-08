@@ -949,7 +949,31 @@ function markPicked(el) {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_seibetsu', 'm_tamago', 'm_ninshin', 'm_hozo', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_seibetsu', 'm_tamago', 'm_ninshin', 'm_hozo', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'seibetsu', icon: '🐟', title: 'メダカのおす・めす', video: 'asj9sl_RIRc',
+    setup: () => { Object.assign(S, { seibetsuState: 'male', seibetsuTried: new Set(['male', 'female']) }); },
+    scope: () => ({ type: 'point', icon: '🐟', name: 'オス' }),
+    text: () => `${W.sebire}の 切れこみと、${W.shiribire}の 形が、メダカの おす・めすを 見分ける ポイントだったね。` },
+  { scene: 'tamago', icon: '🥚', title: 'メダカのたまごの変化', video: '_LNIIOn-hws',
+    setup: () => { Object.assign(S, { tamagoIdx: 8, tamagoIdxDisplay: 8 }); },
+    scope: () => ({ type: 'tamagopeek', elapsed: TAMAGO_ELAPSED[8] }),
+    text: () => `メダカは 受精してから 約10日ほどで ふ化する。日が たつごとに、目や 心臓、ひれが できていく ようすが 見えたね。` },
+  { scene: 'ninshin', icon: '👶', title: '人がうまれるまで', video: 'tVuG1a_KR2w',
+    setup: () => { Object.assign(S, { ninshinIdx: 7, ninshinIdxDisplay: 7 }); },
+    scope: () => ({ type: 'ninshinpeek', week: NINSHIN_ELAPSED[7] }),
+    text: () => `人は ${W.jusei}してから 約38週(約266日)で うまれる。メダカの 約10日と くらべると、ずっと 長い 時間を かけて 育つ。` },
+  { scene: 'hozo', icon: '💞', title: 'へそのお・たいばんのひみつ', video: 'tVuG1a_KR2w',
+    setup: () => { S.hozoFound = new Set(HOZO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: HOZO_POINTS[0].name, icon: HOZO_POINTS[0].icon }),
+    text: () => `赤ちゃんは 自分で 食べたり 呼吸したり しない。${W.taiban}と へそのおを 通して、お母さんの 体から 栄養と 酸素を もらっている。` },
+  { scene: 'hakase', icon: '📖', title: '動物の妊娠期間くらべ', video: 'tVuG1a_KR2w',
+    setup: () => { S.hakaseFound = new Set(ANIMALS.map(a => a.key)); },
+    scope: () => ({ type: 'point', name: ANIMALS[3].name + `　約${ANIMALS[3].days}日`, icon: ANIMALS[3].icon }),
+    text: () => `体が 大きい 動物ほど、生まれるまでの 時間が 長い 傾向が ある。小さな いのちも、大きな いのちも、ちゃんと 育つまでには 時間が かかる。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1215,11 +1239,56 @@ const STEPS = {
       if (i === 0) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say('せいかい！ 体が 大きい 動物ほど、生まれるまでの 時間が 長い 傾向が ある。小さな いのちも、大きな いのちも、ちゃんと 育つまでには 時間が かかる。生まれてきた いのちを、大切に しよう。');
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say('ちがうよ。もういちど かんがえてみよう。');
         setButtons(choiceRow(['大きい動物ほど日数が長い', '大きい動物ほど日数が短い', '関係ない'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#178a76;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
