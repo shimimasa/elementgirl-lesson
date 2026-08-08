@@ -969,7 +969,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_ryuhyo', 'm_kufuu', 'm_yane', 'm_ima', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_ryuhyo', 'm_kufuu', 'm_yane', 'm_ima', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションを1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'ryuhyo', icon: '🧊', title: '流氷を 知る',
+    setup: () => { S.ryuhyoFound = new Set(RYUHYO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.ryuhyou}は ${W.amuru}の 水が こおって できたもの。海を わたって、およそ1000kmも 旅を して 北海道の岸まで やってくる。とけると 鉄分や 栄養が 海に 流れ出して、${W.hyousou}が ふえる「海の めぐみ」でも あったね。` },
+  { scene: 'kufuu', icon: '🏠', title: '家の 工夫', video: 'tMLVlorGp4I',
+    setup: () => { S.kufuuFound = new Set(KUFUU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.nijuumado}・${W.fuujoshitsu}・厚い ${W.dannetsu}……どれも 寒さから 家の中の あたたかさを 守るための 昔ながらの 工夫だったね。` },
+  { scene: 'yane', icon: '❄️', title: '雪から 家を 守れ', video: 'tMLVlorGp4I',
+    setup: () => { Object.assign(S, { yaneLevel: 5, yaneAnimT: 1, yaneResult: 'good', yaneDoneT: 0 }); },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `屋根の かたむき ③〜⑥くらいなら、雪が 自然に すべり落ちた。①②では 雪の 重みが 心配、⑦⑧では 一気に なだれ落ちてしまう。ちょうど よい かたむきが 大事だったね。` },
+  { scene: 'ima', icon: '🚜', title: '今の くらし', video: 'tMLVlorGp4I',
+    setup: () => { S.imaFound = new Set(IMA_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.roadheat}や ${W.josetsusha}、ピンの ない ${W.studless}、雪を まん中に 集める ${W.muraku}……今の 北海道は 新しい 工夫で 雪と じょうずに つきあっているね。` },
+  { scene: 'hakase', icon: '🐄', title: '寒さを いかした 産業',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.rakunou}は 生乳生産量 日本一、${W.jagaimo}や ${W.tensai}は 北海道が 大きな 産地、${W.ryuhyou}観光も 冬ならではの 楽しみ。寒さと 向き合いながら、その 気候を うまく 生かすのが 北海道の くらしの 知恵だったね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1238,11 +1262,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.rakunou}は 生乳生産量 日本一、${W.jagaimo}や ${W.tensai}は 北海道が 大きな 産地、そして ${W.ryuhyou}観光も 冬ならではの 楽しみ。<br><br>💡 <b>たいせつポイント</b><br>寒さと 向き合いながら、その 気候を うまく 生かす……それが 北海道の くらしの 知恵なんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア こまった ことしか ない', 'イ 寒さや 雪を 生かした 産業や 楽しみ方が たくさん 生まれている', 'ウ 何も 関係ない'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションを1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#1f5c78;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
