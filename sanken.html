@@ -937,7 +937,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_yakuwari', 'm_yaji', 'm_kokumin', 'm_kuzureru', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_yakuwari', 'm_yaji', 'm_kokumin', 'm_kuzureru', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッション(はかせ含む)の場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'yakuwari', icon: '🏛️', title: '三権の やくわり', video: 'MCOUrBSvwZo',
+    setup: () => { S.yakuwariFound = new Set(SANKEN.map(s => s.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `国会は ${W.rippou}、内閣は ${W.gyousei}、裁判所は ${W.shihou}を それぞれ もっている。3つの 機関が、はっきり 役割を 分けているんだね。` },
+  { scene: 'yaji', icon: '🔗', title: 'チェックの やじるし', video: 'NQH0bebTDxw',
+    setup: () => { S.yajiFound = new Set(YAJI.map(y => y.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `国会・内閣・裁判所は、6本の やじるしで おたがいを チェックしあっている。この しくみを「${W.kinkou}」と いうよ。` },
+  { scene: 'kokumin', icon: '🧑‍🤝‍🧑', title: '国民の 3つの 力', video: 'NQH0bebTDxw',
+    setup: () => { S.kokuminFound = new Set(KOKUMIN.map(k => k.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `国民も 選挙・${W.yoron}・${W.shinsa}の 3つの 力で、国会・内閣・裁判所を 見守っているんだ。` },
+  { scene: 'kuzure', icon: '⚖️', title: 'もし バランスが くずれたら', video: '6j2SrLq6dGw',
+    setup: () => { S.kuzureKey = 'normal'; S.kuzureTilt = 0; },
+    scope: () => ({ type: 'tilt' }),
+    text: () => `力を 1つに 集めず 3つに 分けるのは、権力が 集中して 国民の 自由や 権利が 守られなくなるのを 防ぐため。てんびんは 水平の ままが いいんだね。` },
+  { scene: 'hakase', icon: '📜', title: 'むかしと 今',
+    setup: () => {},
+    scope: () => ({ type: 'stat' }),
+    text: () => `1889年の 大日本帝国憲法では 力が 天皇に 集まっていたけど、1947年の 日本国憲法では 国会・内閣・裁判所の 3つに 分けて、おたがいに チェックしあう しくみに 変わったんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1205,11 +1229,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 力を 分けて おたがいに 見張りあうほど、1つの 機関だけの 思いどおりには なりにくい。テンビンのように バランスを とることが、みんなの 自由や 権利を 守ることに つながるんだ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 1つに 集める やり方', 'イ 3つに 分ける やり方', 'ウ どちらも 同じ'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッション(はかせ含む)の場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#6f5c96;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
