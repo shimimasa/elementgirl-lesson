@@ -907,7 +907,31 @@ function markPicked(el) {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_doukan', 'm_kyuusui', 'm_jousan', 'm_youbun', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_doukan', 'm_kyuusui', 'm_jousan', 'm_youbun', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'doukan', icon: '🔍', title: '水の通り道を発見', video: 'tnnpz2QM0LA',
+    setup: () => { Object.assign(S, { doukanFound: new Set([0, 1, 2, 3, 4, 5]), scope: { type: 'point', name: '⑥ 色のついた点', icon: '💧' } }); },
+    scope: () => ({ type: 'point', name: '⑥ 色のついた点', icon: '💧' }),
+    text: () => `くきの 輪切り 断面に、輪のように 並んだ 6つの 点（${W.doukan}）が 見つかったね。ここを 通って、根から 吸った 水が 体中に 運ばれる。` },
+  { scene: 'kyuusui', icon: '⏱️', title: '水を吸い上げる時間', video: 'tnnpz2QM0LA',
+    setup: () => { Object.assign(S, { kyuusuiIdx: KYUUSUI_LABEL.length - 1, kyuusuiIdxDisplay: KYUUSUI_LABEL.length - 1, scope: { type: 'water', frac: KYUUSUI_FRAC[KYUUSUI_FRAC.length - 1] } }); },
+    scope: () => ({ type: 'water', frac: KYUUSUI_FRAC[KYUUSUI_FRAC.length - 1] }),
+    text: () => `1分で 切り口、10分で 葉脈、1時間で 葉全体……と、色水は 時間を かけて 体中に 広がっていったね。植物は 休みなく 水を 吸い上げ続けている。` },
+  { scene: 'jousan', icon: '💧', title: '水はどこへ行く？', video: 'Vx2nyqKfGWE',
+    setup: () => { Object.assign(S, { jousanState: null, jousanTried: new Set(['withleaf', 'noleaf']), scope: { type: 'point', name: `${W.kiko}（葉のうら）`, icon: '🔬' } }); },
+    scope: () => ({ type: 'point', name: `${W.kiko}（葉のうら）`, icon: '🔬' }),
+    text: () => `葉の ある 枝だけ、ふくろの 内側に 水てきが ついたね。植物は 体の中の 水よりも ずっと 多い 水を、毎日 ${W.jousan}で 空気中に 出している（${JOUSAN_MIN_TIMES}〜${JOUSAN_MAX_TIMES}倍）。` },
+  { scene: 'youbun', icon: '🌞', title: '養分をつくる', video: 'fhvXTlHL7SM',
+    setup: () => { Object.assign(S, { youbunState: null, youbunTried: new Set(['covered', 'exposed']), scope: { type: 'point', name: '青むらさき色に変化', icon: '🟣' } }); },
+    scope: () => ({ type: 'point', name: '青むらさき色に変化', icon: '🟣' }),
+    text: () => `日光に 当たった 葉だけ、ヨウ素液で 青むらさき色に 変わったね。葉に 日光が 当たると、葉の中で ${W.yobun}（${W.koukousei}）が 作られる。` },
+  { scene: 'hakase', icon: '🌳', title: 'くらしの中の水と養分', video: null,
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'point', name: HAKASE_POINTS[0].name, icon: HAKASE_POINTS[0].icon }),
+    text: () => `木かげの すずしさ・みどりのカーテン・さんそを つくる 葉……水と 養分の しくみは、くらしの あちこちに いかされていたね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1193,11 +1217,56 @@ const STEPS = {
       if (i === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 葉が 水を ${W.jousan}させる 時、まわりから 熱を うばうので すずしくなる。うち水と 同じ しくみ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['かげになるだけ', '葉が水を蒸散させる時、まわりの熱をうばうから', '木はもともと冷たいから'], (i2, el2) => this.pick(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#2e7d32;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
