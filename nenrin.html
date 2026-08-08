@@ -1001,7 +1001,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_shurui', 'm_sodateru', 'm_kanbatsu', 'm_hataraki', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_shurui', 'm_sodateru', 'm_kanbatsu', 'm_hataraki', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションを1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'shurui', icon: '🌳', title: '森の 種類さがし',
+    setup: () => { S.shuruiFound = new Set(SHURUI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.tennenrin}は 自然に 育った いろいろな 木が まざる森、${W.jinkourin}は 人が ${W.sugi}や ${W.hinoki}を 植えて 育てる 森。日本の 森林の 約4わりが ${W.jinkourin}だったね。` },
+  { scene: 'sodateru', icon: '🌱', title: '木を 育てる 一生', video: 'M4PaMjNt93k',
+    setup: () => { Object.assign(S, { sodateruIdx: 4, sodateruH: SODATERU_STAGES[4].h }); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.naegi}を 植えてから、${W.shitakari}・${W.edauchi}・${W.kanbatsu}を くりかえし、${W.shubatsu}で 木材として 使えるまで <b>40〜50年</b>。とても 長い 時間を かけて 育てるんだったね。` },
+  { scene: 'kanbatsu', icon: '🪚', title: '間伐しよう', video: 'M4PaMjNt93k',
+    setup: () => { Object.assign(S, { kanbatsuLevel: 4, kanbatsuAnimT: 1, kanbatsuResult: 'good', kanbatsuTries: new Set([4]) }); },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `間伐の 量が ちょうど よいと、のこった 木に 日光が とどいて 下草が 育ち、根が 土を しっかり ささえてくれた。少なすぎても 多すぎても、地面が むきだしに なってしまったね。` },
+  { scene: 'hataraki', icon: '💧', title: '森の はたらき発見',
+    setup: () => { S.hatarakiFound = new Set(HATARAKI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.midorinodamu}で 水を たくわえ、空気を きれいに して、根が 土を ささえて ${W.doshasaigai}を ふせぐ……森には たくさんの はたらきが あったね。` },
+  { scene: 'hakase', icon: '🪑', title: '木材と わたしたちの くらし', video: 'KdPsqMbgQEo',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `木材${W.jikyuuritsu}は 2002年ごろ 大きく 落ちこんだけど、${W.kokusanzai}が 見直されて 今は 約4わりまで 回復。森を 育て、木を 使い、また 植える……そのくりかえしが わたしたちの くらしを 支えているんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1274,11 +1298,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 2002年ごろに 大きく 落ちこんだ 木材${W.jikyuuritsu}は、${W.kokusanzai}が 見直されて、今は 約4わりまで 回復してきている。<br><br>💡 <b>たいせつポイント</b><br>森を 育て、木を 使い、また 植える……この くりかえしが 続けば、森は これからも わたしたちの くらしを 支えてくれる。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 減り続けている', 'イ 下がりきってから、また 少しずつ 回復してきている', 'ウ ずっと 変わらない'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションを1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#1f5c78;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
