@@ -869,7 +869,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_shurui', 'm_nakattara', 'm_yosan', 'm_kokkai', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_shurui', 'm_nakattara', 'm_yosan', 'm_kokkai', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッション(はかせ含む)の場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'shurui', icon: '🏙️', title: '税金の 種類さがし', video: '07gFnucAz14',
+    setup: () => { S.shuruiFound = new Set(SHURUI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `税金には、納め先で 分ける ${W.kokuzei}と ${W.chihouzei}、納め方で 分ける ${W.chokusetsuzei}と ${W.kansetsuzei}が あったね。買い物の ときの ${W.shohizei}は ${W.kansetsuzei}だったね。` },
+  { scene: 'nakattara', icon: '❓', title: 'もし 税金が なかったら', video: 't3UYGGh6eDg',
+    setup: () => { S.nakattaraFound = new Set(NAKATTARA_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `学校・救急車・道路・消防……税金が なかったら、これらは お金を 払える 人しか 使えなく なって しまうかもしれない。税金は みんなで 出し合って、みんなが 使える サービスを ささえる しくみだったね。` },
+  { scene: 'yosan', icon: '🚧', title: '予算を くばろう', video: null,
+    setup: () => { S.yosanLevel = 4; S.yosan = { levelF: 4 }; },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `公共事業に 予算を 回しすぎても、少なすぎても 困る 人が 出て しまう。予算には 限りが あるから、バランスを 考えて 配分することが 大切だったね。` },
+  { scene: 'kokkai', icon: '🏛️', title: '予算は 誰が 決める？', video: 'Pf7Wv0MOin4',
+    setup: () => { S.kokkaiFound = new Set(KOKKAI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.naikaku}が つくった 予算案を、わたしたちが 選挙で 選んだ ${W.kokkai}議員が 話し合い（${W.shingi}）、決める（${W.giketsu}）んだったね。` },
+  { scene: 'hakase', icon: '📊', title: '日本の 予算の 内わけ', video: 'Jl3Tpv1exHc',
+    setup: () => {},
+    scope: () => ({ type: 'idle' }),
+    text: () => `年金・医療・介護などに 使われる ${W.shakaihoshou}が 予算の 約3分の1で いちばん 多かったね。${W.shoushikoureika}が 進む 日本では、この 金がくは これからも 増え続けると 言われているよ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1118,11 +1142,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 年金・医療・介護などに 使われる ${W.shakaihoshou}が 予算の 約3分の1で いちばん 多いんだ。${W.shoushikoureika}が 進む 日本では、この 金がくは これからも 増え続けると 言われているよ。また、税金だけでは 足りず、${W.kokusai}という 国の 借金にも たよっているんだ。<br><br>💡 <b>たいせつポイント</b><br>予算の バランスを どう とるかは、これからの 日本の 大きな 課題なんだね。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 防衛関係費', 'イ 社会保障関係費', 'ウ 公共事業関係費'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッション(はかせ含む)の場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#4a7256;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
