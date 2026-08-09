@@ -836,7 +836,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_metsubo', 'm_kenmu', 'm_onsho', 'm_nanboku', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_metsubo', 'm_kenmu', 'm_onsho', 'm_nanboku', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'metsubo', icon: '⚔️', title: '鎌倉幕府の滅亡', video: 'a_p2ATQK8d4',
+    setup: () => { S.metsuboFound = new Set(METSUBO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1333年、${W.hojo}が ほろび、150年ほど 続いた 鎌倉幕府は たおれたね。御家人だった ${W.ashikaga}が 幕府に そむき、${W.nitta}が 鎌倉を 攻めたことが、大きな きっかけに なったんだ。` },
+  { scene: 'kenmu', icon: '📜', title: '建武の新政と武士の不満', video: 'PBQaoS4jEJs',
+    setup: () => { S.kenmuFound = new Set(KENMU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.godaigo}は、公家を 重んじる ${W.kenmu}を 始めたね。でも 倒幕に 手がらの あった 武士への ${W.onsho}が 不十分で、${W.nijou}に あるように、武士たちの 不満は 高まる 一方だったんだ。` },
+  { scene: 'onsho', icon: '⚖️', title: '恩賞のバランス',
+    setup: () => { S.onsho = { tiltF: 0 }; S.onshoLevel = 5; },
+    scope: () => ({ type: 'tilt' }),
+    text: () => `武士たちへの ${W.onsho}の 量を、ちょうどよい バランスで くばれたね。でも 実さいの 建武の新政では、この バランスが うまく 取れず、多くの 武士が 不満を つのらせて しまったんだ。` },
+  { scene: 'nanboku', icon: '🗾', title: '南北朝の分裂', video: 'a_p2ATQK8d4',
+    setup: () => { S.nanbokuFound = new Set(NANBOKU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.ashikaga}は 京都で ${W.komei}を たてて ${W.hokuchou}を、${W.godaigo}は ${W.yoshino}へ うつって ${W.nanchou}を 主張したね。天皇が 同時に 2人 いる、ふしぎな ${W.nanbokuchou}が 始まったんだ。` },
+  { scene: 'hakase', icon: '🏯', title: '室町幕府と南北朝の統一', video: 'a_p2ATQK8d4',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1338年、${W.ashikaga}が ${W.seiitaishougun}に 任命され ${W.muromachibakufu}が 始まったね。56年も 続いた ${W.nanbokuchou}は、1392年に ${W.yoshimitsu}が ${W.meitokuwayaku}で 2つの 朝廷を 1つに まとめて 終わったんだよ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1109,6 +1133,51 @@ const STEPS = {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 数年', 'イ 約10年', 'ウ 約60年'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#5a6478;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
