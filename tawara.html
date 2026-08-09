@@ -816,7 +816,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_taisen', 'm_kome', 'm_seito', 'm_fusen', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_taisen', 'm_kome', 'm_seito', 'm_fusen', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'taisen', icon: '⚓', title: '第一次世界大戦と 日本', video: null,
+    setup: () => { S.taisenFound = new Set(TAISEN_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `日本は ${W.daisen}に 参戦し、船の 運賃が 戦前の 1トン 約3円から 1917年には 40円を こえるまで はね上がる ${W.daisenkeiki}に わいた。戦場から 遠かった 日本は、ヨーロッパへの 輸出を 急増させたんだったね。` },
+  { scene: 'kome', icon: '🌾', title: '米騒動', video: null,
+    setup: () => { S.komeN = KOME_STEPS.length; S.kome = { f: KOME_STEPS[KOME_STEPS.length - 1].price }; },
+    scope: () => ({ type: 'price' }),
+    text: () => `1916〜1918年の 2年間で、米の 値段は およそ 3倍に なった。${W.toyama}魚津の 女性たちの 行動を きっかけに、${W.komesoudou}が 全国に 広がったんだったね。` },
+  { scene: 'seito', icon: '🏛️', title: '原敬内閣', video: null,
+    setup: () => { S.seitoFound = new Set(SEITO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.komesoudou}の 責任を とって 内閣が たおれ、${W.harakei}が 初めての 本格的な ${W.seitounaikaku}を 作った。爵位を 持たない ${W.heiminsaisho}と 呼ばれたんだったね。` },
+  { scene: 'fusen', icon: '📜', title: '普通選挙法', video: 'TyRKA1M8XJ0',
+    setup: () => { S.fusenFound = new Set(FUSEN_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1925年の ${W.fusenkyoho}で、満25歳以上の すべての 男子に 選挙権が 認められた。でも 女性が 選挙に 参加できるのは、まだ ずっと あとの 1945年まで 待つことに なるんだったね。` },
+  { scene: 'hakase', icon: '📢', title: '大正デモクラシーの 広がり', video: 'ph82Me3eMII',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.yoshino}の ${W.minponshugi}や、政党内閣・普通選挙を 求める 動きが 広がった、この 時代を ${W.taisho}デモクラシーと 呼ぶよ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1085,6 +1109,51 @@ const STEPS = {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 民衆の 声が 政治に 反映されるように なっていった 時代', 'イ 軍隊の 力が もっとも 強かった 時代', 'ウ 外国との 交流が すべて 絶たれた 時代'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#5a6478;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
