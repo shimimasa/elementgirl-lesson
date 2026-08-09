@@ -857,7 +857,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_genroku', 'm_kasei', 'm_ukiyoe', 'm_terakoya', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_genroku', 'm_kasei', 'm_ukiyoe', 'm_terakoya', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'genroku', icon: '🎭', title: '元禄文化を知る',
+    setup: () => { S.genrokuFound = new Set(GENROKU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.genroku}は 上方（京都・大坂）の 豪商や 町人の 間で 花開いた。松尾芭蕉の 俳句、井原西鶴の 浮世草子、尾形光琳の 琳派……華やかな 文化が いっぱいだったね。` },
+  { scene: 'kasei', icon: '🗻', title: '化政文化を知る',
+    setup: () => { S.kaseiFound = new Set(KASEI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.kasei}は 元禄文化の およそ100年後、今度は 江戸の 町衆を 中心に 広がった。葛飾北斎の「富嶽三十六景」、歌川広重の「東海道五十三次」、十返舎一九の 旅の 笑い話……庶民に 大人気だったね。` },
+  { scene: 'ukiyoe', icon: '🎨', title: '浮世絵の色を重ねる', video: 'Ej6HRzYarEU',
+    setup: () => { S.suriN = 8; S.suri = { f: 1 }; },
+    scope: () => ({ type: 'suri' }),
+    text: () => `色版を 何度も 重ねる 多色ずりの 技法で 作られた 浮世絵を ${W.nishikie}と いうよ。実際の 職人さんが 摺る ようすを 見てみよう。` },
+  { scene: 'terakoya', icon: '📖', title: '寺子屋のひみつ',
+    setup: () => { S.terakoyaFound = new Set(TERAKOYA_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.terakoya}では 町人や 農民の 子どもたちも「読み・書き・そろばん」を 学んでいた。江戸時代の 識字率は 70〜80%くらいで、当時の ロンドンや パリより ずっと 高かったんだよ。` },
+  { scene: 'hakase', icon: '💰', title: '三都のにぎわい',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `江戸・大坂（${W.daidokoro}）・京都、三都と 呼ばれる 大きな 町が にぎわった。金貨・銀貨・銭貨と ${W.ryougae}の 活やくで、農村にも お金の 経済が 広がっていったんだよ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1123,11 +1147,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 大坂には 全国から 米や 特産品が 蔵屋敷に 集まり 取り引きされたので、${W.daidokoro}と 呼ばれたんだ。<br><br>💡 <b>たいせつポイント</b><br>金貨・銀貨・銭貨と ${W.ryougae}の 活やくで、農村にも お金の 経済が 広がっていったんだよ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 将軍の お城が あったから', 'イ 全国の 米や 特産品が 蔵屋敷に 集まり 取り引きされたから', 'ウ 料理人が いちばん 多い 町だったから'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#5a7090;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
