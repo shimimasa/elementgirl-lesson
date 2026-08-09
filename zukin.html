@@ -821,7 +821,27 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_michi', 'm_kurashi', 'm_shusen', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_michi', 'm_kurashi', 'm_shusen', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'michi', icon: '⚔️', title: '戦争への 道', video: 'cRlcMHE7XFM',
+    setup: () => { S.michiFound = new Set(MICHI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1931年の ${W.manshu}、1933年の ${W.kokusairenmei}脱退、そして 1937年の ${W.nitchu}。日本は 少しずつ、大きな 戦争への 道を 進んでいったね。` },
+  { scene: 'kurashi', icon: '🏠', title: '銃後の くらし', video: 'opfx_x6e7wc',
+    setup: () => { S.kurashiYear = KURASHI_YEARS.length; S.kurashi = { gaugeF: KURASHI_YEARS[KURASHI_YEARS.length - 1].gauge }; },
+    scope: () => ({ type: 'gauge' }),
+    text: () => `${W.haikyu}ゲージは 100%から 3%まで、年を 追うごとに 下がっていった。${W.kippusei}・${W.kinzoku}・${W.gakudosokai}……くらしは 少しずつ、でも 確実に 苦しく なっていったんだったね。` },
+  { scene: 'shusen', icon: '🕊️', title: '終戦へ', video: '0o8UX5Acp4Q',
+    setup: () => { S.shusenFound = new Set(SHUSEN_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.okinawasen}、広島・長崎への ${W.genbaku}、そして 8月15日の ${W.gyokuon}。1945年、長く 続いた 戦争が、ついに 終わりを むかえたんだったね。` },
+  { scene: 'hakase', icon: '🌅', title: '戦争が 終わった日', video: '8sSYKtB0wQw',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `深い 悲しみと、「もう 戦争を しなくて いい」という ほっとした 気持ち。焼け野原から、人々は 新しい くらしを 立て直し始めていったんだったね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1051,11 +1071,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 深い 悲しみと、「もう 戦争を しなくて いい」という ほっとした 気持ちが、入りまじっていたんだ。<br><br>💡 <b>たいせつポイント</b><br>焼け野原に なった 町から、人々は 少しずつ 新しい くらしを 立て直し始めていく。次は、その 戦後の 歩みを たしかめに 行こう……。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア みんな 大喜びだった', 'イ 悲しみと ほっとした 気持ちが 入りまじっていた', 'ウ 何も 感じなかった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#5a6478;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
