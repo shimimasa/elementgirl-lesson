@@ -865,7 +865,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_heike', 'm_kamakura', 'm_shugo', 'm_goon', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_heike', 'm_kamakura', 'm_shugo', 'm_goon', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'heike', icon: '🏯', title: '平氏の栄華と滅亡', video: 'D0ug-e43ttM',
+    setup: () => { S.heikeFound = new Set(HEIKE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.kiyomori}は ${W.heiji}に 勝利し、${W.daijodaijin}と なって 一族で 高い 位を 独占する ほど 栄えたね。でも ${W.dannoura}で 平氏は 滅び、かわって 源氏の ${W.yoritomo}が 力を 強めて いったんだ。` },
+  { scene: 'kamakura', icon: '⛰️', title: '頼朝と鎌倉', video: 'D0ug-e43ttM',
+    setup: () => { S.kamakuraFound = new Set(KAMAKURA_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.yoritomo}は 伊豆で 兵を 挙げ、三方を 山、一方を 海に 囲まれた 守りやすい 鎌倉を 本拠地に 選んだね。${W.samuraidokoro}を 置くなど、武士による 新しい 政治の しくみを 整えて いったんだ。` },
+  { scene: 'shugo', icon: '🗾', title: '守護・地頭を置く',
+    setup: () => { S.shugoFound = new Set(SHUGO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1185年、頼朝は 国ごとに ${W.shugo}、荘園や 公領ごとに ${W.jitou}を 置く 権利を 朝廷に 認めさせたね。今の 教科書では、この 年を ${W.bakufu}の 実質的な 始まりと 考える 説が 有力なんだ。` },
+  { scene: 'goon', icon: '⚖️', title: '御恩と奉公のバランス', video: 'NXkyog6iW9c',
+    setup: () => { S.goon = { tiltF: 0 }; S.goonLevel = 5; },
+    scope: () => ({ type: 'tilt' }),
+    text: () => `将軍は 御家人に ${W.goon}を あたえ、御家人は ${W.houkou}で こたえる。ちょうどよい 御恩の 量で、天びんが つりあったね。これが 鎌倉幕府を ささえる 主従関係の しくみだよ。` },
+  { scene: 'hakase', icon: '⚔️', title: '承久の乱と北条政子', video: 'NXkyog6iW9c',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1221年の ${W.jokyu}では、${W.masako}の 呼びかけで 御家人の 心が 一つに まとまり、幕府が 勝利したね。京都には ${W.rokuhara}を 置いて 朝廷を 見張ることに なったんだ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1133,11 +1157,56 @@ const STEPS = {
       if (n === 0) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 頼朝 以来の 御恩と 奉公の きずなが、御家人たちを 一つに まとめたんだ。幕府は 勝利し、京都には ${W.rokuhara}を 置いて 朝廷を 見張ることに なったよ。<br><br>💡 <b>たいせつポイント</b><br>御恩と 奉公の しくみが、鎌倉幕府を より 強くしたんだね。でも この あと、外国からの 襲来（元寇）が おこり、御家人に 十分な 恩賞を あたえられない できごとが 起きて、幕府は 少しずつ ゆらいで いくことに なる……。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 頼朝から 受けた 御恩への 感謝と、政子の 呼びかけで 心が まとまったから', 'イ 朝廷の 方が 弱そうに 見えたから', 'ウ ただの 偶然で'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#5a6478;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
