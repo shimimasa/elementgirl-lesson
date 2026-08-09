@@ -897,7 +897,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_kenchi', 'm_ichi', 'm_katanagari', 'm_choutou', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_kenchi', 'm_ichi', 'm_katanagari', 'm_choutou', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'kenchi', icon: '📜', title: '検地を知る', video: 'Nvc6omS_KdE',
+    setup: () => { S.kenchiFound = new Set(KENCHI_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `秀吉は ${W.kenchichou}・${W.kenchizao}・${W.kyouMasu}で 全国の ものさしを そろえ、${W.kokudaka}で 年貢を 公平に 決められるように したね。` },
+  { scene: 'ichi', icon: '📐', title: '一地一作人',
+    setup: () => { S.ichi = { f: 1 }; },
+    scope: () => ({ type: 'idle' }),
+    text: () => `同じ 田んぼに 重なっていた ${W.shouen}や ${W.jitou}の 権利が、検地帳には ただ 1人の 耕作者だけが 記録されるように 整理されたね。` },
+  { scene: 'katanagari', icon: '⚔️', title: '刀狩のバランス', video: 'Nvc6omS_KdE',
+    setup: () => { S.kata = { f: 0.9 }; },
+    scope: () => ({ type: 'pile' }),
+    text: () => `ちょうどよい 量の 武器を 集めれば、一揆は 防げて 農具は 村に 残る。集めすぎると 農具まで 取り上げられてしまう、という バランスだったね。` },
+  { scene: 'choutou', icon: '⛵', title: '朝鮮出兵', video: 'NBbOh_ZXH24',
+    setup: () => { S.choutouFound = new Set(CHOUTOU_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `秀吉は ${W.bunroku}・${W.keichou}で 2度も 朝鮮に 大軍を 送ったけど、1598年に 秀吉が 亡くなると 日本軍は 引き上げたね。` },
+  { scene: 'hakase', icon: '🏯', title: '兵農分離の完成', video: 'NBbOh_ZXH24',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `検地と 刀狩で 武士と 農民の 身分が はっきり 分かれる ${W.heinoubunri}が 完成したね。この あと ${W.ieyasu}が 力を 強め、江戸幕府の 時代へと 進んでいくんだよ。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1153,11 +1177,56 @@ const STEPS = {
       if (n === 1) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ ${W.heinoubunri}によって、武士は 城下町に 住んで 政治や 軍事を、農民は 村で 農業に 専念する、という くらしの 区別が できあがったんだ。<br><br>💡 <b>たいせつポイント</b><br>この しくみは、この あとの 江戸時代の 身分制度の もとにも なっていくんだよ。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 武士も 農民も 同じように 農業を するように なった', 'イ 武士は 城下町に 住み、農民は 村で 農業に 専念するように なった', 'ウ 武士と 農民の 区別が なくなった'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#8a5a2a;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
