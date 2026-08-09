@@ -848,7 +848,31 @@ function updateLoc() {
 }
 
 // ---------- ステップ ----------
-const FLOW = ['intro', 'vote', 'm_nisshin', 'm_nichiro', 'm_kouwa', 'm_kaisei', 'hakase', 'ending', 'free'];
+const FLOW = ['intro', 'vote', 'm_nisshin', 'm_nichiro', 'm_kouwa', 'm_kaisei', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：5ミッションの場面を1つずつ見せ直すスライドショー
+const FURIKAERI_SLIDES = [
+  { scene: 'nisshin', icon: '⚔️', title: '日清戦争を 知る', video: 'cI6KJ5ruBfI',
+    setup: () => { S.nisshinFound = new Set(NISSHIN_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1894年の 日清戦争で 日本が 勝利し、${W.shimonoseki}が 結ばれた。でも すぐに ${W.sangoku}が 起きて、${W.ryoutou}は 清に 返すことに なったね。` },
+  { scene: 'nichiro', icon: '🚢', title: '日英同盟と 日露戦争', video: 'cI6KJ5ruBfI',
+    setup: () => { S.nichiroFound = new Set(NICHIRO_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `ロシアとの 対立を 深めた 日本は ${W.nichiei}を 結び、${W.touhei}の 連合艦隊が ${W.nihonkai}で ロシアの ${W.baru}を うち破ったね。` },
+  { scene: 'kouwa', icon: '📜', title: 'ポーツマス条約', video: 'cI6KJ5ruBfI',
+    setup: () => { S.kouwaFound = new Set(KOUWA_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `${W.portsmouth}で 韓国での 優越権や ${W.karafuto}の 南半分を 得たけれど、賠償金は ゼロ。${W.hibiya}が 起きるほど 国民の 不満は 大きかったね。` },
+  { scene: 'kaisei', icon: '⚖️', title: '条約改正の バランス', video: 'p4wH7oF19JU',
+    setup: () => { S.kaisei = { tiltF: 0 }; S.kaiseiLevel = 8; },
+    scope: () => ({ type: 'tilt' }),
+    text: () => `条約改正の 進み具合を 目もり⑧まで 上げると、天びんが 水平に なった。${W.mutsu}が ${W.chigaihouken}を、${W.komura}が ${W.kanzeijishuken}を 取りもどしたんだね。` },
+  { scene: 'hakase', icon: '🏛️', title: '条約改正の 完成', video: 'p4wH7oF19JU',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(p => p.key)); },
+    scope: () => ({ type: 'idle' }),
+    text: () => `1858年の 不平等条約から 53年後の 1911年、ついに ${W.jouyakukaisei}が 完成した。日清・日露の 戦争を 通じて 得た 国力が、この 悲願を 実現させたんだね。` },
+];
 
 function gotoStep(i) {
   S.stepIndex = clamp(i, 0, FLOW.length - 1);
@@ -1116,11 +1140,56 @@ const STEPS = {
       if (n === 2) {
         sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
         say(`せいかい！ 1858年から 1911年まで、じつに 53年、約半世紀ごしの 悲願 達成だったんだ。<br><br>💡 <b>たいせつポイント</b><br>日清・日露の 戦争を 通じて 国力を つけたことが、この 条約改正を 実現させる 大きな 力に なったんだよ。このあと 日本は、国際社会で さらに 大きな 役割を になうように なっていくよ……。`);
-        setButtons([{ label: 'まとめへ すすむ', cb: nextStep }]);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
       } else {
         sHmm();
         say(`ちがうよ。もういちど かんがえてみよう。`);
         setButtons(choiceRow(['ア 約10年後', 'イ 約30年後', 'ウ 約50年後'], (i, el2) => this.pick(i, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：5ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      if (slide.video) {
+        const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        showOverlay(`
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
+          <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
+            <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
+              <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
+              </div>
+            </div>
+            <div style="margin-top:.5em;color:#7a6048;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+          </div>
+          <p class="talk">${slide.text()}</p>
+          <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
+          <div class="foot">先生へ：動画は外部サイト(YouTube)の発信元です。内容を事前にご確認ください。URL: ${videoUrl}</div>
+        `);
+        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriNextBtn').onclick = goNext;
+      } else {
+        hideOverlay();
+        scopeBurst();
+        say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+        setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
       }
     },
   },
