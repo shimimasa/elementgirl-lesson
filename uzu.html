@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <script src="auth.js"></script>
 <script src="orientation-guard.js"></script>
+<script src="progress.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ウズの実験室 — 電磁石のひみつたいけん</title>
 <style>
@@ -835,6 +836,7 @@ function award(id) {
   if (S.badges.has(id)) return;
   S.badges.add(id);
   $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
 }
 const overlayEl = $('overlay'), panelEl = $('panelBody');
 function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
