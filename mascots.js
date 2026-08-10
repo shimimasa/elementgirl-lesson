@@ -1,6 +1,135 @@
 // 各授業ページのキャラクター(mascot)SVGを一覧画面カード用に集約したもの。
 // 各slug.htmlの <svg class="mascot">...</svg> をそのまま複製している。
 const MASCOTS = {
+  tsukiyomido: `<svg class="cat mascot" viewBox="0 0 120 132" aria-hidden="true">
+            <path class="tail" d="M20 106 C 0 100, 2 72, 22 80" fill="none" stroke="#232433" stroke-width="10" stroke-linecap="round"/>
+            <ellipse cx="60" cy="102" rx="34" ry="26" fill="#232433"/>
+            <ellipse cx="46" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <ellipse cx="74" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <path d="M36 44 L29 14 L54 30 Z" fill="#232433"/>
+            <path d="M84 44 L91 14 L66 30 Z" fill="#232433"/>
+            <path d="M38 39 L34 21 L49 31 Z" fill="#6b5aa0"/>
+            <path d="M82 39 L86 21 L71 31 Z" fill="#6b5aa0"/>
+            <circle cx="60" cy="60" r="30" fill="#232433"/>
+            <g class="eyes">
+              <ellipse cx="49" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <ellipse cx="71" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <circle cx="49" cy="62" r="2.7" fill="#1b1c26"/>
+              <circle cx="71" cy="62" r="2.7" fill="#1b1c26"/>
+            </g>
+            <path d="M57 68 l3 3 l3 -3 z" fill="#f0a0b0"/>
+            <path d="M55 74 Q60 78 65 74" stroke="#8f93b8" fill="none" stroke-width="2" stroke-linecap="round"/>
+            <path d="M28 62 h14 M29 69 h13 M78 62 h14 M78 69 h13" stroke="#8f93b8" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="60" cy="90" r="5" fill="#ffd66b"/>
+            <path d="M58 4 L76 34 Q60 27 44 34 Z" fill="#4a3d8f"/>
+            <ellipse cx="60" cy="35" rx="27" ry="7" fill="#5a4aa8"/>
+            <circle cx="57" cy="12" r="3.6" fill="#ffd66b"/>
+          </svg>`,
+  mahou: `<svg class="cat mascot" viewBox="0 0 120 132" aria-hidden="true">
+            <path class="tail" d="M20 106 C 0 100, 2 72, 22 80" fill="none" stroke="#232433" stroke-width="10" stroke-linecap="round"/>
+            <ellipse cx="60" cy="102" rx="34" ry="26" fill="#232433"/>
+            <ellipse cx="46" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <ellipse cx="74" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <path d="M36 44 L29 14 L54 30 Z" fill="#232433"/>
+            <path d="M84 44 L91 14 L66 30 Z" fill="#232433"/>
+            <path d="M38 39 L34 21 L49 31 Z" fill="#6b5aa0"/>
+            <path d="M82 39 L86 21 L71 31 Z" fill="#6b5aa0"/>
+            <circle cx="60" cy="60" r="30" fill="#232433"/>
+            <g class="eyes">
+              <ellipse cx="49" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <ellipse cx="71" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <circle cx="49" cy="62" r="2.7" fill="#1b1c26"/>
+              <circle cx="71" cy="62" r="2.7" fill="#1b1c26"/>
+            </g>
+            <path d="M57 68 l3 3 l3 -3 z" fill="#f0a0b0"/>
+            <path d="M55 74 Q60 78 65 74" stroke="#8f93b8" fill="none" stroke-width="2" stroke-linecap="round"/>
+            <path d="M28 62 h14 M29 69 h13 M78 62 h14 M78 69 h13" stroke="#8f93b8" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="60" cy="90" r="5" fill="#ffd66b"/>
+            <path d="M58 4 L76 34 Q60 27 44 34 Z" fill="#4a3d8f"/>
+            <ellipse cx="60" cy="35" rx="27" ry="7" fill="#5a4aa8"/>
+            <circle cx="57" cy="12" r="3.6" fill="#ffd66b"/>
+          </svg>`,
+  hidamari: `<svg class="owl mascot" viewBox="0 0 120 132" aria-hidden="true">
+            <ellipse cx="60" cy="90" rx="34" ry="32" fill="#8a6a48"/>
+            <ellipse cx="33" cy="88" rx="10" ry="20" fill="#6f5438" transform="rotate(14 33 88)"/>
+            <ellipse cx="87" cy="88" rx="10" ry="20" fill="#6f5438" transform="rotate(-14 87 88)"/>
+            <ellipse cx="60" cy="98" rx="21" ry="19" fill="#f3e6c8"/>
+            <path d="M52 96 q4 4 8 0 M56 104 q4 4 8 0" stroke="#d8c39a" fill="none" stroke-width="1.5"/>
+            <circle cx="60" cy="48" r="30" fill="#8a6a48"/>
+            <path d="M34 30 L30 14 L46 24 Z" fill="#8a6a48"/>
+            <path d="M86 30 L90 14 L74 24 Z" fill="#8a6a48"/>
+            <circle cx="47" cy="52" r="15" fill="#f3e6c8"/>
+            <circle cx="73" cy="52" r="15" fill="#f3e6c8"/>
+            <g class="eyes">
+              <circle cx="47" cy="52" r="8" fill="#fff"/>
+              <circle cx="73" cy="52" r="8" fill="#fff"/>
+              <circle cx="47" cy="52" r="5" fill="#d9931f"/>
+              <circle cx="73" cy="52" r="5" fill="#d9931f"/>
+              <circle cx="48" cy="53" r="2.2" fill="#2c1f10"/>
+              <circle cx="74" cy="53" r="2.2" fill="#2c1f10"/>
+            </g>
+            <path d="M55 58 h10 l-5 9 z" fill="#d98a2b"/>
+            <path d="M30 34 Q60 6 90 34 Q60 26 30 34 Z" fill="#5f7a4a"/>
+            <ellipse cx="60" cy="33" rx="31" ry="6.5" fill="#6f8a56"/>
+            <path d="M40 28 q20 -10 40 0" stroke="#4a6238" fill="none" stroke-width="2"/>
+            <circle cx="93" cy="98" r="10" fill="rgba(180,215,240,.5)" stroke="#4a3320" stroke-width="2.5"/>
+            <line x1="99" y1="106" x2="108" y2="118" stroke="#4a3320" stroke-width="4" stroke-linecap="round"/>
+          </svg>`,
+  hoshimeguri: `<svg class="cat mascot" viewBox="0 0 120 132" aria-hidden="true">
+            <path class="tail" d="M20 106 C 0 100, 2 72, 22 80" fill="none" stroke="#232433" stroke-width="10" stroke-linecap="round"/>
+            <ellipse cx="60" cy="102" rx="34" ry="26" fill="#232433"/>
+            <ellipse cx="46" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <ellipse cx="74" cy="124" rx="9" ry="6" fill="#2e2f42"/>
+            <path d="M36 44 L29 14 L54 30 Z" fill="#232433"/>
+            <path d="M84 44 L91 14 L66 30 Z" fill="#232433"/>
+            <path d="M38 39 L34 21 L49 31 Z" fill="#6b5aa0"/>
+            <path d="M82 39 L86 21 L71 31 Z" fill="#6b5aa0"/>
+            <circle cx="60" cy="60" r="30" fill="#232433"/>
+            <g class="eyes">
+              <ellipse cx="49" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <ellipse cx="71" cy="60" rx="6" ry="8" fill="#ffd66b"/>
+              <circle cx="49" cy="62" r="2.7" fill="#1b1c26"/>
+              <circle cx="71" cy="62" r="2.7" fill="#1b1c26"/>
+            </g>
+            <path d="M57 68 l3 3 l3 -3 z" fill="#f0a0b0"/>
+            <path d="M55 74 Q60 78 65 74" stroke="#8f93b8" fill="none" stroke-width="2" stroke-linecap="round"/>
+            <path d="M28 62 h14 M29 69 h13 M78 62 h14 M78 69 h13" stroke="#8f93b8" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="60" cy="90" r="5" fill="#ffd66b"/>
+            <path d="M58 4 L76 34 Q60 27 44 34 Z" fill="#4a3d8f"/>
+            <ellipse cx="60" cy="35" rx="27" ry="7" fill="#5a4aa8"/>
+            <circle cx="57" cy="12" r="3.6" fill="#ffd66b"/>
+          </svg>`,
+  furiko: `<svg class="cat mascot" viewBox="0 0 120 132" aria-hidden="true">
+            <g class="tail">
+              <line x1="60" y1="94" x2="60" y2="118" stroke="#a8760a" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="60" cy="121" r="7" fill="#ffd66b" stroke="#a8760a" stroke-width="2"/>
+            </g>
+            <circle cx="60" cy="58" r="40" fill="#fdfbf4" stroke="#c9a227" stroke-width="5"/>
+            <g fill="#c9a227">
+              <circle cx="27" cy="28" r="10"/>
+              <circle cx="93" cy="28" r="10"/>
+            </g>
+            <g fill="#ffd66b">
+              <circle cx="27" cy="28" r="5"/>
+              <circle cx="93" cy="28" r="5"/>
+            </g>
+            <g stroke="#c9a227" stroke-width="2.4">
+              <line x1="60" y1="19" x2="60" y2="25"/>
+              <line x1="60" y1="91" x2="60" y2="97"/>
+              <line x1="21" y1="58" x2="27" y2="58"/>
+              <line x1="93" y1="58" x2="99" y2="58"/>
+            </g>
+            <line x1="60" y1="58" x2="60" y2="37" stroke="#3a2a55" stroke-width="3.6" stroke-linecap="round"/>
+            <line x1="60" y1="58" x2="79" y2="58" stroke="#3a2a55" stroke-width="3.6" stroke-linecap="round"/>
+            <circle cx="60" cy="58" r="3.2" fill="#3a2a55"/>
+            <g class="eyes">
+              <circle cx="47" cy="69" r="4.2" fill="#232433"/>
+              <circle cx="73" cy="69" r="4.2" fill="#232433"/>
+            </g>
+            <ellipse cx="40" cy="77" rx="5" ry="3.2" fill="#ffb0c0" opacity=".55"/>
+            <ellipse cx="80" cy="77" rx="5" ry="3.2" fill="#ffb0c0" opacity=".55"/>
+            <path d="M52 81 Q60 86 68 81" stroke="#8a760a" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>`,
   onaka: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
             <ellipse cx="60" cy="118" rx="30" ry="7" fill="rgba(150,90,70,.18)"/>
             <!-- からだ（にっこり菌ビフィー：カプセル形） -->

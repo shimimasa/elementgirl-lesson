@@ -88,6 +88,63 @@
     margin-top:5px;
   }
 
+  /* ---- profile picker ---- */
+  .profile-bar{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom: 14px;
+  }
+  .profile-bar .profile-label{
+    font-size:13px;
+    font-weight:bold;
+    color:#888;
+    margin-right:2px;
+  }
+  .profile-chip{
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:bold;
+    border-radius:999px;
+    padding:9px 18px;
+    min-height:40px;
+    font-size:14px;
+    background:#f1f1f1;
+    color:#555;
+    transition: transform .1s ease;
+  }
+  .profile-chip:active{ transform: scale(.93); }
+  .profile-chip.active{
+    background:#4a7fd6;
+    color:#fff;
+  }
+  .profile-add-btn{
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:bold;
+    border-radius:999px;
+    padding:9px 16px;
+    min-height:40px;
+    font-size:14px;
+    background:#fff;
+    color:#4a7fd6;
+    border:1.5px dashed #4a7fd6;
+  }
+  .profile-add-btn:active{ transform: scale(.93); }
+  .profile-input{
+    font-size:18px;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    width:100%;
+    max-width:220px;
+    text-align:center;
+    font-family:inherit;
+    margin:10px 0;
+  }
+
   /* ---- next up card ---- */
   .nextup{ margin-bottom: 14px; }
   .nextup-label{
@@ -550,6 +607,7 @@
 <body>
   <h1>🎮 ゲーム型授業 一覧</h1>
   <p class="lead">すきな作品をタップすると、ぼうけんがはじまるよ！</p>
+  <div id="profileBar" class="profile-bar"></div>
   <div id="progressPanel" class="progress-panel"></div>
   <div class="stats" id="statsRow"></div>
   <div id="nextUpCard" class="nextup"></div>
@@ -591,7 +649,17 @@
     </div>
   </div>
 
+  <div id="profileModal" class="pick-modal">
+    <div class="pick-modal-inner">
+      <button type="button" id="profileModalClose" class="pick-modal-close" aria-label="とじる">✕</button>
+      <div class="pick-modal-label">👤 なまえを おしえてね</div>
+      <input type="text" id="profileNameInput" class="profile-input" maxlength="10" placeholder="れい：ゆい">
+      <div><button type="button" id="profileConfirmBtn" class="pick-again-btn">きめる！</button></div>
+    </div>
+  </div>
+
 <script src="mascots.js"></script>
+<script src="profile.js"></script>
 <script>
 const ITEMS = [
   {t:"月よみ堂", u:"月の満ち欠け", subj:"science", f:"tenmon", g:[6], gt:"小6", slug:"tsukiyomido", seq:3},
@@ -673,16 +741,14 @@ const SCIENCE_FIELDS = ["tenmon","busshitsu","jintai","chigaku","rikigaku","seim
 const SOCIETY_FIELDS = ["rekishi","chiri","komin"];
 const GRADES = [3,4,5,6];
 
-// mascots.js にSVGが無い(初期作品でキャラクターSVG未実装)ものは絵文字で代用
-const FALLBACK_EMOJI = {
-  tsukiyomido:"🌙", mahou:"🧪", hidamari:"🔍", hoshimeguri:"🌌", furiko:"⏰",
-};
+// mascots.js にSVGが無いものは絵文字で代用（2026-08-10時点では該当作品なし）
+const FALLBACK_EMOJI = {};
 
 const PLAYED_KEY = "elementgirl_played_slugs";
 
 function getPlayedSlugs(){
   try {
-    return new Set(JSON.parse(localStorage.getItem(PLAYED_KEY) || "[]"));
+    return new Set(JSON.parse(localStorage.getItem(profileNamespacedKey(PLAYED_KEY)) || "[]"));
   } catch(e) {
     return new Set();
   }
@@ -692,7 +758,7 @@ function markPlayed(slug){
   const played = getPlayedSlugs();
   if(played.has(slug)) return;
   played.add(slug);
-  localStorage.setItem(PLAYED_KEY, JSON.stringify([...played]));
+  localStorage.setItem(profileNamespacedKey(PLAYED_KEY), JSON.stringify([...played]));
 }
 
 // ---- バッジ進捗（各授業のaward()から progress.js 経由でここに書き込まれる） ----
@@ -700,10 +766,68 @@ const BADGE_KEY = "elementgirl_badge_progress";
 
 function getBadgeProgress(){
   try {
-    return JSON.parse(localStorage.getItem(BADGE_KEY) || "{}");
+    return JSON.parse(localStorage.getItem(profileNamespacedKey(BADGE_KEY)) || "{}");
   } catch(e) {
     return {};
   }
+}
+
+// ---- なまえプロフィール（端末共有時に子どもごとの進捗を分けるため） ----
+function migrateLegacyProgressIfNeeded(){
+  if(getProfileList().length > 0) return;
+  const oldPlayed = localStorage.getItem(PLAYED_KEY);
+  const oldBadge = localStorage.getItem(BADGE_KEY);
+  if(!oldPlayed && !oldBadge) return;
+  const name = "きろく";
+  addProfile(name);
+  setActiveProfile(name);
+  if(oldPlayed) localStorage.setItem(profileNamespacedKey(PLAYED_KEY), oldPlayed);
+  if(oldBadge) localStorage.setItem(profileNamespacedKey(BADGE_KEY), oldBadge);
+}
+
+function renderProfileBar(){
+  const list = getProfileList();
+  const active = getActiveProfile();
+  let html = `<span class="profile-label">👤 だれが あそぶ？</span>`;
+  html += list.map(name=>{
+    const activeCls = name === active ? "active" : "";
+    return `<button type="button" class="profile-chip ${activeCls}" data-name="${name}">${name}</button>`;
+  }).join("");
+  html += `<button type="button" id="profileAddBtn" class="profile-add-btn">＋ なまえをついか</button>`;
+  profileBarEl.innerHTML = html;
+
+  profileBarEl.querySelectorAll(".profile-chip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      setActiveProfile(btn.dataset.name);
+      refreshAll();
+    });
+  });
+  document.getElementById("profileAddBtn").addEventListener("click", openProfileModal);
+}
+
+function openProfileModal(){
+  profileNameInputEl.value = "";
+  profileModalEl.classList.add("open");
+  setTimeout(()=> profileNameInputEl.focus(), 50);
+}
+function closeProfileModal(){
+  profileModalEl.classList.remove("open");
+}
+function confirmProfile(){
+  const name = profileNameInputEl.value.trim().slice(0, 10);
+  if(!name) return;
+  addProfile(name);
+  setActiveProfile(name);
+  closeProfileModal();
+  refreshAll();
+}
+
+function refreshAll(){
+  initStats();
+  renderProgress();
+  renderNextUp();
+  renderProfileBar();
+  render();
 }
 
 function isCleared(slug, badgeProgress){
@@ -786,6 +910,11 @@ document.addEventListener("click", (e)=>{
 
 const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false, view:"grid", roadmapField:null };
 
+const profileBarEl = document.getElementById("profileBar");
+const profileModalEl = document.getElementById("profileModal");
+const profileNameInputEl = document.getElementById("profileNameInput");
+const profileConfirmBtnEl = document.getElementById("profileConfirmBtn");
+const profileModalCloseEl = document.getElementById("profileModalClose");
 const progressPanelEl = document.getElementById("progressPanel");
 const nextUpEl = document.getElementById("nextUpCard");
 const statsRow = document.getElementById("statsRow");
@@ -841,6 +970,13 @@ pickModalEl.addEventListener("click", (e)=>{
   if(e.target === pickModalEl) pickModalEl.classList.remove("open");
 });
 
+profileConfirmBtnEl.addEventListener("click", confirmProfile);
+profileNameInputEl.addEventListener("keydown", (e)=>{ if(e.key === "Enter") confirmProfile(); });
+profileModalCloseEl.addEventListener("click", closeProfileModal);
+profileModalEl.addEventListener("click", (e)=>{
+  if(e.target === profileModalEl) closeProfileModal();
+});
+
 function initStats(){
   const scienceCount = ITEMS.filter(it=>it.subj==="science").length;
   const societyCount = ITEMS.filter(it=>it.subj==="society").length;
@@ -861,11 +997,13 @@ function renderProgress(){
   const total = ITEMS.length;
   const pct = total > 0 ? Math.round(playedCount / total * 100) : 0;
   const {current, next} = getTitleState(playedCount);
+  const active = getActiveProfile();
+  const namePrefix = active !== "default" ? `${active}さんの ` : "";
   const subText = next
     ? `つぎの称号「${next.icon} ${next.label}」まで あと ${next.min - playedCount}こ！`
     : `ぜんぶの称号を てにいれたよ！さいきょうの はかせだね！`;
   progressPanelEl.innerHTML = `
-    <div class="progress-title"><span class="icon">${current.icon}</span>いまの称号：${current.label}</div>
+    <div class="progress-title"><span class="icon">${current.icon}</span>${namePrefix}いまの称号：${current.label}</div>
     <div class="progress-bar-wrap">
       <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
       <div class="progress-sub">${playedCount}／${total}こ あそんだよ（${pct}%）・${subText}</div>
@@ -1130,9 +1268,11 @@ searchBox.addEventListener("input", ()=>{
   render();
 });
 
+migrateLegacyProgressIfNeeded();
 initStats();
 renderProgress();
 renderNextUp();
+renderProfileBar();
 initSubjectTabs();
 initViewTabs();
 initGradeChips();
@@ -1142,6 +1282,7 @@ window.addEventListener("pageshow", ()=>{
   initStats();
   renderProgress();
   renderNextUp();
+  renderProfileBar();
   render();
 });
 </script>
