@@ -1449,4 +1449,21 @@ const MASCOTS = {
             <path d="M48 56 Q60 62 72 56" fill="none" stroke="#204020" stroke-width="2.2" stroke-linecap="round"/>
             <path d="M55 6 L63 6 L58 16 L65 16 L52 30 L56 18 L49 18 Z" fill="#ffd54f" stroke="#c98a12" stroke-width="1"/>
           </svg>`,
+  tomoshi: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <ellipse cx="60" cy="122" rx="28" ry="6" fill="rgba(15,50,65,.16)"/>
+            <path d="M60 8 C78 26 96 52 92 78 C89 100 76 118 60 118 C44 118 31 100 28 78 C24 52 42 26 60 8 Z" fill="#ff9248" stroke="#c9481b" stroke-width="2.5"/>
+            <path d="M60 34 C71 48 80 64 77 80 C75 94 68 104 60 104 C52 104 45 94 43 80 C40 64 49 48 60 34 Z" fill="#ffd54f" opacity=".85"/>
+            <g class="eyes">
+              <circle cx="50" cy="70" r="6" fill="#fff"/>
+              <circle cx="70" cy="70" r="6" fill="#fff"/>
+              <circle cx="50.7" cy="70.8" r="3.2" fill="#5a2a00"/>
+              <circle cx="70.7" cy="70.8" r="3.2" fill="#5a2a00"/>
+              <circle cx="52" cy="68.5" r="1.1" fill="#fff"/>
+              <circle cx="72" cy="68.5" r="1.1" fill="#fff"/>
+            </g>
+            <path d="M50 86 Q60 92 70 86" fill="none" stroke="#5a2a00" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="45" cy="20" r="2.6" fill="#ffe082"/>
+            <circle cx="78" cy="17" r="2.1" fill="#ffe082"/>
+            <circle cx="61" cy="6" r="1.7" fill="#ffe082"/>
+          </svg>`,
 };
