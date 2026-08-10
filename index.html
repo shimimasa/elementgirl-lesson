@@ -87,13 +87,17 @@
     font-family: inherit;
     font-weight:bold;
     border-radius: 999px;
-    padding: 7px 16px;
+    padding: 12px 20px;
+    min-height: 44px;
+    display:inline-flex;
+    align-items:center;
     font-size: 14px;
     background:#f1f1f1;
     color:#555;
     transition: transform .1s ease, box-shadow .1s ease;
   }
   .tab-btn:hover, .chip:hover{ transform: translateY(-1px); }
+  .tab-btn:active, .chip:active{ transform: scale(.93); }
   .tab-btn.active{
     background:#4a7fd6;
     color:#fff;
@@ -114,7 +118,9 @@
   }
 
   .more-toggle{
-    display:block;
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
     margin: 10px 0 0;
     border:none;
     background:none;
@@ -123,9 +129,10 @@
     font-family: inherit;
     font-size:14px;
     cursor:pointer;
-    padding:6px 2px;
+    padding:6px 10px 6px 2px;
   }
   .more-toggle:hover{ text-decoration:underline; }
+  .more-toggle:active{ transform: scale(.96); }
   .more-filters{ display:none; margin-top:6px; }
   .more-filters.open{ display:block; }
 
@@ -242,12 +249,16 @@
     flex-wrap:wrap;
   }
   .card a{
-    display:inline-block;
-    padding: 9px 14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height: 44px;
+    padding: 10px 16px;
     border-radius: 8px;
     text-decoration:none;
     font-size: 14px;
     font-weight: bold;
+    transition: transform .1s ease, opacity .1s ease;
   }
   .card a.main{
     background:#4a7fd6;
@@ -258,6 +269,7 @@
     color:#333;
   }
   .card a:hover{ opacity:.85; }
+  .card a:active{ transform: scale(.94); }
 
   .empty-state{
     color:#999;
