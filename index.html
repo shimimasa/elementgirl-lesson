@@ -252,8 +252,8 @@
 </style>
 </head>
 <body>
-  <h1>ゲーム型授業 一覧</h1>
-  <p class="lead">画面をタップして遊ぶだけで、じゅぎょう画面が開きます。</p>
+  <h1>🎮 ゲーム型授業 一覧</h1>
+  <p class="lead">すきな作品をタップすると、ぼうけんがはじまるよ！</p>
   <div class="stats" id="statsRow"></div>
 
   <div class="controls">
@@ -378,9 +378,9 @@ function initStats(){
   const scienceCount = ITEMS.filter(it=>it.subj==="science").length;
   const societyCount = ITEMS.filter(it=>it.subj==="society").length;
   statsRow.innerHTML = `
-    <span>全<b>${ITEMS.length}</b>作品</span>
-    <span>理科 <b>${scienceCount}</b></span>
-    <span>社会 <b>${societyCount}</b></span>
+    <span>ぜんぶで<b>${ITEMS.length}</b>このぼうけん</span>
+    <span>🔬りか <b>${scienceCount}</b></span>
+    <span>🏯しゃかい <b>${societyCount}</b></span>
   `;
 }
 
@@ -481,7 +481,13 @@ function render(){
   });
 
   const filtered = ITEMS.filter(matchesFilter);
-  resultCountEl.textContent = `全${ITEMS.length}作品中 ${filtered.length}作品を表示`;
+  if(filtered.length === ITEMS.length){
+    resultCountEl.textContent = `${ITEMS.length}このぼうけんがあるよ！`;
+  } else if(filtered.length === 0){
+    resultCountEl.textContent = "";
+  } else {
+    resultCountEl.textContent = `${filtered.length}こ 見つかったよ！`;
+  }
 
   const subjectOrder = state.subject === "all" ? ["science","society"] : [state.subject];
   let html = "";
@@ -501,7 +507,7 @@ function render(){
   });
 
   if(filtered.length === 0){
-    html = `<div class="empty-state">条件に合う作品が見つかりませんでした。検索や絞り込みを変えてみてください。</div>`;
+    html = `<div class="empty-state">😢 みつからなかったよ…べつのことばで さがしてみてね</div>`;
   }
   sectionsEl.innerHTML = html;
 }
