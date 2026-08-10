@@ -211,6 +211,17 @@
     font-size:14px;
     background: var(--fc-bg);
   }
+  .played-badge{
+    position:absolute;
+    top:10px; left:10px;
+    background:#ffd54f;
+    color:#7c5a10;
+    font-size:11px;
+    font-weight:bold;
+    padding:4px 9px;
+    border-radius:999px;
+    box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
   .card-mascot{
     width:84px;
     height:84px;
@@ -482,6 +493,28 @@ const FALLBACK_EMOJI = {
   tsukiyomido:"🌙", mahou:"🧪", hidamari:"🔍", hoshimeguri:"🌌", furiko:"⏰",
 };
 
+const PLAYED_KEY = "elementgirl_played_slugs";
+
+function getPlayedSlugs(){
+  try {
+    return new Set(JSON.parse(localStorage.getItem(PLAYED_KEY) || "[]"));
+  } catch(e) {
+    return new Set();
+  }
+}
+
+function markPlayed(slug){
+  const played = getPlayedSlugs();
+  if(played.has(slug)) return;
+  played.add(slug);
+  localStorage.setItem(PLAYED_KEY, JSON.stringify([...played]));
+}
+
+document.addEventListener("click", (e)=>{
+  const link = e.target.closest("a.main");
+  if(link && link.dataset.slug) markPlayed(link.dataset.slug);
+});
+
 const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false };
 
 const statsRow = document.getElementById("statsRow");
@@ -520,7 +553,7 @@ function showPickModal(it){
     <h2>${it.t}</h2>
     <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
     <div class="btnrow" style="margin-top:10px;">
-      <a class="main" href="${it.slug}.html">あそびに行く！</a>
+      <a class="main" data-slug="${it.slug}" href="${it.slug}.html">あそびに行く！</a>
     </div>
     <div><button type="button" id="pickAgainBtn" class="pick-again-btn">🔄 もう一回</button></div>
   `;
@@ -537,10 +570,12 @@ pickModalEl.addEventListener("click", (e)=>{
 function initStats(){
   const scienceCount = ITEMS.filter(it=>it.subj==="science").length;
   const societyCount = ITEMS.filter(it=>it.subj==="society").length;
+  const playedCount = getPlayedSlugs().size;
   statsRow.innerHTML = `
     <span>ぜんぶで<b>${ITEMS.length}</b>このぼうけん</span>
     <span>🔬りか <b>${scienceCount}</b></span>
     <span>🏯しゃかい <b>${societyCount}</b></span>
+    <span>⭐あそんだ数 <b>${playedCount}</b></span>
   `;
 }
 
@@ -607,16 +642,18 @@ function mascotHTML(it){
     : `<div class="card-mascot emoji">${FALLBACK_EMOJI[it.slug] || info.icon}</div>`;
 }
 
-function cardHTML(it){
+function cardHTML(it, playedSet){
   const info = FIELD_INFO[it.f];
+  const playedBadge = playedSet.has(it.slug) ? `<span class="played-badge">⭐ あそんだ</span>` : "";
   return `
     <div class="card" style="--fc:${info.fc}">
+      ${playedBadge}
       <span class="card-fibadge" style="--fc-bg:${info.bg}" title="${info.label}">${info.icon}</span>
       ${mascotHTML(it)}
       <h2>${it.t}</h2>
       <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
       <div class="btnrow">
-        <a class="main" href="${it.slug}.html">じゅぎょう画面</a>
+        <a class="main" data-slug="${it.slug}" href="${it.slug}.html">じゅぎょう画面</a>
         <a class="sheet" href="${it.slug}-sheet.html">きろくシート</a>
       </div>
     </div>`;
@@ -656,6 +693,7 @@ function render(){
     resultCountEl.textContent = `${filtered.length}こ 見つかったよ！`;
   }
 
+  const playedSet = getPlayedSlugs();
   const subjectOrder = state.subject === "all" ? ["science","society"] : [state.subject];
   let html = "";
   subjectOrder.forEach(subj=>{
@@ -668,7 +706,7 @@ function render(){
       if(items.length === 0) return;
       const info = FIELD_INFO[fk];
       html += `<div class="field-heading"><span class="fi-badge" style="--fc-bg:${info.bg}">${info.icon}</span>${info.label}<span class="fi-count">（${items.length}）</span></div>`;
-      html += `<div class="grid">${items.map(cardHTML).join("")}</div>`;
+      html += `<div class="grid">${items.map(it=>cardHTML(it, playedSet)).join("")}</div>`;
     });
     html += `</div>`;
   });
@@ -688,6 +726,11 @@ initStats();
 initSubjectTabs();
 initGradeChips();
 render();
+
+window.addEventListener("pageshow", ()=>{
+  initStats();
+  render();
+});
 </script>
 </body>
 </html>
