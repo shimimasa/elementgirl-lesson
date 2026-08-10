@@ -259,7 +259,7 @@
     justify-content:center;
     flex-wrap:wrap;
   }
-  .card a, .pick-modal-inner a{
+  .card a, .pick-modal-inner a, .road-body a{
     display:inline-flex;
     align-items:center;
     justify-content:center;
@@ -271,16 +271,97 @@
     font-weight: bold;
     transition: transform .1s ease, opacity .1s ease;
   }
-  .card a.main, .pick-modal-inner a.main{
+  .card a.main, .pick-modal-inner a.main, .road-body a.main{
     background:#4a7fd6;
     color:#fff;
   }
-  .card a.sheet{
+  .card a.sheet, .road-body a.sheet{
     background:#f0f0f0;
     color:#333;
   }
-  .card a:hover, .pick-modal-inner a:hover{ opacity:.85; }
-  .card a:active, .pick-modal-inner a:active{ transform: scale(.94); }
+  .card a:hover, .pick-modal-inner a:hover, .road-body a:hover{ opacity:.85; }
+  .card a:active, .pick-modal-inner a:active, .road-body a:active{ transform: scale(.94); }
+
+  /* ---- roadmap view ---- */
+  .road{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom: 6px;
+  }
+  .road-node{
+    display:flex;
+    align-items:stretch;
+  }
+  .road-badge-col{
+    width:40px;
+    flex:0 0 40px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .road-badge{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background: var(--fc,#999);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:13px;
+    flex:0 0 auto;
+    box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .road-line{
+    flex:1;
+    width:4px;
+    min-height:8px;
+    margin-top:2px;
+    background:#ddd;
+    border-radius:2px;
+  }
+  .road-body{
+    flex:1;
+    min-width:0;
+    margin-left:10px;
+    background:#fff;
+    border:1px solid #eee;
+    border-left:4px solid var(--fc,#ccc);
+    border-radius:12px;
+    padding: 10px 14px 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    position:relative;
+  }
+  .road-body .played-badge{
+    top:-10px;
+    left:auto;
+    right:10px;
+  }
+  .road-body-top{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .road-body .card-mascot{
+    width:52px;
+    height:52px;
+    flex:0 0 52px;
+    margin-bottom:0;
+  }
+  .road-body .card-mascot.emoji{ font-size:34px; }
+  .road-text{ flex:1; min-width:160px; }
+  .road-text h3{ margin:2px 0 4px; font-size:16px; }
+  .road-text .meta{ font-size:12.5px; color:#888; line-height:1.5; margin:0; }
+  .road-body .btnrow{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-start;
+    margin-top:10px;
+  }
 
   .empty-state{
     color:#999;
@@ -383,6 +464,9 @@
     <div class="row-label">教科</div>
     <div class="chiprow" id="subjectTabs"></div>
 
+    <div class="row-label">見かた</div>
+    <div class="chiprow" id="viewTabs"></div>
+
     <button type="button" id="moreToggle" class="more-toggle"></button>
 
     <div id="moreFilters" class="more-filters">
@@ -409,63 +493,63 @@
 <script src="mascots.js"></script>
 <script>
 const ITEMS = [
-  {t:"月よみ堂", u:"月の満ち欠け", subj:"science", f:"tenmon", g:[6], gt:"小6", slug:"tsukiyomido"},
-  {t:"まほう薬屋ほしずく", u:"もののとけ方", subj:"science", f:"busshitsu", g:[5], gt:"小5", slug:"mahou"},
-  {t:"ひだまり探偵社", u:"地図の見方", subj:"society", f:"chiri", g:[4], gt:"小4", slug:"hidamari"},
-  {t:"おなかの探検隊", u:"消化", subj:"science", f:"jintai", g:[6], gt:"小6", slug:"onaka"},
-  {t:"星めぐりの塔", u:"星の動き", subj:"science", f:"tenmon", g:[4], gt:"小4", slug:"hoshimeguri"},
-  {t:"みずの旅", u:"水はどこから", subj:"society", f:"chiri", g:[4], gt:"小4", slug:"mizunotabi"},
-  {t:"ながれる水の探検隊", u:"流れる水のはたらき", subj:"science", f:"chigaku", g:[5], gt:"小5", slug:"nagareru"},
-  {t:"ちそう発掘隊", u:"大地のつくり・地層", subj:"science", f:"chigaku", g:[6], gt:"小6", slug:"chisou"},
-  {t:"ふりこの間", u:"振り子", subj:"science", f:"rikigaku", g:[5], gt:"小5", slug:"furiko"},
-  {t:"めばえラボ", u:"植物の発芽", subj:"science", f:"seimei", g:[5], gt:"小5", slug:"mebae"},
-  {t:"てこの工房", u:"てこのはたらき", subj:"science", f:"rikigaku", g:[6], gt:"小6", slug:"teko"},
-  {t:"みのりの村", u:"お米づくり（食料生産）", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"kome"},
-  {t:"大仏づくり工房", u:"奈良の大仏・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"daibutsu"},
-  {t:"かさねの宮", u:"貴族の暮らしと国風文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kasane"},
-  {t:"ツイジの砦", u:"元寇と博多の防塁・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"genko"},
-  {t:"しおさいの湊", u:"水産業（とる漁業・育てる漁業）", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"shiosai"},
-  {t:"ひとつぶ村", u:"せんきょと一票のねうち（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"hitotsubu"},
-  {t:"ぎんしゃの庭", u:"金閣・銀閣と室町の文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"muromachi"},
-  {t:"ボルトの町工場", u:"自動車をつくる工業", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"jidosha"},
-  {t:"ヒナワの陣", u:"戦国時代・鉄砲伝来〜長篠の戦い・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"sengoku"},
-  {t:"ドグウの丘", u:"縄文・弥生時代・むらからくにへ・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"jomon"},
-  {t:"ケヤリの道", u:"江戸幕府と参勤交代・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"edo"},
-  {t:"オウギの島", u:"鎖国と貿易統制・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"sakoku"},
-  {t:"テンビンの間", u:"国の政治のしくみ・三権分立（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"sanken"},
-  {t:"マルの蔵", u:"税金とくらし（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"zeikin"},
-  {t:"ミハシラの杜", u:"日本国憲法と基本的人権（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"mihashira"},
-  {t:"ムスビの丘", u:"国際社会とSDGs（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"musubi"},
-  {t:"ケムリの港", u:"黒船来航と開国・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kurofune"},
-  {t:"ミズヤの里", u:"低い土地のくらし・輪中", subj:"society", f:"chiri", g:[4,5], gt:"小4〜5", slug:"mizuya"},
-  {t:"カンラの畑", u:"高い土地のくらし・高原野菜", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"kanra"},
-  {t:"シーサの家", u:"あたたかい土地のくらし・沖縄県", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"okinawa"},
-  {t:"リュウヒョウの岸", u:"寒い土地のくらし・北海道", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"ryuhyo"},
-  {t:"ネンリンの杜", u:"森林とわたしたちのくらし", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"nenrin"},
-  {t:"ホシゾラの街", u:"環境を守る・公害", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"hoshizora"},
-  {t:"ガイトウの町", u:"明治維新と文明開化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"gaitou"},
-  {t:"カンムリの都", u:"聖徳太子と大化の改新・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kanmuri"},
-  {t:"キリドオシの関", u:"鎌倉幕府の成立・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kiridoshi"},
-  {t:"ニスジの都", u:"室町幕府の成立と南北朝・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"nisuji"},
-  {t:"タイトウの丘", u:"日清・日露戦争と条約改正・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"taitou"},
-  {t:"ズキンの家", u:"昭和の戦争と銃後のくらし・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"zukin"},
-  {t:"ホナミの田", u:"戦後の民主化と復興・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"honami"},
-  {t:"マスの野", u:"秀吉の全国統一・太閤検地と刀狩・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"masu"},
-  {t:"ニシキの座", u:"江戸の産業と文化・元禄文化と化政文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"nishiki"},
-  {t:"タワラの辻", u:"大正デモクラシー・米騒動と普通選挙法・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"tawara"},
-  {t:"ハヤテの駅", u:"高度経済成長と現代・東京オリンピックと新幹線・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"hayate"},
-  {t:"アオバの葉かげ", u:"チョウの育ち方（昆虫の成長）", subj:"science", f:"seimei", g:[3], gt:"小3", slug:"chou"},
-  {t:"いろみずの研究所", u:"水よう液の性質（酸性・中性・アルカリ性）", subj:"science", f:"busshitsu", g:[6], gt:"小6", slug:"iromizu"},
-  {t:"ウズの実験室", u:"電磁石のひみつ（電流のはたらき）", subj:"science", f:"energy", g:[5], gt:"小5", slug:"uzu"},
-  {t:"カガミの丘", u:"光のひみつ（光の性質）", subj:"science", f:"energy", g:[3], gt:"小3", slug:"kagami"},
-  {t:"カゲロウの原", u:"影と太陽のひみつ（太陽と地面のようす）", subj:"science", f:"tenmon", g:[3], gt:"小3", slug:"kagerou"},
-  {t:"ダンダンの実験場", u:"温度と体積・あたたまり方", subj:"science", f:"ryushi", g:[4], gt:"小4", slug:"dandan"},
-  {t:"シズクの淵", u:"動物のたんじょう（メダカ・人）", subj:"science", f:"seimei", g:[5], gt:"小5", slug:"shizuku"},
-  {t:"ホムラの炉", u:"ものの燃え方と空気", subj:"science", f:"ryushi", g:[6], gt:"小6", slug:"homura"},
-  {t:"ミャクの森", u:"植物の養分と水の通り道", subj:"science", f:"seimei", g:[6], gt:"小6", slug:"myaku"},
-  {t:"コドウの丘", u:"人の体のつくりと働き（呼吸・血液循環）", subj:"science", f:"jintai", g:[6], gt:"小6", slug:"kodou"},
-  {t:"カザミの丘", u:"天気の変化（雲と天気・台風）", subj:"science", f:"kisho", g:[5], gt:"小5", slug:"kazami"},
-  {t:"クルルの発電所", u:"電気の利用（発電・蓄電・センサー）", subj:"science", f:"energy", g:[6], gt:"小6", slug:"kururu"},
+  {t:"月よみ堂", u:"月の満ち欠け", subj:"science", f:"tenmon", g:[6], gt:"小6", slug:"tsukiyomido", seq:3},
+  {t:"まほう薬屋ほしずく", u:"もののとけ方", subj:"science", f:"busshitsu", g:[5], gt:"小5", slug:"mahou", seq:1},
+  {t:"ひだまり探偵社", u:"地図の見方", subj:"society", f:"chiri", g:[4], gt:"小4", slug:"hidamari", seq:1},
+  {t:"おなかの探検隊", u:"消化", subj:"science", f:"jintai", g:[6], gt:"小6", slug:"onaka", seq:1},
+  {t:"星めぐりの塔", u:"星の動き", subj:"science", f:"tenmon", g:[4], gt:"小4", slug:"hoshimeguri", seq:2},
+  {t:"みずの旅", u:"水はどこから", subj:"society", f:"chiri", g:[4], gt:"小4", slug:"mizunotabi", seq:2},
+  {t:"ながれる水の探検隊", u:"流れる水のはたらき", subj:"science", f:"chigaku", g:[5], gt:"小5", slug:"nagareru", seq:1},
+  {t:"ちそう発掘隊", u:"大地のつくり・地層", subj:"science", f:"chigaku", g:[6], gt:"小6", slug:"chisou", seq:2},
+  {t:"ふりこの間", u:"振り子", subj:"science", f:"rikigaku", g:[5], gt:"小5", slug:"furiko", seq:1},
+  {t:"めばえラボ", u:"植物の発芽", subj:"science", f:"seimei", g:[5], gt:"小5", slug:"mebae", seq:2},
+  {t:"てこの工房", u:"てこのはたらき", subj:"science", f:"rikigaku", g:[6], gt:"小6", slug:"teko", seq:2},
+  {t:"みのりの村", u:"お米づくり（食料生産）", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"kome", seq:7},
+  {t:"大仏づくり工房", u:"奈良の大仏・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"daibutsu", seq:3},
+  {t:"かさねの宮", u:"貴族の暮らしと国風文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kasane", seq:4},
+  {t:"ツイジの砦", u:"元寇と博多の防塁・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"genko", seq:6},
+  {t:"しおさいの湊", u:"水産業（とる漁業・育てる漁業）", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"shiosai", seq:8},
+  {t:"ひとつぶ村", u:"せんきょと一票のねうち（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"hitotsubu", seq:3},
+  {t:"ぎんしゃの庭", u:"金閣・銀閣と室町の文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"muromachi", seq:8},
+  {t:"ボルトの町工場", u:"自動車をつくる工業", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"jidosha", seq:9},
+  {t:"ヒナワの陣", u:"戦国時代・鉄砲伝来〜長篠の戦い・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"sengoku", seq:9},
+  {t:"ドグウの丘", u:"縄文・弥生時代・むらからくにへ・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"jomon", seq:1},
+  {t:"ケヤリの道", u:"江戸幕府と参勤交代・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"edo", seq:11},
+  {t:"オウギの島", u:"鎖国と貿易統制・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"sakoku", seq:12},
+  {t:"テンビンの間", u:"国の政治のしくみ・三権分立（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"sanken", seq:2},
+  {t:"マルの蔵", u:"税金とくらし（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"zeikin", seq:4},
+  {t:"ミハシラの杜", u:"日本国憲法と基本的人権（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"mihashira", seq:1},
+  {t:"ムスビの丘", u:"国際社会とSDGs（公民）", subj:"society", f:"komin", g:[6], gt:"小6", slug:"musubi", seq:5},
+  {t:"ケムリの港", u:"黒船来航と開国・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kurofune", seq:14},
+  {t:"ミズヤの里", u:"低い土地のくらし・輪中", subj:"society", f:"chiri", g:[4,5], gt:"小4〜5", slug:"mizuya", seq:3},
+  {t:"カンラの畑", u:"高い土地のくらし・高原野菜", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"kanra", seq:4},
+  {t:"シーサの家", u:"あたたかい土地のくらし・沖縄県", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"okinawa", seq:5},
+  {t:"リュウヒョウの岸", u:"寒い土地のくらし・北海道", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"ryuhyo", seq:6},
+  {t:"ネンリンの杜", u:"森林とわたしたちのくらし", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"nenrin", seq:10},
+  {t:"ホシゾラの街", u:"環境を守る・公害", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"hoshizora", seq:11},
+  {t:"ガイトウの町", u:"明治維新と文明開化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"gaitou", seq:15},
+  {t:"カンムリの都", u:"聖徳太子と大化の改新・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kanmuri", seq:2},
+  {t:"キリドオシの関", u:"鎌倉幕府の成立・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"kiridoshi", seq:5},
+  {t:"ニスジの都", u:"室町幕府の成立と南北朝・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"nisuji", seq:7},
+  {t:"タイトウの丘", u:"日清・日露戦争と条約改正・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"taitou", seq:16},
+  {t:"ズキンの家", u:"昭和の戦争と銃後のくらし・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"zukin", seq:18},
+  {t:"ホナミの田", u:"戦後の民主化と復興・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"honami", seq:19},
+  {t:"マスの野", u:"秀吉の全国統一・太閤検地と刀狩・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"masu", seq:10},
+  {t:"ニシキの座", u:"江戸の産業と文化・元禄文化と化政文化・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"nishiki", seq:13},
+  {t:"タワラの辻", u:"大正デモクラシー・米騒動と普通選挙法・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"tawara", seq:17},
+  {t:"ハヤテの駅", u:"高度経済成長と現代・東京オリンピックと新幹線・歴史", subj:"society", f:"rekishi", g:[6], gt:"小6", slug:"hayate", seq:20},
+  {t:"アオバの葉かげ", u:"チョウの育ち方（昆虫の成長）", subj:"science", f:"seimei", g:[3], gt:"小3", slug:"chou", seq:1},
+  {t:"いろみずの研究所", u:"水よう液の性質（酸性・中性・アルカリ性）", subj:"science", f:"busshitsu", g:[6], gt:"小6", slug:"iromizu", seq:2},
+  {t:"ウズの実験室", u:"電磁石のひみつ（電流のはたらき）", subj:"science", f:"energy", g:[5], gt:"小5", slug:"uzu", seq:2},
+  {t:"カガミの丘", u:"光のひみつ（光の性質）", subj:"science", f:"energy", g:[3], gt:"小3", slug:"kagami", seq:1},
+  {t:"カゲロウの原", u:"影と太陽のひみつ（太陽と地面のようす）", subj:"science", f:"tenmon", g:[3], gt:"小3", slug:"kagerou", seq:1},
+  {t:"ダンダンの実験場", u:"温度と体積・あたたまり方", subj:"science", f:"ryushi", g:[4], gt:"小4", slug:"dandan", seq:1},
+  {t:"シズクの淵", u:"動物のたんじょう（メダカ・人）", subj:"science", f:"seimei", g:[5], gt:"小5", slug:"shizuku", seq:3},
+  {t:"ホムラの炉", u:"ものの燃え方と空気", subj:"science", f:"ryushi", g:[6], gt:"小6", slug:"homura", seq:2},
+  {t:"ミャクの森", u:"植物の養分と水の通り道", subj:"science", f:"seimei", g:[6], gt:"小6", slug:"myaku", seq:4},
+  {t:"コドウの丘", u:"人の体のつくりと働き（呼吸・血液循環）", subj:"science", f:"jintai", g:[6], gt:"小6", slug:"kodou", seq:2},
+  {t:"カザミの丘", u:"天気の変化（雲と天気・台風）", subj:"science", f:"kisho", g:[5], gt:"小5", slug:"kazami", seq:1},
+  {t:"クルルの発電所", u:"電気の利用（発電・蓄電・センサー）", subj:"science", f:"energy", g:[6], gt:"小6", slug:"kururu", seq:3},
 ];
 
 const SUBJECT_LABEL = {science:"理科", society:"社会"};
@@ -515,16 +599,18 @@ document.addEventListener("click", (e)=>{
   if(link && link.dataset.slug) markPlayed(link.dataset.slug);
 });
 
-const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false };
+const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false, view:"grid" };
 
 const statsRow = document.getElementById("statsRow");
 const subjectTabsEl = document.getElementById("subjectTabs");
+const viewTabsEl = document.getElementById("viewTabs");
 const fieldChipsEl = document.getElementById("fieldChips");
 const fieldRowWrap = document.getElementById("fieldRowWrap");
 const gradeChipsEl = document.getElementById("gradeChips");
 const resultCountEl = document.getElementById("resultCount");
 const sectionsEl = document.getElementById("sections");
 const searchBox = document.getElementById("searchBox");
+const searchRowEl = document.querySelector(".search-row");
 const moreToggleEl = document.getElementById("moreToggle");
 const moreFiltersEl = document.getElementById("moreFilters");
 
@@ -592,6 +678,22 @@ function initSubjectTabs(){
     btn.addEventListener("click", ()=>{
       state.subject = btn.dataset.subject;
       state.fields.clear();
+      render();
+    });
+  });
+}
+
+function initViewTabs(){
+  const tabs = [
+    {key:"grid", label:`📋 いちらん`},
+    {key:"roadmap", label:`🗺️ じゅんばん`},
+  ];
+  viewTabsEl.innerHTML = tabs.map(tb=>
+    `<button type="button" class="tab-btn" data-view="${tb.key}">${tb.label}</button>`
+  ).join("");
+  viewTabsEl.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      state.view = btn.dataset.view;
       render();
     });
   });
@@ -670,18 +772,79 @@ function matchesFilter(it){
   return true;
 }
 
+function roadNodeHTML(it, num, isLast, playedSet){
+  const info = FIELD_INFO[it.f];
+  const playedBadge = playedSet.has(it.slug) ? `<span class="played-badge">⭐ あそんだ</span>` : "";
+  return `
+    <div class="road-node">
+      <div class="road-badge-col">
+        <span class="road-badge" style="--fc:${info.fc}">${num}</span>
+        ${isLast ? "" : `<span class="road-line"></span>`}
+      </div>
+      <div class="road-body" style="--fc:${info.fc}">
+        ${playedBadge}
+        <div class="road-body-top">
+          ${mascotHTML(it)}
+          <div class="road-text">
+            <h3>${it.t}</h3>
+            <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
+          </div>
+        </div>
+        <div class="btnrow">
+          <a class="main" data-slug="${it.slug}" href="${it.slug}.html">じゅぎょう画面</a>
+          <a class="sheet" href="${it.slug}-sheet.html">きろくシート</a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderRoadmap(){
+  resultCountEl.textContent = "";
+  const playedSet = getPlayedSlugs();
+  const subjectOrder = state.subject === "all" ? ["science","society"] : [state.subject];
+  let html = "";
+  subjectOrder.forEach(subj=>{
+    const fieldOrder = subj === "science" ? SCIENCE_FIELDS : SOCIETY_FIELDS;
+    const subjItems = ITEMS.filter(it=>it.subj===subj);
+    if(subjItems.length === 0) return;
+    html += `<div class="subject-block"><div class="subject-title ${subj}">${SUBJECT_LABEL[subj]}（${subjItems.length}）</div>`;
+    fieldOrder.forEach(fk=>{
+      const items = subjItems.filter(it=>it.f===fk).sort((a,b)=>a.seq-b.seq);
+      if(items.length === 0) return;
+      const info = FIELD_INFO[fk];
+      html += `<div class="field-heading"><span class="fi-badge" style="--fc-bg:${info.bg}">${info.icon}</span>${info.label}<span class="fi-count">（${items.length}）</span></div>`;
+      html += `<div class="road">${items.map((it,i)=>roadNodeHTML(it, i+1, i===items.length-1, playedSet)).join("")}</div>`;
+    });
+    html += `</div>`;
+  });
+  sectionsEl.innerHTML = html;
+}
+
 function render(){
   // subject tab active state
   subjectTabsEl.querySelectorAll("button").forEach(btn=>{
     btn.classList.toggle("active", btn.dataset.subject === state.subject);
   });
+  viewTabsEl.querySelectorAll("button").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.view === state.view);
+  });
+
+  const isRoadmap = state.view === "roadmap";
+  searchRowEl.style.display = isRoadmap ? "none" : "flex";
+  moreToggleEl.style.display = isRoadmap ? "none" : "inline-flex";
+  moreFiltersEl.classList.toggle("open", !isRoadmap && state.moreOpen);
+
+  if(isRoadmap){
+    renderRoadmap();
+    return;
+  }
+
   fieldRowWrap.style.display = "block";
   renderFieldChips();
   gradeChipsEl.querySelectorAll("button").forEach(btn=>{
     btn.classList.toggle("active", state.grades.has(Number(btn.dataset.grade)));
   });
 
-  moreFiltersEl.classList.toggle("open", state.moreOpen);
   moreToggleEl.textContent = state.moreOpen ? "🔼 とじる" : "🔍 もっとくわしく えらぶ";
 
   const filtered = ITEMS.filter(matchesFilter);
@@ -724,6 +887,7 @@ searchBox.addEventListener("input", ()=>{
 
 initStats();
 initSubjectTabs();
+initViewTabs();
 initGradeChips();
 render();
 
