@@ -283,6 +283,18 @@
   .card a:active, .pick-modal-inner a:active, .road-body a:active{ transform: scale(.94); }
 
   /* ---- roadmap view ---- */
+  .roadmap-field-tabs{
+    display:none;
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:#fffaf0;
+    margin: 0 0 16px;
+    padding:10px 10px;
+    border-radius:14px;
+    box-shadow:0 3px 10px rgba(0,0,0,.1);
+  }
+  .roadmap-field-tabs.show{ display:flex; flex-wrap:wrap; gap:8px; }
   .road{
     display:flex;
     flex-direction:column;
@@ -480,6 +492,7 @@
     </div>
   </div>
 
+  <div id="roadmapFieldTabs" class="roadmap-field-tabs"></div>
   <div class="result-count" id="resultCount"></div>
   <div id="sections"></div>
 
@@ -599,11 +612,12 @@ document.addEventListener("click", (e)=>{
   if(link && link.dataset.slug) markPlayed(link.dataset.slug);
 });
 
-const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false, view:"grid" };
+const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false, view:"grid", roadmapField:null };
 
 const statsRow = document.getElementById("statsRow");
 const subjectTabsEl = document.getElementById("subjectTabs");
 const viewTabsEl = document.getElementById("viewTabs");
+const roadmapFieldTabsEl = document.getElementById("roadmapFieldTabs");
 const fieldChipsEl = document.getElementById("fieldChips");
 const fieldRowWrap = document.getElementById("fieldRowWrap");
 const gradeChipsEl = document.getElementById("gradeChips");
@@ -798,25 +812,28 @@ function roadNodeHTML(it, num, isLast, playedSet){
     </div>`;
 }
 
-function renderRoadmap(){
+function renderRoadmapFieldTabs(fields){
+  roadmapFieldTabsEl.innerHTML = fields.map(fk=>{
+    const info = FIELD_INFO[fk];
+    const count = ITEMS.filter(it=>it.f===fk).length;
+    const active = state.roadmapField === fk ? "active" : "";
+    return `<button type="button" class="chip ${active}" data-field="${fk}" style="--chip-bg:${info.bg};--chip-fg:${info.fc}">${info.icon} ${info.label}（${count}）</button>`;
+  }).join("");
+  roadmapFieldTabsEl.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      state.roadmapField = btn.dataset.field;
+      render();
+    });
+  });
+}
+
+function renderRoadmap(fieldKey){
   resultCountEl.textContent = "";
   const playedSet = getPlayedSlugs();
-  const subjectOrder = state.subject === "all" ? ["science","society"] : [state.subject];
-  let html = "";
-  subjectOrder.forEach(subj=>{
-    const fieldOrder = subj === "science" ? SCIENCE_FIELDS : SOCIETY_FIELDS;
-    const subjItems = ITEMS.filter(it=>it.subj===subj);
-    if(subjItems.length === 0) return;
-    html += `<div class="subject-block"><div class="subject-title ${subj}">${SUBJECT_LABEL[subj]}（${subjItems.length}）</div>`;
-    fieldOrder.forEach(fk=>{
-      const items = subjItems.filter(it=>it.f===fk).sort((a,b)=>a.seq-b.seq);
-      if(items.length === 0) return;
-      const info = FIELD_INFO[fk];
-      html += `<div class="field-heading"><span class="fi-badge" style="--fc-bg:${info.bg}">${info.icon}</span>${info.label}<span class="fi-count">（${items.length}）</span></div>`;
-      html += `<div class="road">${items.map((it,i)=>roadNodeHTML(it, i+1, i===items.length-1, playedSet)).join("")}</div>`;
-    });
-    html += `</div>`;
-  });
+  const info = FIELD_INFO[fieldKey];
+  const items = ITEMS.filter(it=>it.f===fieldKey).sort((a,b)=>a.seq-b.seq);
+  let html = `<div class="field-heading"><span class="fi-badge" style="--fc-bg:${info.bg}">${info.icon}</span>${info.label}<span class="fi-count">（${items.length}）</span></div>`;
+  html += `<div class="road">${items.map((it,i)=>roadNodeHTML(it, i+1, i===items.length-1, playedSet)).join("")}</div>`;
   sectionsEl.innerHTML = html;
 }
 
@@ -833,9 +850,13 @@ function render(){
   searchRowEl.style.display = isRoadmap ? "none" : "flex";
   moreToggleEl.style.display = isRoadmap ? "none" : "inline-flex";
   moreFiltersEl.classList.toggle("open", !isRoadmap && state.moreOpen);
+  roadmapFieldTabsEl.classList.toggle("show", isRoadmap);
 
   if(isRoadmap){
-    renderRoadmap();
+    const fields = fieldsForCurrentSubject().filter(fk=>ITEMS.some(it=>it.f===fk));
+    if(!fields.includes(state.roadmapField)) state.roadmapField = fields[0];
+    renderRoadmapFieldTabs(fields);
+    renderRoadmap(state.roadmapField);
     return;
   }
 
