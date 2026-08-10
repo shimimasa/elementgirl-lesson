@@ -113,6 +113,22 @@
     --chip-fg:#777;
   }
 
+  .more-toggle{
+    display:block;
+    margin: 10px 0 0;
+    border:none;
+    background:none;
+    color:#4a7fd6;
+    font-weight:bold;
+    font-family: inherit;
+    font-size:14px;
+    cursor:pointer;
+    padding:6px 2px;
+  }
+  .more-toggle:hover{ text-decoration:underline; }
+  .more-filters{ display:none; margin-top:6px; }
+  .more-filters.open{ display:block; }
+
   .result-count{
     font-size: 13px;
     color:#888;
@@ -264,13 +280,17 @@
     <div class="row-label">教科</div>
     <div class="chiprow" id="subjectTabs"></div>
 
-    <div id="fieldRowWrap">
-      <div class="row-label">分野</div>
-      <div class="chiprow" id="fieldChips"></div>
-    </div>
+    <button type="button" id="moreToggle" class="more-toggle"></button>
 
-    <div class="row-label">学年</div>
-    <div class="chiprow grade-row" id="gradeChips"></div>
+    <div id="moreFilters" class="more-filters">
+      <div id="fieldRowWrap">
+        <div class="row-label">分野</div>
+        <div class="chiprow" id="fieldChips"></div>
+      </div>
+
+      <div class="row-label">学年</div>
+      <div class="chiprow grade-row" id="gradeChips"></div>
+    </div>
   </div>
 
   <div class="result-count" id="resultCount"></div>
@@ -363,7 +383,7 @@ const FALLBACK_EMOJI = {
   tsukiyomido:"🌙", mahou:"🧪", hidamari:"🔍", hoshimeguri:"🌌", furiko:"⏰",
 };
 
-const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"" };
+const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false };
 
 const statsRow = document.getElementById("statsRow");
 const subjectTabsEl = document.getElementById("subjectTabs");
@@ -373,6 +393,13 @@ const gradeChipsEl = document.getElementById("gradeChips");
 const resultCountEl = document.getElementById("resultCount");
 const sectionsEl = document.getElementById("sections");
 const searchBox = document.getElementById("searchBox");
+const moreToggleEl = document.getElementById("moreToggle");
+const moreFiltersEl = document.getElementById("moreFilters");
+
+moreToggleEl.addEventListener("click", ()=>{
+  state.moreOpen = !state.moreOpen;
+  render();
+});
 
 function initStats(){
   const scienceCount = ITEMS.filter(it=>it.subj==="science").length;
@@ -479,6 +506,9 @@ function render(){
   gradeChipsEl.querySelectorAll("button").forEach(btn=>{
     btn.classList.toggle("active", state.grades.has(Number(btn.dataset.grade)));
   });
+
+  moreFiltersEl.classList.toggle("open", state.moreOpen);
+  moreToggleEl.textContent = state.moreOpen ? "🔼 とじる" : "🔍 もっとくわしく えらぶ";
 
   const filtered = ITEMS.filter(matchesFilter);
   if(filtered.length === ITEMS.length){
