@@ -157,51 +157,77 @@
 
   .grid{
     display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
     gap: 16px;
     margin-bottom: 6px;
   }
   .card{
     background:#fff;
-    border-radius: 14px;
-    padding: 14px 18px 16px;
+    border-radius: 16px;
+    padding: 16px 14px 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,.08);
     border:1px solid #eee;
     border-top: 4px solid var(--fc, #ccc);
     position:relative;
-  }
-  .card-top{
     display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:8px;
-    margin-bottom: 6px;
+    text-align:center;
+    transition: transform .15s ease, box-shadow .15s ease;
   }
-  .card-top .fi-badge{
-    width:24px; height:24px;
+  .card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,.13);
+  }
+  .card-fibadge{
+    position:absolute;
+    top:10px; right:10px;
+    width:26px; height:26px;
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-size:13px;
+    font-size:14px;
     background: var(--fc-bg);
-    flex-shrink:0;
   }
-  .card-top .fi-label{
-    font-size:12px;
-    font-weight:bold;
-    color: var(--fc);
+  .card-mascot{
+    width:84px;
+    height:84px;
+    margin-bottom:2px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
+  .card-mascot svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .card-mascot.emoji{
+    font-size:52px;
+    line-height:1;
+  }
+  .card .mascot{ width:100%; animation: card-floaty 3.7s ease-in-out infinite; }
+  .card .mascot .eyes{ transform-box: fill-box; transform-origin: center; animation: card-blink 4.5s infinite; }
+  @keyframes card-floaty{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+  @keyframes card-blink{ 0%,92%,100%{ transform:scaleY(1); } 96%{ transform:scaleY(.1); } }
   .card h2{
-    margin: 0 0 4px;
-    font-size: 19px;
+    margin: 2px 0 4px;
+    font-size: 18px;
   }
   .card .meta{
-    font-size: 13px;
+    font-size: 12.5px;
     color:#888;
     margin-bottom: 12px;
+    line-height:1.5;
+  }
+  .card .btnrow{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    flex-wrap:wrap;
   }
   .card a{
     display:inline-block;
-    margin: 4px 8px 0 0;
-    padding: 8px 14px;
+    padding: 9px 14px;
     border-radius: 8px;
     text-decoration:none;
     font-size: 14px;
@@ -250,6 +276,7 @@
   <div class="result-count" id="resultCount"></div>
   <div id="sections"></div>
 
+<script src="mascots.js"></script>
 <script>
 const ITEMS = [
   {t:"月よみ堂", u:"月の満ち欠け", subj:"science", f:"tenmon", g:[6], gt:"小6", slug:"tsukiyomido"},
@@ -331,6 +358,11 @@ const SCIENCE_FIELDS = ["tenmon","busshitsu","jintai","chigaku","rikigaku","seim
 const SOCIETY_FIELDS = ["rekishi","chiri","komin"];
 const GRADES = [3,4,5,6];
 
+// mascots.js にSVGが無い(初期作品でキャラクターSVG未実装)ものは絵文字で代用
+const FALLBACK_EMOJI = {
+  tsukiyomido:"🌙", mahou:"🧪", hidamari:"🔍", hoshimeguri:"🌌", furiko:"⏰",
+};
+
 const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"" };
 
 const statsRow = document.getElementById("statsRow");
@@ -409,16 +441,20 @@ function initGradeChips(){
 
 function cardHTML(it){
   const info = FIELD_INFO[it.f];
+  const svg = typeof MASCOTS !== "undefined" ? MASCOTS[it.slug] : null;
+  const mascotHTML = svg
+    ? `<div class="card-mascot">${svg}</div>`
+    : `<div class="card-mascot emoji">${FALLBACK_EMOJI[it.slug] || info.icon}</div>`;
   return `
     <div class="card" style="--fc:${info.fc}">
-      <div class="card-top">
-        <span class="fi-badge" style="--fc-bg:${info.bg}">${info.icon}</span>
-        <span class="fi-label">${info.label}</span>
-      </div>
+      <span class="card-fibadge" style="--fc-bg:${info.bg}" title="${info.label}">${info.icon}</span>
+      ${mascotHTML}
       <h2>${it.t}</h2>
-      <div class="meta">${it.u} ／ ${SUBJECT_LABEL[it.subj]}${it.gt}</div>
-      <a class="main" href="${it.slug}.html">じゅぎょう画面</a>
-      <a class="sheet" href="${it.slug}-sheet.html">きろくシート</a>
+      <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
+      <div class="btnrow">
+        <a class="main" href="${it.slug}.html">じゅぎょう画面</a>
+        <a class="sheet" href="${it.slug}-sheet.html">きろくシート</a>
+      </div>
     </div>`;
 }
 
