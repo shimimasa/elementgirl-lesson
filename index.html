@@ -43,6 +43,86 @@
   }
   .stats span b{ color:#c76b2c; }
 
+  /* ---- progress / title ---- */
+  .progress-panel{
+    background: linear-gradient(135deg,#fff7e8,#fff);
+    border: 1px solid #f0dfb8;
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .progress-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:bold;
+    font-size:15px;
+    color:#7c5a10;
+    white-space:nowrap;
+  }
+  .progress-title .icon{ font-size:26px; }
+  .progress-bar-wrap{
+    flex:1;
+    min-width:180px;
+  }
+  .progress-bar-track{
+    background:#f1e6cc;
+    border-radius:999px;
+    height:14px;
+    overflow:hidden;
+  }
+  .progress-bar-fill{
+    height:100%;
+    background: linear-gradient(90deg,#ffb648,#ff8a3d);
+    border-radius:999px;
+    transition: width .4s ease;
+  }
+  .progress-sub{
+    font-size:12px;
+    color:#a07840;
+    margin-top:5px;
+  }
+
+  /* ---- next up card ---- */
+  .nextup{ margin-bottom: 14px; }
+  .nextup-label{
+    font-size:13px;
+    font-weight:bold;
+    color:#c76b2c;
+    margin-bottom:6px;
+  }
+  .nextup-body{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:#fff;
+    border:1px solid #eee;
+    border-left:6px solid var(--fc,#ccc);
+    border-radius:16px;
+    padding:12px 16px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+    flex-wrap:wrap;
+  }
+  .nextup-body .card-mascot{ width:64px; height:64px; flex:0 0 64px; margin:0; }
+  .nextup-text{ flex:1; min-width:150px; }
+  .nextup-text h3{ margin:0 0 4px; font-size:16px; }
+  .nextup-text .meta{ font-size:12.5px; color:#888; line-height:1.5; margin:0; }
+  .nextup-btn{ flex:0 0 auto; }
+  .nextup-complete{
+    background:#fff7e8;
+    border:1px solid #f0dfb8;
+    border-radius:16px;
+    padding:16px;
+    text-align:center;
+    font-weight:bold;
+    color:#a8790b;
+  }
+
   /* ---- controls ---- */
   .controls{
     background: rgba(255,255,255,.6);
@@ -464,7 +544,9 @@
 <body>
   <h1>🎮 ゲーム型授業 一覧</h1>
   <p class="lead">すきな作品をタップすると、ぼうけんがはじまるよ！</p>
+  <div id="progressPanel" class="progress-panel"></div>
   <div class="stats" id="statsRow"></div>
+  <div id="nextUpCard" class="nextup"></div>
 
   <button type="button" id="pickRandomBtn" class="pick-random-btn">🎲 どれであそぶ？ おまかせ！</button>
 
@@ -607,6 +689,58 @@ function markPlayed(slug){
   localStorage.setItem(PLAYED_KEY, JSON.stringify([...played]));
 }
 
+// ---- 称号・進捗（作品数が増えても崩れないよう割合ベースのしきい値） ----
+function titleThresholds(){
+  const total = ITEMS.length;
+  return [
+    {min:0,                          label:"みならい たんけんか",   icon:"🌱"},
+    {min:Math.max(1,Math.round(total*0.10)), label:"いちにんまえ たんけんか", icon:"🔍"},
+    {min:Math.round(total*0.25),     label:"はかせの たまご",       icon:"🎓"},
+    {min:Math.round(total*0.5),      label:"ものしり はかせ",       icon:"⭐"},
+    {min:Math.round(total*0.8),      label:"ぼうけんの たつじん",   icon:"🏅"},
+    {min:total,                      label:"でんせつの はかせ",     icon:"👑"},
+  ];
+}
+
+function getTitleState(playedCount){
+  const thresholds = titleThresholds();
+  let current = thresholds[0];
+  let next = null;
+  for(const th of thresholds){
+    if(playedCount >= th.min) current = th;
+    else { next = th; break; }
+  }
+  return {current, next};
+}
+
+// ---- 「次はこれ！」おすすめ：直近に触れた分野の続き→未着手の分野→どれか未プレイ ----
+function pickNextRecommendation(){
+  const playedSet = getPlayedSlugs();
+  const playedArr = [...playedSet];
+  if(playedArr.length >= ITEMS.length) return null;
+
+  const lastSlug = playedArr[playedArr.length - 1];
+  const lastItem = lastSlug ? ITEMS.find(it=>it.slug===lastSlug) : null;
+  if(lastItem){
+    const sameField = ITEMS.filter(it=>it.f===lastItem.f && !playedSet.has(it.slug))
+      .sort((a,b)=>a.seq-b.seq);
+    if(sameField.length > 0) return {item: sameField[0], reason:"continue"};
+  }
+
+  const allFields = [...SCIENCE_FIELDS, ...SOCIETY_FIELDS];
+  for(const fk of allFields){
+    const fieldItems = ITEMS.filter(it=>it.f===fk);
+    const fieldPlayed = fieldItems.filter(it=>playedSet.has(it.slug));
+    if(fieldPlayed.length === 0){
+      const first = fieldItems.slice().sort((a,b)=>a.seq-b.seq)[0];
+      if(first) return {item: first, reason:"new"};
+    }
+  }
+
+  const anyUnplayed = ITEMS.find(it=>!playedSet.has(it.slug));
+  return anyUnplayed ? {item: anyUnplayed, reason:"any"} : null;
+}
+
 document.addEventListener("click", (e)=>{
   const link = e.target.closest("a.main");
   if(link && link.dataset.slug) markPlayed(link.dataset.slug);
@@ -614,6 +748,8 @@ document.addEventListener("click", (e)=>{
 
 const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false, view:"grid", roadmapField:null };
 
+const progressPanelEl = document.getElementById("progressPanel");
+const nextUpEl = document.getElementById("nextUpCard");
 const statsRow = document.getElementById("statsRow");
 const subjectTabsEl = document.getElementById("subjectTabs");
 const viewTabsEl = document.getElementById("viewTabs");
@@ -676,6 +812,45 @@ function initStats(){
     <span>🔬りか <b>${scienceCount}</b></span>
     <span>🏯しゃかい <b>${societyCount}</b></span>
     <span>⭐あそんだ数 <b>${playedCount}</b></span>
+  `;
+}
+
+function renderProgress(){
+  const playedCount = getPlayedSlugs().size;
+  const total = ITEMS.length;
+  const pct = total > 0 ? Math.round(playedCount / total * 100) : 0;
+  const {current, next} = getTitleState(playedCount);
+  const subText = next
+    ? `つぎの称号「${next.icon} ${next.label}」まで あと ${next.min - playedCount}こ！`
+    : `ぜんぶの称号を てにいれたよ！さいきょうの はかせだね！`;
+  progressPanelEl.innerHTML = `
+    <div class="progress-title"><span class="icon">${current.icon}</span>いまの称号：${current.label}</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="progress-sub">${playedCount}／${total}こ あそんだよ（${pct}%）・${subText}</div>
+    </div>
+  `;
+}
+
+function renderNextUp(){
+  const rec = pickNextRecommendation();
+  if(!rec){
+    nextUpEl.innerHTML = `<div class="nextup-complete">👑 ぜんぶの ぼうけんを あそんだよ！すごい！</div>`;
+    return;
+  }
+  const it = rec.item;
+  const info = FIELD_INFO[it.f];
+  const label = rec.reason === "continue" ? "🚩 つづきは これ！" : "✨ 次は これに ちょうせん！";
+  nextUpEl.innerHTML = `
+    <div class="nextup-label">${label}</div>
+    <div class="nextup-body" style="--fc:${info.fc}">
+      ${mascotHTML(it)}
+      <div class="nextup-text">
+        <h3>${it.t}</h3>
+        <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
+      </div>
+      <a class="main nextup-btn" data-slug="${it.slug}" href="${it.slug}.html">あそびに行く！</a>
+    </div>
   `;
 }
 
@@ -907,6 +1082,8 @@ searchBox.addEventListener("input", ()=>{
 });
 
 initStats();
+renderProgress();
+renderNextUp();
 initSubjectTabs();
 initViewTabs();
 initGradeChips();
@@ -914,6 +1091,8 @@ render();
 
 window.addEventListener("pageshow", ()=>{
   initStats();
+  renderProgress();
+  renderNextUp();
   render();
 });
 </script>
