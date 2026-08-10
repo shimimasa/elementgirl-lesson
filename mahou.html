@@ -1049,13 +1049,13 @@ const FLOW = ['intro', 'vote', 'm_weight', 'm_limit', 'm_temp', 'm_crystal', 'ha
 
 // ふりかえりタイム：4つのミッションのポーションを1つずつ見せ直す
 const FURIKAERI_SLIDES = [
-  { icon: '🌟', title: () => 'きらきらポーション（重さの保存）', video: 'fYxoSlSPTiw',
+  { icon: '🌟', title: () => 'きらきらポーション（重さの保存）', video: 'fYxoSlSPTiw', embeddable: false,
     setup: () => { setStateDirect({ mat: 'shio', added: 10, temp: 20, dissolvedAuto: true }); },
     text: () => `${W.shio}を 2さじ（10g）とかしても、はかりは <b>110gの まま</b>だったね。とけて 見えなくなっても、つぶは 水の中に ちゃんと いる——だから ${W.omosa}は きえないんだ。` },
-  { icon: '🫧', title: () => 'まんぷくポーション（とける量の限度）', video: 'VlWN_i09Frk',
+  { icon: '🫧', title: () => 'まんぷくポーション（とける量の限度）', video: 'VlWN_i09Frk', embeddable: false,
     setup: () => { const lim = MATS.shio.sol(20); setStateDirect({ mat: 'shio', added: 40, temp: 20, dissolved: lim, crystal: 0 }); },
     text: () => `水100g（20℃）に ${W.shio}が とけるのは <b>7さじ（やく35g）まで</b>。いくら まぜても、それいじょうは とけのこりに なったね。とける${W.ryou}には <b>かぎり</b>が あるんだ。` },
-  { icon: '🔥', title: () => 'ほかほかポーション（温度とものによるちがい）', video: '2j0zCaJx1jw',
+  { icon: '🔥', title: () => 'ほかほかポーション（温度とものによるちがい）', video: '2j0zCaJx1jw', embeddable: false,
     setup: () => { setStateDirect({ mat: 'myoban', added: 15, temp: 60, dissolvedAuto: true }); },
     text: () => `${W.shio}は あたためても とける${W.ryou}が ほとんど ふえなかったけど、ミョウバンは 60℃なら <b>11さじ（57g）</b>も とけたね。あたためた ときの とけかたは <b>ものに よって ちがう</b>んだ。` },
   { icon: '💎', title: () => 'よあけのほうせきポーション（さいけっしょう）',
@@ -1352,8 +1352,9 @@ const STEPS = {
       };
       if (slide.video) {
         const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        const canEmbed = slide.embeddable !== false;
         showOverlay(`
-          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title()}</h2>
+          <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
           <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
             <div style="position:relative;border-radius:12px;overflow:hidden;background:#000">
               <img src="https://img.youtube.com/vi/${slide.video}/hqdefault.jpg" style="width:100%;display:block;opacity:.85">
@@ -1361,13 +1362,21 @@ const STEPS = {
                 <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
               </div>
             </div>
-            <div style="margin-top:.5em;color:#8f96c8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+            <div style="margin-top:.5em;color:#3a7ab8;font-size:clamp(12px,1.3vw,16px)">${canEmbed ? 'タップすると この画面で 動画が はじまるよ' : 'タップすると 新しい タブで 動画が ひらくよ'}</div>
           </div>
           <p class="talk">${slide.text()}</p>
           <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
-          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+          <div class="foot">先生へ：動画はYouTubeの教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
         `);
-        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriThumb').onclick = () => {
+          sTap();
+          if (canEmbed) {
+            const embedUrl = `https://www.youtube-nocookie.com/embed/${slide.video}?rel=0&modestbranding=1&iv_load_policy=3&autoplay=1`;
+            $('furikaeriThumb').outerHTML = `<div style="max-width:380px;margin:0 auto;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#000"><iframe width="100%" height="100%" src="${embedUrl}" title="${slide.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+          } else {
+            window.open(videoUrl, '_blank', 'noopener');
+          }
+        };
         $('furikaeriNextBtn').onclick = goNext;
       } else {
         hideOverlay();

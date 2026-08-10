@@ -882,15 +882,15 @@ const FURIKAERI_SLIDES = [
     setup: () => { Object.assign(S, { circuitOn: true, clipAttached: true, kisoAnimT: 1 }); },
     scope: () => ({ type: 'idle' }),
     text: () => `${W.denryuu}を 流すと、コイルが 電磁石に なって クリップが くっついた。回路を 切ると、クリップは ポロッと 落ちたね。${W.denryuu}が 流れている 間だけ 磁石に なるのが、電磁石の ひみつだったね。` },
-  { scene: 'kyoku', icon: '🧭', title: '極を調べる', video: '4EgeaWnOFuM',
+  { scene: 'kyoku', icon: '🧭', title: '極を調べる', video: '4EgeaWnOFuM', embeddable: false,
     setup: () => { Object.assign(S, { battFlipped: true, compassChecked: 1 }); },
     scope: () => ({ type: 'idle' }),
     text: () => `${W.houi}で 極を 調べると、電池の 向きを 変えた とき、電磁石の N極・S極が 入れかわったね。${W.denryuu}の 向きを 変えると、極も 入れかわるんだったね。` },
-  { scene: 'makisuu', icon: '🌀', title: '巻き数で強さをためす', video: '-FugogntY2w',
+  { scene: 'makisuu', icon: '🌀', title: '巻き数で強さをためす', video: '-FugogntY2w', embeddable: false,
     setup: () => { Object.assign(S, { makiLevel: MAKI_TARGET, makiAnimT: 1, makiResult: 'good' }); },
     scope: () => ({ type: 'gauge' }),
     text: () => `${W.makisuu}を ふやしていくと、目ひょうの ${MAKI_TARGET}こを こえて クリップが 持ち上がったね。${W.makisuu}を 増やすほど、電磁石は 強くなるんだったね。` },
-  { scene: 'denryu', icon: '🔋', title: '電流の大きさ', video: '-FugogntY2w',
+  { scene: 'denryu', icon: '🔋', title: '電流の大きさ', video: '-FugogntY2w', embeddable: false,
     setup: () => { Object.assign(S, { battCount: 2, denAnimT: 1, denryuTested: new Set([1, 2]) }); },
     scope: () => ({ type: 'idle' }),
     text: () => `かん電池を 2こ ${W.chokuretsu}に すると、1こより ずっと 多く クリップが 持ち上がったね。${W.denryuu}が 大きいほど、電磁石は 強くなるんだったね。` },
@@ -1170,6 +1170,7 @@ const STEPS = {
       };
       if (slide.video) {
         const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        const canEmbed = slide.embeddable !== false;
         showOverlay(`
           <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
           <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
@@ -1179,13 +1180,21 @@ const STEPS = {
                 <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
               </div>
             </div>
-            <div style="margin-top:.5em;color:#8fb8e8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+            <div style="margin-top:.5em;color:#3a7ab8;font-size:clamp(12px,1.3vw,16px)">${canEmbed ? 'タップすると この画面で 動画が はじまるよ' : 'タップすると 新しい タブで 動画が ひらくよ'}</div>
           </div>
           <p class="talk">${slide.text()}</p>
           <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
-          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+          <div class="foot">先生へ：動画はYouTubeの教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
         `);
-        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriThumb').onclick = () => {
+          sTap();
+          if (canEmbed) {
+            const embedUrl = `https://www.youtube-nocookie.com/embed/${slide.video}?rel=0&modestbranding=1&iv_load_policy=3&autoplay=1`;
+            $('furikaeriThumb').outerHTML = `<div style="max-width:380px;margin:0 auto;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#000"><iframe width="100%" height="100%" src="${embedUrl}" title="${slide.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+          } else {
+            window.open(videoUrl, '_blank', 'noopener');
+          }
+        };
         $('furikaeriNextBtn').onclick = goNext;
       } else {
         hideOverlay();

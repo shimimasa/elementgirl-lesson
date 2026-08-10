@@ -1103,7 +1103,7 @@ document.addEventListener("click", (e)=>{
   if(link && link.dataset.slug) markPlayed(link.dataset.slug);
 });
 
-const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false, view:"grid", roadmapField:null };
+const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", moreOpen:false, view:"roadmap", roadmapField:null };
 
 const profileBarEl = document.getElementById("profileBar");
 const profileModalEl = document.getElementById("profileModal");

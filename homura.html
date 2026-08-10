@@ -1206,6 +1206,7 @@ const STEPS = {
       };
       if (slide.video) {
         const videoUrl = `https://www.youtube.com/watch?v=${slide.video}`;
+        const canEmbed = slide.embeddable !== false;
         showOverlay(`
           <h2>${slide.icon} ふりかえりタイム（${n}/${total}）${slide.title}</h2>
           <div id="furikaeriThumb" style="max-width:380px;margin:0 auto;cursor:pointer">
@@ -1215,13 +1216,21 @@ const STEPS = {
                 <div style="width:15%;aspect-ratio:1;min-width:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,3vw,34px)">▶</div>
               </div>
             </div>
-            <div style="margin-top:.5em;color:#3a7ab8;font-size:clamp(12px,1.3vw,16px)">タップすると 新しい タブで 動画が ひらくよ</div>
+            <div style="margin-top:.5em;color:#3a7ab8;font-size:clamp(12px,1.3vw,16px)">${canEmbed ? 'タップすると この画面で 動画が はじまるよ' : 'タップすると 新しい タブで 動画が ひらくよ'}</div>
           </div>
           <p class="talk">${slide.text()}</p>
           <button class="btn" id="furikaeriNextBtn">${isLast ? 'まとめへ すすむ' : 'つぎへ'}</button>
-          <div class="foot">先生へ：動画は外部サイト(YouTube)の教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
+          <div class="foot">先生へ：動画はYouTubeの教育系チャンネルです。内容を事前にご確認ください。URL: ${videoUrl}</div>
         `);
-        $('furikaeriThumb').onclick = () => { sTap(); window.open(videoUrl, '_blank', 'noopener'); };
+        $('furikaeriThumb').onclick = () => {
+          sTap();
+          if (canEmbed) {
+            const embedUrl = `https://www.youtube-nocookie.com/embed/${slide.video}?rel=0&modestbranding=1&iv_load_policy=3&autoplay=1`;
+            $('furikaeriThumb').outerHTML = `<div style="max-width:380px;margin:0 auto;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#000"><iframe width="100%" height="100%" src="${embedUrl}" title="${slide.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+          } else {
+            window.open(videoUrl, '_blank', 'noopener');
+          }
+        };
         $('furikaeriNextBtn').onclick = goNext;
       } else {
         hideOverlay();
