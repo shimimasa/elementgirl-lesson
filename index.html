@@ -102,6 +102,11 @@
     color:#888;
     margin-right:2px;
   }
+  .profile-chip-item{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+  }
   .profile-chip{
     border:none;
     cursor:pointer;
@@ -120,6 +125,19 @@
     background:#4a7fd6;
     color:#fff;
   }
+  .profile-edit-btn{
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
+    border-radius:50%;
+    width:32px;
+    height:32px;
+    min-height:32px;
+    font-size:13px;
+    background:#f1f1f1;
+    color:#888;
+  }
+  .profile-edit-btn:active{ transform: scale(.9); }
   .profile-add-btn{
     cursor:pointer;
     font-family:inherit;
@@ -143,6 +161,61 @@
     text-align:center;
     font-family:inherit;
     margin:10px 0;
+  }
+  .profile-name-error{
+    min-height:18px;
+    font-size:13px;
+    color:#c0392b;
+    font-weight:bold;
+    margin-bottom:6px;
+  }
+  .profile-modal-actions{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .profile-delete-btn{
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
+    margin-top:10px;
+    padding:9px 18px;
+    border:none;
+    border-radius:999px;
+    background:#ffdada;
+    color:#a02020;
+    font-weight:bold;
+    font-family:inherit;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .profile-delete-btn:active{ transform: scale(.95); }
+  .profile-delete-confirm{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid #eee;
+    font-size:14px;
+    color:#a02020;
+    font-weight:bold;
+  }
+  .backup-link{
+    display:inline-block;
+    margin: 0 0 10px;
+    padding: 4px 2px;
+    border:none;
+    background:none;
+    color:#999;
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .backup-desc{
+    font-size:13px;
+    color:#777;
+    margin-bottom:10px;
+    line-height:1.5;
   }
 
   /* ---- next up card ---- */
@@ -608,6 +681,7 @@
   <h1>🎮 ゲーム型授業 一覧</h1>
   <p class="lead">すきな作品をタップすると、ぼうけんがはじまるよ！</p>
   <div id="profileBar" class="profile-bar"></div>
+  <button type="button" id="backupOpenBtn" class="backup-link">📦 きろくのバックアップ（せんせい用）</button>
   <div id="progressPanel" class="progress-panel"></div>
   <div class="stats" id="statsRow"></div>
   <div id="nextUpCard" class="nextup"></div>
@@ -652,9 +726,34 @@
   <div id="profileModal" class="pick-modal">
     <div class="pick-modal-inner">
       <button type="button" id="profileModalClose" class="pick-modal-close" aria-label="とじる">✕</button>
-      <div class="pick-modal-label">👤 なまえを おしえてね</div>
+      <div class="pick-modal-label" id="profileModalLabel">👤 なまえを おしえてね</div>
       <input type="text" id="profileNameInput" class="profile-input" maxlength="10" placeholder="れい：ゆい">
-      <div><button type="button" id="profileConfirmBtn" class="pick-again-btn">きめる！</button></div>
+      <div id="profileNameError" class="profile-name-error"></div>
+      <div class="profile-modal-actions">
+        <button type="button" id="profileConfirmBtn" class="pick-again-btn">きめる！</button>
+        <button type="button" id="profileDeleteBtn" class="profile-delete-btn" style="display:none">けす</button>
+      </div>
+      <div id="profileDeleteConfirm" class="profile-delete-confirm" style="display:none">
+        <div>ほんとうに けす？<br>きろくも きえるよ</div>
+        <div class="profile-modal-actions">
+          <button type="button" id="profileDeleteYes" class="profile-delete-btn">はい、けす</button>
+          <button type="button" id="profileDeleteNo" class="pick-again-btn">やめる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="backupModal" class="pick-modal">
+    <div class="pick-modal-inner">
+      <button type="button" id="backupModalClose" class="pick-modal-close" aria-label="とじる">✕</button>
+      <div class="pick-modal-label">📦 きろくの バックアップ</div>
+      <div class="backup-desc">タブレットの きろくが きえるのが しんぱいなときに つかってね（せんせい用の きのうです）</div>
+      <div class="profile-modal-actions">
+        <button type="button" id="backupExportBtn" class="pick-again-btn">📥 書き出す</button>
+        <button type="button" id="backupImportBtn" class="pick-again-btn">📤 読み込む</button>
+      </div>
+      <input type="file" id="backupFileInput" accept="application/json" style="display:none">
+      <div id="backupStatus" class="profile-name-error"></div>
     </div>
   </div>
 
@@ -773,7 +872,15 @@ function getBadgeProgress(){
   }
 }
 
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, function(ch){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch];
+  });
+}
+
 // ---- なまえプロフィール（端末共有時に子どもごとの進捗を分けるため） ----
+let profileEditTarget = null; // 編集中のプロフィール名(nullなら新規追加モード)
+
 function migrateLegacyProgressIfNeeded(){
   if(getProfileList().length > 0) return;
   const oldPlayed = localStorage.getItem(PLAYED_KEY);
@@ -792,7 +899,11 @@ function renderProfileBar(){
   let html = `<span class="profile-label">👤 だれが あそぶ？</span>`;
   html += list.map(name=>{
     const activeCls = name === active ? "active" : "";
-    return `<button type="button" class="profile-chip ${activeCls}" data-name="${name}">${name}</button>`;
+    const esc = escapeHtml(name);
+    return `<span class="profile-chip-item">`+
+      `<button type="button" class="profile-chip ${activeCls}" data-name="${esc}">${esc}</button>`+
+      `<button type="button" class="profile-edit-btn" data-name="${esc}" aria-label="なまえをへんしゅう">✎</button>`+
+      `</span>`;
   }).join("");
   html += `<button type="button" id="profileAddBtn" class="profile-add-btn">＋ なまえをついか</button>`;
   profileBarEl.innerHTML = html;
@@ -803,24 +914,107 @@ function renderProfileBar(){
       refreshAll();
     });
   });
-  document.getElementById("profileAddBtn").addEventListener("click", openProfileModal);
+  profileBarEl.querySelectorAll(".profile-edit-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      openProfileModal(btn.dataset.name);
+    });
+  });
+  document.getElementById("profileAddBtn").addEventListener("click", ()=> openProfileModal(null));
 }
 
-function openProfileModal(){
-  profileNameInputEl.value = "";
+function openProfileModal(editName){
+  profileEditTarget = editName || null;
+  profileNameInputEl.value = editName || "";
+  profileNameErrorEl.textContent = "";
+  profileModalLabelEl.textContent = editName ? "👤 なまえを へんこう" : "👤 なまえを おしえてね";
+  profileConfirmBtnEl.textContent = editName ? "へんこうする！" : "きめる！";
+  profileDeleteBtnEl.style.display = editName ? "inline-flex" : "none";
+  profileDeleteConfirmEl.style.display = "none";
   profileModalEl.classList.add("open");
   setTimeout(()=> profileNameInputEl.focus(), 50);
 }
 function closeProfileModal(){
   profileModalEl.classList.remove("open");
+  profileEditTarget = null;
+  profileDeleteConfirmEl.style.display = "none";
+  profileNameErrorEl.textContent = "";
 }
 function confirmProfile(){
   const name = profileNameInputEl.value.trim().slice(0, 10);
-  if(!name) return;
-  addProfile(name);
-  setActiveProfile(name);
+  profileNameErrorEl.textContent = "";
+  if(!name){ profileNameErrorEl.textContent = "なまえを にゅうりょくしてね"; return; }
+  const isDuplicate = getProfileList().indexOf(name) !== -1 && name !== profileEditTarget;
+  if(isDuplicate){ profileNameErrorEl.textContent = "そのなまえは もう あるよ"; return; }
+  if(profileEditTarget){
+    if(name !== profileEditTarget) renameProfile(profileEditTarget, name);
+  } else {
+    addProfile(name);
+    setActiveProfile(name);
+  }
   closeProfileModal();
   refreshAll();
+}
+function requestDeleteProfile(){
+  profileDeleteConfirmEl.style.display = "block";
+}
+function cancelDeleteProfile(){
+  profileDeleteConfirmEl.style.display = "none";
+}
+function confirmDeleteProfile(){
+  if(!profileEditTarget) return;
+  removeProfile(profileEditTarget);
+  closeProfileModal();
+  refreshAll();
+}
+
+// ---- きろくのバックアップ（せんせい用・localStorageのJSON書き出し/読み込み） ----
+const BACKUP_BASE_KEYS = [PLAYED_KEY, BADGE_KEY, "elementgirl_profiles", "elementgirl_active_profile"];
+
+function collectBackupData(){
+  const keys = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(!k) continue;
+    const isMatch = BACKUP_BASE_KEYS.some(base => k === base || k.indexOf(base + "__") === 0);
+    if(isMatch) keys[k] = localStorage.getItem(k);
+  }
+  return { exportedAt: new Date().toISOString(), keys };
+}
+
+function exportBackup(){
+  const data = collectBackupData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `elementgirl_backup_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  backupStatusEl.style.color = "#3f8a52";
+  backupStatusEl.textContent = "書き出したよ！";
+}
+
+function importBackupFile(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || typeof data.keys !== "object") throw new Error("bad format");
+      Object.keys(data.keys).forEach(k=> localStorage.setItem(k, data.keys[k]));
+      backupStatusEl.style.color = "#3f8a52";
+      backupStatusEl.textContent = "読み込んだよ！";
+      refreshAll();
+    } catch(e){
+      backupStatusEl.style.color = "#c0392b";
+      backupStatusEl.textContent = "読み込めなかったよ…ファイルを確認してね";
+    }
+  };
+  reader.readAsText(file);
 }
 
 function refreshAll(){
@@ -913,9 +1107,22 @@ const state = { subject:"all", fields:new Set(), grades:new Set(), keyword:"", m
 
 const profileBarEl = document.getElementById("profileBar");
 const profileModalEl = document.getElementById("profileModal");
+const profileModalLabelEl = document.getElementById("profileModalLabel");
 const profileNameInputEl = document.getElementById("profileNameInput");
+const profileNameErrorEl = document.getElementById("profileNameError");
 const profileConfirmBtnEl = document.getElementById("profileConfirmBtn");
 const profileModalCloseEl = document.getElementById("profileModalClose");
+const profileDeleteBtnEl = document.getElementById("profileDeleteBtn");
+const profileDeleteConfirmEl = document.getElementById("profileDeleteConfirm");
+const profileDeleteYesEl = document.getElementById("profileDeleteYes");
+const profileDeleteNoEl = document.getElementById("profileDeleteNo");
+const backupOpenBtnEl = document.getElementById("backupOpenBtn");
+const backupModalEl = document.getElementById("backupModal");
+const backupModalCloseEl = document.getElementById("backupModalClose");
+const backupExportBtnEl = document.getElementById("backupExportBtn");
+const backupImportBtnEl = document.getElementById("backupImportBtn");
+const backupFileInputEl = document.getElementById("backupFileInput");
+const backupStatusEl = document.getElementById("backupStatus");
 const progressPanelEl = document.getElementById("progressPanel");
 const nextUpEl = document.getElementById("nextUpCard");
 const statsRow = document.getElementById("statsRow");
@@ -976,6 +1183,25 @@ profileNameInputEl.addEventListener("keydown", (e)=>{ if(e.key === "Enter") conf
 profileModalCloseEl.addEventListener("click", closeProfileModal);
 profileModalEl.addEventListener("click", (e)=>{
   if(e.target === profileModalEl) closeProfileModal();
+});
+profileDeleteBtnEl.addEventListener("click", requestDeleteProfile);
+profileDeleteYesEl.addEventListener("click", confirmDeleteProfile);
+profileDeleteNoEl.addEventListener("click", cancelDeleteProfile);
+
+backupOpenBtnEl.addEventListener("click", ()=>{
+  backupStatusEl.textContent = "";
+  backupModalEl.classList.add("open");
+});
+backupModalCloseEl.addEventListener("click", ()=> backupModalEl.classList.remove("open"));
+backupModalEl.addEventListener("click", (e)=>{
+  if(e.target === backupModalEl) backupModalEl.classList.remove("open");
+});
+backupExportBtnEl.addEventListener("click", exportBackup);
+backupImportBtnEl.addEventListener("click", ()=> backupFileInputEl.click());
+backupFileInputEl.addEventListener("change", ()=>{
+  const file = backupFileInputEl.files[0];
+  if(file) importBackupFile(file);
+  backupFileInputEl.value = "";
 });
 
 function initStats(){
