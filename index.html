@@ -865,6 +865,8 @@ const BONUS_GAMES = [
   { t:"ちそうならべ", u:"地層タイムアタック", icon:"⛰️", slug:"chisounarabe", requireSlug:"chisou", requireTitle:"ちそう発掘隊" },
   { t:"地図記号タイムアタック", u:"記号さがしゲーム", icon:"🧭", slug:"chizukigou", requireSlug:"hidamari", requireTitle:"ひだまり探偵社" },
   { t:"クリップチャレンジ", u:"電磁石スコアアタック", icon:"🧲", slug:"clipchallenge", requireSlug:"uzu", requireTitle:"ウズの実験室" },
+  { t:"じだいならべ", u:"歴史年表タイムアタック", icon:"📜",
+    slug:"jidainarabe", requireSlugs: ITEMS.filter(it=>it.f==="rekishi").map(it=>it.slug), requireCount: 10, requireTitle:"歴史シリーズ10作品" },
 ];
 
 const SUBJECT_LABEL = {science:"理科", society:"社会"};
@@ -1082,7 +1084,15 @@ function renderBonusGames(){
   if(!wrap || BONUS_GAMES.length === 0){ if(wrap) wrap.innerHTML = ""; return; }
   const badgeProgress = getBadgeProgress();
   const cards = BONUS_GAMES.map(g=>{
-    const unlocked = isCleared(g.requireSlug, badgeProgress);
+    let unlocked, lockMsg;
+    if (g.requireSlugs) {
+      const n = g.requireSlugs.filter(slug => isCleared(slug, badgeProgress)).length;
+      unlocked = n >= g.requireCount;
+      lockMsg = `「${g.requireTitle}」<br>${n}／${g.requireCount} クリアすると あそべるよ`;
+    } else {
+      unlocked = isCleared(g.requireSlug, badgeProgress);
+      lockMsg = `「${g.requireTitle}」を<br>クリアすると あそべるよ`;
+    }
     if(unlocked){
       return `
         <a class="bonus-card" href="${g.slug}.html">
@@ -1096,7 +1106,7 @@ function renderBonusGames(){
       <div class="bonus-card locked">
         <div class="bonus-icon">🔒</div>
         <h3>${g.t}</h3>
-        <div class="bonus-meta">「${g.requireTitle}」を<br>クリアすると あそべるよ</div>
+        <div class="bonus-meta">${lockMsg}</div>
         <div class="bonus-tag">ロック中</div>
       </div>`;
   }).join("");
