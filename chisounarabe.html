@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ちそうならべ — 地層タイムアタック</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f4ecda 0%, #ecdfc6 60%, #e2d2b4 100%);
+    color: #4a3520;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(18px, 2.3vw, 30px); font-weight: 700;
+    color: #a05e1e; margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .5em; color: #8a7050; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px;
+    white-space: nowrap;
+  }
+  #levelChip { background: #fff; color: #a05e1e; border: 1.5px solid #d8c090; }
+  #timeChip { background: #c07a30; color: #fff6e6; box-shadow: 0 0 14px rgba(192,122,48,.5); }
+  #bestChip { background: #fff; color: #8a7050; border: 1.5px solid #d8c090; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 25%, #fdf9ee 0%, #f4e8cc 70%, #ecdab0 100%);
+    border: 2px solid #d8c090;
+    box-shadow: inset 0 0 60px rgba(160,94,30,.08), 0 4px 24px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stage { cursor: pointer; }
+  #fx { pointer-events: none; }
+  #stageTitle {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%); pointer-events: none;
+    color: #a05e1e; font-weight: 700; text-align: center;
+    font-size: clamp(15px, 2vw, 24px);
+  }
+  #progressChip {
+    position: absolute; top: 1vh; right: 1.4vw; pointer-events: none;
+    background: rgba(255,255,255,.85); color: #a05e1e; font-weight: 700;
+    font-size: clamp(12px, 1.3vw, 17px); padding: .3em .8em; border-radius: 999px;
+    border: 1.5px solid #d8c090;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(60, 40, 15, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: #fdf9ee;
+    border: 2px solid #d8c090; border-radius: 26px;
+    max-width: 560px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0,0,0,.25);
+  }
+  .panel h1 {
+    font-size: clamp(22px, 3.2vw, 34px); color: #a05e1e; margin: 0 0 .3em;
+  }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #4a3520; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #a05e1e; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #c07a30, #a05e1e); color: #fff6e6;
+    box-shadow: 0 4px 14px rgba(160,94,30,.4);
+    min-height: 44px;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #fff; color: #a05e1e; box-shadow: none; border: 1.5px solid #d8c090; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(160,94,30,.12); border: 1px solid rgba(160,94,30,.4);
+    color: #a05e1e; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">⛰️ ちそうならべ <small>地層タイムアタック</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">Lv. -/6</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="stageTitle"></div>
+    <div id="progressChip"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この <ruby>地層<rt>ちそう</rt></ruby>ならべは、<b>ちそう発掘隊</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ちそう発掘隊を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="chisou.html">ちそう発掘隊へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>⛰️ ちそうならべ</h1>
+    <p>バラバラに なった <ruby>地層<rt>ちそう</rt></ruby>カードを、<b><ruby>新<rt>あたら</rt></ruby>しい じゅんばん</b>で タップして がけを かんせいさせよう。<br>「<ruby>下<rt>した</rt></ruby>ほど <ruby>古<rt>ふる</rt></ruby>い」を てがかりに！<br>6つの がけを、いちばん はやく つくれるかな？</p>
+    <div id="bestInfo" class="panel" style="display:none"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="clearOverlay" class="overlay hide">
+  <div class="panel">
+    <h1 id="clearTitle">✨ できた！</h1>
+    <p id="clearName"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnNext">つぎへ ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 ぜんぶ クリア！</h1>
+    <p>6つの がけを ぜんぶ ならべたよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const TAU = Math.PI * 2;
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'chisou';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'chisounarabe_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 岩石の種類（本物：粒の大きさで分類、色はちそう発掘隊と同じ） ----------
+const ROCK = {
+  reki:     { col: '#b09468', name: 'れき' },
+  suna:     { col: '#d9c48a', name: 'すな' },
+  doro:     { col: '#b8a488', name: 'どろ' },
+  kazanbai: { col: '#a8a4a0', name: '火山灰' },
+};
+
+// ---------- 6つのがけ（上から下＝新しい→古い、地層累重の法則） ----------
+const LEVELS = [
+  { layers: ['doro','suna','kazanbai','doro','suna','reki'] },
+  { layers: ['reki','doro','suna','kazanbai','doro','suna'] },
+  { layers: ['suna','reki','doro','suna','kazanbai','doro'] },
+  { layers: ['kazanbai','suna','reki','doro','suna','doro'] },
+  { layers: ['doro','kazanbai','reki','suna','doro','suna'] },
+  { layers: ['reki','suna','doro','kazanbai','suna','doro'] },
+];
+
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | levelClear | result
+  level: 0,
+  nextIdx: 0,
+  deck: [],          // シャッフルされた {type, id} カード（未使用のみ残る）
+  sound: true,
+  startTime: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(700, 0, 0.09, 'triangle', 0.08);
+const sHmm = () => tone(300, 0, 0.15, 'sine', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 26, PAD_B = 16, PAD_X = 16;
+const MAPW = 1000, MAPH = 620;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+function curLevel(){ return LEVELS[S.level]; }
+
+// 断面(左)のレイアウト
+const CLIFF_X = 210, CLIFF_TOP = 60, LAYER_H = 80, CLIFF_W = 260;
+// カード置き場(右)のレイアウト：3列×2行
+const CARD_COLS = 3, CARD_W = 190, CARD_H = 130, CARD_X0 = 560, CARD_Y0 = 100, CARD_GAP = 22;
+function cardRect(i){
+  const col = i % CARD_COLS, row = Math.floor(i / CARD_COLS);
+  return { x: CARD_X0 + col * (CARD_W + CARD_GAP), y: CARD_Y0 + row * (CARD_H + CARD_GAP), w: CARD_W, h: CARD_H };
+}
+
+// ---------- 描画 ----------
+function drawLayerTexture(ctx, type, x0, y0, w, h, X, Y){
+  const seedBase = (x0 * 7 + y0 * 13) | 0;
+  if (type === 'reki') {
+    for (let k = 0; k < 5; k++) {
+      const px = x0 + 14 + ((k * 71 + seedBase) % (w - 28));
+      const py = y0 + h/2 + (((k*37)%2)?1:-1) * (6 + (k*5)%14);
+      ctx.fillStyle = '#8a7048';
+      ctx.beginPath(); ctx.arc(X(px), Y(py), 6, 0, TAU); ctx.fill();
+    }
+  } else if (type === 'suna') {
+    for (let k = 0; k < 10; k++) {
+      const px = x0 + 8 + ((k * 47 + seedBase) % (w - 16));
+      const py = y0 + 10 + ((k * 31) % (h - 20));
+      ctx.fillStyle = '#a8925c';
+      ctx.beginPath(); ctx.arc(X(px), Y(py), 2.4, 0, TAU); ctx.fill();
+    }
+  } else if (type === 'doro') {
+    for (let k = 0; k < 16; k++) {
+      const px = x0 + 6 + ((k * 23 + seedBase) % (w - 12));
+      const py = y0 + 6 + ((k * 19) % (h - 12));
+      ctx.fillStyle = '#8a7862';
+      ctx.beginPath(); ctx.arc(X(px), Y(py), 1.1, 0, TAU); ctx.fill();
+    }
+  } else if (type === 'kazanbai') {
+    for (let k = 0; k < 8; k++) {
+      const px = x0 + 10 + ((k * 41 + seedBase) % (w - 20));
+      const py = y0 + 8 + ((k * 29) % (h - 16));
+      ctx.save(); ctx.translate(X(px), Y(py)); ctx.rotate(k);
+      ctx.fillStyle = '#78746e';
+      ctx.fillRect(-3, -3, 6, 6);
+      ctx.restore();
+    }
+  }
+}
+
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing' && S.phase !== 'levelClear') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  const lv = curLevel();
+
+  // がけの外わく
+  gctx.fillStyle = 'rgba(160,94,30,.06)';
+  gctx.fillRect(X(CLIFF_X), Y(CLIFF_TOP), CLIFF_W * sc, LAYER_H * 6 * sc);
+  gctx.strokeStyle = '#c0a870'; gctx.lineWidth = 2 * sc;
+  gctx.strokeRect(X(CLIFF_X), Y(CLIFF_TOP), CLIFF_W * sc, LAYER_H * 6 * sc);
+
+  // 積み上がった層（上から nextIdx 個ぶん）
+  for (let i = 0; i < S.nextIdx; i++) {
+    const type = lv.layers[i];
+    const y0 = CLIFF_TOP + i * LAYER_H;
+    gctx.fillStyle = ROCK[type].col;
+    gctx.fillRect(X(CLIFF_X), Y(y0), CLIFF_W * sc, LAYER_H * sc);
+    drawLayerTexture(gctx, type, CLIFF_X, y0, CLIFF_W, LAYER_H, X, Y);
+    gctx.strokeStyle = 'rgba(80,60,30,.35)'; gctx.lineWidth = 1.5 * sc;
+    gctx.strokeRect(X(CLIFF_X), Y(y0), CLIFF_W * sc, LAYER_H * sc);
+    gctx.fillStyle = '#3a2a15'; gctx.font = `700 ${Math.max(11, 15*sc)}px sans-serif`; gctx.textAlign = 'left';
+    gctx.fillText('①②③④⑤⑥'[i] + ' ' + ROCK[type].name, X(CLIFF_X + 10), Y(y0 + LAYER_H/2));
+  }
+  // 次に置く場所のガイド枠
+  if (S.nextIdx < 6) {
+    const y0 = CLIFF_TOP + S.nextIdx * LAYER_H;
+    gctx.strokeStyle = `rgba(192,122,48,${0.5 + 0.4*Math.sin(t*3)})`; gctx.lineWidth = 3 * sc;
+    gctx.setLineDash([10,6]);
+    gctx.strokeRect(X(CLIFF_X)+2, Y(y0)+2, CLIFF_W*sc-4, LAYER_H*sc-4);
+    gctx.setLineDash([]);
+  }
+
+  // シャッフルされたカード
+  S.deck.forEach((card, i) => {
+    if (card.used) return;
+    const r = cardRect(i);
+    gctx.fillStyle = ROCK[card.type].col;
+    gctx.fillRect(X(r.x), Y(r.y), r.w * sc, r.h * sc);
+    drawLayerTexture(gctx, card.type, r.x, r.y, r.w, r.h, X, Y);
+    gctx.strokeStyle = '#8a7050'; gctx.lineWidth = 2 * sc;
+    gctx.strokeRect(X(r.x), Y(r.y), r.w * sc, r.h * sc);
+    gctx.fillStyle = '#3a2a15'; gctx.font = `700 ${Math.max(13, 17*sc)}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText(ROCK[card.type].name, X(r.x + r.w/2), Y(r.y + r.h - 14));
+  });
+
+  gctx.fillStyle = 'rgba(160,94,30,.85)'; gctx.font = `700 ${Math.max(13, 17*sc)}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('つぎに 上に くる 地層は？', X(CARD_X0 + (CARD_W*CARD_COLS + CARD_GAP*2)/2), Y(CARD_Y0 - 24));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: Math.random() < 0.6 ? '#c07a30' : (Math.random() < 0.5 ? '#fff' : '#a05e1e'),
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+}
+
+// ---------- タップ処理 ----------
+function pickCard(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  const lx = (clientX - rect.left - ox) / sc, ly = (clientY - rect.top - oy) / sc;
+  for (let i = 0; i < S.deck.length; i++) {
+    if (S.deck[i].used) continue;
+    const r = cardRect(i);
+    if (lx >= r.x && lx <= r.x + r.w && ly >= r.y && ly <= r.y + r.h) return i;
+  }
+  return -1;
+}
+function onStageTap(clientX, clientY){
+  if (S.phase !== 'playing') return;
+  const idx = pickCard(clientX, clientY);
+  if (idx === -1) return;
+  ac();
+  const lv = curLevel();
+  const card = S.deck[idx];
+  const wantType = lv.layers[S.nextIdx];
+  if (card.type === wantType) {
+    sTap();
+    card.used = true;
+    S.nextIdx++;
+    updateProgressChip();
+    const r = cardRect(idx);
+    const rect = stageCv.getBoundingClientRect();
+    const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+    burst(rect.left + ox + (r.x + r.w/2) * sc, rect.top + oy + (r.y + r.h/2) * sc, 24);
+    if (S.nextIdx >= 6) onLevelClear();
+  } else {
+    sHmm();
+  }
+}
+stageCv.addEventListener('pointerdown', e => onStageTap(e.clientX, e.clientY));
+
+// ---------- レベル進行 ----------
+function updateProgressChip(){
+  $('progressChip').textContent = `${S.nextIdx} / 6 つみあがった`;
+}
+function startLevel(i){
+  S.level = i;
+  S.nextIdx = 0;
+  const lv = LEVELS[i];
+  S.deck = shuffled(lv.layers.map((type, k) => ({ type, id: k, used: false })));
+  $('stageTitle').innerHTML = `がけ ${i + 1}`;
+  updateProgressChip();
+  $('levelChip').textContent = `Lv. ${i+1}/6`;
+  S.phase = 'playing';
+}
+function onLevelClear(){
+  S.phase = 'levelClear';
+  sYes(); stageBurst();
+  if (S.level >= LEVELS.length - 1) {
+    setTimeout(onAllClear, 500);
+    return;
+  }
+  $('clearTitle').textContent = '✨ がけ かんせい！';
+  $('clearName').innerHTML = `がけ <b>${S.level+1}</b> クリア！`;
+  $('btnNext').textContent = `つぎの がけへ ▶ (${S.level+2}/6)`;
+  showOverlay('clearOverlay');
+}
+$('btnNext').addEventListener('click', () => {
+  hideOverlay('clearOverlay');
+  startLevel(S.level + 1);
+});
+
+function onAllClear(){
+  S.phase = 'result';
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = LEVELS.map((l,i) => `<span class="starChip">⛰️ がけ${i+1}</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  S.startTime = performance.now();
+  startLevel(0);
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const t = now / 1000;
+  drawStage(t);
+  drawFx(dt);
+  if (S.phase === 'playing' || S.phase === 'levelClear') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
