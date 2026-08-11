@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ふりこピッタリチャレンジ — めざせタイム！</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #0a0e24 0%, #131a3d 60%, #1a2150 100%);
+    color: #f2efff;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  #starsLayer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .bgstar {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: .85; } }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(17px, 2.1vw, 28px); font-weight: 700;
+    color: #ffe9a8; text-shadow: 0 0 14px rgba(255, 214, 107, .55);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #bdc4f5; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #1c2450; color: #cfd6ff; border: 1.5px solid #3a437a; }
+  #timeChip { background: #ffd66b; color: #5a3c00; box-shadow: 0 0 14px rgba(255,214,107,.5); }
+  #bestChip { background: #1c2450; color: #cfd6ff; border: 1.5px solid #3a437a; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #1a2150 0%, #10152f 70%, #0a0e24 100%);
+    border: 2px solid #3a437a;
+    box-shadow: inset 0 0 60px rgba(120, 140, 255, .12), 0 4px 24px rgba(0,0,0,.4);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #targetChip {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%);
+    background: #ffd66b; color: #5a3c00; font-weight: 700;
+    font-size: clamp(14px, 1.8vw, 22px); padding: .32em 1em; border-radius: 999px;
+    box-shadow: 0 0 14px rgba(255,214,107,.5); white-space: nowrap;
+  }
+  #resultMsg {
+    position: absolute; top: 6.4vh; left: 50%; transform: translateX(-50%);
+    color: #ffe9a8; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 19px); min-height: 1.4em;
+    text-shadow: 0 0 10px rgba(0,0,0,.6);
+    max-width: 90%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .5vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(10, 14, 36, .7) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.5vw, 19px); font-weight: 700;
+    padding: .5em .9em; border-radius: 14px; border: 2px solid #ffd66b; cursor: pointer;
+    background: linear-gradient(180deg, #ffd66b, #f2a93b); color: #3a2a00;
+    box-shadow: 0 3px 0 #b97e17; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 40px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.alt { background: linear-gradient(180deg, #6a5aa8, #4a3d8a); border-color: #9a8ad0; box-shadow: 0 3px 0 #2e2560; color: #fff; }
+  .ctl.go { background: linear-gradient(180deg, #ff9d6b, #e0622f); border-color: #ffbf9d; box-shadow: 0 3px 0 #a83f14; color: #fff; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(7, 9, 24, .88);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #1b2249, #141a3d);
+    border: 2px solid #3a437a; border-radius: 26px;
+    max-width: 600px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 0 60px rgba(120, 140, 255, .18);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(22px, 3.2vw, 34px); color: #ffe9a8; margin: 0 0 .3em; text-shadow: 0 0 20px rgba(255,214,107,.5); }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #dfe1ff; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #ffe9a8; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #ffd66b, #f2a93b); color: #3a2a00;
+    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #2a3468; color: #cfd6ff; box-shadow: none; border: 1.5px solid #3a437a; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(255,214,107,.14); border: 1px solid rgba(255,214,107,.4);
+    color: #ffe9a8; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<div id="starsLayer"></div>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">⏰ ふりこピッタリチャレンジ <small>めざせ タイム！</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">もん 0/8</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="targetChip"></div>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この <ruby>振<rt>ふ</rt></ruby>り<ruby>子<rt>こ</rt></ruby>ピッタリチャレンジは、<b>ふりこの間</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ふりこの間を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="furiko.html">ふりこの間へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>⏰ ふりこピッタリチャレンジ</h1>
+    <p><ruby>目標<rt>もくひょう</rt></ruby>の <b>タイム</b>を 見て、<ruby>長<rt>なが</rt></ruby>さ・おもさ・ふれはばの ボタンを つかって ふりこを ぴったり 合わせよう。<br>
+    ほんとうに タイムを 決めるのは、この 3つの うち <b>ひとつだけ</b>！<br>
+    8もん ぜんぶ せいかいするまでの はやさを きそおう。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 ぜんぶ ピッタリ！</h1>
+    <p>8もん ぜんぶ タイムを 合わせられたよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'furiko';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'furikopittari_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 振り子の物理（ふりこの間と同じ：T=2π√(L/g)、長さのみが決める） ----------
+const G = 9.8;
+const periodOf = Lm => TAU * Math.sqrt(Lm / G);
+const TICK_CM = [10, 25, 40, 55, 70, 85, 100, 115];
+const TICK_LABEL = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
+const TARGET_SEC = TICK_CM.map(cm => +periodOf(cm / 100).toFixed(1));
+
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | swinging | result
+  order: [],         // シャッフルされた出題順（長さindex 0..7）
+  qIdx: 0,
+  tickIdx: 3,
+  weight: 'light',
+  angleDeg: 25,
+  theta: 0,
+  swing: null,
+  trace: [],
+  sound: true,
+  startTime: 0,
+  misses: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sSwing = () => { tone(440, 0, 0.15, 'triangle', 0.06); tone(330, 0.1, 0.2, 'triangle', 0.05); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+(function makeBgStars() {
+  const layer = $('starsLayer');
+  for (let i = 0; i < 26; i++) {
+    const s = document.createElement('span');
+    s.className = 'bgstar';
+    const size = 1 + Math.random() * 2.2;
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;animation-delay:${Math.random() * 3}s;`;
+    layer.appendChild(s);
+  }
+})();
+
+const PAD_T = 26, PAD_B = 16, PAD_X = 14;
+const MAPW = 1000, MAPH = 680;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+const PIVOT = { x: 500, y: 130 };
+const PX_PER_CM = 3.3;
+const RULER_X = 800;
+
+function drawRuler(X, Y, sc) {
+  gctx.strokeStyle = 'rgba(189,196,255,.4)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(RULER_X), Y(PIVOT.y));
+  gctx.lineTo(X(RULER_X), Y(PIVOT.y + TICK_CM[7] * PX_PER_CM + 16));
+  gctx.stroke();
+  TICK_CM.forEach((cm, i) => {
+    const ty = PIVOT.y + cm * PX_PER_CM;
+    const active = i === S.tickIdx;
+    gctx.strokeStyle = active ? '#ffd66b' : 'rgba(189,196,255,.5)';
+    gctx.lineWidth = (active ? 3 : 2) * sc;
+    gctx.beginPath(); gctx.moveTo(X(RULER_X - 10), Y(ty)); gctx.lineTo(X(RULER_X + 10), Y(ty)); gctx.stroke();
+    gctx.font = `700 ${Math.max(11, (active ? 19 : 14) * sc)}px sans-serif`;
+    gctx.fillStyle = active ? '#ffe9a8' : '#8f96c8';
+    gctx.textAlign = 'left'; gctx.textBaseline = 'middle';
+    gctx.fillText(TICK_LABEL[i], X(RULER_X + 16), Y(ty));
+  });
+}
+
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing' && S.phase !== 'swinging') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+
+  gctx.fillStyle = 'rgba(10,14,36,.4)';
+  gctx.fillRect(X(0), Y(0), MAPW * sc, MAPH * sc);
+
+  gctx.fillStyle = '#4a3d2a';
+  gctx.fillRect(X(360), Y(90), 280 * sc, 18 * sc);
+  gctx.strokeStyle = '#8a6a3a'; gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(PIVOT.x), Y(108)); gctx.lineTo(X(PIVOT.x), Y(PIVOT.y)); gctx.stroke();
+
+  drawRuler(X, Y, sc);
+
+  const Lpx = TICK_CM[S.tickIdx] * PX_PER_CM;
+  const bx = PIVOT.x + Math.sin(S.theta) * Lpx, by = PIVOT.y + Math.cos(S.theta) * Lpx;
+  gctx.strokeStyle = '#c9a227'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(PIVOT.x), Y(PIVOT.y)); gctx.lineTo(X(bx), Y(by)); gctx.stroke();
+
+  const bobR = (S.weight === 'heavy' ? 24 : 15) * sc;
+  const bobCol = S.weight === 'heavy' ? '#e8c53a' : '#cfd6ff';
+  const grd = gctx.createRadialGradient(X(bx) - bobR * 0.3, Y(by) - bobR * 0.3, bobR * 0.1, X(bx), Y(by), bobR);
+  grd.addColorStop(0, '#fff'); grd.addColorStop(1, bobCol);
+  gctx.fillStyle = grd;
+  gctx.beginPath(); gctx.arc(X(bx), Y(by), bobR, 0, TAU); gctx.fill();
+  gctx.strokeStyle = '#7a4d00'; gctx.lineWidth = 2 * sc; gctx.stroke();
+
+  gctx.fillStyle = '#8a6a3a';
+  gctx.beginPath(); gctx.arc(X(PIVOT.x), Y(PIVOT.y), 8 * sc, 0, TAU); gctx.fill();
+
+  gctx.fillStyle = 'rgba(10,14,36,.85)';
+  gctx.fillRect(X(0), Y(628), 1000 * sc, 52 * sc);
+  gctx.strokeStyle = 'rgba(120,140,255,.25)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(X(0), Y(628)); gctx.lineTo(X(1000), Y(628)); gctx.stroke();
+
+  gctx.fillStyle = 'rgba(189,196,255,.85)'; gctx.font = `700 ${Math.max(12, 16*sc)}px sans-serif`; gctx.textAlign = 'center';
+  const stateLabel = S.phase === 'swinging'
+    ? `けいそく中… ${TICK_LABEL[S.tickIdx]} ${S.weight === 'heavy' ? 'おもい' : 'かるい'} ${S.angleDeg}°`
+    : `いまの せってい：${TICK_LABEL[S.tickIdx]} ${S.weight === 'heavy' ? 'おもい' : 'かるい'} ${S.angleDeg}°`;
+  gctx.fillText(stateLabel, X(500), Y(660));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ffd66b', '#f2a93b', '#cfd6ff', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 振り子シミュレーション ----------
+let simNow = performance.now() / 1000;
+function startSwing(onDone) {
+  const L = TICK_CM[S.tickIdx] / 100;
+  const theta0 = S.angleDeg * Math.PI / 180;
+  S.swing = { L, theta0, t0: simNow, T: periodOf(L), fired: false, onDone };
+  S.theta = theta0;
+  S.phase = 'swinging';
+  sSwing();
+}
+function stepSwing(t) {
+  if (!S.swing) return;
+  const sw = S.swing;
+  const elapsed = t - sw.t0;
+  S.theta = sw.theta0 * Math.cos(TAU * elapsed / sw.T);
+  if (!sw.fired && elapsed >= sw.T) {
+    sw.fired = true;
+    const measured = sw.T;
+    const done = sw.onDone;
+    S.swing = null;
+    S.phase = 'playing';
+    if (done) done(measured);
+  }
+}
+
+// ---------- 出題進行 ----------
+function updateLevelChip(){
+  $('levelChip').textContent = `もん ${S.qIdx}/8`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function targetIdx(){ return S.order[S.qIdx]; }
+
+function renderControls(disabled){
+  setControls([
+    { label: '◀ みじかく', dis: disabled, cb: () => { S.tickIdx = clamp(S.tickIdx - 1, 0, 7); sTap(); renderControls(false); } },
+    { label: 'ながく ▶', dis: disabled, cb: () => { S.tickIdx = clamp(S.tickIdx + 1, 0, 7); sTap(); renderControls(false); } },
+    { label: S.weight === 'light' ? '🪶 かるい' : '⚙ おもい', cls: 'alt', dis: disabled, cb: () => { S.weight = S.weight === 'light' ? 'heavy' : 'light'; sTap(); renderControls(false); } },
+    { label: S.angleDeg === 25 ? '📐 小さく ふる' : '📐 大きく ふる', cls: 'alt', dis: disabled, cb: () => { S.angleDeg = S.angleDeg === 25 ? 45 : 25; sTap(); renderControls(false); } },
+    { label: '🎯 ふって ためす', cls: 'go', dis: disabled, cb: onTry },
+  ]);
+}
+function setControls(list){
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+
+function startQuestion(){
+  S.theta = S.angleDeg * Math.PI / 180;
+  updateLevelChip();
+  const tg = TARGET_SEC[targetIdx()];
+  $('targetChip').textContent = `めざせ：${tg.toFixed(1)}びょう`;
+  setResultMsg('ながさ・おもさ・ふれはばを えらんで、「ふって ためす」をおそう。');
+  renderControls(false);
+}
+function onTry(){
+  if (S.phase !== 'playing') return;
+  setResultMsg('けいそく中…');
+  renderControls(true);
+  startSwing(measured => {
+    const idx = S.tickIdx;
+    if (idx === targetIdx()) {
+      sYes(); stageBurst();
+      setResultMsg(`🎯 ピッタリ！ <b>${measured.toFixed(1)}びょう</b>！ せいかい！`);
+      setControls([]);
+      S.qIdx++;
+      setTimeout(() => {
+        if (S.qIdx >= 8) onAllClear();
+        else startQuestion();
+      }, 900);
+    } else {
+      sHmm();
+      S.misses++;
+      const hint = idx < targetIdx() ? 'もう少し ながく してみよう' : 'もう少し みじかく してみよう';
+      setResultMsg(`${TICK_LABEL[idx]}は <b>${measured.toFixed(1)}びょう</b>。おしい！ ${hint}。`);
+      renderControls(false);
+    }
+  });
+}
+
+function startGame(){
+  S.order = shuffled([0,1,2,3,4,5,6,7]);
+  S.qIdx = 0;
+  S.tickIdx = 3;
+  S.weight = 'light';
+  S.angleDeg = 25;
+  S.misses = 0;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  startQuestion();
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}（まちがえた かいすう：${S.misses}）`;
+  $('starListEl').innerHTML = TICK_LABEL.map((l,i) => `<span class="starChip">${l} ${TARGET_SEC[i].toFixed(1)}びょう</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const t = now / 1000;
+  simNow = t;
+  stepSwing(t);
+  drawStage(t);
+  drawFx(dt);
+  if (S.phase === 'playing' || S.phase === 'swinging') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
