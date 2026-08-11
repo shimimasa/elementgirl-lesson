@@ -254,6 +254,42 @@
     color:#a8790b;
   }
 
+  /* ---- bonus games ---- */
+  .bonus-section{ margin-bottom: 14px; }
+  .bonus-label{
+    font-size:13px; font-weight:bold; color:#a8790b; margin-bottom:6px;
+  }
+  .bonus-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .bonus-card{
+    background: linear-gradient(160deg, #1a2150, #10152f);
+    border-radius: 16px;
+    padding: 16px 14px;
+    border: 2px solid #f2a93b;
+    box-shadow: 0 2px 12px rgba(0,0,0,.18);
+    position: relative;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    color: #f2efff;
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .bonus-card:hover{ transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+  .bonus-card .bonus-icon{ font-size: 34px; margin-bottom: 6px; }
+  .bonus-card h3{ margin: 0 0 4px; font-size: 16px; color: #ffe9a8; }
+  .bonus-card .bonus-meta{ font-size: 12px; color: #bdc4f5; line-height: 1.5; margin: 0; }
+  .bonus-card .bonus-tag{
+    margin-top: 8px; font-size: 12px; font-weight: bold;
+    background: #ffd66b; color: #5a3c00; padding: 3px 12px; border-radius: 999px;
+  }
+  .bonus-card.locked{
+    border-color: #555; filter: grayscale(.4); cursor: default;
+  }
+  .bonus-card.locked .bonus-tag{ background: #444; color: #ccc; }
+  .bonus-card.locked:hover{ transform:none; box-shadow: 0 2px 12px rgba(0,0,0,.18); }
+
   /* ---- controls ---- */
   .controls{
     background: rgba(255,255,255,.6);
@@ -685,6 +721,7 @@
   <div id="progressPanel" class="progress-panel"></div>
   <div class="stats" id="statsRow"></div>
   <div id="nextUpCard" class="nextup"></div>
+  <div id="bonusGamesWrap"></div>
 
   <button type="button" id="pickRandomBtn" class="pick-random-btn">🎲 どれであそぶ？ おまかせ！</button>
 
@@ -819,6 +856,11 @@ const ITEMS = [
   {t:"カザミの丘", u:"天気の変化（雲と天気・台風）", subj:"science", f:"kisho", g:[5], gt:"小5", slug:"kazami", seq:1},
   {t:"クルルの発電所", u:"電気の利用（発電・蓄電・センサー）", subj:"science", f:"energy", g:[6], gt:"小6", slug:"kururu", seq:3},
   {t:"トモシの浜", u:"自然災害と防災", subj:"society", f:"chiri", g:[5], gt:"小5", slug:"tomoshi", seq:12},
+];
+
+// ---- ごほうびミニゲーム（通常の学習カード一覧とは別枠。特定の本編クリアで解放） ----
+const BONUS_GAMES = [
+  { t:"ほしつなぎ", u:"星座タイムアタック", icon:"✨", slug:"hoshitsunagi", requireSlug:"hoshimeguri", requireTitle:"星めぐりの塔" },
 ];
 
 const SUBJECT_LABEL = {science:"理科", society:"社会"};
@@ -1021,6 +1063,7 @@ function refreshAll(){
   initStats();
   renderProgress();
   renderNextUp();
+  renderBonusGames();
   renderProfileBar();
   render();
 }
@@ -1028,6 +1071,36 @@ function refreshAll(){
 function isCleared(slug, badgeProgress){
   const p = badgeProgress[slug];
   return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+function renderBonusGames(){
+  const wrap = document.getElementById("bonusGamesWrap");
+  if(!wrap || BONUS_GAMES.length === 0){ if(wrap) wrap.innerHTML = ""; return; }
+  const badgeProgress = getBadgeProgress();
+  const cards = BONUS_GAMES.map(g=>{
+    const unlocked = isCleared(g.requireSlug, badgeProgress);
+    if(unlocked){
+      return `
+        <a class="bonus-card" href="${g.slug}.html">
+          <div class="bonus-icon">${g.icon}</div>
+          <h3>${g.t}</h3>
+          <div class="bonus-meta">${g.u}</div>
+          <div class="bonus-tag">🔓 あそべる！</div>
+        </a>`;
+    }
+    return `
+      <div class="bonus-card locked">
+        <div class="bonus-icon">🔒</div>
+        <h3>${g.t}</h3>
+        <div class="bonus-meta">「${g.requireTitle}」を<br>クリアすると あそべるよ</div>
+        <div class="bonus-tag">ロック中</div>
+      </div>`;
+  }).join("");
+  wrap.innerHTML = `
+    <div class="bonus-section">
+      <div class="bonus-label">✨ ごほうびミニゲーム</div>
+      <div class="bonus-grid">${cards}</div>
+    </div>`;
 }
 
 function playedBadgeHTML(it, playedSet, badgeProgress){
@@ -1499,6 +1572,7 @@ migrateLegacyProgressIfNeeded();
 initStats();
 renderProgress();
 renderNextUp();
+renderBonusGames();
 renderProfileBar();
 initSubjectTabs();
 initViewTabs();
@@ -1509,6 +1583,7 @@ window.addEventListener("pageshow", ()=>{
   initStats();
   renderProgress();
   renderNextUp();
+  renderBonusGames();
   renderProfileBar();
   render();
 });
