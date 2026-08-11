@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>地図記号タイムアタック — ひだまり探偵社</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f3ead4 0%, #ecdfc2 100%);
+    color: #3a2c18;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(16px, 2.1vw, 27px); font-weight: 700;
+    color: #b5432e; margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .5em; color: #8a7050; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px;
+    white-space: nowrap;
+  }
+  #levelChip { background: #fff; color: #b5432e; border: 1.5px solid #dcc79a; }
+  #timeChip { background: #d0563c; color: #fff8ea; box-shadow: 0 0 14px rgba(208,86,60,.5); }
+  #bestChip { background: #fff; color: #8a7050; border: 1.5px solid #dcc79a; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 25%, #fffdf6 0%, #f7ecd2 70%, #efdfb4 100%);
+    border: 2px solid #dcc79a;
+    box-shadow: inset 0 0 60px rgba(150,120,70,.08), 0 4px 24px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stage { cursor: pointer; }
+  #fx { pointer-events: none; }
+  #stageTitle {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%); pointer-events: none;
+    color: #b5432e; font-weight: 700; text-align: center;
+    font-size: clamp(14px, 1.9vw, 22px);
+  }
+  #progressChip {
+    position: absolute; top: 1vh; right: 1.4vw; pointer-events: none;
+    background: rgba(255,255,255,.85); color: #b5432e; font-weight: 700;
+    font-size: clamp(12px, 1.3vw, 17px); padding: .3em .8em; border-radius: 999px;
+    border: 1.5px solid #dcc79a;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(60, 40, 15, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: #fffdf6;
+    border: 2px solid #dcc79a; border-radius: 26px;
+    max-width: 560px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0,0,0,.25);
+  }
+  .panel h1 {
+    font-size: clamp(20px, 3vw, 32px); color: #b5432e; margin: 0 0 .3em;
+  }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #3a2c18; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #b5432e; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #d0563c, #b5432e); color: #fff8ea;
+    box-shadow: 0 4px 14px rgba(181,67,46,.4);
+    min-height: 44px;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #fff; color: #b5432e; box-shadow: none; border: 1.5px solid #dcc79a; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(181,67,46,.10); border: 1px solid rgba(181,67,46,.35);
+    color: #b5432e; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🧭 地図記号タイムアタック <small>ひだまり探偵社</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">Lv. -/3</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="stageTitle"></div>
+    <div id="progressChip"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この <ruby>地図<rt>ちず</rt></ruby><ruby>記号<rt>きごう</rt></ruby>タイムアタックは、<b>ひだまり<ruby>探偵社<rt>たんていしゃ</rt></ruby></b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ひだまり<ruby>探偵社<rt>たんていしゃ</rt></ruby>を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="hidamari.html">ひだまり探偵社へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🧭 地図記号タイムアタック</h1>
+    <p>でてきた <ruby>地図<rt>ちず</rt></ruby><ruby>記号<rt>きごう</rt></ruby>の <ruby>名前<rt>なまえ</rt></ruby>を 見て、<b>あう記号</b>を さがしてタップしよう。<br>ぜんぶ 当てたら つぎのマップへ！<br>3つのマップを、いちばん はやく とけるかな？</p>
+    <div id="bestInfo" class="panel" style="display:none"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="clearOverlay" class="overlay hide">
+  <div class="panel">
+    <h1 id="clearTitle">✨ せいかい！</h1>
+    <p id="clearName"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnNext">つぎへ ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 ぜんぶ クリア！</h1>
+    <p>3つの マップを ぜんぶ とけたよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const TAU = Math.PI * 2;
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'hidamari';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'chizukigou_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 地図記号（国土地理院準拠、ひだまり探偵社のTYPES/drawSymbolをそのまま流用） ----------
+const TYPES = {
+  ta:      { name: '田', kana: 'た' },
+  hata:    { name: '畑', kana: 'はたけ' },
+  kaju:    { name: '果樹園', kana: 'かじゅえん' },
+  mori:    { name: '森林', kana: 'しんりん' },
+  jinja:   { name: '神社', kana: 'じんじゃ' },
+  tera:    { name: '寺', kana: 'てら' },
+  yubin:   { name: '郵便局', kana: 'ゆうびんきょく' },
+  byoin:   { name: '病院', kana: 'びょういん' },
+  gakko:   { name: '学校', kana: 'がっこう' },
+  tosho:   { name: '図書館', kana: 'としょかん' },
+  shiyaku: { name: '市役所', kana: 'しやくしょ' },
+  eki:     { name: '駅', kana: 'えき' },
+  koban:   { name: '交番', kana: 'こうばん' },
+  shobo:   { name: '消防署', kana: 'しょうぼうしょ' },
+  ki:      { name: '一本木の広場', kana: 'いっぽんぎのひろば' },
+};
+
+// ---------- 3マップ×5記号（15記号すべてを網羅） ----------
+const LEVELS = [
+  { title: 'マップ①', types: ['ta','hata','kaju','mori','jinja'] },
+  { title: 'マップ②', types: ['tera','yubin','byoin','gakko','tosho'] },
+  { title: 'マップ③', types: ['shiyaku','eki','koban','shobo','ki'] },
+];
+const SLOT_POS = [
+  { x: 220, y: 190 }, { x: 500, y: 140 }, { x: 780, y: 200 },
+  { x: 330, y: 460 }, { x: 670, y: 460 },
+];
+
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | levelClear | result
+  level: 0,
+  slots: [],         // [{type, x, y, done}]
+  quizOrder: [],
+  quizIdx: 0,
+  sound: true,
+  startTime: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(700, 0, 0.09, 'triangle', 0.08);
+const sHmm = () => tone(300, 0, 0.15, 'sine', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 26, PAD_B = 16, PAD_X = 16;
+const MAPW = 1000, MAPH = 620;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 地図記号の絵（ひだまり探偵社のdrawSymbolをそのまま流用） ----------
+function drawSymbol(ctx, type, x, y, u) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.lineWidth = u * 0.09;
+  ctx.strokeStyle = '#3a2c18'; ctx.fillStyle = '#3a2c18';
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  switch (type) {
+    case 'ta':
+      ctx.strokeStyle = '#4a7a3a';
+      ctx.beginPath();
+      ctx.moveTo(-u * .3, -u * .35); ctx.lineTo(-u * .3, u * .05);
+      ctx.moveTo(-u * .1, -u * .35); ctx.lineTo(-u * .1, u * .05);
+      ctx.moveTo(u * .15, -u * .05); ctx.lineTo(u * .15, u * .35);
+      ctx.moveTo(u * .35, -u * .05); ctx.lineTo(u * .35, u * .35);
+      ctx.stroke();
+      break;
+    case 'hata':
+      ctx.strokeStyle = '#7a6a2a';
+      ctx.beginPath();
+      ctx.moveTo(-u * .3, -u * .25); ctx.lineTo(-u * .12, u * .2); ctx.lineTo(u * .06, -u * .25);
+      ctx.moveTo(u * .1, .0); ctx.lineTo(u * .24, u * .3); ctx.lineTo(u * .38, 0);
+      ctx.stroke();
+      break;
+    case 'kaju':
+      ctx.strokeStyle = '#b06030'; ctx.fillStyle = '#c9803a';
+      ctx.beginPath(); ctx.arc(-u * .15, u * .05, u * .2, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(u * .22, -u * .12, u * .16, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-u * .15, -u * .15); ctx.lineTo(-u * .15, -u * .3); ctx.stroke();
+      break;
+    case 'mori':
+      ctx.strokeStyle = '#2f6a3a'; ctx.fillStyle = '#3f8a4a';
+      [[-u * .18, 0], [u * .2, u * .1]].forEach(([dx, dy]) => {
+        ctx.beginPath();
+        ctx.moveTo(dx, dy - u * .38); ctx.lineTo(dx + u * .2, dy + u * .08); ctx.lineTo(dx - u * .2, dy + u * .08);
+        ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(dx, dy + u * .08); ctx.lineTo(dx, dy + u * .22); ctx.stroke();
+      });
+      break;
+    case 'jinja':
+      ctx.strokeStyle = '#b5432e'; ctx.lineWidth = u * 0.11;
+      ctx.beginPath();
+      ctx.moveTo(-u * .28, -u * .3); ctx.lineTo(u * .28, -u * .3);
+      ctx.moveTo(-u * .34, -u * .42); ctx.lineTo(u * .34, -u * .42);
+      ctx.moveTo(-u * .22, -u * .42); ctx.lineTo(-u * .22, u * .3);
+      ctx.moveTo(u * .22, -u * .42); ctx.lineTo(u * .22, u * .3);
+      ctx.stroke();
+      break;
+    case 'tera':
+      ctx.font = `700 ${u * .85}px serif`;
+      ctx.fillText('卍', 0, 0);
+      break;
+    case 'yubin':
+      ctx.beginPath(); ctx.arc(0, 0, u * .42, 0, TAU); ctx.stroke();
+      ctx.font = `700 ${u * .55}px sans-serif`;
+      ctx.fillText('〒', 0, u * .02);
+      break;
+    case 'byoin':
+      ctx.strokeStyle = '#c0392b'; ctx.lineWidth = u * .11;
+      ctx.beginPath();
+      ctx.moveTo(0, -u * .38); ctx.lineTo(0, u * .05);
+      ctx.moveTo(-u * .2, -u * .2); ctx.lineTo(u * .2, -u * .2);
+      ctx.moveTo(0, u * .05); ctx.lineTo(-u * .26, u * .36);
+      ctx.moveTo(0, u * .05); ctx.lineTo(u * .26, u * .36);
+      ctx.stroke();
+      break;
+    case 'gakko':
+      ctx.font = `700 ${u * .8}px serif`;
+      ctx.fillText('文', 0, 0);
+      break;
+    case 'tosho':
+      ctx.beginPath();
+      ctx.moveTo(-u * .38, -u * .18); ctx.lineTo(0, -u * .28); ctx.lineTo(u * .38, -u * .18);
+      ctx.lineTo(u * .38, u * .2); ctx.lineTo(0, u * .1); ctx.lineTo(-u * .38, u * .2);
+      ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -u * .28); ctx.lineTo(0, u * .1); ctx.stroke();
+      break;
+    case 'shiyaku':
+      ctx.beginPath(); ctx.arc(0, 0, u * .38, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, u * .18, 0, TAU); ctx.stroke();
+      break;
+    case 'eki':
+      ctx.fillStyle = '#3a2c18';
+      ctx.fillRect(-u * .45, -u * .2, u * .9, u * .4);
+      ctx.fillStyle = '#fff';
+      ctx.font = `700 ${u * .34}px sans-serif`;
+      ctx.fillText('駅', 0, u * .01);
+      break;
+    case 'koban':
+      ctx.lineWidth = u * .13;
+      ctx.beginPath();
+      ctx.moveTo(-u * .28, -u * .28); ctx.lineTo(u * .28, u * .28);
+      ctx.moveTo(u * .28, -u * .28); ctx.lineTo(-u * .28, u * .28);
+      ctx.stroke();
+      break;
+    case 'shobo':
+      ctx.lineWidth = u * .11;
+      ctx.beginPath();
+      ctx.moveTo(0, u * .35); ctx.lineTo(0, -u * .05);
+      ctx.moveTo(-u * .26, -u * .35); ctx.quadraticCurveTo(-u * .26, -u * .02, 0, -u * .05);
+      ctx.moveTo(u * .26, -u * .35); ctx.quadraticCurveTo(u * .26, -u * .02, 0, -u * .05);
+      ctx.stroke();
+      break;
+    case 'ki':
+      ctx.fillStyle = '#4a8a4a';
+      ctx.beginPath(); ctx.arc(0, -u * .12, u * .3, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#6a4a28'; ctx.lineWidth = u * .12;
+      ctx.beginPath(); ctx.moveTo(0, u * .12); ctx.lineTo(0, u * .38); ctx.stroke();
+      break;
+  }
+  ctx.restore();
+}
+
+function curLevel(){ return LEVELS[S.level]; }
+
+// ---------- 描画 ----------
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing' && S.phase !== 'levelClear') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+
+  S.slots.forEach(slot => {
+    const r = 62;
+    gctx.fillStyle = slot.done ? 'rgba(181,67,46,.10)' : '#fffdf6';
+    gctx.beginPath(); gctx.arc(X(slot.x), Y(slot.y), r * sc, 0, TAU); gctx.fill();
+    gctx.strokeStyle = slot.done ? '#b5432e' : '#dcc79a'; gctx.lineWidth = (slot.done ? 3.5 : 2.5) * sc;
+    gctx.stroke();
+    drawSymbol(gctx, slot.type, X(slot.x), Y(slot.y), 60 * sc);
+    if (slot.isTarget) {
+      gctx.strokeStyle = `rgba(181,67,46,${0.55 + 0.35*Math.sin(t*3)})`; gctx.lineWidth = 3 * sc;
+      gctx.setLineDash([9,6]);
+      gctx.beginPath(); gctx.arc(X(slot.x), Y(slot.y), (r+10) * sc, 0, TAU); gctx.stroke();
+      gctx.setLineDash([]);
+    }
+  });
+
+  // 出題文
+  const wantType = S.quizOrder[S.quizIdx];
+  if (wantType) {
+    gctx.fillStyle = '#b5432e'; gctx.font = `700 ${Math.max(16, 26*sc)}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText(`「${TYPES[wantType].name}」は どれ？`, X(500), Y(560));
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: Math.random() < 0.6 ? '#d0563c' : (Math.random() < 0.5 ? '#fff' : '#b5432e'),
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+}
+
+// ---------- タップ処理 ----------
+function pickSlot(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  const lx = (clientX - rect.left - ox) / sc, ly = (clientY - rect.top - oy) / sc;
+  for (let i = 0; i < S.slots.length; i++) {
+    const slot = S.slots[i];
+    if (Math.hypot(slot.x - lx, slot.y - ly) < 66) return i;
+  }
+  return -1;
+}
+function onStageTap(clientX, clientY){
+  if (S.phase !== 'playing') return;
+  const idx = pickSlot(clientX, clientY);
+  if (idx === -1) return;
+  ac();
+  const slot = S.slots[idx];
+  const wantType = S.quizOrder[S.quizIdx];
+  if (slot.type === wantType && !slot.done) {
+    sTap();
+    slot.done = true;
+    S.quizIdx++;
+    updateProgressChip();
+    const rect = stageCv.getBoundingClientRect();
+    const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+    burst(rect.left + ox + slot.x * sc, rect.top + oy + slot.y * sc, 24);
+    if (S.quizIdx >= S.quizOrder.length) onLevelClear();
+  } else {
+    sHmm();
+  }
+}
+stageCv.addEventListener('pointerdown', e => onStageTap(e.clientX, e.clientY));
+
+// ---------- レベル進行 ----------
+function updateProgressChip(){
+  $('progressChip').textContent = `${S.quizIdx} / ${S.quizOrder.length} せいかい`;
+}
+function startLevel(i){
+  S.level = i;
+  const lv = LEVELS[i];
+  const positions = shuffled(SLOT_POS);
+  S.slots = lv.types.map((type, k) => ({ type, x: positions[k].x, y: positions[k].y, done: false }));
+  S.quizOrder = shuffled(lv.types);
+  S.quizIdx = 0;
+  $('stageTitle').innerHTML = lv.title;
+  updateProgressChip();
+  $('levelChip').textContent = `Lv. ${i+1}/3`;
+  S.phase = 'playing';
+}
+function onLevelClear(){
+  S.phase = 'levelClear';
+  sYes(); stageBurst();
+  if (S.level >= LEVELS.length - 1) {
+    setTimeout(onAllClear, 500);
+    return;
+  }
+  $('clearTitle').textContent = '✨ ぜんぶ せいかい！';
+  $('clearName').innerHTML = `${curLevel().title} クリア！`;
+  $('btnNext').textContent = `つぎの マップへ ▶ (${S.level+2}/3)`;
+  showOverlay('clearOverlay');
+}
+$('btnNext').addEventListener('click', () => {
+  hideOverlay('clearOverlay');
+  startLevel(S.level + 1);
+});
+
+function onAllClear(){
+  S.phase = 'result';
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = LEVELS.map(l => `<span class="starChip">🧭 ${l.title}</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  S.startTime = performance.now();
+  startLevel(0);
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const t = now / 1000;
+  drawStage(t);
+  drawFx(dt);
+  if (S.phase === 'playing' || S.phase === 'levelClear') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
