@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>てこバランス — つり合いパズル</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fff6e6 0%, #ffe9c2 60%, #ffdca0 100%);
+    color: #3a2a1a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(18px, 2.3vw, 30px); font-weight: 700;
+    color: #a0521f; margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .5em; color: #8a6a42; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px;
+    white-space: nowrap;
+  }
+  #levelChip { background: #fff; color: #a0521f; border: 1.5px solid #e0b878; }
+  #timeChip { background: #f2a93b; color: #fff6e6; box-shadow: 0 0 14px rgba(242,169,59,.5); }
+  #bestChip { background: #fff; color: #8a6a42; border: 1.5px solid #e0b878; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 25%, #fffaf0 0%, #fdeecb 70%, #f8e0ad 100%);
+    border: 2px solid #e0b878;
+    box-shadow: inset 0 0 60px rgba(200,140,50,.10), 0 4px 24px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stage { cursor: pointer; }
+  #fx { pointer-events: none; }
+  #stageTitle {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%); pointer-events: none;
+    color: #a0521f; font-weight: 700; text-align: center;
+    font-size: clamp(15px, 2vw, 24px);
+  }
+  #progressChip {
+    position: absolute; top: 1vh; right: 1.4vw; pointer-events: none;
+    background: rgba(255,255,255,.85); color: #a0521f; font-weight: 700;
+    font-size: clamp(12px, 1.3vw, 17px); padding: .3em .8em; border-radius: 999px;
+    border: 1.5px solid #e0b878;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(60, 40, 20, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: #fffaf0;
+    border: 2px solid #e0b878; border-radius: 26px;
+    max-width: 560px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0,0,0,.25);
+  }
+  .panel h1 {
+    font-size: clamp(22px, 3.2vw, 34px); color: #a0521f; margin: 0 0 .3em;
+  }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #5a3a1a; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #a0521f; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #f2c26b, #e0863f); color: #fff6e6;
+    box-shadow: 0 4px 14px rgba(224,134,63,.4);
+    min-height: 44px;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #fff; color: #a0521f; box-shadow: none; border: 1.5px solid #e0b878; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(224,134,63,.12); border: 1px solid rgba(224,134,63,.4);
+    color: #a0521f; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">⚖️ てこバランス <small>つり合いパズル</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">Lv. -/8</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="stageTitle"></div>
+    <div id="progressChip"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この <ruby>てこ<rt>てこ</rt></ruby>バランスパズルは、<b><ruby>てこ<rt>てこ</rt></ruby>の<ruby>工房<rt>こうぼう</rt></ruby></b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは <ruby>てこ<rt>てこ</rt></ruby>の<ruby>工房<rt>こうぼう</rt></ruby>を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="teko.html">てこの工房へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>⚖️ てこバランス</h1>
+    <p><ruby>目<rt>め</rt></ruby>もり①〜⑧を タップして、みぎの おもりを 置く<ruby>場所<rt>ばしょ</rt></ruby>を えらぼう。<br>てんびんが <ruby>水平<rt>すいへい</rt></ruby>に なったら せいかい！<br>8つの もんだいを、いちばん はやく とけるかな？</p>
+    <div id="bestInfo" class="panel" style="display:none"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="clearOverlay" class="overlay hide">
+  <div class="panel">
+    <h1 id="clearTitle">✨ つり合った！</h1>
+    <p id="clearName"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnNext">つぎへ ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 ぜんぶ クリア！</h1>
+    <p>8つの もんだいを ぜんぶ つり合わせたよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const TAU = Math.PI * 2;
+const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧'];
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'teko';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'tekobalance_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 8つのつり合い問題（本物のモーメント計算：重さ×めもり） ----------
+const LEVELS = [
+  { leftW: 20, leftPos: 6, rightW: 20, correctPos: 6 },
+  { leftW: 10, leftPos: 6, rightW: 30, correctPos: 2 },
+  { leftW: 15, leftPos: 4, rightW: 20, correctPos: 3 },
+  { leftW: 8,  leftPos: 5, rightW: 10, correctPos: 4 },
+  { leftW: 24, leftPos: 5, rightW: 15, correctPos: 8 },
+  { leftW: 18, leftPos: 8, rightW: 24, correctPos: 6 },
+  { leftW: 35, leftPos: 4, rightW: 20, correctPos: 7 },
+  { leftW: 16, leftPos: 7, rightW: 14, correctPos: 8 },
+];
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | levelClear | result
+  level: 0,
+  rightPos: null,
+  tiltAngle: 0,
+  tiltTarget: 0,
+  sound: true,
+  startTime: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(700, 0, 0.09, 'triangle', 0.08);
+const sHmm = () => tone(300, 0, 0.15, 'sine', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 26, PAD_B = 16, PAD_X = 16;
+const MAPW = 1000, MAPH = 620;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+function curLevel(){ return LEVELS[S.level]; }
+const PIVOT = { x: 500, y: 300 };
+const SCALE_PX = 46;
+function weightRadius(w){ return 15 + w * 0.5; }
+
+// ---------- 描画 ----------
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing' && S.phase !== 'levelClear') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  const lv = curLevel();
+
+  // 台座
+  gctx.fillStyle = '#c9843f';
+  gctx.beginPath();
+  gctx.moveTo(X(PIVOT.x - 42), Y(PIVOT.y + 60)); gctx.lineTo(X(PIVOT.x + 42), Y(PIVOT.y + 60)); gctx.lineTo(X(PIVOT.x), Y(PIVOT.y));
+  gctx.closePath(); gctx.fill();
+  gctx.strokeStyle = '#7a4315'; gctx.lineWidth = 2 * sc; gctx.stroke();
+
+  gctx.save();
+  gctx.translate(X(PIVOT.x), Y(PIVOT.y));
+  gctx.rotate(S.tiltAngle);
+  const armLen = 8 * SCALE_PX;
+  gctx.strokeStyle = '#e0b878'; gctx.lineWidth = 14 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(-armLen * sc, 0); gctx.lineTo(armLen * sc, 0); gctx.stroke();
+  gctx.strokeStyle = '#c9843f'; gctx.lineWidth = 2 * sc; gctx.stroke();
+
+  // めもり（右のみタップ対象、左は固定おもりの位置表示のみ）
+  for (let n = 1; n <= 8; n++) {
+    [-1, 1].forEach(dir => {
+      const mx = dir * n * SCALE_PX * sc;
+      gctx.strokeStyle = '#a0521f'; gctx.lineWidth = 2 * sc;
+      gctx.beginPath(); gctx.moveTo(mx, -10 * sc); gctx.lineTo(mx, 10 * sc); gctx.stroke();
+      gctx.fillStyle = '#8a6a42'; gctx.font = `700 ${11 * sc}px sans-serif`; gctx.textAlign = 'center';
+      gctx.fillText(NUMS[n - 1], mx, 26 * sc);
+    });
+  }
+  gctx.fillStyle = '#d84a3a'; gctx.beginPath(); gctx.arc(0, 0, 9 * sc, 0, TAU); gctx.fill();
+
+  function weight(pos, wgt, color, label, side) {
+    const wx = side * pos * SCALE_PX * sc;
+    const r = weightRadius(wgt) * sc;
+    gctx.fillStyle = color; gctx.strokeStyle = '#3a2a1a'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.roundRect(wx - 3 * sc, -r - 14 * sc, 6 * sc, 14 * sc, 2); gctx.fill();
+    gctx.beginPath(); gctx.arc(wx, -r - 14 * sc, r, 0, TAU); gctx.fill(); gctx.stroke();
+    gctx.fillStyle = '#fff'; gctx.font = `700 ${Math.max(11, 14 * sc)}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(label, wx, -r - 14 * sc);
+  }
+  weight(lv.leftPos, lv.leftW, '#3d7fd8', lv.leftW + 'g', -1);
+  if (S.rightPos !== null) weight(S.rightPos, lv.rightW, '#3fa04a', lv.rightW + 'g', 1);
+  gctx.restore();
+
+  // 右のめもりタップ位置(スクリーン座標でヒット判定するため、論理座標のみ描画)
+  gctx.fillStyle = 'rgba(160,82,31,.85)'; gctx.font = `700 ${Math.max(13, 18 * sc)}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText(`みぎの おもり ${lv.rightW}g を どこに 置く？`, X(500), Y(PIVOT.y + 130));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: Math.random() < 0.6 ? '#f2a93b' : (Math.random() < 0.5 ? '#fff' : '#e0863f'),
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+}
+
+// ---------- タップ処理 ----------
+function pickPos(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  const lx = (clientX - rect.left - ox) / sc, ly = (clientY - rect.top - oy) / sc;
+  if (Math.abs(ly - PIVOT.y) > 40) return -1;
+  for (let n = 1; n <= 8; n++) {
+    const mx = PIVOT.x + n * SCALE_PX;
+    if (Math.abs(lx - mx) < SCALE_PX / 2) return n;
+  }
+  return -1;
+}
+function onStageTap(clientX, clientY){
+  if (S.phase !== 'playing') return;
+  const pos = pickPos(clientX, clientY);
+  if (pos === -1) return;
+  ac();
+  const lv = curLevel();
+  S.rightPos = pos;
+  if (pos === lv.correctPos) {
+    sTap();
+    S.tiltTarget = 0;
+    onLevelClear();
+  } else {
+    sHmm();
+    const torque = (lv.rightW * pos) - (lv.leftW * lv.leftPos);
+    S.tiltTarget = Math.max(-0.26, Math.min(0.26, torque / 150));
+  }
+}
+stageCv.addEventListener('pointerdown', e => onStageTap(e.clientX, e.clientY));
+
+// ---------- レベル進行 ----------
+function updateProgressChip(){
+  $('progressChip').textContent = `もんだい ${S.level + 1} / 8`;
+}
+function startLevel(i){
+  S.level = i;
+  S.rightPos = null;
+  S.tiltAngle = 0; S.tiltTarget = 0;
+  $('stageTitle').innerHTML = `もんだい ${i + 1}`;
+  updateProgressChip();
+  $('levelChip').textContent = `Lv. ${i+1}/8`;
+  S.phase = 'playing';
+}
+function onLevelClear(){
+  S.phase = 'levelClear';
+  sYes(); stageBurst();
+  if (S.level >= LEVELS.length - 1) {
+    setTimeout(onAllClear, 500);
+    return;
+  }
+  $('clearTitle').textContent = '✨ つり合った！';
+  $('clearName').innerHTML = `もんだい <b>${S.level+1}</b> クリア！`;
+  $('btnNext').textContent = `つぎの もんだいへ ▶ (${S.level+2}/8)`;
+  showOverlay('clearOverlay');
+}
+$('btnNext').addEventListener('click', () => {
+  hideOverlay('clearOverlay');
+  startLevel(S.level + 1);
+});
+
+function onAllClear(){
+  S.phase = 'result';
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = LEVELS.map((l,i) => `<span class="starChip">⚖️ もんだい${i+1}</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  S.startTime = performance.now();
+  startLevel(0);
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const t = now / 1000;
+  S.tiltAngle += (S.tiltTarget - S.tiltAngle) * Math.min(1, dt * 8);
+  drawStage(t);
+  drawFx(dt);
+  if (S.phase === 'playing' || S.phase === 'levelClear') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
