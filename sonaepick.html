@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>そなえアイテムピック — なんのための道具？</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6fb 0%, #d6eef7 100%);
+    color: #0a3a4a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(16px, 2.1vw, 27px); font-weight: 700;
+    color: #0f6e8c; margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .5em; color: #9c5a2e; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #progChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px;
+    white-space: nowrap;
+  }
+  #progChip { background: #fff; color: #0f6e8c; border: 1.5px solid #a9d7e3; }
+  #timeChip { background: #0f6e8c; color: #f0fbff; box-shadow: 0 0 14px rgba(15,110,140,.5); }
+  #bestChip { background: #fff; color: #4a7a8a; border: 1.5px solid #a9d7e3; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #ffffff 0%, #eaf6fb 70%, #cfe8f2 100%);
+    border: 2px solid #a9d7e3;
+    box-shadow: inset 0 0 60px rgba(15,110,140,.08), 0 4px 24px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stage { cursor: pointer; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.2vh; left: 50%; transform: translateX(-50%);
+    color: #0a3a4a; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.5vw, 18px); min-height: 1.4em;
+    max-width: 92%;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(10, 40, 55, .5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eaf6fb);
+    border: 2px solid #a9d7e3; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(10, 40, 55, .28);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #0f6e8c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #0a3a4a; margin: .6em 0; }
+  .panel .big { font-size: clamp(26px, 4.6vw, 46px); font-weight: 700; color: #0f6e8c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #3a9cc0, #0f6e8c); color: #f0fbff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #eaf6fb; color: #0f6e8c; box-shadow: none; border: 1.5px solid #a9d7e3; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(15,110,140,.10); border: 1px solid rgba(15,110,140,.35);
+    color: #0f6e8c; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🎒 そなえアイテムピック <small>なんのための 道具？</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="progChip">0/10</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この そなえアイテムピックは、<b>トモシの浜</b>を 全部クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは トモシの浜を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="tomoshi.html">トモシの浜へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎒 そなえアイテムピック</h1>
+    <p>そなえの 道具が 6つ ならんでいるよ。<br>
+    「なんのための 道具か」を 見て、<b>あう 道具</b>を タップしよう。<br>
+    10問を、いちばん はやく とけるかな？</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏁 ぜんぶ とけた！</h1>
+    <p id="resultCorrect"></p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'tomoshi';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'sonaepick_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- そなえの道具（トモシの浜 tomoshi.html の SONAE_CARDS と同じ本物データ） ----------
+const ITEMS = [
+  { key: 0, icon: '🗺️', name: 'ハザードマップ', hint: 'あぶない場所を 前もって しらべる ときに 見るものは？' },
+  { key: 1, icon: '💧', name: '水の備蓄', hint: '1人 1日 3リットルを めやすに、そなえておくものは？' },
+  { key: 2, icon: '🍚', name: '食料の備蓄', hint: 'そのまま 食べられる 非常食を、そなえておくものは？' },
+  { key: 3, icon: '🔦', name: '懐中電灯・ラジオ', hint: '停電した ときに、あかりや じょうほうを 得るためのものは？' },
+  { key: 4, icon: '🩹', name: '救急セット', hint: 'けがの 手当てを するための 道具は？' },
+  { key: 5, icon: '⛑️', name: 'ヘルメット・ぼうさいずきん', hint: 'あたまを 守るために かぶるものは？' },
+];
+const SLOT_POS = [
+  { x: 220, y: 220 }, { x: 500, y: 190 }, { x: 780, y: 220 },
+  { x: 220, y: 460 }, { x: 500, y: 490 }, { x: 780, y: 460 },
+];
+const QUESTION_COUNT = 10;
+
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+// 6種類が均等に近い頻度で出るよう、6問ずつのシャッフル済みブロックをつなげて出題列を作る
+function buildQuestionOrder(n){
+  const order = [];
+  while (order.length < n) order.push(...shuffled(ITEMS.map(it => it.key)));
+  return order.slice(0, n);
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | result
+  quizIdx: 0,
+  correctCount: 0,
+  order: [],
+  answered: false,
+  sound: true,
+  startTime: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 26, PAD_B = 16, PAD_X = 16;
+const MAPW = 1000, MAPH = 620;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 描画 ----------
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+
+  ITEMS.forEach((it, i) => {
+    const pos = SLOT_POS[i];
+    const r = 68;
+    gctx.beginPath(); gctx.arc(X(pos.x), Y(pos.y), r * sc, 0, TAU);
+    gctx.fillStyle = '#ffffff';
+    gctx.fill();
+    gctx.strokeStyle = '#a9d7e3'; gctx.lineWidth = 2.5 * sc;
+    gctx.stroke();
+    gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(it.icon, X(pos.x), Y(pos.y - 8));
+    gctx.fillStyle = '#0a3a4a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(it.name, X(pos.x), Y(pos.y + r - 14));
+  });
+
+  const q = ITEMS[S.order[S.quizIdx]];
+  if (q) {
+    gctx.fillStyle = '#0f6e8c'; gctx.font = `700 ${Math.max(15, 22*sc)}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    wrapText(q.hint, X(500), Y(345), 900 * sc, 26 * sc);
+  }
+}
+function wrapText(text, cx, cy, maxWidth, lineHeight){
+  const chars = text.split('');
+  let lines = [''], li = 0;
+  chars.forEach(ch => {
+    const test = lines[li] + ch;
+    if (gctx.measureText(test).width > maxWidth && lines[li].length > 0) {
+      li++; lines[li] = ch;
+    } else {
+      lines[li] = test;
+    }
+  });
+  const startY = cy - (lines.length - 1) * lineHeight / 2;
+  lines.forEach((line, i) => gctx.fillText(line, cx, startY + i * lineHeight));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3a9cc0', '#0f6e8c', '#ffe3a8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- タップ処理 ----------
+function pickSlot(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  const lx = (clientX - rect.left - ox) / sc, ly = (clientY - rect.top - oy) / sc;
+  for (let i = 0; i < SLOT_POS.length; i++) {
+    if (Math.hypot(SLOT_POS[i].x - lx, SLOT_POS[i].y - ly) < 72) return i;
+  }
+  return -1;
+}
+function onStageTap(clientX, clientY){
+  if (S.phase !== 'playing' || S.answered) return;
+  const idx = pickSlot(clientX, clientY);
+  if (idx === -1) return;
+  onChoose(idx);
+}
+stageCv.addEventListener('pointerdown', e => onStageTap(e.clientX, e.clientY));
+
+// ---------- 出題進行 ----------
+function updateProgChip(){ $('progChip').textContent = `${S.quizIdx}/${QUESTION_COUNT}`; }
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function onChoose(pickedIdx){
+  if (S.phase !== 'playing' || S.answered) return;
+  S.answered = true;
+  ac(); sTap();
+  const wantKey = S.order[S.quizIdx];
+  const correct = pickedIdx === wantKey;
+  const wantItem = ITEMS[wantKey];
+  if (correct) {
+    S.correctCount++;
+    sYes();
+    const rect = stageCv.getBoundingClientRect();
+    const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+    const pos = SLOT_POS[pickedIdx];
+    burst(rect.left + ox + pos.x * sc, rect.top + oy + pos.y * sc, 40);
+    setResultMsg(`🎯 せいかい！「${wantItem.name}」だね。`);
+  } else {
+    sHmm();
+    setResultMsg(`😥 ちがうよ。これは「${wantItem.name}」の やくわりだよ。`);
+  }
+  S.quizIdx++;
+  updateProgChip();
+  setTimeout(nextQuestion, 1500);
+}
+function nextQuestion(){
+  if (S.quizIdx >= QUESTION_COUNT) { onAllClear(); return; }
+  S.answered = false;
+  setResultMsg('道具の 名前を 見て、あう「ものの やくわり」を 思い出そう。');
+}
+
+function rankText(correct){
+  if (correct >= QUESTION_COUNT) return '👑 パーフェクト！そなえ名人！';
+  if (correct >= 8) return '🌟🌟🌟 すごい！よく そなえを知ってるね！';
+  if (correct >= 5) return '🌟🌟 いいちょうし！';
+  return '🌱 もういちど、そなえの道具を たしかめてみよう！';
+}
+function startGame(){
+  S.quizIdx = 0;
+  S.correctCount = 0;
+  S.order = buildQuestionOrder(QUESTION_COUNT);
+  S.answered = false;
+  S.startTime = performance.now();
+  S.phase = 'playing';
+  updateProgChip();
+  setResultMsg('道具の 名前を 見て、あう「ものの やくわり」を 思い出そう。');
+}
+function onAllClear(){
+  S.phase = 'result';
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultCorrect').textContent = `${S.correctCount} / ${QUESTION_COUNT} もん せいかい`;
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').innerHTML = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = `<span class="starChip">${rankText(S.correctCount)}</span>`;
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const t = now / 1000;
+  drawStage(t);
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
