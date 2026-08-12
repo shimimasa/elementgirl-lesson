@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>はつでんMAXチャレンジ — クルルの発電所 ごほうびミニゲーム</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fffaf0 0%, #fff0c2 45%, #ffdd8a 100%);
+    color: #3a2e10;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(16px, 2vw, 27px); font-weight: 700;
+    color: #2e7d32; text-shadow: 0 0 14px rgba(46, 125, 50, .22);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #b8790a; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #eaf3e6; color: #245a28; border: 1.5px solid #bcd9bb; }
+  #timeChip { background: #ffb300; color: #4a2f00; box-shadow: 0 0 12px rgba(255,179,0,.5); }
+  #bestChip { background: #eaf3e6; color: #245a28; border: 1.5px solid #bcd9bb; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #fffdf2 0%, #ffe9a0 70%, #ffcf5c 100%);
+    border: 3px solid #f0c96a;
+    box-shadow: inset 0 0 40px rgba(150, 110, 10, .14), 0 4px 18px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #scopeMini {
+    position: absolute; top: 10px; right: 14px;
+    width: clamp(60px, 7vw, 90px); height: clamp(60px, 7vw, 90px);
+    border-radius: 50%; border: 3px solid #ffb300; overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18); background: #fffaf0;
+  }
+  #scopeMini canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #resultMsg {
+    position: absolute; top: 1vh; left: 1.4vw; right: calc(clamp(60px, 7vw, 90px) + 30px);
+    color: #245a28; font-weight: 700; text-align: left;
+    font-size: clamp(12px, 1.5vw, 17px); min-height: 1.4em;
+    line-height: 1.4;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: center; align-items: center;
+    padding: 1.2vh .5vw; background: linear-gradient(180deg, transparent, rgba(240, 210, 130, .7) 40%);
+  }
+  #tapBtn {
+    font-family: inherit; font-size: clamp(16px, 2vw, 24px); font-weight: 700;
+    padding: .6em 1.6em; border-radius: 999px; border: 2px solid #a5d6a7; cursor: pointer;
+    background: linear-gradient(180deg, #66bb6a, #2e7d32); color: #fff;
+    box-shadow: 0 4px 0 #1b5e20, 0 6px 14px rgba(0,0,0,.18);
+    transition: transform .06s, filter .1s; touch-action: none;
+    min-width: 260px;
+  }
+  #tapBtn.flash {
+    transform: translateY(3px); box-shadow: 0 1px 0 #1b5e20; filter: brightness(1.22);
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(60, 44, 10, .5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #fffdf5, #fff0cf);
+    border: 3px solid #f0c96a; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(60,40,0,.25);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(22px, 3.2vw, 34px); color: #2e7d32; margin: 0 0 .3em; text-shadow: 0 0 20px rgba(46,125,50,.2); }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #3a2e10; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #2e7d32; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #66bb6a, #2e7d32); color: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #eaf3e6; color: #245a28; box-shadow: none; border: 1.5px solid #bcd9bb; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(102,187,106,.14); border: 1px solid rgba(102,187,106,.5);
+    color: #245a28; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">⚡ はつでんMAXチャレンジ <small>— クルルの発電所 ごほうびミニゲーム —</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">れべる 0/4</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="scopeMini"><canvas id="scope"></canvas></div>
+    <div id="resultMsg"></div>
+    <div id="controls">
+      <button id="tapBtn">⚡ れんだで まわす！</button>
+    </div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この <b>はつでんMAXチャレンジ</b>は、<b>クルルの発電所</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは クルルの発電所を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="kururu.html">クルルの発電所へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>⚡ はつでんMAXチャレンジ</h1>
+    <p>「⚡ れんだで まわす！」ボタンを <ruby>何度<rt>なんど</rt></ruby>も タップして、手回し<ruby>発電機<rt>はつでんき</rt></ruby>の ハンドルを 回そう。<ruby>連打<rt>れんだ</rt></ruby>を やめると、<ruby>電圧<rt>でんあつ</rt></ruby>は すぐに 下がってしまう。</p>
+    <p><ruby>電圧<rt>でんあつ</rt></ruby>が <b>2.5V</b>（LEDが 光る めやす）を こえている 間だけ、コンデンサーに 電気が たまっていく。コンデンサーが <b>100%</b>に なったら、つぎの れべるへ！ れべるが 上がるほど、電圧の 下がる 速さが 上がる。ぜんぶで 4れべる。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 ぜんぶ じゅうでんできた！</h1>
+    <p>4れべる ぜんぶ、コンデンサーを 満タンに できたよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   はつでんMAXチャレンジ — クルルの発電所(kururu.html) 12作目ごほうびミニゲーム
+   本編m_hatsudenの数値(HATSUDEN_V/HATSUDEN_TARGET=2.5V)をそのまま流用。
+   「⚡ れんだで まわす！」を連打するたびに電圧が上がり、
+   連打をやめると電圧はだんだん下がっていく。電圧が目標2.5V以上の
+   間だけコンデンサーが充電され、下回るとゆっくり放電する。
+   コンデンサーが100%になったらレベルクリア、4レベルクリアでゴール。
+   ===================================================== */
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'kururu';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'hatsudenmax_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 発電の数値（本編クルルの発電所 m_hatsudenと同じ値・nodeシミュレーションで検証済み） ----------
+const VMAX = 4.4;          // 本編HATSUDEN_Vの最大値と同じ
+const TARGET_V = 2.5;      // 本編HATSUDEN_TARGET（白色LEDが光る電圧の目安）と同じ
+const TAP_GAIN = 0.45;     // 1タップごとの電圧の上がり方
+const FILL_RATE = 22;      // コンデンサーの充電速度（%/秒、電圧が目標以上の時）
+const DRAIN_RATE = 10;     // コンデンサーの放電速度（%/秒、電圧が目標未満の時）
+
+function voltStateText(v){
+  if (v >= TARGET_V) return 'しっかり 光っている！';
+  if (v >= 1.2) return 'すこし 光っている';
+  return 'ほとんど 光っていない';
+}
+
+// ---------- れべる構成（上がるほど電圧の下がる速さが上がる＝連打速度が必要） ----------
+const LEVELS = [
+  { label: '①', decay: 0.85 },
+  { label: '②', decay: 1.05 },
+  { label: '③', decay: 1.25 },
+  { label: '④', decay: 1.50 },
+];
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | lock | playing | result
+  levelIdx: 0,
+  V: 0,
+  charge: 0,
+  spinAngle: 0,
+  spinSpeed: 0,
+  zeroDrops: 0,
+  hadCharge: false,
+  sound: true,
+  startTime: 0,
+  _msgTimer: null,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(760, 0, 0.06, 'triangle', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx'), scopeCv = $('scope');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d'), sctx = scopeCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 18, PAD_B = 18, PAD_X = 14;
+const MAPW = 1000, MAPH = 760;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(MAPH));
+  g.addColorStop(0, '#fffaf0'); g.addColorStop(1, '#ffdd8a');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), MAPW * sc, MAPH * sc);
+}
+
+// ---------- 手回し発電機・豆電球・コンデンサーの描画（本編kururu.htmlから移植） ----------
+function drawGenerator(X, Y, sc, cx, cy, spinAngle, glowT) {
+  gctx.fillStyle = '#eceff1'; gctx.strokeStyle = '#455a64'; gctx.lineWidth = 2.4 * sc;
+  roundRect(gctx, X(cx - 60), Y(cy - 38), 120 * sc, 76 * sc, 10 * sc);
+  gctx.fill(); gctx.stroke();
+  gctx.save();
+  gctx.translate(X(cx + 44), Y(cy));
+  gctx.rotate(spinAngle);
+  gctx.strokeStyle = '#8d6e63'; gctx.lineWidth = 5.4 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(0, 0); gctx.lineTo(28 * sc, 0); gctx.stroke();
+  gctx.beginPath(); gctx.arc(28 * sc, 0, 7.6 * sc, 0, TAU); gctx.fillStyle = '#bdbdbd'; gctx.fill();
+  gctx.strokeStyle = '#616161'; gctx.lineWidth = 1.6 * sc; gctx.stroke();
+  gctx.restore();
+  gctx.beginPath(); gctx.arc(X(cx + 44), Y(cy), 8.6 * sc, 0, TAU); gctx.fillStyle = '#455a64'; gctx.fill();
+  gctx.fillStyle = '#3a2e10'; gctx.font = `700 ${14 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('手回し発電機', X(cx), Y(cy + 56));
+  if (glowT > 0.02) {
+    gctx.save(); gctx.globalAlpha = glowT;
+    gctx.shadowColor = '#ffd54f'; gctx.shadowBlur = 16 * sc;
+    gctx.strokeStyle = '#ffb300'; gctx.lineWidth = 3.4 * sc;
+    gctx.beginPath(); gctx.moveTo(X(cx + 60), Y(cy)); gctx.lineTo(X(cx + 170), Y(cy)); gctx.stroke();
+    gctx.restore();
+  }
+}
+function drawBulb(X, Y, sc, cx, cy, brightness) {
+  const b = clamp(brightness, 0, 1);
+  if (b > 0.03) {
+    gctx.save(); gctx.globalAlpha = 0.55 * b;
+    const g = gctx.createRadialGradient(X(cx), Y(cy), 0, X(cx), Y(cy), 56 * sc);
+    g.addColorStop(0, '#fff3b0'); g.addColorStop(1, 'rgba(255,220,120,0)');
+    gctx.fillStyle = g; gctx.beginPath(); gctx.arc(X(cx), Y(cy), 56 * sc, 0, TAU); gctx.fill();
+    gctx.restore();
+  }
+  gctx.fillStyle = b > 0.03 ? `rgba(255,220,120,${0.55 + 0.45 * b})` : '#e6e0d0';
+  gctx.strokeStyle = '#8d6e63'; gctx.lineWidth = 2.2 * sc;
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), 21 * sc, 0, TAU); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = b > 0.03 ? '#e65100' : '#a09070';
+  gctx.beginPath(); gctx.arc(X(cx), Y(cy), 4.4 * sc, 0, TAU); gctx.fill();
+  gctx.fillStyle = '#9e9e9e'; gctx.fillRect(X(cx) - 9 * sc, Y(cy) + 21 * sc, 18 * sc, 11 * sc);
+}
+function drawCapacitor(X, Y, sc, cx, cy, pct) {
+  const w = 74, h = 118;
+  gctx.strokeStyle = '#455a64'; gctx.lineWidth = 2.6 * sc;
+  roundRect(gctx, X(cx - w / 2), Y(cy - h / 2), w * sc, h * sc, 10 * sc);
+  gctx.fillStyle = '#fff'; gctx.fill(); gctx.stroke();
+  gctx.save();
+  roundRect(gctx, X(cx - w / 2), Y(cy - h / 2), w * sc, h * sc, 10 * sc); gctx.clip();
+  const fh = h * (clamp(pct, 0, 100) / 100);
+  gctx.fillStyle = pct >= 100 ? '#66bb6a' : '#ffca28';
+  gctx.fillRect(X(cx - w / 2), Y(cy + h / 2 - fh), w * sc, fh * sc);
+  gctx.restore();
+  gctx.fillStyle = '#3a2e10'; gctx.font = `700 ${14 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('コンデンサー', X(cx), Y(cy + h / 2 + 24));
+  gctx.font = `700 ${20 * sc}px sans-serif`;
+  gctx.fillText(Math.round(pct) + '%', X(cx), Y(cy));
+}
+
+// ---------- ステージ ----------
+function drawStage(){
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  bgFill(X, Y, sc);
+
+  const lvl = LEVELS[S.levelIdx];
+  gctx.fillStyle = '#3a2e10'; gctx.font = `700 ${Math.max(13, 19 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`れべる ${lvl.label}　目ひょう：電圧2.5V いじょうを たもって じゅうでん`, X(500), Y(40));
+  gctx.font = `700 ${Math.max(11, 14 * sc)}px sans-serif`;
+  gctx.fillStyle = S.V >= TARGET_V ? '#2e7d32' : '#7a6420';
+  gctx.fillText(`電圧 ${S.V.toFixed(1)}V　${voltStateText(S.V)}`, X(500), Y(68));
+
+  const glowT = clamp(S.V / TARGET_V, 0, 1);
+  drawGenerator(X, Y, sc, 300, 380, S.spinAngle, glowT);
+  drawBulb(X, Y, sc, 300, 220, glowT);
+  drawCapacitor(X, Y, sc, 700, 340, S.charge);
+
+  drawKeepBar(X, Y, sc);
+}
+function drawKeepBar(X, Y, sc){
+  const barX = 170, barY = 660, barW = 660, barH = 44;
+  gctx.fillStyle = '#eaf3e6';
+  roundRect(gctx, X(barX), Y(barY), barW * sc, barH * sc, 12 * sc); gctx.fill();
+  gctx.strokeStyle = '#bcd9bb'; gctx.lineWidth = 2 * sc;
+  roundRect(gctx, X(barX), Y(barY), barW * sc, barH * sc, 12 * sc); gctx.stroke();
+  const frac = clamp(S.charge / 100, 0, 1);
+  if (frac > 0) {
+    gctx.fillStyle = '#66bb6a';
+    roundRect(gctx, X(barX), Y(barY), barW * sc * frac, barH * sc, 12 * sc); gctx.fill();
+  }
+  gctx.fillStyle = '#3a2e10'; gctx.font = `700 ${Math.max(12, 16 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`じゅうでん ${Math.round(S.charge)} / 100%`, X(barX + barW / 2), Y(barY + barH / 2));
+}
+function drawScopeMini(){
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const R = w / 2;
+  const grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fffdf2'); grd.addColorStop(1, '#e6cf94');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const cx = R, cy = R * 0.78, mr = R * 0.55, maxV = VMAX;
+  const frac = clamp(S.V / maxV, 0, 1);
+  sctx.lineWidth = R * 0.1; sctx.lineCap = 'round';
+  sctx.beginPath(); sctx.arc(cx, cy, mr, Math.PI, 0); sctx.strokeStyle = 'rgba(46,125,50,.16)'; sctx.stroke();
+  sctx.beginPath(); sctx.arc(cx, cy, mr, Math.PI, Math.PI + Math.PI * frac);
+  sctx.strokeStyle = S.V >= TARGET_V ? '#2e7d32' : S.V >= 1.2 ? '#ffb300' : '#9fbf9d';
+  sctx.stroke();
+  const ang = Math.PI + Math.PI * frac;
+  sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx + Math.cos(ang) * mr * 0.85, cy + Math.sin(ang) * mr * 0.85);
+  sctx.strokeStyle = '#3a2e10'; sctx.lineWidth = R * 0.03; sctx.stroke();
+  sctx.beginPath(); sctx.arc(cx, cy, R * 0.05, 0, TAU); sctx.fillStyle = '#3a2e10'; sctx.fill();
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#66bb6a', '#ffb300', '#ffe58a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 進行 ----------
+function updateLevelChip(){
+  $('levelChip').textContent = `れべる ${Math.min(S.levelIdx + 1, LEVELS.length)}/${LEVELS.length}`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function defaultHint(){
+  return '⚡ボタンを 何度も タップして、電圧を 2.5V いじょうに たもとう。';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function flashMsg(html){
+  setResultMsg(html);
+  clearTimeout(S._msgTimer);
+  S._msgTimer = setTimeout(() => { if (S.phase === 'playing') setResultMsg(defaultHint()); }, 1500);
+}
+
+function onZeroDrop(){
+  S.zeroDrops++;
+  flashMsg('あ、でんきが きえちゃった…連打を つづけよう！');
+}
+function onLevelClear(){
+  sYes(); stageBurst();
+  const clearedLabel = LEVELS[S.levelIdx].label;
+  S.levelIdx++;
+  updateLevelChip();
+  if (S.levelIdx >= LEVELS.length) { onAllClear(); return; }
+  S.V = 0; S.charge = 0; S.spinSpeed = 0; S.hadCharge = false;
+  flashMsg(`🎉 ${clearedLabel} クリア！ つぎの れべるへ！`);
+}
+function onAllClear(){
+  S.phase = 'result';
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  sFanfare();
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? `🎉 じぶんの ベストタイム こうしん！（でんきが きえた かいすう：${S.zeroDrops}）`
+    : `ベストタイム：${fmtTime(best)}（でんきが きえた かいすう：${S.zeroDrops}）`;
+  $('starListEl').innerHTML = LEVELS.map(l => `<span class="starChip">${l.label} じゅうでん100%</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+function stepGen(dt){
+  if (S.phase !== 'playing') return;
+  const lvl = LEVELS[S.levelIdx];
+  S.V = Math.max(0, S.V - lvl.decay * dt);
+  S.spinSpeed = Math.max(0, S.spinSpeed - 6 * dt);
+  S.spinAngle += S.spinSpeed * dt;
+
+  if (S.V >= TARGET_V) {
+    S.charge = Math.min(100, S.charge + FILL_RATE * dt);
+  } else {
+    S.charge = Math.max(0, S.charge - DRAIN_RATE * dt);
+  }
+  if (S.charge > 0) S.hadCharge = true;
+  else if (S.hadCharge) { S.hadCharge = false; onZeroDrop(); }
+  if (S.charge >= 100) onLevelClear();
+}
+
+function startGame(){
+  S.levelIdx = 0;
+  S.V = 0;
+  S.charge = 0;
+  S.spinAngle = 0;
+  S.spinSpeed = 0;
+  S.zeroDrops = 0;
+  S.hadCharge = false;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  updateLevelChip();
+  setResultMsg(defaultHint());
+}
+
+// ---------- 操作（タップのたびに1回ぶんまわす。押しっぱなしでは増えない） ----------
+const tapBtn = $('tapBtn');
+let flashTimer = null;
+function handleTap(){
+  if (S.phase !== 'playing') return;
+  ac();
+  S.V = Math.min(VMAX, S.V + TAP_GAIN);
+  S.spinSpeed = Math.min(14, S.spinSpeed + 3.4);
+  sTap();
+  tapBtn.classList.add('flash');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => tapBtn.classList.remove('flash'), 90);
+}
+tapBtn.addEventListener('pointerdown', e => { e.preventDefault(); handleTap(); });
+tapBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  stepGen(dt);
+  drawStage();
+  drawScopeMini();
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
