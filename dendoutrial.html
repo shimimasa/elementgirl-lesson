@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>でんどうタイムトライアル — ちょうどいま！を ねらえ</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fdf6ec 0%, #f3ede4 45%, #e7eef4 100%);
+    color: #2a2a2a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(16px, 2vw, 26px); font-weight: 700;
+    color: #d9502f; text-shadow: 0 0 14px rgba(217, 80, 47, .25);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3a7ab8; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #scoreChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #f3e2d8; color: #8a4a2a; border: 1.5px solid #e0b89e; }
+  #scoreChip { background: #ffd166; color: #5a3a00; box-shadow: 0 0 14px rgba(255,209,102,.5); }
+  #bestChip { background: #f3e2d8; color: #8a4a2a; border: 1.5px solid #e0b89e; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #ffffff 0%, #f2eee7 70%, #e4e9ee 100%);
+    border: 3px solid #e0b89e;
+    box-shadow: inset 0 0 40px rgba(217, 80, 47, .08), 0 4px 24px rgba(0,0,0,.15);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.4vh; left: 50%; transform: translateX(-50%);
+    color: #8a4a2a; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.5vw, 18px); min-height: 1.4em;
+    max-width: 92%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .5vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(240, 220, 205, .65) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(14px, 1.7vw, 20px); font-weight: 700;
+    padding: .55em 1.1em; border-radius: 14px; border: 2px solid #f0c0a0; cursor: pointer;
+    background: linear-gradient(180deg, #f0956a, #d9502f); color: #fff;
+    box-shadow: 0 3px 0 #8a2c14; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 44px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .35; cursor: default; transform: none; }
+  .ctl.go { background: linear-gradient(180deg, #ffe28a, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a0700a; color: #4a3a10; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(74, 40, 18, .5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #fff8f2);
+    border: 2px solid #e0b89e; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(74, 40, 18, .28);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #b8391a; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #5a3a2a; margin: .6em 0; }
+  .panel .big { font-size: clamp(26px, 4.6vw, 46px); font-weight: 700; color: #b8391a; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #ffe28a, #e0a020); color: #4a3a10;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #f3e2d8; color: #8a4a2a; box-shadow: none; border: 1.5px solid #e0b89e; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(255,209,102,.25); border: 1px solid rgba(224,160,32,.4);
+    color: #a5620a; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🔥 でんどうタイムトライアル <small>ちょうどいま！を ねらえ</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">だんかい 0/5</div>
+    <div id="scoreChip">得点 0点</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この でんどうタイムトライアルは、<b>ダンダンの実験場</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ダンダンの実験場を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="dandan.html">ダンダンの実験場へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔥 でんどうタイムトライアル</h1>
+    <p>金属棒の はしを 熱すると、<ruby>示温<rt>しおん</rt></ruby>インクの 点が 熱した点に 近い方から 順番に 色を 変えていく。<br>
+    それぞれの 点が <b>ちょうど 色を 変えた しゅんかん</b>を ねらって タップしよう。<br>
+    5だんかい、ぜんぶで20問。ぴったりの タイミングほど 高い 点数だよ。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏁 チャレンジ しゅうりょう！</h1>
+    <p id="resultRank"></p>
+    <div class="big" id="resultScore">0 / 60 点</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'dandan';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストスコア ----------
+const BEST_KEY = 'dendoutrial_best_score';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v !== null ? parseInt(v, 10) : null;
+}
+function setBest(score){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(score)); } catch(e){}
+}
+
+// ---------- 伝導モデル（ダンダンの実験場 dandan.html の m_dendou と同じ式：t = 0.2 * 距離^2 秒） ----------
+// SPEED=5で本編の実時間を1/5に圧縮してゲームのテンポにした（本編の数値・比例関係はそのまま）
+const K = 0.2, SPEED = 5;
+const THERMO_INK_TEMP = 40;
+// レベルが上がるほど4点の距離配置を詰め、変色タイミングの間隔を狭める（Node.jsシミュレーションで事前検証済み）
+const LEVEL_DIST = [
+  [8, 13, 17, 21],
+  [10, 14, 17, 20],
+  [11, 14, 16, 18],
+  [12, 14, 15, 16],
+  [12, 13, 14, 15],
+];
+function buildPoints(dist){
+  const times = dist.map(d => (K * d * d) / SPEED);
+  return dist.map((d, i) => {
+    const t = times[i];
+    const prevGap = i > 0 ? t - times[i - 1] : Infinity;
+    const nextGap = i < times.length - 1 ? times[i + 1] - t : Infinity;
+    const gapHalf = Math.min(prevGap, nextGap) / 2;
+    return {
+      d, t,
+      winPerfect: Math.min(0.25, gapHalf * 0.5),
+      winOk: Math.min(0.45, gapHalf * 0.85),
+      winSoso: Math.min(0.7, gapHalf * 0.98),
+    };
+  });
+}
+const LEVEL_POINTS = LEVEL_DIST.map(buildPoints);
+const TOTAL_QUESTIONS = LEVEL_POINTS.reduce((n, pts) => n + pts.length, 0);
+const MAX_SCORE = TOTAL_QUESTIONS * 3;
+const MISS_MARGIN = 0.4; // タップしないまま見送った場合、winSoso超過からこの秒数後に自動ミス確定
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',    // title | lock | ready | round | resultRound | result
+  levelIdx: 0,
+  points: [],
+  pointState: [],
+  levelStart: 0,
+  curElapsed: 0,
+  scores: [],
+  scoreTotal: 0,
+  sound: true,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 30, PAD_B = 16, PAD_X = 14;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgBench(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#fdf6ec'); g.addColorStop(1, '#eee6da');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#d8c8ae';
+  gctx.fillRect(X(0), Y(420), 1000 * sc, 220 * sc);
+}
+function tempColor(t) {
+  const f = clamp((t - 5) / 60, 0, 1);
+  const r = Math.round(lerp(70, 217, f)), g = Math.round(lerp(140, 80, f)), b = Math.round(lerp(200, 47, f));
+  return `rgb(${r},${g},${b})`;
+}
+
+// ---------- 金属棒＋示温インクの点（dandan.html drawDendouScene を移植・拡張） ----------
+function drawDendouTrialScene(X, Y, sc) {
+  bgBench(X, Y, sc);
+  const rodY = 340, rodX0 = 160, rodX1 = 880, rodH = 30;
+  gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🔥', X(rodX0 - 40), Y(rodY));
+  const g = gctx.createLinearGradient(X(rodX0), 0, X(rodX1), 0);
+  g.addColorStop(0, '#e8845a'); g.addColorStop(0.35, '#cbb896'); g.addColorStop(1, '#a8b8c4');
+  gctx.fillStyle = g; gctx.strokeStyle = '#5a4a3a'; gctx.lineWidth = 2 * sc;
+  roundRect(gctx, X(rodX0), Y(rodY - rodH / 2), (rodX1 - rodX0) * sc, rodH * sc, 6 * sc);
+  gctx.fill(); gctx.stroke();
+
+  const maxD = 25;
+  (S.points || []).forEach((pt, i) => {
+    const px = rodX0 + (pt.d / maxD) * (rodX1 - rodX0);
+    const st = S.pointState[i] || {};
+    let progress;
+    if (st.tapped) progress = 1;
+    else if (S.phase === 'round') progress = clamp(S.curElapsed / pt.t, 0, 1);
+    else progress = 0;
+    const localTemp = lerp(20, THERMO_INK_TEMP + 6, progress);
+    gctx.beginPath(); gctx.arc(X(px), Y(rodY), 18 * sc, 0, TAU);
+    gctx.fillStyle = tempColor(localTemp);
+    gctx.fill();
+    gctx.strokeStyle = st.tapped ? (st.result.pts >= 2 ? '#2e7d32' : '#b8391a') : '#fff';
+    gctx.lineWidth = 3 * sc; gctx.stroke();
+    gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText(`${pt.d}cm`, X(px), Y(rodY + 40));
+    if (st.tapped) {
+      gctx.font = `${22 * sc}px sans-serif`;
+      gctx.fillText(st.result.label.split(' ')[0], X(px), Y(rodY - 32));
+    }
+  });
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[S.levelIdx]} だんかい　（${THERMO_INK_TEMP}℃で 色が 変わる 示温インク）`, X(500), Y(70));
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'round' && S.phase !== 'resultRound' && S.phase !== 'ready') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawDendouTrialScene(X, Y, sc);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ffd166', '#ffe28a', '#f0956a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 出題進行 ----------
+function updateHud(){
+  const shown = S.phase === 'result' ? LEVEL_POINTS.length : S.levelIdx + 1;
+  $('levelChip').textContent = `だんかい ${shown}/${LEVEL_POINTS.length}`;
+  $('scoreChip').textContent = `得点 ${S.scoreTotal}点`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = (b !== null) ? `ベスト ${b}/${MAX_SCORE}点` : 'ベスト —';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function setControls(list){
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+function renderTapButtons(){
+  setControls(S.points.map((pt, i) => {
+    const st = S.pointState[i];
+    return {
+      label: st.tapped ? `${NUMS[i]} ${pt.d}cm ${st.result.label.split(' ')[0]}` : `${NUMS[i]} ${pt.d}cm を ねらう`,
+      dis: st.tapped,
+      cb: () => onTapPoint(i),
+    };
+  }));
+}
+
+function prepareLevel(idx){
+  S.levelIdx = idx;
+  S.points = LEVEL_POINTS[idx];
+  S.pointState = S.points.map(() => ({ tapped: false, result: null }));
+  S.curElapsed = 0;
+  S.phase = 'ready';
+  updateHud();
+  setResultMsg('じゅんび かんりょう。「ねっする」を おすと 金属棒が あたたまり始めるよ。');
+  setControls([{ label: '🔥 ねっする', cls: 'go', cb: startLevelRun }]);
+}
+function startLevelRun(){
+  S.levelStart = performance.now();
+  S.curElapsed = 0;
+  S.phase = 'round';
+  setResultMsg('示温インクが ちょうど 変わる しゅんかんを ねらって タップ！');
+  renderTapButtons();
+}
+function onTapPoint(i){
+  if (S.phase !== 'round') return;
+  const st = S.pointState[i];
+  if (st.tapped) return;
+  const elapsed = (performance.now() - S.levelStart) / 1000;
+  registerTap(i, elapsed, false);
+}
+function registerTap(i, elapsed, isTimeout){
+  const st = S.pointState[i];
+  const pt = S.points[i];
+  st.tapped = true;
+  let pts, label;
+  if (isTimeout) { pts = 0; label = '😥 のがした'; }
+  else {
+    const diff = Math.abs(elapsed - pt.t);
+    if (diff <= pt.winPerfect) { pts = 3; label = '🎯 ばっちり'; }
+    else if (diff <= pt.winOk) { pts = 2; label = '😊 おしい'; }
+    else if (diff <= pt.winSoso) { pts = 1; label = '🙂 もうすこし'; }
+    else { pts = 0; label = '😥 はずれ'; }
+  }
+  st.result = { pts, label, elapsed };
+  S.scores.push(pts);
+  S.scoreTotal += pts;
+  if (!isTimeout) {
+    sTap();
+    if (pts >= 2) stageBurst();
+    if (pts >= 2) sYes(); else sHmm();
+  }
+  updateHud();
+  if (S.phase === 'round') renderTapButtons();
+  checkLevelDone();
+}
+function checkLevelDone(){
+  if (!S.pointState.every(st => st.tapped)) return;
+  S.phase = 'resultRound';
+  setControls([]);
+  const summary = S.pointState.map((st, i) => `${NUMS[i]}${st.result.label.split(' ')[0]}`).join(' ');
+  setResultMsg(`このだんかい しゅうりょう：${summary}`);
+  setTimeout(() => {
+    if (S.levelIdx >= LEVEL_POINTS.length - 1) onAllClear();
+    else prepareLevel(S.levelIdx + 1);
+  }, 1600);
+}
+
+function rankText(total){
+  if (total >= MAX_SCORE) return '👑 パーフェクト！ぜんぶ ばっちり！';
+  if (total >= MAX_SCORE * 0.8) return '🌟🌟🌟 すごい！ほとんど ばっちり！';
+  if (total >= MAX_SCORE * 0.53) return '🌟🌟 いいちょうし！';
+  if (total >= MAX_SCORE * 0.27) return '🌟 もうすこし！';
+  return '🌱 つぎは もっと ねらってみよう！';
+}
+function startGame(){
+  S.scores = [];
+  S.scoreTotal = 0;
+  prepareLevel(0);
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare();
+  const total = S.scoreTotal;
+  const best = getBest();
+  const isNewBest = (best === null) || (total > best);
+  if (isNewBest) setBest(total);
+  $('resultScore').textContent = `${total} / ${MAX_SCORE} 点`;
+  $('resultRank').textContent = rankText(total);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストスコア こうしん！'
+    : `ベストスコア：${best} / ${MAX_SCORE}点`;
+  $('starListEl').innerHTML = LEVEL_POINTS.map((pts, lv) => {
+    const icons = S.scores.slice(lv * 4, lv * 4 + 4).map(p => p === 3 ? '🎯' : p === 2 ? '😊' : p === 1 ? '🙂' : '😥').join('');
+    return `<span class="starChip">${NUMS[lv]} ${icons}</span>`;
+  }).join('');
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストスコア：<b>${best} / ${MAX_SCORE}点</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.phase === 'round') {
+    S.curElapsed = (now - S.levelStart) / 1000;
+    S.pointState.forEach((st, i) => {
+      if (!st.tapped) {
+        const pt = S.points[i];
+        if (S.curElapsed > pt.t + pt.winSoso + MISS_MARGIN) {
+          registerTap(i, S.curElapsed, true);
+        }
+      }
+    });
+  }
+  drawStage();
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
