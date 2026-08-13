@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>とけるかな？よそうタイムアタック — まほう薬屋ほしずく ごほうびミニゲーム</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #0a0e24 0%, #131a3d 60%, #1a2150 100%);
+    color: #f2efff;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(14px, 1.8vw, 24px); font-weight: 700;
+    color: #ffe9a8; text-shadow: 0 0 14px rgba(255, 214, 107, .5);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #bdc4f5; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .6vw; flex-wrap: wrap; justify-content: flex-end; }
+  #progChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #progChip { background: #1c2450; color: #cfd6ff; border: 1.5px solid #3a437a; }
+  #timeChip { background: #ffe9a8; color: #3a2e10; box-shadow: 0 0 14px rgba(255,233,168,.5); }
+  #bestChip { background: #1c2450; color: #cfd6ff; border: 1.5px solid #3a437a; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #232a54 0%, #171d42 70%, #0d1230 100%);
+    border: 2px solid #3a437a;
+    box-shadow: inset 0 0 50px rgba(60,70,140,.25), 0 4px 24px rgba(0,0,0,.3);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.2vh; left: 50%; transform: translateX(-50%);
+    color: #f2efff; font-weight: 700; text-align: center;
+    font-size: clamp(12px, 1.5vw, 17px); min-height: 1.4em;
+    max-width: 92%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .8vw; justify-content: center; align-items: center;
+    padding: 1.2vh .5vw; background: linear-gradient(180deg, transparent, rgba(20, 25, 60, .7) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(16px, 2.2vw, 24px); font-weight: 700;
+    padding: .6em 1.4em; border-radius: 16px; border: 2px solid #6a74c0; cursor: pointer;
+    background: linear-gradient(180deg, #5b63b8, #3a3f8a); color: #fff;
+    box-shadow: 0 3px 0 #23285a; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 48px; min-width: 200px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.ng { background: linear-gradient(180deg, #b85b7a, #8a3a5a); border-color: #d68aa0; box-shadow: 0 3px 0 #5a2038; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(10, 14, 36, .6);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #1c2450, #131a3d);
+    border: 2px solid #3a437a; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(0,0,0,.4);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #ffe9a8; margin: 0 0 .3em; text-shadow: 0 0 20px rgba(255,214,107,.35); }
+  .panel p { font-size: clamp(13px, 1.6vw, 17px); line-height: 1.8; color: #f2efff; margin: .6em 0; }
+  .panel .big { font-size: clamp(26px, 4.6vw, 46px); font-weight: 700; color: #ffe9a8; margin: .3em 0; }
+  .legend { display: flex; justify-content: center; gap: 1.6em; margin: .8em 0; font-size: clamp(12px, 1.4vw, 15px); font-weight: 700; }
+  .legend span.dot { display:inline-block; width:.9em; height:.9em; border-radius:50%; margin-right:.35em; vertical-align:-.05em; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #ffe28a, #e0a020); color: #3a2e10;
+    box-shadow: 0 4px 14px rgba(0,0,0,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #1c2450; color: #cfd6ff; box-shadow: none; border: 1.5px solid #3a437a; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(255,233,168,.14); border: 1px solid rgba(255,233,168,.4);
+    color: #ffe9a8; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🧪 とけるかな？よそうタイムアタック <small>— まほう薬屋ほしずく ごほうびミニゲーム —</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="progChip">0/10</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この <b>とけるかな？よそうタイムアタック</b>は、<b>まほう薬屋ほしずく</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは まほう薬屋ほしずくを クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="mahou.html">まほう薬屋ほしずくへ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🧪 とけるかな？よそうタイムアタック</h1>
+    <p>フラスコに <ruby>物質<rt>ぶっしつ</rt></ruby>と <ruby>温度<rt>おんど</rt></ruby>、いれる さじの 数が しめされるよ。<br>
+    ぜんぶ <b>とけきる</b>か、<b>とけのこる</b>か、よそうして えらぼう！</p>
+    <div class="legend">
+      <span><span class="dot" style="background:#8fb4ff"></span>ほしの塩</span>
+      <span><span class="dot" style="background:#c9a6ff"></span>つきのミョウバン</span>
+    </div>
+    <p>おなじ 温度でも、物質に よって <b>とける量</b>は ぜんぜん ちがうよ。10問を、いちばん はやく とけるかな？</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏁 ぜんぶ とけた！</h1>
+    <p id="resultCorrect"></p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   とけるかな？よそうタイムアタック — まほう薬屋ほしずく(mahou.html) 20作目ごほうびミニゲーム
+   本編m_tempの実データ（MATS.sol、水100gにとける量(g)の温度依存モデル）を核に、
+   「物質・温度・さじ数」の組み合わせから「とけきる／とけのこる」を予想する
+   2択クイズタイムアタック。食塩は温度を上げても溶解度がほぼ変わらないのに対し、
+   ミョウバンは劇的に増えるという本編の対比をそのまま出題データに使う。
+   10問の出題データはNode.jsで事前検証済み（とけきる5問・とけのこる5問で均等）。
+   ===================================================== */
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'mahou';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'tokerukana_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 溶解度データ（本編mahou.html MATS.solと同じ実データ） ----------
+function interp(pts, t) {
+  if (t <= pts[0][0]) return pts[0][1];
+  for (let i = 1; i < pts.length; i++) {
+    if (t <= pts[i][0]) {
+      const [t0, v0] = pts[i - 1], [t1, v1] = pts[i];
+      return v0 + (v1 - v0) * (t - t0) / (t1 - t0);
+    }
+  }
+  return pts[pts.length - 1][1];
+}
+const MATS = {
+  shio: { name: 'ほしの塩', short: '塩', col: '#8fb4ff', liq: 'rgba(150,180,255,.5)', sol: t => interp([[10, 35.7], [20, 35.8], [40, 36.4], [60, 37.1]], t) },
+  myoban: { name: 'つきのミョウバン', short: 'ミョウバン', col: '#c9a6ff', liq: 'rgba(190,160,255,.5)', sol: t => interp([[10, 7.6], [20, 11.4], [40, 23.8], [60, 57.4]], t) },
+};
+const SPOON = 5;
+
+// ---------- 出題データ（Node.jsで正誤バランス5:5・判定余裕2.4g以上を確認済み） ----------
+const QUESTIONS = [
+  { mat: 'shio', temp: 10, spoons: 6 },
+  { mat: 'shio', temp: 20, spoons: 9 },
+  { mat: 'shio', temp: 40, spoons: 3 },
+  { mat: 'shio', temp: 60, spoons: 8 },
+  { mat: 'shio', temp: 10, spoons: 7 },
+  { mat: 'myoban', temp: 10, spoons: 1 },
+  { mat: 'myoban', temp: 20, spoons: 3 },
+  { mat: 'myoban', temp: 40, spoons: 4 },
+  { mat: 'myoban', temp: 60, spoons: 12 },
+  { mat: 'myoban', temp: 10, spoons: 2 },
+];
+function answerOf(q){
+  const limitG = MATS[q.mat].sol(q.temp);
+  return (q.spoons * SPOON) <= limitG ? 'tokekiru' : 'tokenokoru';
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | result
+  order: [],
+  quizIdx: 0,
+  correctCount: 0,
+  answered: false,
+  revealPhase: 'asking', // asking | ok | ng
+  sound: true,
+  startTime: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 22, PAD_B = 16, PAD_X = 16;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(MAPH));
+  g.addColorStop(0, '#232a54'); g.addColorStop(1, '#0d1230');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), MAPW * sc, MAPH * sc);
+}
+
+// ---------- フラスコの描画（簡易版・新規実装） ----------
+function flaskPath(X, Y, sc, cx, baseY, bw, fh, nw) {
+  const mouthY = baseY - fh, shoulderY = mouthY + fh * 0.32;
+  const p = new Path2D();
+  p.moveTo(X(cx - nw / 2), Y(mouthY));
+  p.lineTo(X(cx - nw / 2), Y(shoulderY));
+  p.lineTo(X(cx - bw / 2), Y(baseY - 10));
+  p.quadraticCurveTo(X(cx - bw / 2), Y(baseY), X(cx - bw / 2 + 10), Y(baseY));
+  p.lineTo(X(cx + bw / 2 - 10), Y(baseY));
+  p.quadraticCurveTo(X(cx + bw / 2), Y(baseY), X(cx + bw / 2), Y(baseY - 10));
+  p.lineTo(X(cx + nw / 2), Y(shoulderY));
+  p.lineTo(X(cx + nw / 2), Y(mouthY));
+  return p;
+}
+function drawFlaskScene(X, Y, sc, q){
+  const mat = MATS[q.mat];
+  const cx = 500, baseY = 480, fh = 260, bw = 220, nw = 70;
+  const mouthY = baseY - fh, shoulderY = mouthY + fh * 0.32;
+  const fp = flaskPath(X, Y, sc, cx, baseY, bw, fh, nw);
+
+  // フラスコ本体（輪郭）
+  gctx.lineWidth = 4 * sc; gctx.strokeStyle = 'rgba(230,235,255,.55)';
+  gctx.stroke(fp);
+
+  // 液体
+  const liqTop = baseY - fh * 0.5;
+  gctx.save();
+  gctx.clip(fp);
+  gctx.fillStyle = mat.liq;
+  gctx.fillRect(X(cx - bw), Y(liqTop), bw * 2 * sc, (baseY - liqTop + 40) * sc);
+  gctx.strokeStyle = 'rgba(255,255,255,.35)'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(X(cx - bw / 2), Y(liqTop)); gctx.lineTo(X(cx + bw / 2), Y(liqTop)); gctx.stroke();
+
+  // 粒（さじ数ぶん、底に配置。revealPhase='ok'ならキラキラ消える途中、'ng'なら沈殿のまま）
+  if (S.revealPhase !== 'ok') {
+    const n = q.spoons;
+    for (let i = 0; i < n; i++) {
+      const row = Math.floor(i / 6), col = i % 6;
+      const gx = cx - bw * 0.32 + col * (bw * 0.64 / 5);
+      const gy = baseY - 14 - row * 14;
+      gctx.beginPath(); gctx.arc(X(gx), Y(gy), 6 * sc, 0, TAU);
+      gctx.fillStyle = mat.col; gctx.fill();
+      gctx.strokeStyle = 'rgba(30,20,60,.4)'; gctx.lineWidth = 1 * sc; gctx.stroke();
+    }
+  }
+  gctx.restore();
+
+  // 温度ラベル(フラスコ下)
+  gctx.fillStyle = '#f2efff'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`🌡️ ${q.temp}℃`, X(cx - bw / 2 - 70), Y(baseY - 30));
+  gctx.fillText(`🥄 ×${q.spoons}`, X(cx + bw / 2 + 70), Y(baseY - 30));
+}
+function drawStage(){
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  bgFill(X, Y, sc);
+
+  const q = QUESTIONS[S.order[S.quizIdx]];
+  gctx.fillStyle = '#f2efff'; gctx.font = `700 ${19 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`水100gに ${MATS[q.mat].name}を いれたら…？`, X(500), Y(60));
+  drawFlaskScene(X, Y, sc, q);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n, cols) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: (cols || ['#ffe9a8', '#8fb4ff', '#c9a6ff', '#fff'])[Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 出題進行 ----------
+const QUESTION_COUNT = QUESTIONS.length;
+function updateProgChip(){ $('progChip').textContent = `${S.quizIdx}/${QUESTION_COUNT}`; }
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function setControls(list){
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+function nextQuestion(){
+  if (S.quizIdx >= QUESTION_COUNT) { onAllClear(); return; }
+  S.answered = false;
+  S.revealPhase = 'asking';
+  updateProgChip();
+  setResultMsg('とけきるかな？ とけのこるかな？ よそうして えらぼう。');
+  setControls([
+    { label: '✨ とけきる', cb: () => onChoose('tokekiru') },
+    { label: '🫧 とけのこる', cls: 'ng', cb: () => onChoose('tokenokoru') },
+  ]);
+}
+function onChoose(guess){
+  if (S.phase !== 'playing' || S.answered) return;
+  S.answered = true;
+  ac(); sTap();
+  const q = QUESTIONS[S.order[S.quizIdx]];
+  const trueAnswer = answerOf(q);
+  const correct = guess === trueAnswer;
+  const limitG = MATS[q.mat].sol(q.temp);
+  const addedG = q.spoons * SPOON;
+  const trueLabel = trueAnswer === 'tokekiru' ? 'とけきる' : 'とけのこる';
+  if (correct) {
+    S.correctCount++;
+    S.revealPhase = 'ok';
+    sYes(); stageBurst();
+    setResultMsg(`🎯 せいかい！ ${MATS[q.mat].short}${q.spoons}さじ(${addedG}g)は ${q.temp}℃で ${trueLabel}。`);
+  } else {
+    S.revealPhase = 'ng';
+    sHmm();
+    const detail = trueAnswer === 'tokekiru'
+      ? `とける限界(${limitG.toFixed(1)}g)より 少ないから、${trueLabel}。`
+      : `とける限界(${limitG.toFixed(1)}g)を こえるから、${trueLabel}。`;
+    setResultMsg(`😥 ちがったよ。${MATS[q.mat].short}${q.spoons}さじ(${addedG}g)は ${q.temp}℃だと ${detail}`);
+  }
+  setControls([]);
+  S.quizIdx++;
+  updateProgChip();
+  setTimeout(nextQuestion, 1700);
+}
+
+function rankText(correct){
+  if (correct >= QUESTION_COUNT) return '👑 パーフェクト！ぜんぶ せいかい！';
+  if (correct >= 8) return '🌟🌟🌟 すごい！とける名人！';
+  if (correct >= 5) return '🌟🌟 いいちょうし！';
+  return '🌱 もういちど、温度と物質の関係を たしかめてみよう！';
+}
+function startGame(){
+  S.order = shuffle(QUESTIONS.map((_, i) => i));
+  S.quizIdx = 0;
+  S.correctCount = 0;
+  S.startTime = performance.now();
+  S.phase = 'playing';
+  nextQuestion();
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultCorrect').textContent = `${S.correctCount} / ${QUESTION_COUNT} もん せいかい`;
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').innerHTML = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = `<span class="starChip">${rankText(S.correctCount)}</span>`;
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawStage();
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
