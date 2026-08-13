@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>石ころの旅レース — 流れる水の探検隊 ごほうびミニゲーム</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6f6 0%, #dcefe4 45%, #d6e8cf 100%);
+    color: #2c3a2a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #2e6b4f; text-shadow: 0 0 14px rgba(46, 107, 79, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8a6a3a; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #e2f0e6; color: #2e6b4f; border: 1.5px solid #b8d8c0; }
+  #timeChip { background: #6ab7c9; color: #0a3540; box-shadow: 0 0 12px rgba(106,183,201,.5); }
+  #bestChip { background: #e2f0e6; color: #2e6b4f; border: 1.5px solid #b8d8c0; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 15%, #ffffff 0%, #e4f2ea 60%, #cfe6d4 100%);
+    border: 3px solid #b8d8c0;
+    box-shadow: inset 0 0 40px rgba(46, 107, 79, .1), 0 4px 18px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #scopeMini {
+    position: absolute; top: 10px; right: 14px;
+    width: clamp(60px, 7vw, 90px); height: clamp(60px, 7vw, 90px);
+    border-radius: 50%; border: 3px solid #6ab7c9; overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18); background: #eaf6f6;
+  }
+  #scopeMini canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #resultMsg {
+    position: absolute; top: 1vh; left: 1.4vw; right: calc(clamp(60px, 7vw, 90px) + 30px);
+    color: #2e6b4f; font-weight: 700; text-align: left;
+    font-size: clamp(12px, 1.5vw, 17px); min-height: 1.4em;
+    line-height: 1.4;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: center; align-items: center;
+    padding: 1.2vh .5vw; background: linear-gradient(180deg, transparent, rgba(184, 216, 192, .7) 40%);
+  }
+  #tapBtn {
+    font-family: inherit; font-size: clamp(16px, 2vw, 24px); font-weight: 700;
+    padding: .6em 1.6em; border-radius: 999px; border: 2px solid #a5cfa8; cursor: pointer;
+    background: linear-gradient(180deg, #8fbf7a, #4a8a5a); color: #fff;
+    box-shadow: 0 4px 0 #2c5c38, 0 6px 14px rgba(0,0,0,.18);
+    transition: transform .06s, filter .1s; touch-action: none;
+    min-width: 260px;
+  }
+  #tapBtn.flash {
+    transform: translateY(3px); box-shadow: 0 1px 0 #2c5c38; filter: brightness(1.22);
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 50, 40, .5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef8f0);
+    border: 3px solid #b8d8c0; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(20,40,25,.25);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(22px, 3.2vw, 34px); color: #2e6b4f; margin: 0 0 .3em; text-shadow: 0 0 20px rgba(46,107,79,.2); }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2c3a2a; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #2e6b4f; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #8fbf7a, #4a8a5a); color: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #e2f0e6; color: #2e6b4f; box-shadow: none; border: 1.5px solid #b8d8c0; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(74,138,90,.14); border: 1px solid rgba(74,138,90,.5);
+    color: #2e6b4f; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🪨 石ころの旅レース <small>— 流れる水の探検隊 ごほうびミニゲーム —</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">れべる 0/5</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="scopeMini"><canvas id="scope"></canvas></div>
+    <div id="resultMsg"></div>
+    <div id="controls">
+      <button id="tapBtn">🪨 ころがす</button>
+    </div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この <b>石ころの旅レース</b>は、<b>流れる水の探検隊</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは 流れる水の探検隊を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="nagareru.html">流れる水の探検隊へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🪨 石ころの旅レース</h1>
+    <p>「🪨 ころがす」ボタンを <ruby>何度<rt>なんど</rt></ruby>も タップして、ゴツゴツの ゴロタ石を <ruby>上流<rt>じょうりゅう</rt></ruby>から <ruby>河口<rt>かこう</rt></ruby>まで ころがそう。</p>
+    <p>とちゅうの <b>岩</b>に ぶつかった しゅんかん、すぐに もう<ruby>一回<rt>いっかい</rt></ruby> タップすると、角が <ruby>大<rt>おお</rt></ruby>きく とれる！ タイミングを のがすと、あまり <ruby>丸<rt>まる</rt></ruby>くならない。ぜんぶで 5れべる、ゴールした 石の 丸さを きそおう。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🌊 海に とうちゃく！</h1>
+    <p>5れべる ぜんぶ、石を ころがしきったよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   石ころの旅レース — 流れる水の探検隊(nagareru.html) ごほうびミニゲーム
+   本編m_hakobuの「ゴツゴツの石が転がりながら角が取れて丸く小さくなる」を
+   連打+タイミングのレースに再構成。
+   「🪨 ころがす」を連打して石を進める(progress 0→1)。
+   進捗が岩の位置(zones)を跨いだ瞬間から一定時間(window)以内に次のタップが
+   来ればジャストヒット＝丸さ(roundness)に大きくボーナス。逃すとわずかにしか丸くならない。
+   Node.jsシミュレーションで検証済み：連打が速く安定した子ほど丸さが伸びる
+   （元気な子32%→96%、平均的な子32%→56〜67%、ゆっくりな子は完走はできるが29%→26〜34%どまり）。
+   ===================================================== */
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'nagareru';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'ishikororace_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- れべる構成（Node.jsシミュレーションで難易度階段を検証済み） ----------
+const TAP_GAIN = 0.045;
+const JUST_GAIN = 0.16;
+const PASS_GAIN = 0.03;
+const LEVELS = [
+  { label: '①', zones: [0.32, 0.66], window: 0.42 },
+  { label: '②', zones: [0.24, 0.50, 0.76], window: 0.36 },
+  { label: '③', zones: [0.20, 0.40, 0.60, 0.82], window: 0.30 },
+  { label: '④', zones: [0.16, 0.33, 0.50, 0.67, 0.86], window: 0.26 },
+  { label: '⑤', zones: [0.14, 0.29, 0.44, 0.59, 0.74, 0.90], window: 0.22 },
+];
+
+function roundLabel(r){
+  if (r >= 0.8) return { text: 'まんまる！', icon: '🌟🌟🌟' };
+  if (r >= 0.5) return { text: 'すこし丸い', icon: '🌟🌟' };
+  return { text: 'ゴツゴツのまま', icon: '🌟' };
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | lock | playing | result
+  levelIdx: 0,
+  progress: 0,
+  roundness: 0,
+  zoneState: [],
+  levelRoundness: [],
+  spinAngle: 0,
+  spinSpeed: 0,
+  sound: true,
+  startTime: 0,
+  _msgTimer: null,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.05, 'triangle', 0.06);
+const sKnock = () => { tone(220, 0, 0.09, 'square', 0.09); tone(160, 0.03, 0.12, 'square', 0.06); };
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx'), scopeCv = $('scope');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d'), sctx = scopeCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 40, PAD_B = 90, PAD_X = 30;
+const MAPW = 1000, MAPH = 500;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+// ---------- 石のかたち（nagareru.html drawStonePoly を移植） ----------
+function jag(seed, i) { return 0.14 + 0.36 * Math.abs(Math.sin(seed * 89.7 + i * 13.3)); }
+function drawStonePoly(ctx, x, y, R, roundness, seed) {
+  const N = 9;
+  ctx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const a = i / N * TAU;
+    const r = R * (1 - jag(seed, i % N) * (1 - roundness));
+    const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = '#9a948a'; ctx.fill();
+  ctx.strokeStyle = '#6a645a'; ctx.lineWidth = Math.max(1.2, R * 0.08); ctx.stroke();
+}
+
+// ---------- レーストラック描画 ----------
+function drawTrack(X, Y, sc){
+  const trackY = 260, trackX0 = 60, trackX1 = 940;
+  const g = gctx.createLinearGradient(X(trackX0), 0, X(trackX1), 0);
+  g.addColorStop(0, '#bcd8ea'); g.addColorStop(1, '#a8d8c8');
+  gctx.fillStyle = g;
+  roundRect(gctx, X(trackX0), Y(trackY - 46), (trackX1 - trackX0) * sc, 92 * sc, 20 * sc);
+  gctx.fill();
+  gctx.strokeStyle = '#7fb8c8'; gctx.lineWidth = 3 * sc;
+  roundRect(gctx, X(trackX0), Y(trackY - 46), (trackX1 - trackX0) * sc, 92 * sc, 20 * sc);
+  gctx.stroke();
+
+  gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('⛰️', X(trackX0 - 20), Y(trackY));
+  gctx.fillText('🌊', X(trackX1 + 20), Y(trackY));
+
+  const lvl = LEVELS[S.levelIdx];
+  lvl.zones.forEach((z, i) => {
+    const zx = trackX0 + z * (trackX1 - trackX0);
+    const st = S.zoneState[i];
+    const hit = st && st.judged && st.hit;
+    const missed = st && st.judged && !st.hit;
+    gctx.font = `${34 * sc}px sans-serif`;
+    gctx.fillText('🪨', X(zx), Y(trackY - 58));
+    if (hit) { gctx.font = `${18 * sc}px sans-serif`; gctx.fillText('✨', X(zx), Y(trackY - 88)); }
+    else if (missed) { gctx.font = `${16 * sc}px sans-serif`; gctx.fillStyle = '#8a7a5a'; gctx.fillText('すり抜けた', X(zx), Y(trackY - 88)); gctx.fillStyle = '#2c3a2a'; }
+  });
+
+  // ゴロタ石本体
+  const px = trackX0 + S.progress * (trackX1 - trackX0);
+  gctx.save();
+  gctx.translate(X(px), Y(trackY));
+  gctx.rotate(S.spinAngle);
+  drawStonePoly(gctx, 0, 0, 30 * sc, S.roundness, 7);
+  gctx.restore();
+
+  gctx.fillStyle = '#2c3a2a'; gctx.font = `700 ${Math.max(13, 18 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`れべる ${lvl.label}　岩に ぶつかったら すぐ もう1タップ！`, X(500), Y(40));
+
+  drawProgressBar(X, Y, sc, trackX0, trackX1, trackY);
+}
+function drawProgressBar(X, Y, sc, trackX0, trackX1, trackY){
+  const barY = 380, barH = 26;
+  gctx.fillStyle = '#e2f0e6';
+  roundRect(gctx, X(trackX0), Y(barY), (trackX1 - trackX0) * sc, barH * sc, 12 * sc); gctx.fill();
+  gctx.strokeStyle = '#b8d8c0'; gctx.lineWidth = 2 * sc;
+  roundRect(gctx, X(trackX0), Y(barY), (trackX1 - trackX0) * sc, barH * sc, 12 * sc); gctx.stroke();
+  if (S.progress > 0) {
+    gctx.fillStyle = '#4a8a5a';
+    roundRect(gctx, X(trackX0), Y(barY), (trackX1 - trackX0) * sc * S.progress, barH * sc, 12 * sc); gctx.fill();
+  }
+  gctx.fillStyle = '#2c3a2a'; gctx.font = `700 ${Math.max(11, 14 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const rl = roundLabel(S.roundness);
+  gctx.fillText(`丸さ ${Math.round(S.roundness * 100)}%　${rl.text}`, X(500), Y(barY + 44));
+}
+
+function drawStage(){
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawTrack(X, Y, sc);
+}
+
+// ---------- 石のむしめがね（rollingモードを移植） ----------
+function drawScopeMini(){
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const R = w / 2;
+  const grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#dceef8'); grd.addColorStop(1, '#b8d8e8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+  sctx.save();
+  sctx.translate(R, R * 0.95);
+  sctx.rotate(S.spinAngle * 1.4);
+  drawStonePoly(sctx, 0, 0, R * 0.34, S.roundness, 7);
+  sctx.restore();
+  chipParts = chipParts.filter(c => c.life > 0);
+  chipParts.forEach(c => {
+    sctx.globalAlpha = Math.max(0, c.life);
+    drawStonePoly(sctx, c.x, c.y, 4, 0.2, c.seed);
+    sctx.globalAlpha = 1;
+  });
+}
+let chipParts = [];
+function spawnChips(){
+  const R = scopeCv.getBoundingClientRect().width / 2;
+  for (let i = 0; i < 4; i++) {
+    chipParts.push({ x: R + (Math.random() - 0.5) * R * 0.6, y: R * 0.95, vx: (Math.random() - 0.5) * 120, vy: -60 - Math.random() * 60, life: 1, seed: Math.random() * 20 });
+  }
+}
+function stepChips(dt){
+  chipParts.forEach(c => { c.life -= dt * 1.5; c.x += c.vx * dt; c.y += c.vy * dt; });
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#4a8a5a', '#6ab7c9', '#ffe58a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 進行 ----------
+function updateLevelChip(){
+  $('levelChip').textContent = `れべる ${Math.min(S.levelIdx + 1, LEVELS.length)}/${LEVELS.length}`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function defaultHint(){
+  return '🪨ボタンを 連打して 石を すすめよう。岩に ぶつかったら すぐ もう1タップ！';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function flashMsg(html){
+  setResultMsg(html);
+  clearTimeout(S._msgTimer);
+  S._msgTimer = setTimeout(() => { if (S.phase === 'playing') setResultMsg(defaultHint()); }, 1300);
+}
+
+function prepareLevel(idx){
+  S.levelIdx = idx;
+  const lvl = LEVELS[idx];
+  S.progress = 0;
+  S.roundness = 0;
+  S.zoneState = lvl.zones.map(z => ({ pos: z, pendingSince: null, judged: false, hit: false }));
+  updateLevelChip();
+}
+function onLevelClear(){
+  sYes(); stageBurst();
+  S.levelRoundness.push(S.roundness);
+  const clearedLabel = LEVELS[S.levelIdx].label;
+  const rl = roundLabel(S.roundness);
+  flashMsg(`🎉 ${clearedLabel} ゴール！ ${rl.icon} ${rl.text}（丸さ${Math.round(S.roundness*100)}%）`);
+  const nextIdx = S.levelIdx + 1;
+  if (nextIdx >= LEVELS.length) { onAllClear(); return; }
+  setTimeout(() => { if (S.phase === 'playing') prepareLevel(nextIdx); }, 1200);
+}
+function onAllClear(){
+  S.phase = 'result';
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  sFanfare();
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = LEVELS.map((l, i) => {
+    const r = S.levelRoundness[i] || 0;
+    return `<span class="starChip">${l.label} ${roundLabel(r).icon}${Math.round(r*100)}%</span>`;
+  }).join('');
+  showOverlay('resultOverlay');
+}
+
+// ---------- ジャストヒット判定 ----------
+function onJustHit(i){
+  S.zoneState[i].judged = true;
+  S.zoneState[i].hit = true;
+  S.roundness = clamp(S.roundness + JUST_GAIN, 0, 1);
+  sKnock(); stageBurst(); spawnChips();
+  flashMsg('✨ ばっちり ぶつけた！ 角が とれた！');
+}
+function onPassMiss(i){
+  S.zoneState[i].judged = true;
+  S.zoneState[i].hit = false;
+  S.roundness = clamp(S.roundness + PASS_GAIN, 0, 1);
+}
+
+function stepRace(dt){
+  if (S.phase !== 'playing') return;
+  const now = performance.now();
+  const lvl = LEVELS[S.levelIdx];
+  S.zoneState.forEach((z, i) => {
+    if (z.judged || z.pendingSince === null) return;
+    if ((now - z.pendingSince) / 1000 > lvl.window) onPassMiss(i);
+  });
+  S.spinSpeed = Math.max(0, S.spinSpeed - 5 * dt);
+  S.spinAngle += S.spinSpeed * dt;
+  stepChips(dt);
+}
+
+// ---------- 操作（タップのたびに1回ぶん進む。押しっぱなしでは増えない） ----------
+function handleTap(){
+  if (S.phase !== 'playing') return;
+  ac();
+  const now = performance.now();
+  const lvl = LEVELS[S.levelIdx];
+
+  // pending中の岩の判定（このタップがジャストヒットになるか）
+  S.zoneState.forEach((z, i) => {
+    if (z.judged || z.pendingSince === null) return;
+    if ((now - z.pendingSince) / 1000 <= lvl.window) onJustHit(i);
+  });
+
+  const prevProgress = S.progress;
+  S.progress = Math.min(1, S.progress + TAP_GAIN);
+  S.spinSpeed = Math.min(14, S.spinSpeed + 3.2);
+  sTap();
+  tapBtn.classList.add('flash');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => tapBtn.classList.remove('flash'), 90);
+
+  // 岩を跨いだ瞬間を検知（状態フラグ方式：跨いだこのタップでは判定せず、次のタップ待ちにする）
+  S.zoneState.forEach((z, i) => {
+    if (z.judged || z.pendingSince !== null) return;
+    if (prevProgress < z.pos && S.progress >= z.pos) {
+      z.pendingSince = now;
+    }
+  });
+
+  if (S.progress >= 1) {
+    S.zoneState.forEach((z, i) => { if (!z.judged) onPassMiss(i); });
+    onLevelClear();
+  }
+}
+const tapBtn = $('tapBtn');
+let flashTimer = null;
+tapBtn.addEventListener('pointerdown', e => { e.preventDefault(); handleTap(); });
+tapBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+function startGame(){
+  S.levelRoundness = [];
+  S.spinAngle = 0;
+  S.spinSpeed = 0;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  prepareLevel(0);
+  setResultMsg(defaultHint());
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  stepRace(dt);
+  drawStage();
+  drawScopeMini();
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
