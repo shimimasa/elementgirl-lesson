@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ひなんタイミングチャレンジ — 水屋まで逃げきろう！</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef8fa 0%, #cfe6d4 55%, #4a90a4 100%);
+    color: #163028;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(14px, 1.8vw, 23px); font-weight: 700;
+    color: #1e5c3a; text-shadow: 0 1px 0 #fff;
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3a7060; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #stageChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 19px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #dff0e4; color: #1e5c3a; border: 1.5px solid #a0d0b0; }
+  #stageChip { background: #ffe9a8; color: #7a5000; box-shadow: 0 0 14px rgba(224,160,32,.4); }
+  #bestChip { background: #dff0e4; color: #1e5c3a; border: 1.5px solid #a0d0b0; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #eef8fa 0%, #d8ecda 100%);
+    border: 3px solid #2d6a7a;
+    box-shadow: inset 0 0 40px rgba(20, 60, 60, .15), 0 4px 24px rgba(0,0,0,.15);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.4vh; left: 50%; transform: translateX(-50%);
+    color: #1e5c3a; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.5vw, 18px); min-height: 1.4em;
+    max-width: 92%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .5vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(20, 60, 60, .4) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(15px, 1.9vw, 22px); font-weight: 700;
+    padding: .55em 1.1em; border-radius: 14px; border: 2px solid #a0c8d2; cursor: pointer;
+    background: linear-gradient(180deg, #4a90a4, #2d6a7a); color: #fff;
+    box-shadow: 0 3px 0 #1a4a54; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 44px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.go { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #8a5a0a; color: #4a3a10; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(15, 40, 40, .62);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #f2faf4, #d8ecda);
+    border: 2px solid #2d6a7a; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(15, 40, 40, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(19px, 2.8vw, 30px); color: #1e5c3a; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #163028; margin: .6em 0; }
+  .panel .big { font-size: clamp(24px, 4.2vw, 40px); font-weight: 700; color: #1e5c3a; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #ffce54, #d4900f); color: #3a2a00;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dff0e4; color: #1e5c3a; box-shadow: none; border: 1.5px solid #a0d0b0; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(212,144,15,.18); border: 1px solid rgba(212,144,15,.4);
+    color: #8a5a0a; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🌊 ひなんタイミングチャレンジ <small>水屋まで にげきろう！</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">れべる 0/5</div>
+    <div id="stageChip">母屋の 1かい</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この ひなんタイミングチャレンジは、<b>ミズヤの里</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ミズヤの里を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="mizuya.html">ミズヤの里へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🌊 ひなんタイミングチャレンジ</h1>
+    <p>大雨で 水位が どんどん 上がっていく。<br>
+    「母屋の1かい → 母屋の2かい → 水屋」の順に、<br>
+    水位が あぶなくなる前に「⬆️ ひなんする！」を おそう。<br>
+    5つの れべるに ちょうせん！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏁 ぜんぶ にげきった！</h1>
+    <p id="resultRank"></p>
+    <div class="big" id="resultTime"></div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'mizuya';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'hinantiming_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v !== null ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  return s.toFixed(1) + 'びょう';
+}
+
+// ---------- れべるデータ(元本編mizuya.htmlのjudgeSuii閾値を参考に設定) ----------
+// STAGE 0=母屋の1かい, 1=母屋の2かい, 2=水屋(最終・安全)
+// Node.jsシミュレーションで検証済み（project-minigame-series.md参照）
+const STAGE_NAMES = ['母屋の 1かい', '母屋の 2かい', '水屋'];
+const STAGE_WARN = [1.0, 2.4, 3.9];
+const STAGE_DEAD = [1.2, 2.7, 4.3];
+const LEVELS = [
+  { rate: 0.16, duration: 16 },
+  { rate: 0.22, duration: 16 },
+  { rate: 0.28, duration: 16 },
+  { rate: 0.36, duration: 16 },
+  { rate: 0.45, duration: 16 },
+];
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',    // title | lock | level | levelClear | levelFail | result
+  levelIdx: 0,
+  levelStartAt: 0,
+  curElapsed: 0,
+  stage: 0,
+  waterLevel: 0,
+  reactFxT: 0,
+  reactFxKind: '',    // 'move' | 'fail'
+  gameStartAt: 0,
+  gameEndAt: 0,
+  sound: true,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 30, PAD_B = 16, PAD_X = 14;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 断面図(mizuya.htmlのdrawSectionを移植) ----------
+const BASE_Y = 470;
+const MIZUYA_H = 240;
+const UNIT_H = 80; // 1mあたりpx(mizuya.htmlは0.5m=40pxなので1m=80px)
+function drawSection(X, Y, sc, waterLevel) {
+  const sky = gctx.createLinearGradient(0, Y(0), 0, Y(300));
+  sky.addColorStop(0, '#cfe6d4'); sky.addColorStop(1, '#eef6ee');
+  gctx.fillStyle = sky; gctx.fillRect(X(0), Y(0), 1000 * sc, 300 * sc);
+  gctx.fillStyle = '#dcd0a8';
+  gctx.fillRect(X(0), Y(300), 1000 * sc, 340 * sc);
+  gctx.fillStyle = '#4a90a4';
+  gctx.fillRect(X(0), Y(230), 130 * sc, 410 * sc);
+  gctx.fillStyle = 'rgba(255,255,255,.25)';
+  for (let i = 0; i < 4; i++) { gctx.fillRect(X(20 + i * 28), Y(260 + i * 18), 18 * sc, 5 * sc); }
+  gctx.fillStyle = '#4a7a56'; gctx.strokeStyle = '#22402e'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(130), Y(BASE_Y)); gctx.lineTo(X(160), Y(300)); gctx.lineTo(X(230), Y(300)); gctx.lineTo(X(260), Y(BASE_Y));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#c9a56a'; gctx.strokeStyle = '#22402e'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(370), Y(BASE_Y - 90), 160 * sc, 90 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#8a5a3a';
+  gctx.beginPath(); gctx.moveTo(X(360), Y(BASE_Y - 90)); gctx.lineTo(X(450), Y(BASE_Y - 150)); gctx.lineTo(X(540), Y(BASE_Y - 90)); gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#9aabab'; gctx.strokeStyle = '#22402e'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(720), Y(BASE_Y - MIZUYA_H), 160 * sc, MIZUYA_H * sc); gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = 'rgba(34,64,46,.35)'; gctx.lineWidth = 1 * sc;
+  for (let ly = BASE_Y - 40; ly > BASE_Y - MIZUYA_H; ly -= 40) {
+    gctx.beginPath(); gctx.moveTo(X(720), Y(ly)); gctx.lineTo(X(880), Y(ly)); gctx.stroke();
+  }
+  gctx.fillStyle = '#c9a56a'; gctx.strokeStyle = '#22402e'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.rect(X(730), Y(BASE_Y - MIZUYA_H - 70), 140 * sc, 70 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#4a5f5a';
+  gctx.beginPath(); gctx.moveTo(X(718), Y(BASE_Y - MIZUYA_H - 70)); gctx.lineTo(X(800), Y(BASE_Y - MIZUYA_H - 116)); gctx.lineTo(X(882), Y(BASE_Y - MIZUYA_H - 70)); gctx.closePath(); gctx.fill(); gctx.stroke();
+
+  if (waterLevel != null) {
+    const wy = BASE_Y - waterLevel * UNIT_H;
+    gctx.fillStyle = 'rgba(74,144,164,.72)';
+    gctx.fillRect(X(0), Y(wy), 1000 * sc, (BASE_Y + 30 - wy) * sc);
+    gctx.strokeStyle = 'rgba(255,255,255,.6)'; gctx.lineWidth = 2 * sc;
+    gctx.beginPath(); gctx.moveTo(X(0), Y(wy)); gctx.lineTo(X(1000), Y(wy)); gctx.stroke();
+  }
+}
+
+const STAGE_POS = [
+  { x: 450, y: BASE_Y - 20 },
+  { x: 450, y: BASE_Y - 70 },
+  { x: 800, y: BASE_Y - MIZUYA_H - 35 },
+];
+function drawPlayer(X, Y, sc, stage) {
+  const p = STAGE_POS[stage];
+  gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🧑', X(p.x), Y(p.y));
+}
+
+function drawWaterGauge(X, Y, sc) {
+  const gx = 940, gy0 = BASE_Y + 20, gyTop = BASE_Y - MIZUYA_H - 110;
+  const toY = m => gy0 - m * UNIT_H;
+  gctx.strokeStyle = '#8ea8a0'; gctx.lineWidth = 10 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(gx), Y(gy0)); gctx.lineTo(X(gx), Y(gyTop)); gctx.stroke();
+  const lv = LEVELS[S.levelIdx];
+  if (S.stage < 2) {
+    gctx.strokeStyle = 'rgba(224,160,32,.7)'; gctx.lineWidth = 6 * sc;
+    const wy = toY(STAGE_WARN[S.stage]);
+    gctx.beginPath(); gctx.moveTo(X(gx - 16), Y(wy)); gctx.lineTo(X(gx + 16), Y(wy)); gctx.stroke();
+    gctx.strokeStyle = 'rgba(192,70,58,.8)'; gctx.lineWidth = 6 * sc;
+    const dy = toY(STAGE_DEAD[S.stage]);
+    gctx.beginPath(); gctx.moveTo(X(gx - 16), Y(dy)); gctx.lineTo(X(gx + 16), Y(dy)); gctx.stroke();
+  }
+  const curY = toY(Math.min(S.waterLevel, 5.4));
+  gctx.strokeStyle = '#2d6a7a'; gctx.lineWidth = 10 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(gx), Y(gy0)); gctx.lineTo(X(gx), Y(curY)); gctx.stroke();
+  gctx.beginPath(); gctx.arc(X(gx), Y(curY), 9 * sc, 0, TAU);
+  gctx.fillStyle = '#fff'; gctx.fill(); gctx.strokeStyle = '#2d6a7a'; gctx.lineWidth = 3 * sc; gctx.stroke();
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'level' && S.phase !== 'levelClear' && S.phase !== 'levelFail') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawSection(X, Y, sc, S.waterLevel);
+  drawPlayer(X, Y, sc, S.stage);
+  drawWaterGauge(X, Y, sc);
+
+  gctx.fillStyle = '#163028'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[S.levelIdx]} れべる — 水位 ${S.waterLevel.toFixed(1)}m`, X(500), Y(30));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#ffce54', '#4a90a4', '#4a9463', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 出題進行 ----------
+function updateHud(){
+  const shownLevel = S.phase === 'result' ? LEVELS.length : S.levelIdx + 1;
+  $('levelChip').textContent = `れべる ${shownLevel}/${LEVELS.length}`;
+  $('stageChip').textContent = STAGE_NAMES[Math.min(S.stage, 2)];
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = (b !== null) ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function setControls(list){
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+
+function startLevel(idx){
+  S.levelIdx = idx;
+  S.levelStartAt = performance.now();
+  S.curElapsed = 0;
+  S.stage = 0;
+  S.waterLevel = 0;
+  S.reactFxKind = ''; S.reactFxT = 0;
+  S.phase = 'level';
+  updateHud();
+  setResultMsg('水位が あがる前に、つぎの ひなん場所へ すすもう。');
+  setControls([{ label: '⬆️ ひなんする！', cls: 'go', cb: onEvacuate }]);
+}
+function onEvacuate(){
+  if (S.phase !== 'level' || S.stage >= 2) return;
+  sTap();
+  S.stage++;
+  S.reactFxKind = 'move'; S.reactFxT = 0.01;
+  updateHud();
+  if (S.stage >= 2) {
+    setResultMsg('水屋に とうちゃく！ ここまで来れば あんしんだよ。');
+  }
+}
+function onLevelFail(){
+  S.phase = 'levelFail';
+  setControls([]);
+  sHmm();
+  setResultMsg(`あっ……${STAGE_NAMES[S.stage]}が 水につかってしまった。もういちど ちょうせん！`);
+  setTimeout(() => { startLevel(S.levelIdx); }, 1600);
+}
+function onLevelClear(){
+  S.phase = 'levelClear';
+  setControls([]);
+  sYes(); stageBurst();
+  setResultMsg(`🎉 ${NUMS[S.levelIdx]} れべる、にげきった！`);
+  setTimeout(() => {
+    if (S.levelIdx >= LEVELS.length - 1) onAllClear();
+    else startLevel(S.levelIdx + 1);
+  }, 1500);
+}
+
+function rankText(ms){
+  const s = ms / 1000;
+  if (s <= 85) return '👑 パーフェクト！すごい とっさの はんだん！';
+  if (s <= 120) return '🌟🌟🌟 すごい！しっかり にげきったね！';
+  if (s <= 170) return '🌟🌟 いいちょうし！';
+  return '🌟 ぜんぶ にげきったね！';
+}
+function startGame(){
+  S.gameStartAt = performance.now();
+  startLevel(0);
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare();
+  S.gameEndAt = performance.now();
+  const totalMs = S.gameEndAt - S.gameStartAt;
+  const best = getBest();
+  const isNewBest = (best === null) || (totalMs < best);
+  if (isNewBest) setBest(totalMs);
+  $('resultTime').textContent = fmtTime(totalMs);
+  $('resultRank').textContent = rankText(totalMs);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = LEVELS.map((_, i) => `<span class="starChip">${NUMS[i]} 🌊 にげきった</span>`).join('');
+  updateHud();
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.phase === 'level') {
+    const lv = LEVELS[S.levelIdx];
+    S.curElapsed = (now - S.levelStartAt) / 1000;
+    S.waterLevel = lv.rate * S.curElapsed;
+    if (S.stage < 2 && S.waterLevel >= STAGE_DEAD[S.stage]) {
+      onLevelFail();
+    } else if (S.curElapsed >= lv.duration) {
+      onLevelClear();
+    }
+  }
+  if (S.reactFxKind && S.reactFxT >= 0) {
+    S.reactFxT += dt / 0.6;
+    if (S.reactFxT > 1) { S.reactFxT = 0; S.reactFxKind = ''; }
+  }
+  drawStage();
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
