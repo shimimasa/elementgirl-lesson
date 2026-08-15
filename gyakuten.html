@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ぎゃくてん！とうひょうりつチャレンジ</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef2fb 0%, #dde6f6 55%, #aebfe0 100%);
+    color: #16294a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 26px); font-weight: 700;
+    color: #1a3c6e; text-shadow: 0 1px 0 #fff;
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c6f96; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #e3ebf9; color: #234276; border: 1.5px solid #b9c9ea; }
+  #timeChip { background: #e0a838; color: #3a2500; box-shadow: 0 0 10px rgba(224,168,56,.5); }
+  #bestChip { background: #e3ebf9; color: #234276; border: 1.5px solid #b9c9ea; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #f7faff 0%, #e2eaf8 100%);
+    border: 3px solid #1a3c6e;
+    box-shadow: inset 0 0 40px rgba(20, 40, 80, .12), 0 4px 24px rgba(15, 35, 70, .22);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #targetChip {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%);
+    background: #e0a838; color: #3a2500; font-weight: 700;
+    font-size: clamp(13px, 1.7vw, 21px); padding: .32em 1em; border-radius: 999px;
+    box-shadow: 0 0 10px rgba(224,168,56,.5); white-space: nowrap;
+  }
+  #resultMsg {
+    position: absolute; top: 6.4vh; left: 50%; transform: translateX(-50%);
+    color: #16294a; font-weight: 700; text-align: center;
+    font-size: clamp(12px, 1.5vw, 18px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #resultMsg b { color: #1a3c6e; background: #ffe9a8; padding: 0 .2em; border-radius: 4px; }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .5vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(15, 35, 70, .35) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.5vw, 19px); font-weight: 700;
+    padding: .5em .9em; border-radius: 14px; border: 2px solid #cfdbf5; cursor: pointer;
+    background: linear-gradient(180deg, #3d6fc4, #1a3c6e); color: #fff;
+    box-shadow: 0 3px 0 #0d2242; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 40px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.go { background: linear-gradient(180deg, #ffce54, #e0a020); border-color: #fff0c0; box-shadow: 0 3px 0 #a08010; color: #4a3a10; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(10, 20, 45, .82);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #f7faff, #e6edfa);
+    border: 3px solid #3d6fc4; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(10, 20, 45, .4);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(22px, 3.2vw, 34px); color: #1a3c6e; margin: 0 0 .3em; text-shadow: 0 2px 0 #fff; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #16294a; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #1a3c6e; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #3d6fc4, #1a3c6e); color: #fff;
+    box-shadow: 0 4px 14px rgba(15,35,70,.35);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #e3ebf9; color: #234276; box-shadow: none; border: 1.5px solid #b9c9ea; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(224,168,56,.14); border: 1px solid rgba(224,168,56,.5);
+    color: #7a5200; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">📮 ぎゃくてん！とうひょうりつチャレンジ</div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">れべる 0/5</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="targetChip"></div>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この ぎゃくてん！とうひょうりつチャレンジは、<b>ひとつぶ村</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした 人だけの ごほうびゲームです。</p>
+    <p>まずは ひとつぶ村を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="hitotsubu.html">ひとつぶ村へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>📮 ぎゃくてん！とうひょうりつチャレンジ</h1>
+    <p>むらの <ruby>広場<rt>ひろば</rt></ruby>づくりの <ruby>投票<rt>とうひょう</rt></ruby>だよ。ねらう こうほを 見て、<ruby>投票率<rt>とうひょうりつ</rt></ruby>①〜⑧を えらんで「かいひょう」しよう。<br>
+    <ruby>投票率<rt>とうひょうりつ</rt></ruby>が ひくいと、べつの こうほが <ruby>当選<rt>とうせん</rt></ruby>してしまう ことも あるよ。ねらう こうほが <ruby>当選<rt>とうせん</rt></ruby>する、いちばん ひくい <ruby>投票率<rt>とうひょうりつ</rt></ruby>を 見つけよう。<br>
+    5もん <ruby>全部<rt>ぜんぶ</rt></ruby> せいかいするまでの はやさを きそおう。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 むらの たからもの かんせい！</h1>
+    <p>5もん ぜんぶ ぎゃくてんを 見つけられたよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'hitotsubu';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'gyakuten_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 投票率①〜⑧のデータ（ひとつぶ村 m_kaihyouのKAIHYOU_TABLEと同じ発想：
+//   得票 = base + rate×(投票率/10)。target候補だけrateを高くし、
+//   低い投票率では負けるが、ある投票率から先は必ず勝ち続ける「単調な逆転」を事前検証済み ----------
+const PCT = [10, 20, 30, 40, 50, 60, 70, 80];
+const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧'];
+const LEVELS = [
+  { target: 1, cands: [
+    { name: 'こうえんの遊具', icon: '🛝', base: 6.74, rate: 1.02 },
+    { name: 'としょかんの本', icon: '📚', base: 3.20, rate: 4.27 },
+    { name: '花だんの広場',   icon: '🌷', base: 5.67, rate: 2.91 },
+    { name: 'ふれあい広場',   icon: '🐰', base: 5.95, rate: 2.50 },
+  ]},
+  { target: 2, cands: [
+    { name: 'こうえんの遊具', icon: '🛝', base: 9.18, rate: 3.13 },
+    { name: 'としょかんの本', icon: '📚', base: 15.86, rate: 1.43 },
+    { name: '花だんの広場',   icon: '🌷', base: 7.92, rate: 4.57 },
+    { name: 'ふれあい広場',   icon: '🐰', base: 6.18, rate: 2.73 },
+  ]},
+  { target: 3, cands: [
+    { name: 'こうえんの遊具', icon: '🛝', base: 11.90, rate: 2.24 },
+    { name: 'としょかんの本', icon: '📚', base: 16.04, rate: 1.61 },
+    { name: '花だんの広場',   icon: '🌷', base: 9.90, rate: 1.53 },
+    { name: 'ふれあい広場',   icon: '🐰', base: 4.21, rate: 4.11 },
+  ]},
+  { target: 0, cands: [
+    { name: 'こうえんの遊具', icon: '🛝', base: 2.02, rate: 4.39 },
+    { name: 'としょかんの本', icon: '📚', base: 12.24, rate: 1.35 },
+    { name: '花だんの広場',   icon: '🌷', base: 17.58, rate: 1.50 },
+    { name: 'ふれあい広場',   icon: '🐰', base: 10.40, rate: 1.25 },
+  ]},
+  { target: 1, cands: [
+    { name: 'こうえんの遊具', icon: '🛝', base: 7.40, rate: 1.64 },
+    { name: 'としょかんの本', icon: '📚', base: 3.89, rate: 4.41 },
+    { name: '花だんの広場',   icon: '🌷', base: 10.40, rate: 1.38 },
+    { name: 'ふれあい広場',   icon: '🐰', base: 14.06, rate: 2.81 },
+  ]},
+];
+function votesAt(cands, pct){
+  return cands.map(c => Math.max(1, Math.round(c.base + c.rate * pct / 10)));
+}
+function winnerIdx(votes){
+  let mi = 0;
+  for (let i = 1; i < votes.length; i++) if (votes[i] > votes[mi]) mi = i;
+  return mi;
+}
+
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | counting | result
+  levelIdx: 0,
+  pctIdx: 0,
+  actualVotes: [0, 0, 0, 0],
+  revealT: 0,
+  reveal: null,
+  sound: true,
+  startTime: 0,
+  misses: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 開票シーン(ひとつぶ村のdrawKaihyouSceneを移植・target強調を追加) ----------
+function drawKaihyouScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eef2fb'); g.addColorStop(1, '#c7d6ef');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+
+  const lv = LEVELS[S.levelIdx];
+  const maxV = lv.maxV;
+  const baseY = 560, maxH = 300, jarW = 120;
+  for (let i = 0; i < 4; i++) {
+    const cx = 165 + i * 225;
+    const v = S.actualVotes[i] * S.revealT;
+    const fillH = (v / maxV) * maxH;
+    const isTarget = i === lv.target;
+    gctx.fillStyle = isTarget ? '#fff7dd' : '#e3ebf9';
+    gctx.strokeStyle = isTarget ? '#e0a838' : '#16294a';
+    gctx.lineWidth = (isTarget ? 4 : 3) * sc;
+    gctx.beginPath(); gctx.roundRect(X(cx - jarW / 2), Y(baseY - maxH), jarW * sc, maxH * sc, 8 * sc);
+    gctx.fill(); gctx.stroke();
+    if (fillH > 0.5) {
+      gctx.fillStyle = isTarget ? '#e0a838' : '#3d6fc4';
+      gctx.fillRect(X(cx - jarW / 2 + 4), Y(baseY - 4 - fillH), (jarW - 8) * sc, fillH * sc);
+    }
+    gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.font = `${34 * sc}px sans-serif`;
+    gctx.fillText(lv.cands[i].icon, X(cx), Y(baseY - maxH - 26));
+    if (isTarget) {
+      gctx.font = `${16 * sc}px sans-serif`;
+      gctx.fillText('⭐', X(cx + 34), Y(baseY - maxH - 42));
+    }
+    gctx.fillStyle = '#16294a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText(lv.cands[i].name, X(cx), Y(baseY + 20));
+    if (S.revealT > 0.02) {
+      gctx.font = `700 ${17 * sc}px sans-serif`;
+      gctx.fillText(Math.round(v) + '票', X(cx), Y(baseY - fillH - 16));
+    }
+  }
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing' && S.phase !== 'counting') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawKaihyouScene(X, Y, sc);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1a3c6e', '#ffe9a8', '#e0a838', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 開票アニメ（絶対時刻ベース。タブがバックグラウンド化してもrAF再開時に正しく追いつく） ----------
+function startReveal(dur, onDone){
+  S.reveal = { startAt: performance.now(), dur, onDone, fired: false };
+}
+function stepReveal(now){
+  if (!S.reveal) return;
+  const elapsed = (now - S.reveal.startAt) / 1000;
+  const t = clamp(elapsed / S.reveal.dur, 0, 1);
+  S.revealT = easeInOut(t);
+  if (t >= 1 && !S.reveal.fired) {
+    S.reveal.fired = true;
+    const cb = S.reveal.onDone;
+    S.reveal = null;
+    if (cb) cb();
+  }
+}
+
+// ---------- 進行 ----------
+function updateLevelChip(){
+  $('levelChip').textContent = `れべる ${S.levelIdx}/5`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+
+function renderControls(disabled){
+  setControls([
+    { label: '◀ ひくく', dis: disabled || S.pctIdx <= 0, cb: () => { S.pctIdx = clamp(S.pctIdx - 1, 0, 7); sTap(); renderControls(false); } },
+    { label: 'たかく ▶', dis: disabled || S.pctIdx >= 7, cb: () => { S.pctIdx = clamp(S.pctIdx + 1, 0, 7); sTap(); renderControls(false); } },
+    { label: `📮 かいひょう（${NUMS[S.pctIdx]} ${PCT[S.pctIdx]}%）`, cls: 'go', dis: disabled, cb: onKaihyou },
+  ]);
+}
+function setControls(list){
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+
+function startLevel(idx){
+  S.levelIdx = idx;
+  const lv = LEVELS[idx];
+  lv.maxV = Math.max(...votesAt(lv.cands, 80));
+  S.pctIdx = Math.floor(Math.random() * 8);
+  S.actualVotes = [0, 0, 0, 0];
+  S.revealT = 0;
+  S.reveal = null;
+  S.phase = 'playing';
+  updateLevelChip();
+  $('targetChip').innerHTML = `ねらう こうほ：${lv.cands[lv.target].icon} <b>${lv.cands[lv.target].name}</b>`;
+  setResultMsg('とうひょうりつを えらんで「かいひょう」しよう。');
+  renderControls(false);
+}
+function onKaihyou(){
+  if (S.phase !== 'playing') return;
+  S.phase = 'counting';
+  setResultMsg('かいひょう ちゅう…');
+  renderControls(true);
+  const lv = LEVELS[S.levelIdx];
+  S.actualVotes = votesAt(lv.cands, PCT[S.pctIdx]);
+  S.revealT = 0;
+  startReveal(0.7, () => {
+    S.phase = 'playing';
+    const w = winnerIdx(S.actualVotes);
+    if (w === lv.target) {
+      sYes(); stageBurst();
+      setResultMsg(`🎉 ぎゃくてん せいこう！ <b>${lv.cands[lv.target].name}</b>が とうせん！`);
+      renderControls(true);
+      setTimeout(() => {
+        const next = S.levelIdx + 1;
+        if (next >= LEVELS.length) onAllClear();
+        else startLevel(next);
+      }, 1100);
+    } else {
+      sHmm(); S.misses++;
+      setResultMsg(`${NUMS[S.pctIdx]}(${PCT[S.pctIdx]}%)では『${lv.cands[w].name}』が とうせん。もう少し とうひょうりつを たかく してみよう。`);
+      renderControls(false);
+    }
+  });
+}
+
+function startGame(){
+  S.levelIdx = 0;
+  S.misses = 0;
+  S.startTime = performance.now();
+  startLevel(0);
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}（まちがえた かいすう：${S.misses}）`;
+  $('starListEl').innerHTML = LEVELS.map(lv => `<span class="starChip">${lv.cands[lv.target].icon} ${lv.cands[lv.target].name}</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  stepReveal(now);
+  drawStage();
+  drawFx(dt);
+  if (S.phase === 'playing' || S.phase === 'counting') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
