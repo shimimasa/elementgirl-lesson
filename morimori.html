@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>もりもりごはんチャレンジ — アオバの葉かげ ごほうびミニゲーム</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6f5 0%, #e6f5da 55%, #cfe8b0 100%);
+    color: #2c5c1a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 26px); font-weight: 700;
+    color: #3d7a26; text-shadow: 0 1px 0 #fff;
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a8a50; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #e3f3d4; color: #2c5c1a; border: 1.5px solid #b8dba0; }
+  #timeChip { background: #a8d86a; color: #234012; box-shadow: 0 0 10px rgba(168,216,106,.5); }
+  #bestChip { background: #e3f3d4; color: #2c5c1a; border: 1.5px solid #b8dba0; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #dff2ec 0%, #eefbe0 100%);
+    border: 3px solid #6bb84a;
+    box-shadow: inset 0 0 40px rgba(60,120,30,.12), 0 4px 18px rgba(40,80,20,.22);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #scopeMini {
+    position: absolute; top: 10px; right: 14px;
+    width: clamp(60px, 7vw, 90px); height: clamp(60px, 7vw, 90px);
+    border-radius: 50%; border: 3px solid #3d7a26; overflow: hidden;
+    box-shadow: 0 3px 10px rgba(40,80,20,.25); background: #f2f8e2;
+  }
+  #scopeMini canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #resultMsg {
+    position: absolute; top: 1vh; left: 1.4vw; right: calc(clamp(60px, 7vw, 90px) + 30px);
+    color: #2c5c1a; font-weight: 700; text-align: left;
+    font-size: clamp(12px, 1.5vw, 17px); min-height: 1.4em;
+    line-height: 1.4;
+  }
+  #resultMsg b { color: #2c6a14; background: #e3f7c0; padding: 0 .2em; border-radius: 4px; }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: center; align-items: center;
+    padding: 1.2vh .5vw; background: linear-gradient(180deg, transparent, rgba(40,80,20,.35) 40%);
+  }
+  #feedBtn {
+    font-family: inherit; font-size: clamp(16px, 2vw, 24px); font-weight: 700;
+    padding: .6em 1.6em; border-radius: 999px; border: 2px solid #9ad46a; cursor: pointer;
+    background: linear-gradient(180deg, #6bb84a, #3d7a26); color: #fff;
+    box-shadow: 0 4px 0 #245214, 0 6px 14px rgba(40,80,20,.28);
+    transition: transform .08s, filter .1s; touch-action: none;
+    min-width: 260px;
+  }
+  #feedBtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #245214; filter: brightness(1.12); }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(20, 40, 10, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #fbffef, #e9f5d4);
+    border: 3px solid #6bb84a; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(15,30,5,.4);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(22px, 3.2vw, 34px); color: #3d7a26; margin: 0 0 .3em; text-shadow: 0 2px 0 #fff; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2c5c1a; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3d7a26; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #6bb84a, #3d7a26); color: #fff;
+    box-shadow: 0 4px 14px rgba(40,90,20,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #e3f3d4; color: #3d6b28; box-shadow: none; border: 1.5px solid #b8dba0; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(107,184,74,.14); border: 1px solid rgba(107,184,74,.5);
+    color: #2c5c1a; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🐛 もりもりごはんチャレンジ</div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">れべる 0/4</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="scopeMini"><canvas id="scope"></canvas></div>
+    <div id="resultMsg"></div>
+    <div id="controls">
+      <button id="feedBtn">🥬 はっぱをあげる</button>
+    </div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この もりもりごはんチャレンジは、<b>アオバの葉かげ</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした 人だけの ごほうびゲームです。</p>
+    <p>まずは アオバの葉かげを クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="chou.html">アオバの葉かげへ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🐛 もりもりごはんチャレンジ</h1>
+    <p>アオムシの おなかは、ほうっておくと どんどん へっていく。「🥬 はっぱをあげる」を ちょうどよい タイミングで おして、おなかを <b>ほどよい りょう</b>に たもとう。</p>
+    <p>おなかが <b>すきすぎ</b>ても、はっぱを あげすぎて <b>たべすぎ</b>に なっても、せいちょうが 止まってしまう。ほどよい おなかを たもてている 間だけ、体が 大きく なっていくよ。<br>
+    <ruby>脱皮<rt>だっぴ</rt></ruby>を 4回 くり返して、りっぱな しゅうれい幼虫まで そだてよう！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 しゅうれい幼虫に なった！</h1>
+    <p>4回の <ruby>脱皮<rt>だっぴ</rt></ruby>を ぜんぶ やりとげたよ！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   もりもりごはんチャレンジ — アオバの葉かげ(chou.html) 27作目ごほうびミニゲーム
+   本編LARVA_STAGESの実測体長(1齢4mm→2齢7mm→3齢14mm→4齢24mm→終齢33mm、midmm)を
+   目標体長に採用。おなかゲージが時間経過で減り続け、「はっぱをあげる」タップで回復。
+   おなかがGOOD_ZONE内にある時だけ体長が伸び、目標体長に届いたら脱皮してつぎのれべるへ。
+   おなか0以下(すきすぎ)・100超(たべすぎ)はどちらも即キープ失敗。
+   ===================================================== */
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'chou';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'morimori_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- れべる構成（本編chou.htmlのLARVA_STAGES midmmをそのまま目標体長に採用。
+//   Node.jsで理想/平均/せっかち/のんびりの4戦略を事前検証済み：全戦略53〜78秒でクリア可） ----------
+const LEVELS = [
+  { label: '①', stageName: '2れい', fromMM: 4,  toMM: 7,  decay: 4.0, feed: 22, zone: [30, 85], growth: 0.55 },
+  { label: '②', stageName: '3れい', fromMM: 7,  toMM: 14, decay: 4.8, feed: 22, zone: [28, 82], growth: 0.55 },
+  { label: '③', stageName: '4れい', fromMM: 14, toMM: 24, decay: 5.6, feed: 22, zone: [26, 80], growth: 0.55 },
+  { label: '④', stageName: 'しゅうれい幼虫', fromMM: 24, toMM: 33, decay: 6.4, feed: 22, zone: [24, 78], growth: 0.55 },
+];
+
+const W_dappi = '<ruby>脱皮<rt>だっぴ</rt></ruby>';
+function bellyStateText(belly, zone){
+  if (belly <= 0) return 'おなかが すきすぎ…';
+  if (belly < zone[0]) return 'すこし おなかが すいてきた';
+  if (belly <= zone[1]) return 'ちょうどよい おなか！';
+  if (belly <= 100) return 'すこし たべすぎかも…';
+  return 'たべすぎ！';
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | lock | playing | result
+  levelIdx: 0,
+  mm: 4,
+  belly: 55,
+  misses: 0,
+  sound: true,
+  startTime: 0,
+  justMolted: 0,
+  _msgTimer: null,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sDappi = () => { tone(300, 0, 0.22, 'sine', 0.06); tone(460, 0.14, 0.28, 'sine', 0.06); tone(620, 0.26, 0.3, 'sine', 0.06); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx'), scopeCv = $('scope');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d'), sctx = scopeCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 18, PAD_B = 18, PAD_X = 14;
+const MAPW = 1000, MAPH = 760;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function bgField(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(MAPH));
+  g.addColorStop(0, '#dff2ec'); g.addColorStop(0.5, '#eefbe0'); g.addColorStop(1, '#daf0be');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), MAPW * sc, MAPH * sc);
+}
+// ---------- 幼虫（アオムシ）描画：chou.htmlのdrawCaterpillarを移植、sizeMMで大きさが変わる ----------
+function drawCaterpillar(X, Y, sc, cx, cy, sizeMM, opts) {
+  opts = opts || {};
+  const scaleMM = clamp(sizeMM, 3, 36);
+  // 実測どおりの縮尺だと1齢(3〜5mm)がほぼ見えなくなるため、視認性を優先し最小サイズを底上げした表示用スケール
+  // （正確な体長は別途drawGrowBarの数値表示で伝える）
+  const len = lerp(75, 230, (scaleMM - 3) / 33);
+  const wid = lerp(24, 40, (scaleMM - 3) / 33);
+  const segs = 6;
+  gctx.save();
+  gctx.translate(X(cx), Y(cy));
+  gctx.scale(sc, sc);
+  for (let i = segs - 1; i >= 0; i--) {
+    const p = i / (segs - 1);
+    const px = -len / 2 + len * p;
+    const segW = wid * (0.62 + 0.5 * Math.sin(p * Math.PI));
+    gctx.fillStyle = i % 2 === 0 ? '#8fd45f' : '#9adf6c';
+    gctx.strokeStyle = '#3d7a26'; gctx.lineWidth = Math.max(1, wid * 0.05);
+    gctx.beginPath(); gctx.ellipse(px, 0, len / segs * 0.62, segW / 2, 0, 0, TAU); gctx.fill(); gctx.stroke();
+    if (i % 2 === 1 && segW > wid * 0.5) {
+      gctx.fillStyle = '#f4d84a';
+      gctx.beginPath(); gctx.arc(px, -segW * 0.22, Math.max(1.4, wid * 0.09), 0, TAU); gctx.fill();
+      gctx.beginPath(); gctx.arc(px, segW * 0.22, Math.max(1.4, wid * 0.09), 0, TAU); gctx.fill();
+    }
+  }
+  gctx.fillStyle = '#6bb84a'; gctx.strokeStyle = '#3d7a26'; gctx.lineWidth = Math.max(1, wid * 0.05);
+  gctx.beginPath(); gctx.arc(-len / 2, 0, wid * 0.38, 0, TAU); gctx.fill(); gctx.stroke();
+  if (scaleMM > 6) {
+    gctx.fillStyle = '#2c2015';
+    gctx.beginPath(); gctx.arc(-len / 2 - wid * 0.12, -wid * 0.12, Math.max(1, wid * 0.07), 0, TAU); gctx.fill();
+    gctx.beginPath(); gctx.arc(-len / 2 - wid * 0.12, wid * 0.12, Math.max(1, wid * 0.07), 0, TAU); gctx.fill();
+  }
+  gctx.restore();
+}
+function drawCabbageLeaf(X, Y, sc, cx, cy, r) {
+  gctx.save();
+  gctx.translate(X(cx), Y(cy));
+  gctx.scale(sc, sc);
+  gctx.fillStyle = '#6bb84a';
+  gctx.strokeStyle = '#3d7a26'; gctx.lineWidth = 2.4;
+  gctx.beginPath();
+  for (let i = 0; i <= 12; i++) {
+    const a = (i / 12) * TAU;
+    const rr = r * (0.82 + 0.18 * Math.sin(a * 5 + cx));
+    const px = Math.cos(a) * rr, py = Math.sin(a) * rr * 0.86;
+    i === 0 ? gctx.moveTo(px, py) : gctx.lineTo(px, py);
+  }
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  gctx.strokeStyle = 'rgba(60,120,30,.4)'; gctx.lineWidth = 1.6;
+  gctx.beginPath(); gctx.moveTo(-r * 0.7, 0); gctx.lineTo(r * 0.7, 0); gctx.stroke();
+  for (let i = -2; i <= 2; i++) {
+    if (i === 0) continue;
+    gctx.beginPath(); gctx.moveTo(i * r * 0.28, 0); gctx.lineTo(i * r * 0.42, i > 0 ? -r * 0.35 : r * 0.35); gctx.stroke();
+  }
+  gctx.restore();
+}
+function drawBellyGauge(X, Y, sc){
+  const lvl = LEVELS[S.levelIdx];
+  const px = 780, topMY = 210, botMY = 470, tubeWm = 46;
+  const topPx = Y(topMY), botPx = Y(botMY);
+  const leftPx = X(px - tubeWm / 2), rightPx = X(px + tubeWm / 2);
+  const tubeWpx = rightPx - leftPx, tubeHpx = botPx - topPx;
+
+  const zoneTopPx = botPx - tubeHpx * clamp(lvl.zone[1] / 100, 0, 1);
+  const zoneBotPx = botPx - tubeHpx * clamp(lvl.zone[0] / 100, 0, 1);
+  gctx.fillStyle = 'rgba(107,184,74,.18)';
+  gctx.fillRect(leftPx, zoneTopPx, tubeWpx, zoneBotPx - zoneTopPx);
+
+  gctx.strokeStyle = '#9ad46a'; gctx.lineWidth = 3 * sc;
+  gctx.strokeRect(leftPx, topPx, tubeWpx, tubeHpx);
+
+  const frac = clamp(S.belly / 100, 0, 1);
+  const fillH = tubeHpx * frac;
+  const inZone = S.belly >= lvl.zone[0] && S.belly <= lvl.zone[1];
+  const grad = gctx.createLinearGradient(0, botPx, 0, topPx);
+  if (inZone) { grad.addColorStop(0, '#3d7a26'); grad.addColorStop(1, '#8fd45f'); }
+  else { grad.addColorStop(0, '#e0a838'); grad.addColorStop(1, '#f4d84a'); }
+  gctx.fillStyle = grad;
+  gctx.fillRect(leftPx, botPx - fillH, tubeWpx, fillH);
+
+  gctx.fillStyle = '#2c5c1a'; gctx.font = `700 ${Math.max(12, 15 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('おなか', X(px), topPx - 16 * sc);
+  gctx.fillText(Math.round(clamp(S.belly, 0, 100)) + '%', X(px), botPx + 22 * sc);
+}
+function drawGrowBar(X, Y, sc){
+  const lvl = LEVELS[S.levelIdx];
+  const barX = 170, barY = 590, barW = 560, barH = 44;
+  gctx.fillStyle = '#e3f3d4';
+  roundRect(gctx, X(barX), Y(barY), barW * sc, barH * sc, 12 * sc); gctx.fill();
+  gctx.strokeStyle = '#b8dba0'; gctx.lineWidth = 2 * sc;
+  roundRect(gctx, X(barX), Y(barY), barW * sc, barH * sc, 12 * sc); gctx.stroke();
+  const frac = clamp((S.mm - lvl.fromMM) / (lvl.toMM - lvl.fromMM), 0, 1);
+  if (frac > 0) {
+    gctx.fillStyle = '#6bb84a';
+    roundRect(gctx, X(barX), Y(barY), barW * sc * frac, barH * sc, 12 * sc); gctx.fill();
+  }
+  gctx.fillStyle = '#2c5c1a'; gctx.font = `700 ${Math.max(12, 16 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${lvl.label} からだの長さ ${S.mm.toFixed(1)} / ${lvl.toMM}mm`, X(barX + barW / 2), Y(barY + barH / 2));
+}
+function drawStage(){
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  bgField(X, Y, sc);
+
+  const lvl = LEVELS[S.levelIdx];
+  gctx.fillStyle = '#2c5c1a'; gctx.font = `700 ${Math.max(13, 19 * sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`れべる ${lvl.label}　めざせ ${lvl.stageName}`, X(430), Y(40));
+  gctx.font = `700 ${Math.max(11, 14 * sc)}px sans-serif`;
+  gctx.fillStyle = (S.belly <= 0 || S.belly > 100) ? '#b71c1c' : '#2c5c1a';
+  gctx.fillText(bellyStateText(S.belly, lvl.zone), X(430), Y(68));
+
+  drawCabbageLeaf(X, Y, sc, 430, 400, 170);
+  drawCaterpillar(X, Y, sc, 430, 370, S.mm, {});
+
+  drawBellyGauge(X, Y, sc);
+  drawGrowBar(X, Y, sc);
+}
+function drawScopeMini(){
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const R = w / 2;
+  const grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f6fbe8'); grd.addColorStop(1, '#dcefc0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+  sctx.save(); sctx.translate(R * 0.3, R);
+  sctx.scale(R * 0.016 * (0.5 + S.mm / 40), R * 0.016 * (0.5 + S.mm / 40));
+  for (let i = 3; i >= 0; i--) {
+    sctx.fillStyle = i % 2 === 0 ? '#8fd45f' : '#9adf6c';
+    sctx.strokeStyle = '#3d7a26'; sctx.lineWidth = 1.6;
+    sctx.beginPath(); sctx.ellipse(-30 + i * 22, 0, 14, 11, 0, 0, TAU); sctx.fill(); sctx.stroke();
+  }
+  sctx.fillStyle = '#6bb84a'; sctx.strokeStyle = '#3d7a26'; sctx.lineWidth = 1.6;
+  sctx.beginPath(); sctx.arc(-42, 0, 10, 0, TAU); sctx.fill(); sctx.stroke();
+  sctx.fillStyle = '#2c2015';
+  sctx.beginPath(); sctx.arc(-45, -3, 2, 0, TAU); sctx.fill();
+  sctx.beginPath(); sctx.arc(-45, 3, 2, 0, TAU); sctx.fill();
+  sctx.restore();
+
+  sctx.font = `700 ${R * 0.098}px sans-serif`;
+  sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+  const txt = LEVELS[S.levelIdx].stageName + ' めざして';
+  const ly = h - R * 0.24;
+  const tw = sctx.measureText(txt).width;
+  sctx.fillStyle = 'rgba(255,255,255,.88)';
+  sctx.beginPath();
+  sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+  sctx.fill();
+  sctx.fillStyle = '#2c6a14';
+  sctx.fillText(txt, R, ly);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3d7a26', '#e8c53a', '#6bb84a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 進行 ----------
+function updateLevelChip(){
+  $('levelChip').textContent = `れべる ${Math.min(S.levelIdx + 1, LEVELS.length)}/${LEVELS.length}`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function defaultHint(){
+  return '「🥬 はっぱをあげる」を ちょうどよい タイミングで おして、おなかを たもとう。';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function flashMsg(html){
+  setResultMsg(html);
+  clearTimeout(S._msgTimer);
+  S._msgTimer = setTimeout(() => { if (S.phase === 'playing') setResultMsg(defaultHint()); }, 1500);
+}
+
+function onTooHungry(){
+  sHmm();
+  S.misses++;
+  S.belly = 45;
+  flashMsg('おなかが すきすぎて せいちょうが 止まっちゃった…もういちど はっぱを あげよう。');
+}
+function onOverfed(){
+  sHmm();
+  S.misses++;
+  S.belly = 55;
+  flashMsg('たべすぎで おなかが いっぱいに…すこし まってから あげよう。');
+}
+function onLevelClear(){
+  sDappi(); sYes(); stageBurst();
+  const cleared = LEVELS[S.levelIdx];
+  S.levelIdx++;
+  updateLevelChip();
+  setResultMsg(`🎉 ${W_dappi} せいこう！ ${cleared.stageName}に なった！`);
+  if (S.levelIdx >= LEVELS.length) { onAllClear(); return; }
+  S.mm = LEVELS[S.levelIdx].fromMM;
+  S.belly = 55;
+  clearTimeout(S._msgTimer);
+  S._msgTimer = setTimeout(() => { if (S.phase === 'playing') setResultMsg(defaultHint()); }, 1500);
+}
+function onAllClear(){
+  S.phase = 'result';
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  sFanfare();
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? `🎉 じぶんの ベストタイム こうしん！（すきすぎ・たべすぎ した かいすう：${S.misses}）`
+    : `ベストタイム：${fmtTime(best)}（すきすぎ・たべすぎ した かいすう：${S.misses}）`;
+  $('starListEl').innerHTML = LEVELS.map(l => `<span class="starChip">${l.label} ${l.stageName}（${l.toMM}mm）</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+function stepGrow(dt){
+  if (S.phase !== 'playing') return;
+  const lvl = LEVELS[S.levelIdx];
+  S.belly = clamp(S.belly - lvl.decay * dt, -20, 120);
+  if (S.belly <= 0) { onTooHungry(); return; }
+  if (S.belly > 100) { onOverfed(); return; }
+  if (S.belly >= lvl.zone[0] && S.belly <= lvl.zone[1]) {
+    S.mm += lvl.growth * dt;
+    if (S.mm >= lvl.toMM) { onLevelClear(); return; }
+  }
+}
+
+function startGame(){
+  S.levelIdx = 0;
+  S.mm = LEVELS[0].fromMM;
+  S.belly = 55;
+  S.misses = 0;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  updateLevelChip();
+  setResultMsg(defaultHint());
+}
+
+// ---------- 操作（タップのたびに1回だけ おなかを回復する。押しっぱなしでは増えない） ----------
+const feedBtn = $('feedBtn');
+feedBtn.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  ac();
+  if (S.phase !== 'playing') return;
+  S.belly = clamp(S.belly + LEVELS[S.levelIdx].feed, S.belly, 130);
+  sTap();
+});
+feedBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  stepGrow(dt);
+  drawStage();
+  drawScopeMini();
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
