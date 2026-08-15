@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>けんりょくトライアングルタイムアタック — チェックのやじるしを見つけよう！</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f3eefb 0%, #e4d9f5 55%, #b6a0d8 100%);
+    color: #2a1a4a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(12px, 1.6vw, 20px); font-weight: 700;
+    color: #3a1f6e; text-shadow: 0 1px 0 #fff;
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6f5c96; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 19px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #e4d9f5; color: #3a1f6e; border: 1.5px solid #b6a0d8; }
+  #bestChip { background: #e4d9f5; color: #3a1f6e; border: 1.5px solid #b6a0d8; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #faf7fd 0%, #e4d9f5 100%);
+    border: 3px solid #3a1f6e;
+    box-shadow: inset 0 0 40px rgba(58, 31, 110, .15), 0 4px 24px rgba(0,0,0,.15);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.4vh; left: 50%; transform: translateX(-50%);
+    color: #3a1f6e; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.5vw, 18px); min-height: 1.4em;
+    max-width: 92%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .5vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(58, 31, 110, .35) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(15px, 1.9vw, 22px); font-weight: 700;
+    padding: .55em 1.3em; border-radius: 14px; border: 2px solid #b6a0d8; cursor: pointer;
+    background: linear-gradient(180deg, #6f5c96, #3a1f6e); color: #fff;
+    box-shadow: 0 3px 0 #1a0e38; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 44px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.sel { background: linear-gradient(180deg, #ffe9a8, #d4a017); border-color: #fff0c0; box-shadow: 0 3px 0 #8a6a0a; color: #4a3a00; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 15, 60, .6);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #faf7fd, #e4d9f5);
+    border: 2px solid #3a1f6e; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(30, 15, 60, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(17px, 2.5vw, 27px); color: #3a1f6e; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2a1a4a; margin: .6em 0; }
+  .panel .big { font-size: clamp(24px, 4.2vw, 40px); font-weight: 700; color: #3a1f6e; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #ffe9a8, #d4a017); color: #4a3a00;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #e4d9f5; color: #3a1f6e; box-shadow: none; border: 1.5px solid #b6a0d8; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(212,160,23,.18); border: 1px solid rgba(212,160,23,.4);
+    color: #8a6a0a; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">⚖️ けんりょくトライアングルタイムアタック <small>チェックの やじるしを 見つけよう！</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">もんだい 0/6</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この けんりょくトライアングルタイムアタックは、<b>テンビンの間</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは テンビンの間を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="sanken.html">テンビンの間へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>⚖️ けんりょくトライアングルタイムアタック</h1>
+    <p>国会・内閣・裁判所は、おたがいを チェックしあっている。<br>
+    出た「ちからの ないよう」を 見て、どこから どこへの やじるしか、<br>
+    <b>はじめに もつところ</b>→<b>つぎに むかうところ</b>の じゅんに タップして 答えよう。<br>
+    6つの もんだい ぜんぶに ちょうせん！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏁 ぜんぶ 見つけた！</h1>
+    <p id="resultRank"></p>
+    <div class="big" id="resultTime"></div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'sanken';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'kenryokutriangle_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v !== null ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  return s.toFixed(1) + 'びょう';
+}
+
+// ---------- 三権データ(元本編sanken.htmlのSANKEN/YAJIと同じ座標・関係性) ----------
+const ORGANS = [
+  { key: 'kokkai',    name: '国会',   icon: '🏛️', x: 220, y: 210 },
+  { key: 'naikaku',   name: '内閣',   icon: '🏢', x: 500, y: 470 },
+  { key: 'saibansho', name: '裁判所', icon: '⚖️', x: 780, y: 210 },
+];
+function organByKey(k){ return ORGANS.find(o => o.key === k); }
+
+const QUESTIONS = [
+  { key: 'a', from: 'kokkai',    to: 'naikaku',   text: '内閣総理大臣を 指名する' },
+  { key: 'b', from: 'naikaku',   to: 'kokkai',    text: '衆議院を 解散する' },
+  { key: 'c', from: 'kokkai',    to: 'saibansho', text: '弾劾裁判所を もうける' },
+  { key: 'd', from: 'saibansho', to: 'kokkai',    text: '法律が 憲法に 違反していないか 調べる' },
+  { key: 'e', from: 'naikaku',   to: 'saibansho', text: '裁判官を 任命する' },
+  { key: 'f', from: 'saibansho', to: 'naikaku',   text: '内閣の 命令が 憲法に 違反していないか 調べる' },
+];
+
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',    // title | lock | level | resultLevel | result
+  order: [],
+  qIdx: 0,
+  step: 'from',       // 'from' | 'to'
+  selectedFrom: null,
+  foundKeys: [],       // 正解した矢印key
+  gameStartAt: 0,
+  gameEndAt: 0,
+  sound: true,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 30, PAD_B = 16, PAD_X = 14;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#faf7fd'); g.addColorStop(1, '#d8c8ec');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- 矢印(sanken.htmlのdrawArrowを移植) ----------
+function drawArrow(X, Y, sc, fromKey, toKey, col, lw) {
+  const f = organByKey(fromKey), t = organByKey(toKey);
+  const x1 = f.x, y1 = f.y, x2 = t.x, y2 = t.y;
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+  const ux = dx / len, uy = dy / len;
+  const curve = 26;
+  const nx = -uy * curve, ny = ux * curve;
+  const sx = x1 + ux * 46 + nx, sy = y1 + uy * 46 + ny;
+  const ex = x2 - ux * 46 + nx, ey = y2 - uy * 46 + ny;
+  const mx = (sx + ex) / 2 + nx, my = (sy + ey) / 2 + ny;
+  gctx.strokeStyle = col; gctx.lineWidth = lw * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(sx), Y(sy));
+  gctx.quadraticCurveTo(X(mx), Y(my), X(ex), Y(ey));
+  gctx.stroke();
+  const ang = Math.atan2(Y(ey) - Y(my), X(ex) - X(mx));
+  gctx.fillStyle = col;
+  gctx.save(); gctx.translate(X(ex), Y(ey)); gctx.rotate(ang);
+  gctx.beginPath(); gctx.moveTo(0, 0); gctx.lineTo(-12 * sc, -6 * sc); gctx.lineTo(-12 * sc, 6 * sc); gctx.closePath(); gctx.fill();
+  gctx.restore();
+}
+
+function drawOrgan(X, Y, sc, o, state) {
+  // state: 'idle' | 'from-candidate' | 'selected' | 'to-candidate'
+  const r = 56;
+  gctx.beginPath(); gctx.arc(X(o.x), Y(o.y), r * sc, 0, TAU);
+  gctx.fillStyle = state === 'selected' ? '#ffe9a8' : '#fff';
+  gctx.fill();
+  gctx.strokeStyle = state === 'selected' ? '#d4a017' : '#6f5c96';
+  gctx.lineWidth = (state === 'selected' ? 4.5 : 2.5) * sc;
+  gctx.stroke();
+  gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(o.icon, X(o.x), Y(o.y - 6));
+  gctx.font = `700 ${15 * sc}px sans-serif`; gctx.fillStyle = '#2a1a4a';
+  gctx.fillText(o.name, X(o.x), Y(o.y + 72 * sc));
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'level' && S.phase !== 'resultLevel') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  bgFill(X, Y, sc);
+
+  // 見つけた矢印(薄く常時表示)
+  S.foundKeys.forEach(k => {
+    const q = QUESTIONS.find(q => q.key === k);
+    drawArrow(X, Y, sc, q.from, q.to, 'rgba(58,31,110,.4)', 3);
+  });
+
+  ORGANS.forEach(o => {
+    let state = 'idle';
+    if (S.step === 'to' && o.key === S.selectedFrom) state = 'selected';
+    drawOrgan(X, Y, sc, o, state);
+  });
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#d4a017', '#ffe9a8', '#6f5c96', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 出題進行 ----------
+function updateHud(){
+  const shown = S.phase === 'result' ? QUESTIONS.length : S.foundKeys.length;
+  $('levelChip').textContent = `もんだい ${shown}/${QUESTIONS.length}`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = (b !== null) ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function setControls(list){
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+
+function startGame(){
+  S.gameStartAt = performance.now();
+  S.order = shuffled(QUESTIONS.map((_, i) => i));
+  S.qIdx = 0;
+  S.foundKeys = [];
+  startQuestion();
+}
+function startQuestion(){
+  S.step = 'from';
+  S.selectedFrom = null;
+  S.phase = 'level';
+  updateHud();
+  const q = QUESTIONS[S.order[S.qIdx]];
+  setResultMsg(`「${q.text}」<br>この力を <b>はじめに もつのは どこ？</b>`);
+  refreshCtl();
+}
+function refreshCtl(){
+  setControls(ORGANS.map(o => ({ label: `${o.icon} ${o.name}`, cb: () => onPickOrgan(o.key) })));
+}
+function onPickOrgan(key){
+  if (S.phase !== 'level') return;
+  sTap();
+  const q = QUESTIONS[S.order[S.qIdx]];
+  if (S.step === 'from') {
+    S.selectedFrom = key;
+    S.step = 'to';
+    setResultMsg(`「${q.text}」<br>その力は <b>どこに むかう？</b>`);
+    refreshCtl();
+  } else {
+    const ok = (S.selectedFrom === q.from && key === q.to);
+    setControls([]);
+    S.phase = 'resultLevel';
+    if (ok) {
+      sYes(); stageBurst();
+      S.foundKeys.push(q.key);
+      setResultMsg('✨ せいかい！ やじるしが つながった！');
+      updateHud();
+      setTimeout(() => {
+        S.qIdx++;
+        if (S.qIdx >= QUESTIONS.length) onAllClear();
+        else startQuestion();
+      }, 1300);
+    } else {
+      sHmm();
+      setResultMsg('ちがうよ。もういちど かんがえてみよう。');
+      setTimeout(() => { startQuestion(); }, 1500);
+    }
+  }
+}
+
+function rankText(ms){
+  const s = ms / 1000;
+  if (s <= 25) return '👑 パーフェクト！三権のしくみを ばっちり わかってるね！';
+  if (s <= 45) return '🌟🌟🌟 すごい！やじるしが よく わかったね！';
+  if (s <= 75) return '🌟🌟 いいちょうし！';
+  return '🌟 ぜんぶ 見つけたね！';
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare();
+  S.gameEndAt = performance.now();
+  const totalMs = S.gameEndAt - S.gameStartAt;
+  const best = getBest();
+  const isNewBest = (best === null) || (totalMs < best);
+  if (isNewBest) setBest(totalMs);
+  $('resultTime').textContent = fmtTime(totalMs);
+  $('resultRank').textContent = rankText(totalMs);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = QUESTIONS.map((q, i) => `<span class="starChip">${q.key} ⚖️ 見つけた</span>`).join('');
+  updateHud();
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawStage();
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
