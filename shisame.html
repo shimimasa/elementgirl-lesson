@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>シーサのめ くふうさがし — かくれたくふうをさがそう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eafaf6 0%, #cdeee0 55%, #7bcf9a 100%);
+    color: #4a2a16;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(14px, 1.8vw, 24px); font-weight: 700;
+    color: #7a3018; margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .5em; color: #a8623a; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #progChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(13px, 1.5vw, 20px);
+    padding: .3em .9em; border-radius: 999px;
+    white-space: nowrap;
+  }
+  #progChip { background: #fff; color: #7a3018; border: 1.5px solid #dfb787; }
+  #timeChip { background: #7a3018; color: #fff4e6; box-shadow: 0 0 14px rgba(122,48,24,.5); }
+  #bestChip { background: #fff; color: #a8623a; border: 1.5px solid #dfb787; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #fffaf1 0%, #f3e2c4 70%, #e6d2a8 100%);
+    border: 2px solid #dfb787;
+    box-shadow: inset 0 0 60px rgba(90,40,10,.08), 0 4px 24px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stage { cursor: pointer; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.2vh; left: 50%; transform: translateX(-50%);
+    color: #4a2a16; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.5vw, 18px); min-height: 1.4em;
+    max-width: 92%;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(60, 26, 10, .5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #fffaf1, #f3e2c4);
+    border: 2px solid #dfb787; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(60, 26, 10, .28);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(18px, 2.6vw, 28px); color: #7a3018; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #4a2a16; margin: .6em 0; }
+  .panel .big { font-size: clamp(26px, 4.6vw, 46px); font-weight: 700; color: #7a3018; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #c1442e, #7a3018); color: #fff4e6;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #f5e2c8; color: #7a3018; box-shadow: none; border: 1.5px solid #dfb787; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(122,48,24,.10); border: 1px solid rgba(122,48,24,.35);
+    color: #7a3018; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🦁 シーサのめ くふうさがし <small>かくれた くふうを さがそう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="progChip">0/10</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この シーサのめ くふうさがしは、<b>シーサの家</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは シーサの家を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="okinawa.html">シーサの家へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🦁 シーサのめ くふうさがし</h1>
+    <p>沖縄の 家の 絵の 中に、台風から くらしを 守る「くふう」が かくれているよ。<br>
+    お題を 見て、絵の 中から あう 場所を タップしよう。<br>
+    10問を、いちばん はやく とけるかな？</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎉 ぜんぶ みつけた！</h1>
+    <p id="resultCorrect"></p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'okinawa';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'shisame_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- くふうの対象データ（本編okinawa.htmlのKUFUU_POINTS/IMA_POINTSと同じ本物データ） ----------
+// scene: 'mukashi'=伝統家屋 / 'ima'=今の家。spots: 正解として認める座標(複数可、左右対称箇所など)
+const ITEMS = [
+  { key: 0, scene: 'mukashi', name: 'あかがわらとしっくい',
+    hint: '屋根の 赤瓦は、しっくいという 白い のりで 固められている。強い 風でも 瓦が とばされにくいのは どこ？',
+    spots: [{ x: 500, y: 335, r: 95 }] },
+  { key: 1, scene: 'mukashi', name: '石垣',
+    hint: '石を つみあげて、強い 風や 海からの 塩を ふせいでいる、家の まわりの かこいは どこ？',
+    spots: [{ x: 350, y: 508, r: 55 }, { x: 650, y: 508, r: 55 }] },
+  { key: 2, scene: 'mukashi', name: 'フクギ並木',
+    hint: 'びっしり 並べて 植えることで、風よけの かべに なる 木は どこ？',
+    spots: [{ x: 250, y: 430, r: 50 }, { x: 750, y: 430, r: 50 }] },
+  { key: 3, scene: 'ima', name: '鉄筋コンクリートの家',
+    hint: '今の 沖縄の 家の 8わり以上が、この じょうぶな つくり。台風にも 強い かべは どこ？',
+    spots: [{ x: 500, y: 280, r: 85 }] },
+  { key: 4, scene: 'ima', name: '屋上の貯水タンク',
+    hint: '台風で 断水しても こまらないように、水を ためて おく タンクは どこ？',
+    spots: [{ x: 500, y: 148, r: 45 }] },
+];
+const QUESTION_COUNT = 10;
+
+function shuffled(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function buildQuestionOrder(n){
+  const order = [];
+  while (order.length < n) order.push(...shuffled(ITEMS.map(it => it.key)));
+  return order.slice(0, n);
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | result
+  quizIdx: 0,
+  correctCount: 0,
+  order: [],
+  answered: false,
+  sound: true,
+  startTime: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 30, PAD_B = 16, PAD_X = 16;
+const MAPW = 1000, MAPH = 620;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 伝統家屋（本編okinawa.htmlのdrawHouse/drawTreeを移植） ----------
+function drawTree(X, Y, sc, cx, baseY) {
+  gctx.fillStyle = '#5a7a2a'; gctx.strokeStyle = '#2a4a10'; gctx.lineWidth = 1.6 * sc;
+  gctx.fillRect(X(cx - 5), Y(baseY - 6), 10 * sc, 40 * sc);
+  for (let i = 0; i < 3; i++) {
+    gctx.beginPath();
+    gctx.ellipse(X(cx), Y(baseY - 60 - i * 26), 34 * sc, 20 * sc, 0, 0, TAU);
+    gctx.fillStyle = i % 2 === 0 ? '#6fa03a' : '#7fb04a';
+    gctx.fill(); gctx.stroke();
+  }
+}
+function drawMukashiScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  g.addColorStop(0, '#bfeef2'); g.addColorStop(1, '#e6f6e0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 620 * sc);
+  gctx.fillStyle = '#e8d8a8';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 220 * sc);
+
+  const bx = 500, baseY = 500;
+  // 石垣
+  gctx.fillStyle = '#b0a690'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 2 * sc;
+  gctx.fillRect(X(bx - 270), Y(baseY - 4), 540 * sc, 24 * sc);
+  gctx.strokeStyle = 'rgba(74,42,22,.4)'; gctx.lineWidth = 1 * sc;
+  for (let lx = bx - 260; lx < bx + 270; lx += 34) {
+    gctx.beginPath(); gctx.moveTo(X(lx), Y(baseY - 4)); gctx.lineTo(X(lx), Y(baseY + 20)); gctx.stroke();
+  }
+  // フクギ
+  drawTree(X, Y, sc, bx - 250, baseY);
+  drawTree(X, Y, sc, bx + 250, baseY);
+  // 家本体
+  gctx.fillStyle = '#fdf6e8'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath(); gctx.rect(X(bx - 170), Y(baseY - 130), 340 * sc, 130 * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#dfeef2';
+  gctx.fillRect(X(bx - 130), Y(baseY - 95), 70 * sc, 60 * sc);
+  gctx.fillRect(X(bx + 60), Y(baseY - 95), 70 * sc, 60 * sc);
+  gctx.strokeRect(X(bx - 130), Y(baseY - 95), 70 * sc, 60 * sc);
+  gctx.strokeRect(X(bx + 60), Y(baseY - 95), 70 * sc, 60 * sc);
+  // 赤瓦の屋根
+  gctx.fillStyle = '#a8492a'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 2.4 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(bx - 220), Y(baseY - 130));
+  gctx.lineTo(X(bx), Y(baseY - 210));
+  gctx.lineTo(X(bx + 220), Y(baseY - 130));
+  gctx.lineTo(X(bx + 175), Y(baseY - 118));
+  gctx.lineTo(X(bx), Y(baseY - 186));
+  gctx.lineTo(X(bx - 175), Y(baseY - 118));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+  // しっくい（瓦の継ぎ目、白いライン）
+  gctx.strokeStyle = 'rgba(253,246,232,.85)'; gctx.lineWidth = 1.6 * sc;
+  for (let i = 1; i <= 3; i++) {
+    const t = i / 4;
+    gctx.beginPath();
+    gctx.moveTo(X(lerp(bx - 220, bx, t)), Y(lerp(baseY - 130, baseY - 210, t)));
+    gctx.lineTo(X(lerp(bx, bx + 220, t)), Y(lerp(baseY - 210, baseY - 130, t)));
+    gctx.stroke();
+  }
+}
+
+// ---------- 今の家（本編drawImaSceneのbuildings描画を参考に、貯水タンクを新規追加） ----------
+function drawImaScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(400));
+  g.addColorStop(0, '#bfeef2'); g.addColorStop(1, '#f0ede0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 620 * sc);
+  gctx.fillStyle = '#d8d0c0';
+  gctx.fillRect(X(0), Y(400), 1000 * sc, 220 * sc);
+
+  const cx = 500, bw = 340, bh = 240;
+  // コンクリートの建物
+  gctx.fillStyle = '#e8e4da'; gctx.strokeStyle = '#8a8272'; gctx.lineWidth = 2.6 * sc;
+  gctx.beginPath(); gctx.rect(X(cx - bw / 2), Y(400 - bh), bw * sc, bh * sc); gctx.fill(); gctx.stroke();
+  gctx.fillStyle = '#a8ccd8';
+  for (let ry = 400 - bh + 24; ry < 388; ry += 34) {
+    for (let rx = cx - bw / 2 + 16; rx < cx + bw / 2 - 16; rx += 30) {
+      gctx.fillRect(X(rx), Y(ry), 16 * sc, 18 * sc);
+    }
+  }
+  // 屋上の貯水タンク（円柱型、本編未描画のため新規実装）
+  const tx = cx, ty = 400 - bh - 12, tw = 60, th = 46;
+  gctx.fillStyle = '#8ec6d0'; gctx.strokeStyle = '#4a2a16'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.ellipse(X(tx), Y(ty - th / 2), tw / 2 * sc, 9 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+  gctx.fillRect(X(tx - tw / 2), Y(ty - th / 2), tw * sc, th * sc);
+  gctx.strokeRect(X(tx - tw / 2), Y(ty - th / 2), tw * sc, th * sc);
+  gctx.beginPath(); gctx.ellipse(X(tx), Y(ty + th / 2), tw / 2 * sc, 9 * sc, 0, 0, TAU); gctx.fill(); gctx.stroke();
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+
+  const q = ITEMS[S.order[S.quizIdx]];
+  if (!q) return;
+  if (q.scene === 'mukashi') drawMukashiScene(X, Y, sc);
+  else drawImaScene(X, Y, sc);
+
+  gctx.fillStyle = '#7a3018'; gctx.font = `700 ${Math.max(15, 20*sc)}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  wrapText(q.hint, X(500), Y(50), 940 * sc, 26 * sc);
+}
+function wrapText(text, cx, cy, maxWidth, lineHeight){
+  const chars = text.split('');
+  let lines = [''], li = 0;
+  chars.forEach(ch => {
+    const test = lines[li] + ch;
+    if (gctx.measureText(test).width > maxWidth && lines[li].length > 0) {
+      li++; lines[li] = ch;
+    } else {
+      lines[li] = test;
+    }
+  });
+  const startY = cy - (lines.length - 1) * lineHeight / 2;
+  lines.forEach((line, i) => gctx.fillText(line, cx, startY + i * lineHeight));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#7a3018', '#ffe3a0', '#c1442e', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- タップ処理 ----------
+function pickSpot(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  const lx = (clientX - rect.left - ox) / sc, ly = (clientY - rect.top - oy) / sc;
+  // 現在表示中のシーンに属するアイテムだけを判定対象にする(異なるシーンの座標が偶然近くても誤爆しないように)
+  const q = ITEMS[S.order[S.quizIdx]];
+  const sceneItems = q ? ITEMS.filter(it => it.scene === q.scene) : ITEMS;
+  let best = null, bestDist = Infinity;
+  sceneItems.forEach(it => {
+    it.spots.forEach(sp => {
+      const d = Math.hypot(sp.x - lx, sp.y - ly);
+      if (d < sp.r && d < bestDist) { bestDist = d; best = it; }
+    });
+  });
+  return best;
+}
+function onStageTap(clientX, clientY){
+  if (S.phase !== 'playing' || S.answered) return;
+  const hitItem = pickSpot(clientX, clientY);
+  if (!hitItem) return;
+  onChoose(hitItem.key, clientX, clientY);
+}
+stageCv.addEventListener('pointerdown', e => onStageTap(e.clientX, e.clientY));
+
+// ---------- 出題進行 ----------
+function updateProgChip(){ $('progChip').textContent = `${S.quizIdx}/${QUESTION_COUNT}`; }
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function onChoose(pickedKey, clientX, clientY){
+  if (S.phase !== 'playing' || S.answered) return;
+  S.answered = true;
+  ac(); sTap();
+  const wantKey = S.order[S.quizIdx];
+  const correct = pickedKey === wantKey;
+  const wantItem = ITEMS[wantKey];
+  if (correct) {
+    S.correctCount++;
+    sYes();
+    if (clientX !== undefined) burst(clientX, clientY, 40);
+    setResultMsg(`🎯 せいかい！「${wantItem.name}」だね。`);
+  } else {
+    sHmm();
+    const pickedItem = ITEMS[pickedKey];
+    setResultMsg(`😥 ちがうよ。そこは「${pickedItem.name}」。さがしていたのは「${wantItem.name}」だよ。`);
+  }
+  S.quizIdx++;
+  updateProgChip();
+  setTimeout(nextQuestion, 1900);
+}
+function nextQuestion(){
+  if (S.quizIdx >= QUESTION_COUNT) { onAllClear(); return; }
+  S.answered = false;
+  setResultMsg('お題を 見て、絵の 中から あう 場所を タップしよう。');
+}
+
+function rankText(correct){
+  if (correct >= QUESTION_COUNT) return '👑 パーフェクト！くふう名人！';
+  if (correct >= 8) return '🌟🌟🌟 すごい！くふうを よく知ってるね！';
+  if (correct >= 5) return '🌟🌟 いいちょうし！';
+  return '🌱 もういちど、シーサの家で くふうを たしかめてみよう！';
+}
+function startGame(){
+  S.quizIdx = 0;
+  S.correctCount = 0;
+  S.order = buildQuestionOrder(QUESTION_COUNT);
+  S.answered = false;
+  S.startTime = performance.now();
+  S.phase = 'playing';
+  updateProgChip();
+  setResultMsg('お題を 見て、絵の 中から あう 場所を タップしよう。');
+}
+function onAllClear(){
+  S.phase = 'result';
+  sFanfare();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultCorrect').textContent = `${S.correctCount} / ${QUESTION_COUNT} もん せいかい`;
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').innerHTML = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = `<span class="starChip">${rankText(S.correctCount)}</span>`;
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const t = now / 1000;
+  drawStage(t);
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
