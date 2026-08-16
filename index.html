@@ -258,8 +258,26 @@
   /* ---- bonus games ---- */
   .bonus-section{ margin-bottom: 14px; }
   .bonus-label{
-    font-size:13px; font-weight:bold; color:#a8790b; margin-bottom:6px;
+    font-size:13px; font-weight:bold; color:#a8790b;
+    margin-bottom:6px;
+    cursor:pointer;
+    list-style:none;
+    user-select:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 2px;
   }
+  .bonus-label::-webkit-details-marker{ display:none; }
+  .bonus-label::before{
+    content:"▶";
+    font-size:10px;
+    color:#a8790b;
+    transition: transform .15s ease;
+    display:inline-block;
+  }
+  details[open] > .bonus-label::before{ transform: rotate(90deg); }
+  .bonus-unlocked-count{ color:#c76b2c; }
   .bonus-grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -881,6 +899,7 @@ const ITEMS = [
 ];
 
 // ---- ごほうびミニゲーム（通常の学習カード一覧とは別枠。特定の本編クリアで解放） ----
+let bonusOpen = false;
 const BONUS_GAMES = [
   { t:"ほしつなぎ", u:"星座タイムアタック", icon:"✨", slug:"hoshitsunagi", requireSlug:"hoshimeguri", requireTitle:"星めぐりの塔" },
   { t:"てこバランス", u:"つり合いパズル", icon:"⚖️", slug:"tekobalance", requireSlug:"teko", requireTitle:"てこの工房" },
@@ -1139,6 +1158,7 @@ function renderBonusGames(){
   const wrap = document.getElementById("bonusGamesWrap");
   if(!wrap || BONUS_GAMES.length === 0){ if(wrap) wrap.innerHTML = ""; return; }
   const badgeProgress = getBadgeProgress();
+  let unlockedCount = 0;
   const cards = BONUS_GAMES.map(g=>{
     let unlocked, lockMsg;
     if (g.requireSlugs) {
@@ -1150,6 +1170,7 @@ function renderBonusGames(){
       lockMsg = `「${g.requireTitle}」を<br>クリアすると あそべるよ`;
     }
     if(unlocked){
+      unlockedCount++;
       return `
         <a class="bonus-card" href="${g.slug}.html">
           <div class="bonus-icon">${g.icon}</div>
@@ -1166,11 +1187,13 @@ function renderBonusGames(){
         <div class="bonus-tag">ロック中</div>
       </div>`;
   }).join("");
+  const unlockedText = unlockedCount > 0 ? `・<span class="bonus-unlocked-count">${unlockedCount}こ あそべるよ！</span>` : "";
   wrap.innerHTML = `
-    <div class="bonus-section">
-      <div class="bonus-label">✨ ごほうびミニゲーム</div>
+    <details class="bonus-section"${bonusOpen ? " open" : ""}>
+      <summary class="bonus-label">✨ ごほうびミニゲーム（${BONUS_GAMES.length}）${unlockedText}</summary>
       <div class="bonus-grid">${cards}</div>
-    </div>`;
+    </details>`;
+  wrap.querySelector("details").addEventListener("toggle", (e)=>{ bonusOpen = e.target.open; });
 }
 
 function playedBadgeHTML(it, playedSet, badgeProgress){
