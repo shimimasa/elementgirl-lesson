@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>いろみずグラデーション配合チャレンジ — 目ざす色を作ろう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f5fbfd 0%, #e3f3f7 55%, #bfe3ea 100%);
+    color: #163044;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(12px, 1.6vw, 21px); font-weight: 700;
+    color: #1f6a78; text-shadow: 0 1px 0 #fff;
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3a8a98; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #levelChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 19px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #levelChip { background: #dff3f0; color: #163044; border: 1.5px solid #a8dcd8; }
+  #bestChip { background: #dff3f0; color: #163044; border: 1.5px solid #a8dcd8; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #f5fbfd 0%, #e0f0f2 100%);
+    border: 3px solid #2f8a9c;
+    box-shadow: inset 0 0 40px rgba(20, 90, 90, .12), 0 4px 24px rgba(10, 50, 60, .2);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.4vh; left: 50%; transform: translateX(-50%);
+    color: #163044; font-weight: 700; text-align: center;
+    font-size: clamp(12px, 1.4vw, 17px); min-height: 1.4em;
+    max-width: 92%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .9vh .5vw; background: linear-gradient(180deg, transparent, rgba(10, 50, 60, .42) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(11px, 1.3vw, 15px); font-weight: 700;
+    padding: .5em .7em; border-radius: 12px; border: 2px solid #cdeaf5; cursor: pointer;
+    background: linear-gradient(180deg, #2f8a9c, #1f6a78); color: #fff;
+    box-shadow: 0 3px 0 #0a3a38; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 42px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.acid { background: linear-gradient(180deg, #e2536e, #b23a52); border-color: #f5c0cb; box-shadow: 0 3px 0 #6a1a2a; }
+  .ctl.alk { background: linear-gradient(180deg, #3a9a78, #1f6a4a); border-color: #a8e8d0; box-shadow: 0 3px 0 #123a2a; }
+  .ctl.undo { background: linear-gradient(180deg, #dff3f0, #b8d4d0); color: #163044; border-color: #a8dcd8; box-shadow: 0 3px 0 #7a9a98; }
+  .ctl.go { background: linear-gradient(180deg, #ffce54, #c97a1e); border-color: #fff0c0; box-shadow: 0 3px 0 #8a5a0a; color: #4a2a00; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(8, 34, 40, .6);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #f5fdfb, #d8ecea);
+    border: 2px solid #2f8a9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(8, 34, 40, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(17px, 2.5vw, 27px); color: #1f6a78; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #163044; margin: .6em 0; }
+  .panel .big { font-size: clamp(24px, 4.2vw, 40px); font-weight: 700; color: #1f6a78; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #ffce54, #c97a1e); color: #4a2a00;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dff3f0; color: #163044; box-shadow: none; border: 1.5px solid #a8dcd8; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(31,106,120,.14); border: 1px solid rgba(31,106,120,.35);
+    color: #1f6a78; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🧪 いろみずグラデーション配合チャレンジ <small>目ざす色を作ろう！</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="levelChip">れべる 0/5</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この いろみずグラデーション配合チャレンジは、<b>いろみずの研究所</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは いろみずの研究所を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="iromizu.html">いろみずの研究所へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🧪 いろみずグラデーション配合チャレンジ</h1>
+    <p>むらさきキャベツ液に、すっぱい 水よう液や せっけんのような 水よう液を たらして、<br>
+    <b>目ざす色</b>に ちかづけよう。<br>
+    「これで かんせい！」を おすと 色を たしかめられるよ。<br>
+    5つの れべるに ちょうせん！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>✨ ぜんぶ 色を 作りきった！</h1>
+    <p id="resultRank"></p>
+    <div class="big" id="resultTime"></div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const NUMS = '①②③④⑤⑥⑦⑧';
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'iromizu';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'irogurade_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v !== null ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  return s.toFixed(1) + 'びょう';
+}
+
+// ---------- 色データ(元本編iromizu.htmlのCABBAGE_POINTSと同じ色をscore軸にマッピング) ----------
+// score: -2=レモン汁(強酸)、-1=お酢(酸)、0=中性(むらさき)、+1=重そう水(弱アルカリ)、+2=せっけん水(アルカリ)
+const CAT_COLORS = [
+  { score: -2, col: '#e0455a' },
+  { score: -1, col: '#c2445a' },
+  { score: 0,  col: '#7a4aa0' },
+  { score: 1,  col: '#4a9a5a' },
+  { score: 2,  col: '#2f8a8a' },
+];
+function hexToRgb(hex) { hex = hex.replace('#', ''); return { r: parseInt(hex.substr(0, 2), 16), g: parseInt(hex.substr(2, 2), 16), b: parseInt(hex.substr(4, 2), 16) }; }
+function lerp(a, b, t) { return a + (b - a) * t; }
+function lerpColor(c1, c2, t) {
+  const p1 = hexToRgb(c1), p2 = hexToRgb(c2);
+  const r = Math.round(lerp(p1.r, p2.r, t)), g = Math.round(lerp(p1.g, p2.g, t)), b = Math.round(lerp(p1.b, p2.b, t));
+  return `rgb(${r},${g},${b})`;
+}
+function scoreToColor(score) {
+  const s = clamp(score, -2, 2);
+  for (let i = 0; i < CAT_COLORS.length - 1; i++) {
+    const a = CAT_COLORS[i], b = CAT_COLORS[i + 1];
+    if (s >= a.score && s <= b.score) {
+      const t = (s - a.score) / (b.score - a.score);
+      return lerpColor(a.col, b.col, t);
+    }
+  }
+  return CAT_COLORS[CAT_COLORS.length - 1].col;
+}
+
+// ---------- 水よう液データ(本編iromizu.htmlのCABBAGE_POINTS/LIQUIDSに実在する4種) ----------
+// Node.jsシミュレーションで全レベル到達可能なことを検証済み（project-minigame-series.md参照）
+const DROPS_DATA = [
+  { key: 'lemon',   name: 'レモン汁',  delta: -0.4,  cls: 'acid' },
+  { key: 'vinegar', name: 'お酢',      delta: -0.22, cls: 'acid' },
+  { key: 'soda',    name: '重そう水',  delta: 0.22,  cls: 'alk' },
+  { key: 'soap',    name: 'せっけん水', delta: 0.4,  cls: 'alk' },
+];
+
+const LEVELS = [
+  { target: -2.0, tol: 0.3 },
+  { target: 2.0,  tol: 0.3 },
+  { target: -1.0, tol: 0.25 },
+  { target: 1.2,  tol: 0.2 },
+  { target: -0.6, tol: 0.15 },
+];
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',    // title | lock | level | resultLevel | result
+  levelIdx: 0,
+  score: 0,
+  history: [],
+  gameStartAt: 0,
+  gameEndAt: 0,
+  sound: true,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sUndo = () => tone(440, 0, 0.1, 'sine', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 30, PAD_B = 16, PAD_X = 14;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f0fbf9'); g.addColorStop(1, '#dceff0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+// ---------- フラスコ描画(本編iromizu.htmlのdrawFlaskShapeを移植) ----------
+function drawFlaskShape(X, Y, sc, cx, topY, botY, halfW) {
+  const p = new Path2D();
+  const nw = halfW * 0.34;
+  p.moveTo(X(cx - nw), Y(topY));
+  p.lineTo(X(cx - nw), Y(topY + (botY - topY) * 0.32));
+  p.lineTo(X(cx - halfW), Y(botY - 10));
+  p.quadraticCurveTo(X(cx - halfW), Y(botY), X(cx - halfW + 8), Y(botY));
+  p.lineTo(X(cx + halfW - 8), Y(botY));
+  p.quadraticCurveTo(X(cx + halfW), Y(botY), X(cx + halfW), Y(botY - 10));
+  p.lineTo(X(cx + nw), Y(topY + (botY - topY) * 0.32));
+  p.lineTo(X(cx + nw), Y(topY));
+  return p;
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'level' && S.phase !== 'resultLevel') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  bgFill(X, Y, sc);
+
+  // メインフラスコ(現在の色)
+  const cx = 380, topY = 140, botY = 430, halfW = 120;
+  const p = drawFlaskShape(X, Y, sc, cx, topY, botY, halfW);
+  const liqTop = topY + (botY - topY) * 0.38;
+  gctx.save(); gctx.clip(p);
+  gctx.fillStyle = scoreToColor(S.score);
+  gctx.globalAlpha = 0.85;
+  gctx.fillRect(X(cx - halfW), Y(liqTop), halfW * 2 * sc, (botY - liqTop) * sc);
+  gctx.globalAlpha = 1;
+  gctx.restore();
+  gctx.lineWidth = 2.5 * sc; gctx.strokeStyle = '#163044'; gctx.stroke(p);
+  gctx.fillStyle = '#163044'; gctx.font = `700 ${15 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'alphabetic';
+  gctx.fillText('むらさきキャベツ液', X(cx), Y(botY + 30));
+
+  // 目ざす色(見本びん)
+  const tx = 760, ty = 260, tr = 70;
+  gctx.beginPath(); gctx.arc(X(tx), Y(ty), tr * sc, 0, TAU);
+  gctx.fillStyle = scoreToColor(LEVELS[S.levelIdx].target);
+  gctx.fill();
+  gctx.lineWidth = 3 * sc; gctx.strokeStyle = '#163044'; gctx.stroke();
+  gctx.fillStyle = '#0d3640'; gctx.font = `700 ${15 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'alphabetic';
+  gctx.fillText('目ざす色', X(tx), Y(ty - tr - 16));
+
+  gctx.fillStyle = '#0d3640'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[S.levelIdx]} れべる — 水よう液を たらして 色を 近づけよう`, X(500), Y(30));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1f6a78', '#ffe3a0', '#a8dcd8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 出題進行 ----------
+function updateHud(){
+  const shown = S.phase === 'result' ? LEVELS.length : S.levelIdx + 1;
+  $('levelChip').textContent = `れべる ${shown}/${LEVELS.length}`;
+}
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = (b !== null) ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function setControls(list){
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+
+function startLevel(idx){
+  S.levelIdx = idx;
+  S.score = 0;
+  S.history = [];
+  S.phase = 'level';
+  updateHud();
+  setResultMsg('水よう液を たらして、目ざす色に 近づけよう。');
+  refreshCtl();
+}
+function refreshCtl(){
+  const list = DROPS_DATA.map((d, i) => ({
+    label: d.name, cls: d.cls, cb: () => onAdd(i),
+  }));
+  list.push({ label: '↩️ 1てき もどす', cls: 'undo', cb: onUndo, dis: S.history.length === 0 });
+  list.push({ label: '✅ これで かんせい！', cls: 'go', cb: onConfirm });
+  setControls(list);
+}
+function onAdd(i){
+  sTap();
+  S.score += DROPS_DATA[i].delta;
+  S.history.push(i);
+  refreshCtl();
+}
+function onUndo(){
+  if (S.history.length === 0) return;
+  sUndo();
+  const i = S.history.pop();
+  S.score -= DROPS_DATA[i].delta;
+  refreshCtl();
+}
+function onConfirm(){
+  const lv = LEVELS[S.levelIdx];
+  const diff = S.score - lv.target;
+  const ok = Math.abs(diff) <= lv.tol;
+  setControls([]);
+  S.phase = 'resultLevel';
+  if (ok) {
+    sYes(); stageBurst();
+    setResultMsg('✨ 目ざす色に、じょうずに 近づけられた！');
+    setTimeout(() => {
+      if (S.levelIdx >= LEVELS.length - 1) onAllClear();
+      else startLevel(S.levelIdx + 1);
+    }, 1600);
+  } else {
+    sHmm();
+    const hint = diff > 0 ? 'もうすこし すっぱい（酸性の）水よう液を たしてみよう。' : 'もうすこし せっけんのような（アルカリ性の）水よう液を たしてみよう。';
+    setResultMsg('おしい！ いろが ちがうよ。' + hint);
+    setTimeout(() => {
+      S.phase = 'level';
+      setResultMsg('つづけて 水よう液を たらして、なおしていこう。');
+      refreshCtl();
+    }, 1900);
+  }
+}
+
+function rankText(ms){
+  const s = ms / 1000;
+  if (s <= 50) return '👑 パーフェクト！色の へんかに くわしいね！';
+  if (s <= 90) return '🌟🌟🌟 すごい！じょうずに 色を 作れたね！';
+  if (s <= 140) return '🌟🌟 いいちょうし！';
+  return '🌟 ぜんぶの 色を 作りきったね！';
+}
+function startGame(){
+  S.gameStartAt = performance.now();
+  startLevel(0);
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare();
+  S.gameEndAt = performance.now();
+  const totalMs = S.gameEndAt - S.gameStartAt;
+  const best = getBest();
+  const isNewBest = (best === null) || (totalMs < best);
+  if (isNewBest) setBest(totalMs);
+  $('resultTime').textContent = fmtTime(totalMs);
+  $('resultRank').textContent = rankText(totalMs);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = LEVELS.map((_, i) => `<span class="starChip">${NUMS[i]} 🧪 色を 作れた</span>`).join('');
+  updateHud();
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawStage();
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
