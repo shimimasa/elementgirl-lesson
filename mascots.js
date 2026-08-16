@@ -1466,4 +1466,33 @@ const MASCOTS = {
             <circle cx="78" cy="17" r="2.1" fill="#ffe082"/>
             <circle cx="61" cy="6" r="1.7" fill="#ffe082"/>
           </svg>`,
+  pokka: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#ffb74d" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <line x1="60" y1="6" x2="60" y2="18"/>
+              <line x1="60" y1="114" x2="60" y2="126"/>
+              <line x1="6" y1="66" x2="18" y2="66"/>
+              <line x1="102" y1="66" x2="114" y2="66"/>
+              <line x1="20" y1="26" x2="28" y2="34"/>
+              <line x1="100" y1="26" x2="92" y2="34"/>
+              <line x1="20" y1="106" x2="28" y2="98"/>
+              <line x1="100" y1="106" x2="92" y2="98"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#pokkaGrad)" stroke="#e8791e" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="pokkaGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fff3c4"/>
+                <stop offset="55%" stop-color="#ffcb6b"/>
+                <stop offset="100%" stop-color="#f2900f"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#7a3b00"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#7a3b00"/>
+            </g>
+            <path d="M48 80 Q60 88 72 80" fill="none" stroke="#7a3b00" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ff8a65" opacity=".55"/>
+            <circle cx="78" cy="76" r="5" fill="#ff8a65" opacity=".55"/>
+          </svg>`,
 };

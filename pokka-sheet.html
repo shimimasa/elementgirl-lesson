@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ポカポカの里 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #d9720f; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd54f; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #fff1dc; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #fff1dc; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="pokka.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>☀️ ポカポカの里 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      晴れた日、太陽がいちばん高くなる正午に、気温もいちばん高くなると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 正午ごろがいちばん高い</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 正午よりあとがいちばん高い</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 正午より前がいちばん高い</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．気温の正しいはかり方</span>
+    <div class="secBody">
+      ①〜③を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①1.2〜1.5mの高さ</th><th>②風通しのよい場所</th><th>③直射日光の当たらない日かげ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      温度計に直射日光が直接当たると、気温は（実際より高く出てしまう ／ 実際より低く出てしまう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．時こく送りで気温グラフ</span>
+    <div class="secBody">
+      「すすめる」ボタンで①〜⑧を進め、晴れの日の気温（℃）を記録しよう。
+      <table class="levelTable">
+        <tr><th>時こく</th><th>①6時</th><th>③10時</th><th>⑤14時</th><th>⑦18時</th></tr>
+        <tr><td>気温(℃)</td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      気温がいちばん高くなったのは（正午ごろ ／ 午後2時ごろ ／ 朝6時ごろ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．晴れvsくもり・雨のグラフ比べ</span>
+    <div class="secBody">
+      2つのグラフを見くらべよう。
+      <table class="roundTable">
+        <tr><th>晴れの日のグラフの形</th><th>くもり・雨の日のグラフの形</th></tr>
+        <tr><td>山が高い ／ 平ら</td><td>山が高い ／ 平ら</td></tr>
+      </table>
+      気温の変化が大きいのは（晴れの日 ／ くもり・雨の日 ／ どちらも同じ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．水のゆくえ</span>
+    <div class="secBody">
+      ①②を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①蒸発（じょうはつ）</th><th>②結露（けつろ）</th></tr>
+        <tr><td>☐</td><td>☐</td></tr>
+      </table>
+      冷たいコップの外側に水てきがつくのは（空気中の水蒸気が冷やされて水になるから ／ コップの中の水がしみ出したから）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（気温と生活の知恵）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 熱中症</th><th>い 洗濯物</th><th>う 地面の温度</th><th>え 天気予報の気温</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      気温がいちばん高くなる午後2時ごろ気をつけたいことは（熱中症 ／ 厚着）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 気温は 地上1.2〜1.5m・（<span class="fillLine"></span>）で はかる。<br>
+      ② 晴れの日、気温がいちばん高くなるのは（<span class="fillLine"></span>）ごろ。<br>
+      ③ くもり・雨の日は、気温の変化が（<span class="fillLine sm"></span>）。<br>
+      ④ 水は蒸発して目に見えない（<span class="fillLine"></span>）になる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌤️</span>
+        <div>
+          ①晴れた日の朝と昼すぎで、外のあたたかさがどうちがうか感じてみよう。<br>
+          ②冷たい飲み物を入れたコップを少し置いておいて、外がわに水てきがつくかかんさつしてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ポカポカの里 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ポカポカの里 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4理科「天気の様子（気温の1日の変化）」・学力幅あり・協力型／ 使うもの：「pokka.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・気象分野の2作目です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_jikoku</b> などで途中再開（m_hakarikata／m_jikoku／m_hikaku／m_yukue／hakase／ending）</li>
+      <li>☐ 本単元の気温の数値は「晴れた日の典型的なパターン（山型・14時ごろ最高）」を表す目安値です。実際の気温は季節・地域で変わるため、必要に応じて「今日の外の気温はどうだったかな？」と実感と結びつける声かけをすると効果的です</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>📏 気温の正しいはかり方</td><td>①〜③を発見し、地上1.2〜1.5m・日かげという条件を確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜20分</td><td>📈 時こく送りで気温グラフ（<b>今日の見せ場</b>）</td><td>「すすめる」で①〜⑧を進め、気温グラフが完成する様子を観察。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">20〜27分</td><td>⚖️ 晴れvsくもり・雨のグラフ比べ</td><td>2つのグラフの形を見くらべる。シート４に記録</td></tr>
+      <tr><td class="min">27〜35分</td><td>💧 水のゆくえ</td><td>①②を発見し、蒸発・結露を確認。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🔎 はかせチャレンジ</td><td>気温と生活の知恵（熱中症・洗濯物など）を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「晴れた日のあたたかさを感じよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「晴れvsくもり・雨のグラフ比べ」を右下「つぎ▶」でスキップ可（<b>時こく送りグラフ・はかせ・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 正午よりあとがいちばん高い</b>／気温の正しいはかり方＝<b>実際より高く出てしまう</b>／
+      時こく送りグラフ＝<b>午後2時ごろ</b>／晴れvsくもり比べ＝<b>晴れの日</b>／
+      水のゆくえ＝<b>空気中の水蒸気が冷やされて水になるから</b>／はかせ＝<b>熱中症に気をつける</b>／
+      まとめ＝①<b>風通しのよい日かげ</b>　②<b>午後2時</b>　③<b>小さい</b>　④<b>水蒸気</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>気温は地上1.2〜1.5m・風通しのよい日かげ（直射日光が当たらない）で観測する（気象庁の観測基準。百葉箱もこの条件を満たす作り）</li>
+      <li>晴れの日、太陽が最も高くなるのは正午ごろ（南中）だが、地面が太陽にあたためられ、その熱が空気に伝わるまでに時間がかかるため、気温が最も高くなるのは午後2時ごろになる（数時間のタイムラグ）</li>
+      <li>くもりや雨の日は、太陽の熱が雲にさえぎられるため、1日の気温の変化が晴れの日より小さくなる</li>
+      <li>水は自然に蒸発（じょうはつ）して目に見えない水蒸気になり、空気中に含まれる。空気中の水蒸気が冷たいものに触れて冷やされると、また水に戻る（結露）</li>
+      <li>気温が最も高くなる午後2時ごろは熱中症に最も注意が必要な時間帯。晴れた日の昼は地面の温度が気温よりさらに高くなることもある</li>
+      <li>数値は「典型的な晴れの日・くもりの日のパターン」を表す目安値（季節・地域により実際の気温は変わる）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「時こく送りで気温グラフ」が今日いちばんの見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる</li>
+      <li>グラフの山が正午（太陽の位置）より後ろにずれていることに気づかせると、誤概念の裏切りがより印象に残る</li>
+      <li>「今日の外の気温」「今の時こく」と結びつけて話すと実感が深まる（実際の気温を測るのは天候・時間帯に左右されるため無理に行わなくてよい）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「温度計はどんな場所ではかる？」「気温がいちばん高くなるのはいつ？」「コップに水てきがつくのはなぜ？」</li>
+      <li>おうちミッションでは、晴れた日の朝と昼すぎのあたたかさの違いや、コップの結露を実際に観察し、画面の学びと日常の体験を結びつける狙い</li>
+      <li>理科・気象分野は本作でカザミの丘（小5・雲と天気・台風）に続く2作目。小4の理科作品はまだ手薄なため、今後の優先候補になる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
