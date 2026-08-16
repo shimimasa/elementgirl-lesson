@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>メダカ水そう おす・めすキャッチタイムアタック — みつけてタップ</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef9f6 0%, #e4f3f0 45%, #fdeef1 100%);
+    color: #2a2a2a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(12px, 1.7vw, 23px); font-weight: 700;
+    color: #178a76; margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .5em; color: #d9607f; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #progChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 19px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #progChip { background: #fff; color: #178a76; border: 1.5px solid #8fe6d4; }
+  #timeChip { background: #178a76; color: #eef9f6; box-shadow: 0 0 14px rgba(23,138,118,.5); }
+  #bestChip { background: #fff; color: #0f6a5a; border: 1.5px solid #8fe6d4; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #ffffff 0%, #eef6f4 70%, #e4eef4 100%);
+    border: 2px solid #8fcdbf;
+    box-shadow: inset 0 0 60px rgba(80,140,120,.08), 0 4px 24px rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #stage { cursor: pointer; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.2vh; left: 50%; transform: translateX(-50%);
+    color: #2a2a2a; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.5vw, 18px); min-height: 1.4em;
+    max-width: 92%;
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(40, 60, 55, .5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef9f6);
+    border: 2px solid #8fcdbf; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(0,0,0,.2);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(18px, 2.6vw, 28px); color: #178a76; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2a2a2a; margin: .6em 0; }
+  .panel .big { font-size: clamp(26px, 4.6vw, 46px); font-weight: 700; color: #178a76; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #5fd0bb, #178a76); color: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dcefe9; color: #0f6a5a; box-shadow: none; border: 1.5px solid #8fe6d4; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: rgba(23,138,118,.10); border: 1px solid rgba(23,138,118,.35);
+    color: #178a76; font-size: clamp(12px, 1.3vw, 15px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🐟 メダカ水そう おす・めすキャッチタイムアタック <small>みつけて タップ</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="progChip">れべる 0/5</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この メダカ水そう おす・めすキャッチタイムアタックは、<b>シズクの淵</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは シズクの淵を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="shizuku.html">シズクの淵へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🐟 メダカ水そう おす・めすキャッチタイムアタック</h1>
+    <p>水そうに、オスと メスの メダカが まざって およいでいるよ。<br>
+    お題を 見て、あう メダカだけを <b>ぜんぶ</b> タップして 見つけよう。<br>
+    せびれ・しりびれの 形の ちがいが 手がかりだよ。<br>
+    5つの れべるに ちょうせん！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎉 ぜんぶ みつけた！</h1>
+    <p id="resultMiss"></p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'shizuku';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'medakacatch_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 難易度階段(本編shizuku.htmlのdrawFish関数を移植して使用) ----------
+const LEVELS = [
+  { n: 5, want: 2 },
+  { n: 6, want: 2 },
+  { n: 7, want: 3 },
+  { n: 8, want: 3 },
+  { n: 9, want: 4 },
+];
+const MISS_PENALTY_MS = 2000;
+
+// 水槽内に重ならない位置でn匹配置(Node.jsで事前検証済み)
+function genTank(n, r){
+  const fishes = [];
+  let attempts = 0;
+  while (fishes.length < n && attempts < 500) {
+    attempts++;
+    const x = 120 + Math.random() * 760;
+    const y = 150 + Math.random() * 380;
+    const tooClose = fishes.some(f => Math.hypot(f.x - x, f.y - y) < r);
+    if (tooClose) continue;
+    fishes.push({ x, y, r: 60, caught: false });
+  }
+  return fishes;
+}
+function setupLevel(idx){
+  const lv = LEVELS[idx];
+  const fishes = genTank(lv.n, 90);
+  const targetSex = Math.random() < 0.5 ? 'male' : 'female';
+  const wantCount = Math.min(lv.want, lv.n - 1); // 全滅させない
+  // wantCount匹をtargetSex、残りは反対の性別にする
+  const idxs = fishes.map((_, i) => i);
+  for (let i = idxs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+  }
+  const targetIdxs = new Set(idxs.slice(0, wantCount));
+  fishes.forEach((f, i) => { f.variant = targetIdxs.has(i) ? targetSex : (targetSex === 'male' ? 'female' : 'male'); });
+  return { fishes, targetSex, wantCount, foundCount: 0 };
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | levelClear | result
+  levelIdx: 0,
+  level: null,
+  missCount: 0,
+  sound: true,
+  gameStartAt: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 30, PAD_B = 16, PAD_X = 16;
+const MAPW = 1000, MAPH = 620;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 背景・水草(本編shizuku.htmlのbgScene/drawWeedを移植) ----------
+function bgScene(X, Y, sc){
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(620));
+  g.addColorStop(0, '#eaf7f4'); g.addColorStop(1, '#d8ede8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 620 * sc);
+  gctx.fillStyle = '#bfa878';
+  gctx.fillRect(X(0), Y(560), 1000 * sc, 60 * sc);
+}
+function drawWeed(X, Y, sc, baseX, t){
+  gctx.strokeStyle = '#4a9a6a'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    const sway = Math.sin(t * 0.8 + i) * 14;
+    gctx.beginPath();
+    gctx.moveTo(X(baseX + i * 14), Y(560));
+    gctx.quadraticCurveTo(X(baseX + i * 14 + sway), Y(460), X(baseX + i * 14 + sway * 1.4), Y(400));
+    gctx.stroke();
+  }
+}
+
+// ---------- メダカの魚(本編shizuku.htmlのdrawFish関数をそのまま移植) ----------
+function drawFish(ctx, cx, cy, s, variant, caught){
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(s, s);
+  ctx.globalAlpha = caught ? 0.25 : 1;
+  ctx.fillStyle = '#ff8f4a';
+  ctx.beginPath(); ctx.moveTo(-58, 0); ctx.lineTo(-92, -26); ctx.lineTo(-92, 26); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(12, 0, 62, 30, 0, 0, TAU);
+  ctx.fillStyle = '#ffa25c'; ctx.fill();
+  ctx.strokeStyle = '#c2600a'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#2a2a2a'; ctx.beginPath(); ctx.arc(58, -6, 4, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#ffcf8a'; ctx.strokeStyle = '#c2600a'; ctx.lineWidth = 2;
+  if (variant === 'male') {
+    ctx.beginPath();
+    ctx.moveTo(-6, -28); ctx.lineTo(2, -50); ctx.lineTo(9, -28);
+    ctx.lineTo(13, -28); ctx.lineTo(21, -48); ctx.lineTo(29, -28);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(-6, -28); ctx.quadraticCurveTo(11, -50, 29, -28);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  if (variant === 'male') {
+    ctx.beginPath();
+    ctx.moveTo(-28, 28); ctx.lineTo(-32, 52); ctx.lineTo(6, 52); ctx.lineTo(9, 28);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(-18, 28); ctx.lineTo(-21, 44); ctx.lineTo(-6, 28);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing' || !S.level) return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  bgScene(X, Y, sc);
+  drawWeed(X, Y, sc, 80, t); drawWeed(X, Y, sc, 880, t);
+  S.level.fishes.forEach(f => {
+    drawFish(gctx, X(f.x), Y(f.y), sc * 0.75, f.variant, f.caught);
+  });
+  const sexLabel = S.level.targetSex === 'male' ? 'オス' : 'メス';
+  gctx.fillStyle = '#2a2a2a'; gctx.font = `700 ${19 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`「${sexLabel}」を ${S.level.wantCount}ひき 見つけよう（あと ${S.level.wantCount - S.level.foundCount}ひき）`, X(500), Y(45));
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 40); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 200;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#5fd0bb', '#ff9fb8', '#ffd166', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- タップ処理 ----------
+function pickFish(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  const lx = (clientX - rect.left - ox) / sc, ly = (clientY - rect.top - oy) / sc;
+  let best = -1, bestDist = Infinity;
+  S.level.fishes.forEach((f, i) => {
+    if (f.caught) return;
+    const d = Math.hypot(f.x - lx, f.y - ly);
+    if (d < f.r && d < bestDist) { bestDist = d; best = i; }
+  });
+  return best;
+}
+function onStageTap(clientX, clientY){
+  if (S.phase !== 'playing') return;
+  const idx = pickFish(clientX, clientY);
+  if (idx === -1) return;
+  onTapFish(idx, clientX, clientY);
+}
+stageCv.addEventListener('pointerdown', e => onStageTap(e.clientX, e.clientY));
+
+// ---------- 出題進行 ----------
+function updateProgChip(){ $('progChip').textContent = `れべる ${Math.min(S.levelIdx + 1, LEVELS.length)}/${LEVELS.length}`; }
+function setResultMsg(html){ $('resultMsg').innerHTML = html; }
+function onTapFish(idx, clientX, clientY){
+  const f = S.level.fishes[idx];
+  ac(); sTap();
+  if (f.variant === S.level.targetSex) {
+    f.caught = true;
+    S.level.foundCount++;
+    sYes();
+    if (clientX !== undefined) burst(clientX, clientY, 30);
+    if (S.level.foundCount >= S.level.wantCount) {
+      onLevelClear();
+      return;
+    }
+    setResultMsg('🎯 せいかい！ その ちょうし！');
+  } else {
+    S.missCount++;
+    S.gameStartAt -= MISS_PENALTY_MS; // 経過時間を進める形でペナルティ
+    sHmm();
+    const wrongLabel = f.variant === 'male' ? 'オス' : 'メス';
+    setResultMsg(`😥 ちがうよ、それは「${wrongLabel}」だよ。せびれ・しりびれの 形を よく見よう。`);
+  }
+}
+function startLevel(idx){
+  S.levelIdx = idx;
+  S.level = setupLevel(idx);
+  S.phase = 'playing';
+  updateProgChip();
+  const sexLabel = S.level.targetSex === 'male' ? 'オス' : 'メス';
+  setResultMsg(`「${sexLabel}」を ${S.level.wantCount}ひき さがそう。`);
+}
+function onLevelClear(){
+  S.phase = 'levelClear';
+  setResultMsg('✨ ぜんぶ 見つけた！');
+  setTimeout(() => {
+    if (S.levelIdx >= LEVELS.length - 1) onAllClear();
+    else startLevel(S.levelIdx + 1);
+  }, 1500);
+}
+
+function rankText(missCount){
+  if (missCount === 0) return '👑 パーフェクト！メダカはかせ！';
+  if (missCount <= 3) return '🌟🌟🌟 すごい！よく 見分けられたね！';
+  if (missCount <= 7) return '🌟🌟 いいちょうし！';
+  return '🌱 もういちど、せびれ・しりびれの 形を たしかめてみよう！';
+}
+function startGame(){
+  S.missCount = 0;
+  S.gameStartAt = performance.now();
+  startLevel(0);
+}
+function onAllClear(){
+  S.phase = 'result';
+  sFanfare();
+  const elapsed = performance.now() - S.gameStartAt;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultMiss').textContent = `まちがえた かいすう：${S.missCount}かい`;
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').innerHTML = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('starListEl').innerHTML = `<span class="starChip">${rankText(S.missCount)}</span>`;
+  showOverlay('resultOverlay');
+  updateBestChip();
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id){ $(id).classList.remove('hide'); }
+function hideOverlay(id){ $(id).classList.add('hide'); }
+
+function updateBestChip(){
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot(){
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best !== null) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  const t = now / 1000;
+  drawStage(t);
+  drawFx(dt);
+  if (S.phase === 'playing' || S.phase === 'levelClear') {
+    $('timeChip').textContent = fmtTime(Math.max(0, now - S.gameStartAt));
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
