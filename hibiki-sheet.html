@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ヒビキの谷 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #8a3fae; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd54f; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #f1e3fb; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #f1e3fb; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="hibiki.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🥁 ヒビキの谷 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      糸電話の糸を、ピンと張らずにたるませても、声は同じように聞こえると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 同じように聞こえる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 聞こえにくくなる（ほとんど聞こえない）</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> むしろよく聞こえる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．いろいろな音のもとをしらべよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①たいこ</th><th>②すず（鈴）</th><th>③わゴム</th><th>④のど（声帯）</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      音が出ている物に共通していることは（ふるえている ／ あたたかい ／ おもい）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．たたく強さと音の大きさ</span>
+    <div class="secBody">
+      「たたく」ボタンで①〜⑦を進め、音の大きさ（dB）を記録しよう。
+      <table class="levelTable">
+        <tr><th>たたく強さ</th><th>①そっと</th><th>③</th><th>⑤</th><th>⑦力いっぱい</th></tr>
+        <tr><td>音の大きさ(dB)</td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      強くたたくと、ふるえ方は（大きく（はげしく）ふるえる ／ かわらない ／ 小さくなる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．糸電話で音をつたえよう</span>
+    <div class="secBody">
+      「ピンと張る」「たるませる」の両方をためして、聞こえたかを記録しよう。
+      <table class="roundTable">
+        <tr><th>ピンと張る</th><th>たるませる</th></tr>
+        <tr><td>聞こえた ／ 聞こえない</td><td>聞こえた ／ 聞こえない</td></tr>
+      </table>
+      糸をたるませると、声は（同じように聞こえる ／ 聞こえにくくなる ／ むしろよく聞こえる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．震えをピタッと止めてみよう</span>
+    <div class="secBody">
+      鳴っているたいこに指でそっとふれてみよう。
+      <table class="roundTable">
+        <tr><th>ふれる前</th><th>指でふれた後</th></tr>
+        <tr><td>鳴っている</td><td>（　　　　　　　）</td></tr>
+      </table>
+      指でふれると、音は（すぐに止まる ／ もっと大きくなる ／ かわらない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（音と安心なくらし）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 耳を守る道具</th><th>い 静かにするマナー</th><th>う 聴診器のしくみ</th><th>え 大きすぎる音の注意</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      音がいちばん大きい場所で耳を守るために使う道具は（耳せんやイヤーマフ ／ 虫めがね ／ 聴診器）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 音が出ている物は、みんな（<span class="fillLine"></span>）。<br>
+      ② たいこを強くたたくと、ふるえ方が（<span class="fillLine sm"></span>）なり、音も大きくなる。<br>
+      ③ 糸電話の糸がたるむと、ふるえが伝わらず、声は（<span class="fillLine"></span>）なる。<br>
+      ④ 鳴っている物にそっとふれると、ふるえが（<span class="fillLine sm"></span>）ので、音も止まる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🧵</span>
+        <div>
+          ①紙コップとたこ糸で糸電話を作って、家族や友だちと話してみよう。糸をピンと張るとよく聞こえるよ。<br>
+          ②家の中の音（テレビの音・話し声など）を、大きい/小さいでくらべてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ヒビキの谷 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ヒビキの谷 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小3理科「音の性質」・学力幅あり・協力型／ 使うもの：「hibiki.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・エネルギー分野の4作目です（光＝カガミの丘、電磁石＝ウズの実験室、発電/蓄電/センサー＝クルルの発電所に続く）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_ookisa</b> などで途中再開（m_furue／m_ookisa／m_itodenwa／m_tomeru／hakase／ending）</li>
+      <li>☐ 可能であれば太鼓・すず・わゴム・糸電話（紙コップ2つ＋たこ糸）などの実物を用意すると、画面の内容と実体験がつながりやすい（必須ではない）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>👂 いろいろな音のもとをしらべよう</td><td>①〜④を発見し、「音が出る物はみんなふるえている」ことを確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜20分</td><td>🥁 たたく強さと音の大きさ（<b>今日の見せ場</b>）</td><td>「たたく」で①〜⑦を進め、ふるえ方（波形）と音の大きさ（dB）が変わる様子を観察。シート３に記録</td></tr>
+      <tr><td class="min">20〜28分</td><td>🧵 糸電話で音をつたえよう</td><td>「ピンと張る」「たるませる」の両方をためす。よそうタイムをここで回収。シート４に記録</td></tr>
+      <tr><td class="min">28〜35分</td><td>✋ 震えをピタッと止めてみよう</td><td>指でふれると音が止まることを発見。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🔎 はかせチャレンジ</td><td>音と安心なくらしの知恵（耳せん・マナーなど）を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「糸電話を作ってみよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「震えをピタッと止めてみよう」を右下「つぎ▶」でスキップ可（<b>たたく強さと音の大きさ・糸電話・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 聞こえにくくなる（ほとんど聞こえない）</b>／音のもと＝<b>ふるえている</b>／
+      たたく強さ＝<b>大きく（はげしく）ふるえる</b>／糸電話＝<b>聞こえにくくなる</b>／
+      震えを止める＝<b>すぐに止まる</b>／はかせ＝<b>耳せんやイヤーマフ</b>／
+      まとめ＝①<b>ふるえている</b>　②<b>大きく</b>　③<b>聞こえにくく</b>　④<b>止まる</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：物から音が出たり伝わったりするとき、物は震えている。音の大きさが変わるとき、物の震え方が変わる（小学校学習指導要領・理科・第3学年）</li>
+      <li>音の大きさの目安（デシベル）：静かな図書館は約40dB、ふつうの会話は約60dB、電車の中は約80dB（一般的な騒音・音響資料の目安値）。①③⑤⑦の間はこの目安を直線的に補間した表示です</li>
+      <li>糸電話の伝わり方：口 → コップの中の空気 → コップ → 糸 → コップ → コップの中の空気 → 耳、という順番で震え（振動）が伝わる。糸がたるむと震えがうまく伝わらず、声が聞こえにくくなる。糸や底を指で押さえても、震えが遮断されて同じように聞こえなくなる</li>
+      <li>鳴っている物に指でそっとふれると、震えが止まるため音も止まる（糸電話の糸をつまむと聞こえなくなるのも同じ理由）</li>
+      <li>大きすぎる音を長時間聞き続けると耳（聴力）に負担がかかることがあるため、工事現場や空港などでは耳せん・イヤーマフを使う。イヤホンの音量にも気をつけたい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「たたく強さと音の大きさ」が今日いちばんの見せ場。1人ずつ交代で「たたく」ボタンを押させると全員が参加できる</li>
+      <li>糸電話ミッションでは、たるませた糸で試した時に「あれ、聞こえない！」という驚きの声を拾い、なぜかを考えさせると誤概念の裏切りがより印象に残る</li>
+      <li>可能であれば太鼓や輪ゴムの実物にそっと触れさせ、震えを手で感じる体験を加えると理解が深まる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「音が出ている物に共通することは？」「強くたたくとふるえ方はどうなる？」「糸電話の糸がたるむとどうなる？」</li>
+      <li>おうちミッションでは、紙コップの糸電話を実際に作って家族と話し、画面の学びと日常の体験を結びつける狙い。家の中の音の大小を比べる活動も、耳で「大きさ」を意識するきっかけになる</li>
+      <li>理科・エネルギー分野は本作でカガミの丘（光）・ウズの実験室（電磁石）・クルルの発電所（発電/蓄電/センサー）に続く4作目。理科の未着手単元は理科ロードマップに整理済み</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

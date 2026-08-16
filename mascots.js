@@ -1495,4 +1495,33 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#ff8a65" opacity=".55"/>
             <circle cx="78" cy="76" r="5" fill="#ff8a65" opacity=".55"/>
           </svg>`,
+  hibiki: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#c98ae0" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M60 6 Q66 14 60 20" fill="none"/>
+              <path d="M60 114 Q54 122 60 128" fill="none"/>
+              <path d="M6 66 Q14 60 20 66" fill="none"/>
+              <path d="M102 66 Q108 72 114 66" fill="none"/>
+              <path d="M20 26 Q28 30 26 38" fill="none"/>
+              <path d="M100 26 Q92 30 94 38" fill="none"/>
+              <path d="M20 106 Q28 102 26 94" fill="none"/>
+              <path d="M100 106 Q92 102 94 94" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#hibikiGrad)" stroke="#6a2088" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="hibikiGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#f6e3ff"/>
+                <stop offset="55%" stop-color="#c98ae0"/>
+                <stop offset="100%" stop-color="#8a3fae"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#4a1a66"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#4a1a66"/>
+            </g>
+            <path d="M48 80 Q60 88 72 80" fill="none" stroke="#4a1a66" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#e8703f" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#e8703f" opacity=".5"/>
+          </svg>`,
 };
