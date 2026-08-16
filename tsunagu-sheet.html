@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ツナグの池 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2a6fa8; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd54f; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #dcedf7; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #dcedf7; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="tsunagu.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🔄 ツナグの池 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      もし、カエルがいなくなったら、バッタの数はどうなると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 増える</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 減る</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> かわらない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．陸の食物連鎖を発見しよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①草</th><th>②バッタ</th><th>③カエル</th><th>④ヘビ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      食物連鎖で、カエルを食べるのは（バッタ ／ ヘビ ／ 草）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．水の中の食物連鎖を発見しよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①植物プランクトン</th><th>②動物プランクトン</th><th>③メダカ</th><th>④フナ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      メダカのような小さな魚は、おもに何を食べる？（動物プランクトン ／ フナ ／ 水の中の石）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．もし〇〇がいなくなったら？</span>
+    <div class="secBody">
+      ①〜④の生き物を1つずつ消して、のこりがどう変わるか記録しよう。
+      <table class="levelTable">
+        <tr><th>消した生き物</th><th>①草</th><th>②バッタ</th><th>③カエル</th><th>④ヘビ</th></tr>
+        <tr><td>ためした</td><td class="res">☐</td><td class="res">☐</td><td class="res">☐</td><td class="res">☐</td></tr>
+      </table>
+      カエルがいなくなると、バッタは（増える ／ 減る ／ かわらない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．数のピラミッドを見てみよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①草（多い）</th><th>②バッタ</th><th>③カエル</th><th>④ヘビ（少ない）</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      食物連鎖で、いちばん数が少ないのは（草 ／ バッタ ／ ヘビ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（人と環境のかかわり）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 分解者</th><th>い 水や空気</th><th>う 生物多様性</th><th>え 身近な自然</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      落ち葉や死がいを土にかえす生き物を（分解者 ／ 生産者 ／ 消費者）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 食う食われるの関係を（<span class="fillLine"></span>）という。<br>
+      ② 自分で養分をつくる生き物を（<span class="fillLine"></span>）という。<br>
+      ③ カエルがいなくなると、バッタは（<span class="fillLine sm"></span>）。<br>
+      ④ 落ち葉や死がいを土にかえす生き物を（<span class="fillLine"></span>）という。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌿</span>
+        <div>
+          ①近所の公園や庭で、どんな生き物が何を食べているか、観察してみよう。<br>
+          ②図書館やインターネットで、他にどんな食物連鎖があるか調べてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ツナグの池 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ツナグの池 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6理科「生物と環境」・学力幅あり・協力型／ 使うもの：「tsunagu.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・生命分野の6作目です（発芽＝めばえラボ、チョウの育ち方＝アオバの葉かげ、動物のたんじょう＝シズクの淵、水の通り道＝ミャクの森、季節と生物＝メグルの庭に続く）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_moshi</b> などで途中再開（m_riku／m_mizu／m_moshi／m_pyramid／hakase／ending）</li>
+      <li>☐ 本単元は「生物と環境」の中でも食物連鎖にしぼった内容です。水・空気とのつながりはミャクの森・ホムラの炉、環境保全はホシゾラの街（社会科）でも扱っているため、関連づけて紹介すると理解が深まります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🌾 陸の食物連鎖を発見しよう</td><td>①〜④を発見し、草→バッタ→カエル→ヘビのつながりを確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜16分</td><td>🐠 水の中の食物連鎖を発見しよう</td><td>①〜④を発見し、水中の食物連鎖を確認。シート３に記録</td></tr>
+      <tr><td class="min">16〜28分</td><td>🔄 もし〇〇がいなくなったら？（<b>今日の見せ場</b>）</td><td>4種を1つずつ「消す」ボタンで試し、残りの生き物の数の変化を観察。よそうタイムをここで回収。シート４に記録</td></tr>
+      <tr><td class="min">28〜35分</td><td>🔺 数のピラミッドを見てみよう</td><td>①〜④を発見し、上にいくほど数が少ないことを確認。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🔎 はかせチャレンジ</td><td>人と環境のかかわり（分解者・生物多様性など）を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「身近な生き物を観察しよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「数のピラミッドを見てみよう」を右下「つぎ▶」でスキップ可（<b>もし〇〇がいなくなったら？・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ア 増える</b>／陸の食物連鎖＝<b>ヘビ</b>／水の中の食物連鎖＝<b>動物プランクトン</b>／
+      もし消えたら＝<b>増える（カエル除去でバッタ増加）</b>／数のピラミッド＝<b>ヘビ</b>／はかせ＝<b>分解者</b>／
+      まとめ＝①<b>食物連鎖</b>　②<b>生産者</b>　③<b>増える</b>　④<b>分解者</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：生物は水及び空気を通して周囲の環境と関わって生きている。生物の間には食う食われるという関係（食物連鎖）がある。人は環境と関わり、工夫して生活している（小学校学習指導要領・理科・第6学年）</li>
+      <li>陸上食物連鎖の教科書定番例：草→バッタ→カエル→ヘビ→ワシ。水中食物連鎖の教科書定番例：植物プランクトン（ケイソウ等）→動物プランクトン（ミジンコ等）→小型の魚（メダカ等）→大型の魚（フナ等）</li>
+      <li>もしカエルがいなくなると、カエルに食べられなくなったバッタは増える。増えたバッタに食べられて草は減り、カエルを食べていたヘビは減る、というように影響が次々に広がる（栄養段階カスケード）</li>
+      <li>栄養段階が上がるにつれて個体数・生物量は減りピラミッド状になる。ある段階から次の段階へ伝わるエネルギーはおよそ10%（残り約90%は呼吸などで失われる）という生態学の目安が背景にある（10%則）</li>
+      <li>落ち葉や動物の死がい・ふんを土の中の小さな生き物や菌が分解して土にかえす「分解者」も食物連鎖を支える重要な役割</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「もし〇〇がいなくなったら？」が今日いちばんの見せ場。1人ずつ交代で「消す」ボタンを押させると全員が参加できる</li>
+      <li>1つの生き物が消えると複数の生き物に影響が連鎖する様子に気づかせ、「なぜ増えたのか・減ったのか」を自分の言葉で説明させると理解が深まる</li>
+      <li>身近な例（校庭の虫、近所の公園の生き物など）に置きかえて考えさせると実感が深まる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「食物連鎖でカエルを食べるのは？」「カエルがいなくなるとバッタはどうなる？」「数がいちばん少ないのはどの生き物？」</li>
+      <li>おうちミッションでは、身近な生き物の観察や食物連鎖について調べる活動で、画面の学びと日常の体験を結びつける狙い</li>
+      <li>理科・生命分野は本作でめばえラボ（発芽）・アオバの葉かげ（チョウの育ち方）・シズクの淵（動物のたんじょう）・ミャクの森（水の通り道）・メグルの庭（季節と生物）に続く6作目。理科の未着手単元は理科ロードマップに整理済み</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

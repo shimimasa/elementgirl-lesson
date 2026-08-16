@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ツナグの池 — 生物と環境（食物連鎖） たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6fb 0%, #d0e8f2 45%, #a8d0e0 100%);
+    color: #163a4a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #2a6fa8; text-shadow: 0 0 14px rgba(42, 111, 168, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #1d5580; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dcedf7; border: 2px solid #a8cfe8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #8fb8d4;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #a8d8f5, #2a6fa8);
+    border-color: #123f5c; color: #0a2436;
+    box-shadow: 0 0 16px rgba(42, 111, 168, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #f7fcff 0%, #dcedf7 60%, #b8dcee 100%);
+    border: 3px solid #5a9ac9;
+    box-shadow: inset 0 0 40px rgba(10, 50, 70, .14), 0 4px 18px rgba(10, 50, 70, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #1d5580; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #2a6fa8; color: #f2fbff; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(10, 50, 70, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(140, 190, 220, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #a8cfe8; cursor: pointer;
+    background: linear-gradient(180deg, #6bb8e8, #2a6fa8); color: #fff;
+    box-shadow: 0 3px 0 #123f5c; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #2a6fa8; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(10, 50, 70, .28), inset 0 0 24px rgba(20, 70, 100, .14);
+    flex-shrink: 0; background: #eaf6fb;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #1d5580;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #2a6fa8; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f7fcffd9; border: 2px solid #cde3f0; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #1d5580; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #163a4a;
+    border: 1.5px solid #cde3f0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #2a6fa8; background: #dcedf7; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #f7fcff, #dcedf7); color: #123f5c;
+    border: 2px solid #2a6fa8; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #2a6fa8; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #6bb8e8, #2a6fa8); color: #f2fbff;
+    box-shadow: 0 3px 0 #123f5c, 0 5px 12px rgba(10, 50, 70, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #123f5c; }
+  .btn.sub {
+    background: #dcedf7; color: #1d5580; box-shadow: 0 3px 0 #c5ddec;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #163a4a; box-shadow: 0 3px 0 #cde3f0; font-weight: 400; border: 1.5px solid #cde3f0; }
+  .btn.choice.picked { background: #dcedf7; outline: 3px solid #2a6fa8; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(10, 40, 60, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #f7fcff, #d0e8f2);
+    border: 3px solid #5a9ac9; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(10, 50, 70, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #2a6fa8; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #2a6fa8; }
+  .panel .sub { color: #1d5580; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #163a4a; border: 1.5px solid #cde3f0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #1d5580; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #163a4a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cde3f0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #2a6fa8; background: #eaf6fb; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #2a6fa8; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #2a6fa8;
+    color: #2a6fa8; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #1d5580;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dcedf7; color: #1d5580;
+    border: 1px solid #a8cfe8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #c5ddec; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🔄 ツナグの池<small>— 生物と環境（食物連鎖） —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_riku" title="陸の食物連鎖を発見しよう">★</div>
+    <div class="badge" id="bd_m_mizu" title="水の中の食物連鎖を発見しよう">★</div>
+    <div class="badge" id="bd_m_moshi" title="もし〇〇がいなくなったら？">★</div>
+    <div class="badge" id="bd_m_pyramid" title="数のピラミッドを見てみよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ツナグの池</div>
+    <div id="locChip">ツナグの池</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🔄 ツナグのめがね 〜見えないつながりを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#6bb8e8" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M60 6 Q66 14 60 20" fill="none"/>
+              <path d="M60 114 Q54 122 60 128" fill="none"/>
+              <path d="M6 66 Q14 60 20 66" fill="none"/>
+              <path d="M102 66 Q108 72 114 66" fill="none"/>
+              <path d="M20 26 Q28 30 26 38" fill="none"/>
+              <path d="M100 26 Q92 30 94 38" fill="none"/>
+              <path d="M20 106 Q28 102 26 94" fill="none"/>
+              <path d="M100 106 Q92 102 94 94" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#tsunaguGrad)" stroke="#123f5c" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="tsunaguGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#eaf8ff"/>
+                <stop offset="55%" stop-color="#6bb8e8"/>
+                <stop offset="100%" stop-color="#2a6fa8"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#123f5c"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#123f5c"/>
+            </g>
+            <path d="M48 80 Q60 88 72 80" fill="none" stroke="#123f5c" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#f2a154" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#f2a154" opacity=".5"/>
+          </svg>
+          <div class="catname">いのちの<ruby>糸<rt>いと</rt></ruby>から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ツナグ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🔄 ツナグの池ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ツナグの池 — 生物と環境・食物連鎖（小6理科・生命分野6作目・協力型・1ファイル）
+   陸の食物連鎖を発見しよう（発見型）→ 水の中の食物連鎖を発見しよう（発見型）→
+   もし〇〇がいなくなったら？（メイン操作・4種のシミュレーション）→ 数のピラミッドを見てみよう（発見型）→
+   はかせ（人と環境のかかわり）。
+   数値：学習指導要領・小6理科「生物と環境」＝生物は水及び空気を通して周囲の環境と関わって生きている、
+   生物の間には食う食われるという関係（食物連鎖）がある、人は環境と関わり工夫して生活している。
+   陸上食物連鎖の教科書定番例＝草→バッタ→カエル→ヘビ。水中食物連鎖の教科書定番例＝
+   植物プランクトン→動物プランクトン→小型の魚→大型の魚。栄養段階が上がるにつれて個体数・生物量が
+   減りピラミッド状になる理由は、1つ上の段階に伝わるエネルギーがおよそ10%（10%則）という生態学の目安。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  shokumotsurensa: ruby('食物連鎖', 'しょくもつれんさ'),
+  seisansha: ruby('生産者', 'せいさんしゃ'),
+  shouhisha: ruby('消費者', 'しょうひしゃ'),
+  bunkaisha: ruby('分解者', 'ぶんかいしゃ'),
+  kankyou: ruby('環境', 'かんきょう'),
+  tayousei: ruby('多様性', 'たようせい'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_riku：陸の食物連鎖を発見しよう（発見型）。教科書定番例＝草→バッタ→カエル→ヘビ
+const RIKU_CARDS = [
+  { key: 0, num: '①', icon: '🌾', name: '草', txt: `草は 日光と 空気、水を 使って、自分で 養分を つくる ことが できる。これを ${W.seisansha}と いう。` },
+  { key: 1, num: '②', icon: '🦗', name: 'バッタ', txt: `バッタは 草を 食べて 育つ。他の 生き物を 食べて 生きる ものを ${W.shouhisha}と いう。` },
+  { key: 2, num: '③', icon: '🐸', name: 'カエル', txt: `カエルは バッタを 食べる。カエルも ${W.shouhisha}の なかま。` },
+  { key: 3, num: '④', icon: '🐍', name: 'ヘビ', txt: `ヘビは カエルを 食べる。このように 食う食われるの 関係が くさりのように つながることを ${W.shokumotsurensa}と いう。` },
+];
+
+// m_mizu：水の中の食物連鎖を発見しよう（発見型）。教科書定番例＝植物プランクトン→動物プランクトン→小型の魚→大型の魚
+const MIZU_CARDS = [
+  { key: 0, num: '①', icon: '🟢', name: '植物プランクトン', txt: `水の中には、目に 見えない くらい 小さな 生き物「プランクトン」が いる。植物プランクトンは 日光で 自分で 養分を つくる ${W.seisansha}。` },
+  { key: 1, num: '②', icon: '🦠', name: '動物プランクトン', txt: `動物プランクトンは、植物プランクトンを 食べて 生きる ${W.shouhisha}。` },
+  { key: 2, num: '③', icon: '🐠', name: 'メダカ', txt: `メダカのような 小さな 魚は、動物プランクトンを 食べて 育つ。` },
+  { key: 3, num: '④', icon: '🐟', name: 'フナ', txt: `フナのような 大きな 魚は、小さな 魚を 食べる。水の中にも ${W.shokumotsurensa}が あるんだ。` },
+];
+
+// m_moshi：もし〇〇がいなくなったら？（メイン操作・シミュレーション）
+// 陸の食物連鎖4種の個体数の目安（0〜10）。BASE_POPを基準に、1種を消すと栄養段階カスケード
+// （捕食者が減ると被食者は増え、その被食者のえさは減るという交互パターン）で残り3種が変化する。
+const SPECIES = [
+  { key: 0, icon: '🌾', label: '草' },
+  { key: 1, icon: '🦗', label: 'バッタ' },
+  { key: 2, icon: '🐸', label: 'カエル' },
+  { key: 3, icon: '🐍', label: 'ヘビ' },
+];
+const BASE_POP = [8, 5, 3, 1];
+const CASCADE = {
+  0: [0, 1, 0, 0],
+  1: [10, 0, 1, 0],
+  2: [4, 9, 0, 0],
+  3: [10, 2, 6, 0],
+};
+const CASCADE_TEXT = [
+  `草を 消してみたよ。草を 食べる バッタが 減り、バッタを 食べる カエルも、カエルを 食べる ヘビも、みんな 減ってしまった。`,
+  `バッタを 消してみたよ。バッタに 食べられなくなった 草は 増えた。でも バッタを 食べていた カエルは 減り、ヘビも 減ってしまった。`,
+  `カエルを 消してみたよ。カエルに 食べられなくなった バッタは 増えた。増えた バッタに 食べられて 草は 減り、カエルを 食べていた ヘビは 減ってしまった。`,
+  `ヘビを 消してみたよ。ヘビに 食べられなくなった カエルは 増えた。増えた カエルに 食べられて バッタは 減り、バッタが 減った分 草は 増えた。`,
+];
+
+// m_pyramid：数のピラミッドを見てみよう（発見型）。m_rikuと同じ4種を数の多さの順で再提示
+const PYRAMID_CARDS = [
+  { key: 0, num: '①', icon: '🌾', name: '草（いちばん多い）', txt: `草のような ${W.seisansha}は、たくさん 日光を うけて 自分で 養分を つくれるから、数が いちばん 多い。` },
+  { key: 1, num: '②', icon: '🦗', name: 'バッタ（つぎに多い）', txt: `バッタは 草を 食べて 育つ。えさに なる 草より 数は 少なくなる。` },
+  { key: 2, num: '③', icon: '🐸', name: 'カエル（少ない）', txt: `カエルは バッタを 食べる。バッタより さらに 数が 少ない。` },
+  { key: 3, num: '④', icon: '🐍', name: 'ヘビ（いちばん少ない）', txt: `ヘビは カエルを 食べる、食物連鎖の 中で いちばん 上の 生き物。数は いちばん 少ない。` },
+];
+
+// はかせ：人と環境のかかわり（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '🍄', name: '分解者のはたらき', txt: `落ち葉や 動物の ふん・死がいを、土の中の 小さな 生き物や 菌が 分解して、土に かえす。これを ${W.bunkaisha}と いう。分解された 養分は また 植物の 栄養に なる。` },
+  { key: 1, letter: 'い', icon: '💧', name: '水や空気とのつながり', txt: `生き物は 水や 空気を通して、周りの ${W.kankyou}と つながっている。よごれた 水や 空気は、多くの 生き物に えいきょうを あたえる。` },
+  { key: 2, letter: 'う', icon: '🌍', name: '生物多様性を守る', txt: `いろいろな 生き物が バランスよく くらしていることを ${W.tayousei}と いう。1つの 生き物が いなくなると、つながった 多くの 生き物に えいきょうが 出る。` },
+  { key: 3, letter: 'え', icon: '🌳', name: '身近な自然を大切に', txt: `公園や 田んぼ、川などの 身近な 自然も、たくさんの 生き物を つなぐ 大切な 場所。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'riku',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  rikuFound: new Set(),
+  mizuFound: new Set(),
+  moshiPopDisplay: BASE_POP.slice(),
+  moshiRemoved: null,
+  moshiTried: new Set(),
+  pyramidFound: new Set(),
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZap = () => { tone(880, 0, 0.08, 'square', 0.05); tone(1200, 0.05, 0.06, 'square', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f7fcff'); g.addColorStop(1, '#c5dfec');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#2a6fa8' : '#cde3f0';
+    gctx.fill(); gctx.strokeStyle = '#2a6fa8'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#163a4a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#163a4a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．陸の食物連鎖を発見しよう（発見型） ----------
+function drawRikuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, RIKU_CARDS, S.rikuFound, 4, '①〜④をタッチして、陸の食物連鎖を発見しよう');
+}
+
+// ---------- 2．水の中の食物連鎖を発見しよう（発見型） ----------
+function drawMizuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, MIZU_CARDS, S.mizuFound, 4, '①〜④をタッチして、水の中の食物連鎖を発見しよう');
+}
+
+// ---------- 3．もし〇〇がいなくなったら？（メイン操作・シミュレーション） ----------
+function drawMoshiScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const xs = [200, 400, 600, 800];
+  const baseY = 520, maxH = 300, barW = 90;
+  SPECIES.forEach((sp, i) => {
+    const pop = S.moshiPopDisplay[i];
+    const hh = (pop / 10) * maxH;
+    const removed = S.moshiRemoved === i;
+    gctx.fillStyle = '#dcedf7';
+    gctx.beginPath(); gctx.roundRect(X(xs[i] - barW / 2), Y(baseY - maxH), barW * sc, maxH * sc, 8 * sc); gctx.fill();
+    gctx.fillStyle = removed ? '#cccccc' : '#6bb8e8';
+    gctx.beginPath(); gctx.roundRect(X(xs[i] - barW / 2), Y(baseY - hh), barW * sc, hh * sc, 8 * sc); gctx.fill();
+    gctx.strokeStyle = '#2a6fa8'; gctx.lineWidth = 2 * sc;
+    gctx.strokeRect(X(xs[i] - barW / 2), Y(baseY - maxH), barW * sc, maxH * sc);
+    gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(removed ? '✖' : sp.icon, X(xs[i]), Y(baseY - maxH - 26));
+    gctx.fillStyle = '#163a4a'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText(sp.label, X(xs[i]), Y(baseY + 26));
+  });
+  gctx.fillStyle = '#163a4a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('①〜④から 1つ えらんで「消す」と、どうなるかな？', X(500), Y(70));
+}
+
+// ---------- 4．数のピラミッドを見てみよう（発見型） ----------
+function drawPyramidScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, PYRAMID_CARDS, S.pyramidFound, 4, '①〜④をタッチして、数のちがいを見てみよう');
+}
+
+// ---------- 5．はかせ：人と環境のかかわり ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、人と環境のかかわりを見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'riku') drawRikuScene(X, Y, sc);
+  else if (S.scene === 'mizu') drawMizuScene(X, Y, sc);
+  else if (S.scene === 'moshi') drawMoshiScene(X, Y, sc);
+  else if (S.scene === 'pyramid') drawPyramidScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ツナグのめがね（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f7fcff'); grd.addColorStop(1, '#b8dcee');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#2a6fa8';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#a8d8f588'); g2.addColorStop(1, 'rgba(168,216,245,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#2a6fa8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔄', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#2a6fa8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#163a4a';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#2a6fa8', '#6bb8e8', '#f2a154', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    riku: '🌾 陸の食物連鎖を発見しよう',
+    mizu: '🐠 水の中の食物連鎖を発見しよう',
+    moshi: '🔄 もし〇〇がいなくなったら？',
+    pyramid: '🔺 数のピラミッドを見てみよう',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🔄 ツナグの池 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ツナグの池';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_riku', 'm_mizu', 'm_moshi', 'm_pyramid', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'riku', icon: '🌾', title: '陸の食物連鎖を発見しよう',
+    setup: () => { S.rikuFound = new Set(RIKU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🐍', name: '草→バッタ→カエル→ヘビ' }),
+    text: () => `草・バッタ・カエル・ヘビの 食う食われるの つながりが ${W.shokumotsurensa}だったね。` },
+  { scene: 'mizu', icon: '🐠', title: '水の中の食物連鎖を発見しよう',
+    setup: () => { S.mizuFound = new Set(MIZU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🐟', name: 'プランクトン→メダカ→フナ' }),
+    text: () => `水の中にも、プランクトンから 大きな 魚まで つながる 食物連鎖が あったね。` },
+  { scene: 'moshi', icon: '🔄', title: 'もし〇〇がいなくなったら？',
+    setup: () => { S.moshiPopDisplay = CASCADE[2].slice(); S.moshiRemoved = 2; S.moshiTried = new Set([0, 1, 2, 3]); },
+    scope: () => ({ type: 'point', icon: '🐸', name: 'カエルが消えるとバッタが増える' }),
+    text: () => `1つの 生き物が いなくなると、つながった 他の 生き物にも えいきょうが 出たね。` },
+  { scene: 'pyramid', icon: '🔺', title: '数のピラミッドを見てみよう',
+    setup: () => { S.pyramidFound = new Set(PYRAMID_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🔺', name: '上にいくほど数が少ない' }),
+    text: () => `食物連鎖の 上に いくほど、生き物の 数は 少なくなったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'riku', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌾🐠🔄🔺</div>
+        <h1>ツナグの池</h1>
+        <div class="sub">〜 生物と ${W.kankyou}（食物連鎖） 〜</div>
+        <p class="talk">ようこそ！ わたしは いのちの 糸から 生まれた ${W.seirei}、<b>ツナグ</b>。この 池には、たくさんの 生き物が つながりあって くらしているよ。もし、その中の 1つが いなくなったら、どうなると 思う？<br>
+        今日は、食う食われるの つながり「${W.shokumotsurensa}」を、いっしょに たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">もし、カエルが いなくなったら、バッタの 数は どうなると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">📈</span><b>ア</b> 増える</div>
+          <div class="vcard" data-v="1"><span class="vicon">📉</span><b>イ</b> 減る</div>
+          <div class="vcard" data-v="2"><span class="vicon">➖</span><b>ウ</b> かわらない</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：陸の食物連鎖を発見しよう（発見型） ---
+  m_riku: {
+    enter() {
+      Object.assign(S, { scene: 'riku', scope: { type: 'idle' }, rikuFound: new Set() });
+      updateLoc();
+      setWish('🌾', `①〜④を タッチして、陸の 食物連鎖を 発見しよう。`);
+      say(`草・バッタ・カエル・ヘビ。だれが だれを 食べるのか、じゅんばんに たしかめてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(RIKU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.rikuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.rikuFound.size >= RIKU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.rikuFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`${W.shokumotsurensa}で、カエルを 食べるのは、どの 生き物？`);
+      setButtons(choiceRow(['バッタ', 'ヘビ', '草'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_riku'); S.phase = 'done';
+        say(`せいかい！ 草 → バッタ → カエル → ヘビの じゅんに、食う食われるの 関係が くさりのように つながっているんだ。`);
+        setButtons([{ label: 'つぎへ（水の中の食物連鎖を発見しよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、じゅんばんを 思い出してみよう。`);
+        setButtons(choiceRow(['バッタ', 'ヘビ', '草'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：水の中の食物連鎖を発見しよう（発見型） ---
+  m_mizu: {
+    enter() {
+      Object.assign(S, { scene: 'mizu', scope: { type: 'idle' }, mizuFound: new Set() });
+      updateLoc();
+      setWish('🐠', `①〜④を タッチして、水の中の 食物連鎖を 発見しよう。`);
+      say(`水の中にも、目に 見えない くらい 小さな 生き物から 大きな 魚まで、つながりが あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(MIZU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.mizuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.mizuFound.size >= MIZU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.mizuFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`メダカのような 小さな 魚は、おもに 何を 食べる？`);
+      setButtons(choiceRow(['動物プランクトン', 'フナ', '水の中の石'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_mizu'); S.phase = 'done';
+        say(`せいかい！ 植物プランクトン → 動物プランクトン → メダカ → フナの じゅんに、水の中にも ${W.shokumotsurensa}が あるんだ。`);
+        setButtons([{ label: 'つぎへ（もし〇〇がいなくなったら？）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['動物プランクトン', 'フナ', '水の中の石'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：もし〇〇がいなくなったら？（メイン操作・シミュレーション） ---
+  m_moshi: {
+    enter() {
+      Object.assign(S, { scene: 'moshi', moshiPopDisplay: BASE_POP.slice(), moshiRemoved: null, moshiTried: new Set(), scope: { type: 'idle' } });
+      updateLoc();
+      setWish('🔄', `①〜④の 生き物を 1つ えらんで「消す」ボタンを おし、のこりの 生き物が どう 変わるか たしかめよう。4つ すべて ためしてみよう。`);
+      say(`草・バッタ・カエル・ヘビは、たがいに つながっている。1つが いなくなると、どうなるかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setControls(SPECIES.map(sp => ({
+        label: (S.moshiRemoved === sp.key ? '✔ ' : '') + sp.icon + ' ' + sp.label + 'を消す' + (S.moshiTried.has(sp.key) ? ' ✓' : ''),
+        cb: () => this.remove(sp.key),
+      })));
+      if (S.moshiTried.size >= SPECIES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      } else {
+        setButtons([]);
+      }
+    },
+    remove(key) {
+      setControls([]);
+      const fromArr = S.moshiPopDisplay.slice();
+      const toArr = CASCADE[key];
+      startTween(0, 1, 0.9, p => {
+        S.moshiPopDisplay = fromArr.map((f, i) => lerp(f, toArr[i], p));
+      }, () => {
+        S.moshiRemoved = key;
+        S.moshiTried.add(key);
+        sTap(); scopeBurst();
+        S.scope = { type: 'point', icon: SPECIES[key].icon, name: '消えた：' + SPECIES[key].label };
+        say(CASCADE_TEXT[key]);
+        this.refreshCtl();
+      });
+    },
+    ask() {
+      hideWish(); setControls([]); setButtons([]);
+      say(`もし、カエルが いなくなったら、バッタの 数は どうなる？`);
+      setButtons(choiceRow(['増える', '減る', 'かわらない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_moshi'); S.phase = 'done';
+        const votedRight = S.votePicked.has(0);
+        say(`せいかい！ カエルが いなくなると、カエルに 食べられなくなった バッタは 増える。1つの 生き物が いなくなると、つながった 他の 生き物にも、次つぎに えいきょうが 広がっていくんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（数のピラミッドを見てみよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、カエルを 消した 時の 結果を 思い出してみよう。`);
+        setButtons(choiceRow(['増える', '減る', 'かわらない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：数のピラミッドを見てみよう（発見型） ---
+  m_pyramid: {
+    enter() {
+      Object.assign(S, { scene: 'pyramid', scope: { type: 'idle' }, pyramidFound: new Set() });
+      updateLoc();
+      setWish('🔺', `①〜④を タッチして、生き物の 数の ちがいを 見てみよう。`);
+      say(`食物連鎖の 生き物たちは、みんな 同じ 数だけ いるのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(PYRAMID_CARDS.map(c => ({
+        label: c.num + ' ' + (S.pyramidFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.pyramidFound.size >= PYRAMID_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.pyramidFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`${W.shokumotsurensa}で、いちばん 数が 少ないのは、どの 生き物？`);
+      setButtons(choiceRow(['草', 'バッタ', 'ヘビ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('m_pyramid'); S.phase = 'done';
+        say(`せいかい！ 生き物が 1つ 上の 段階に 食べられて 伝わる時、体の中の エネルギーは およそ10分の1に 減ると 言われている（10%の 法則）。だから ${W.shokumotsurensa}の 上に いくほど、生き物の 数は 少なくなるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['草', 'バッタ', 'ヘビ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：人と環境のかかわり ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 人と ${W.kankyou}の かかわりを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`落ち葉や 死がいを 土に かえす はたらきを する 生き物を 何と いう？`);
+      setButtons(choiceRow(['分解者', '生産者', '消費者'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.bunkaisha}は、落ち葉や 死がいを 分解して 土に かえす、食物連鎖を ささえる 大切な 役わり。人も 水や 空気を通して 環境と つながっているから、${W.tayousei}を 守る くらしを 大切に しよう。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['分解者', '生産者', '消費者'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(0);
+      showOverlay(`
+        <h2>⭐ ツナグの池 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 食う食われるの 関係を（<span class="blankWord" data-a="食物連鎖">？？？</span>）と いう。<br>
+        ② 自分で 養分を つくる 生き物を（<span class="blankWord" data-a="生産者">？？？</span>）と いう。<br>
+        ③ カエルが いなくなると、バッタは（<span class="blankWord" data-a="増える">？？？</span>）。<br>
+        ④ 落ち葉や 死がいを 土に かえす 生き物を（<span class="blankWord" data-a="分解者">？？？</span>）と いう。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ア 増える</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①近所の 公園や 庭で、どんな 生き物が 何を 食べているか、観察してみよう。<br>②図書館や インターネットで、他に どんな 食物連鎖が あるか 調べてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#2a6fa8'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「食物連鎖でカエルを食べるのは？」「カエルがいなくなるとバッタはどうなる？」「数がいちばん少ないのはどの生き物？」`);
+      setButtons([
+        { label: '🌾 陸の食物連鎖の図', cls: 'sub', cb: () => this.show('riku') },
+        { label: '🐠 水の中の食物連鎖の図', cls: 'sub', cb: () => this.show('mizu') },
+        { label: '🔄 もし消えたら…の図', cls: 'sub', cb: () => this.show('moshi') },
+        { label: '🔺 数のピラミッドの図', cls: 'sub', cb: () => this.show('pyramid') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_moshi などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
