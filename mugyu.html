@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ムギュの実験小屋 — とじこめた空気や水（空気と水の性質） たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf8ff 0%, #cdeeff 45%, #a8dcf5 100%);
+    color: #133a4d;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #1976a8; text-shadow: 0 0 14px rgba(25, 118, 168, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #2f6b8a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #eaf7fd; border: 2px solid #8fd0ec;
+    font-size: clamp(16px, 1.8vw, 26px); color: #7bb8d4;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #bdeeff, #1976a8);
+    border-color: #0c3346; color: #0c3346;
+    box-shadow: 0 0 16px rgba(25, 118, 168, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eaf6fc 60%, #cfe9f7 100%);
+    border: 3px solid #1a6f96;
+    box-shadow: inset 0 0 40px rgba(12, 60, 80, .14), 0 4px 18px rgba(12, 60, 80, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #2f6b8a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #1976a8; color: #eafbff; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(12, 60, 80, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(120, 190, 220, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #8fd0ec; cursor: pointer;
+    background: linear-gradient(180deg, #6cc3ea, #1976a8); color: #fff;
+    box-shadow: 0 3px 0 #0c3346; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #1976a8; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(12, 60, 80, .28), inset 0 0 24px rgba(20, 90, 120, .14);
+    flex-shrink: 0; background: #eaf8ff;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #2f6b8a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #1976a8; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #bfe3f5; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #2f6b8a; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #133a4d;
+    border: 1.5px solid #bfe3f5;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1976a8; background: #dbf1fb; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #dbf1fb); color: #0c3d52;
+    border: 2px solid #1976a8; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #1976a8; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #6cc3ea, #1976a8); color: #eafbff;
+    box-shadow: 0 3px 0 #0c3346, 0 5px 12px rgba(12, 60, 80, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0c3346; }
+  .btn.sub {
+    background: #dbf1fb; color: #2f6b8a; box-shadow: 0 3px 0 #bfe3f5;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #133a4d; box-shadow: 0 3px 0 #bfe3f5; font-weight: 400; border: 1.5px solid #bfe3f5; }
+  .btn.choice.picked { background: #dbf1fb; outline: 3px solid #1976a8; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(10, 45, 65, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #cdeeff);
+    border: 3px solid #1a6f96; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(10, 45, 65, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #1976a8; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #1976a8; }
+  .panel .sub { color: #2f6b8a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #133a4d; border: 1.5px solid #bfe3f5; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #2f6b8a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #133a4d; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #bfe3f5; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #1976a8; background: #eaf8ff; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #1976a8; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #1976a8;
+    color: #1976a8; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #2f6b8a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dbf1fb; color: #2f6b8a;
+    border: 1px solid #8fd0ec; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #bfe3f5; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🌬️ ムギュの実験小屋<small>— とじこめた空気や水（空気と水の性質） —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_teppou" title="空気でっぽうのしくみを発見しよう">★</div>
+    <div class="badge" id="bd_m_oshiku" title="とじこめた空気をおしてみよう">★</div>
+    <div class="badge" id="bd_m_mizu" title="とじこめた水をおしてみよう">★</div>
+    <div class="badge" id="bd_m_kurashi" title="くらしの中の空気の力を発見しよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ムギュの実験小屋</div>
+    <div id="locChip">ムギュの実験小屋</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🌬️ ムギュの圧縮ビューア 〜見えない空気のつぶを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#6cc3ea" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M30 20 Q42 26 40 34" fill="none"/>
+              <path d="M90 20 Q78 26 80 34" fill="none"/>
+              <path d="M18 60 Q28 62 30 70" fill="none"/>
+              <path d="M102 60 Q92 62 90 70" fill="none"/>
+              <path d="M26 100 Q36 96 38 88" fill="none"/>
+              <path d="M94 100 Q84 96 82 88" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#mugyuGrad)" stroke="#0c3346" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="mugyuGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fbfeff"/>
+                <stop offset="55%" stop-color="#6cc3ea"/>
+                <stop offset="100%" stop-color="#1976a8"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#0c3346"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#0c3346"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#0c3346" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+            <circle cx="78" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+          </svg>
+          <div class="catname">空気でっぽうの「ムギュッ」から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ムギュ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌬️ ムギュの実験小屋ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ムギュの実験小屋 — とじこめた空気や水・空気と水の性質（小4理科・粒子分野3作目・協力型・1ファイル）
+   空気でっぽうのしくみを発見しよう（発見型）→ とじこめた空気をおしてみよう（メイン操作・①〜⑧の数値階段）→
+   とじこめた水をおしてみよう（対照実験・同じ①〜⑧のUIで体積が変わらないことを発見）→
+   くらしの中の空気の力を発見しよう（発見型）→ はかせ（空気の力とくらしの安全）。
+   数値：学習指導要領・小4理科「とじこめた空気や水」＝閉じ込めた空気に力を加えると体積は小さくなるが
+   押し返す力は大きくなり、閉じ込めた水は力を加えても体積がほとんど変わらない（非圧縮性）。
+   体積変化はボイルの法則（圧力と体積は反比例）に基づく実際の比率で計算：
+   60mLの空気を圧力係数1.00〜3.00気圧相当でおしたときの体積＝60/係数（60,52,46,40,34,30,24,20mL）。
+   水は8段階すべて60mL固定（WebSearchで裏取り済み）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  taiseki: ruby('体積', 'たいせき'),
+  asshuku: ruby('圧縮', 'あっしゅく'),
+  kuukiatsu: ruby('空気圧', 'くうきあつ'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+// canvas専用のプレーン文字列（W.taisekiはルビ入りHTML文字列なのでplain()を通しても
+// タグが消えるだけで<rt>内の読みは残り「体積たいせき」のように連結表示されてしまう。
+// canvasのfillTextに渡す時は必ずこの安全なプレーン文字列を使う）
+const N_TAISEKI = 'たいせき';
+
+// ---------- 数値データ（本物度） ----------
+// m_teppou：空気でっぽうのしくみを発見しよう（発見型）
+const TEPPOU_CARDS = [
+  { key: 0, num: '①', icon: '➡️', name: 'おし棒', txt: `後ろから おし棒で ぐっと おすと、つつの 中の 空気が おしちぢめられる。` },
+  { key: 1, num: '②', icon: '💨', name: 'とじこめた空気', txt: `つつの 中の 空気は、外に にげられない。おされると ちぢんで、${W.taiseki}が 小さくなる。` },
+  { key: 2, num: '③', icon: '↩️', name: 'おし返す力', txt: `ちぢんだ 空気は、もとの 大きさに もどろうとして、強く おし返してくる。おすほど、この 力は 強くなる。` },
+  { key: 3, num: '④', icon: '🎯', name: '前玉がとび出す', txt: `おし返す力が じゅうぶん 強くなると、前玉を いきおいよく おし出す。「パン！」と とび出す しくみだよ。` },
+];
+
+// m_oshiku：とじこめた空気をおしてみよう（メイン操作・数値階段①〜⑧）
+// ボイルの法則（圧力と体積は反比例）に基づく実比率：60mLの空気に圧力係数1.00〜3.00気圧相当をかけた時の体積＝60/係数
+const OSHIKU_FACTOR = [1.00, 1.15, 1.30, 1.50, 1.75, 2.00, 2.50, 3.00];
+const OSHIKU_VOLUME = OSHIKU_FACTOR.map(f => Math.round(60 / f)); // [60,52,46,40,34,30,24,20]
+const OSHIKU_RESIST = OSHIKU_FACTOR.map(f => Math.round((f - 1) / (3.00 - 1) * 100)); // [0,8,15,25,38,50,75,100]
+
+// m_mizu：とじこめた水をおしてみよう（対照実験・同じ①〜⑧のUI）
+// 水は非圧縮性のため8段階すべて体積60mL固定（学習指導要領・小4理科でWebSearch裏取り済み）
+const MIZU_VOLUME = new Array(8).fill(60);
+const MIZU_RESIST = new Array(8).fill(100);
+
+// m_kurashi：くらしの中の空気の力を発見しよう（発見型）
+const KURASHI_CARDS = [
+  { key: 0, num: '①', icon: '🚲', name: '自転車のタイヤ', txt: `タイヤの 中には 空気が ぎゅっと おしこまれている。空気の おし返す力で、タイヤは かたく、じょうぶに なる。` },
+  { key: 1, num: '②', icon: '🚀', name: 'ペットボトルロケット', txt: `とじこめた 空気を おしちぢめて ためて おくと、いきおいよく ふき出す 力で ロケットを 飛ばせる。` },
+  { key: 2, num: '③', icon: '📦', name: 'エアクッション', txt: `つぶつぶの 中に とじこめた 空気が、ものを 落としても やさしく まもってくれる。` },
+  { key: 3, num: '④', icon: '🏊', name: 'うきわ', txt: `うきわは 空気を たくさん おしこんで ふくらませることで、水に うく 力を 生み出している。` },
+];
+
+// はかせ：空気の力とくらしの安全（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '🚲', name: 'タイヤの空気圧点検', txt: `タイヤの ${W.kuukiatsu}が 低いと、パンクしやすく なったり、こぐのが 重く なったり する。ときどき チェックしよう。` },
+  { key: 1, letter: 'い', icon: '⚠️', name: '入れすぎに注意', txt: `ボールや うきわに 空気を 入れすぎると、われたり やぶれたり する ことが ある。ちょうど よい かたさを まもろう。` },
+  { key: 2, letter: 'う', icon: '🌡️', name: '気温と体積のつながり', txt: `空気は あたたまると ふくらみ、冷えると ちぢむ。夏の 暑い日は タイヤの ${W.kuukiatsu}が 上がりやすいので 注意しよう。` },
+  { key: 3, letter: 'え', icon: '🏊', name: 'うきわの安全な使い方', txt: `うきわは 正しく 空気を 入れて、こわれていないか かくにんしてから 使おう。水の 事故を ふせぐ ために 大切だよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'teppou',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  teppouFound: new Set(),
+  oshikuIdx: 0,
+  oshikuIdxDisplay: 0,
+  mizuIdx: 0,
+  mizuIdxDisplay: 0,
+  kurashiFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sPush = () => { tone(200, 0, 0.12, 'square', 0.05); tone(140, 0.08, 0.16, 'square', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eef9ff'); g.addColorStop(1, '#bfe3f5');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1976a8' : '#bfe3f5';
+    gctx.fill(); gctx.strokeStyle = '#1976a8'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#133a4d'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#133a4d'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．空気でっぽうのしくみを発見しよう（発見型） ----------
+function drawTeppouScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, TEPPOU_CARDS, S.teppouFound, 4, '①〜④をタッチして、空気でっぽうのしくみを発見しよう');
+}
+
+// ---------- 実験の「つつ」の共通描画（おす実験の主舞台） ----------
+const STAGE_DOTS_BASE = [
+  { x: 0.12, y: 0.22 }, { x: 0.32, y: 0.15 }, { x: 0.55, y: 0.28 }, { x: 0.78, y: 0.18 }, { x: 0.90, y: 0.42 },
+  { x: 0.15, y: 0.55 }, { x: 0.38, y: 0.62 }, { x: 0.60, y: 0.5 }, { x: 0.82, y: 0.6 }, { x: 0.25, y: 0.82 },
+  { x: 0.48, y: 0.85 }, { x: 0.68, y: 0.78 }, { x: 0.88, y: 0.85 }, { x: 0.05, y: 0.4 },
+];
+const BARREL_L = 220, BARREL_R = 780, BARREL_TOP = 220, BARREL_BOT = 360;
+function drawTube(X, Y, sc, volMl, isWater) {
+  const volFrac = clamp(volMl / 60, 0, 1);
+  const capW = 20, pistonHeadW = 18;
+  const chamberRight = BARREL_R - capW;
+  const chamberLeftAtFull = BARREL_L + pistonHeadW + 30;
+  const chamberFullLen = chamberRight - chamberLeftAtFull;
+  const pistonX = chamberRight - volFrac * chamberFullLen;
+
+  // 筒（バレル）本体
+  gctx.fillStyle = '#ffffff'; gctx.strokeStyle = '#0c3346'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.roundRect(X(BARREL_L), Y(BARREL_TOP), (BARREL_R - BARREL_L) * sc, (BARREL_BOT - BARREL_TOP) * sc, 14 * sc);
+  gctx.fill(); gctx.stroke();
+
+  // 先たん（キャップ／ノズル）
+  gctx.fillStyle = '#1976a8';
+  gctx.beginPath(); gctx.roundRect(X(BARREL_R - 4), Y(BARREL_TOP + 20), (capW + 16) * sc, (BARREL_BOT - BARREL_TOP - 40) * sc, 6 * sc); gctx.fill();
+
+  // 中の空気／水（チャンバー）
+  const chTop = BARREL_TOP + 14, chBot = BARREL_BOT - 14;
+  gctx.save();
+  gctx.beginPath(); gctx.rect(X(pistonX), Y(chTop), (chamberRight - pistonX) * sc, (chBot - chTop) * sc); gctx.clip();
+  if (isWater) {
+    gctx.fillStyle = '#bfe3f5';
+    gctx.fillRect(X(pistonX), Y(chTop), (chamberRight - pistonX) * sc, (chBot - chTop) * sc);
+    gctx.fillStyle = '#1f5f96';
+    gctx.fillRect(X(pistonX), Y(chTop), (chamberRight - pistonX) * sc, (chBot - chTop) * sc);
+  } else {
+    gctx.fillStyle = '#f5fbff';
+    gctx.fillRect(X(BARREL_L), Y(chTop), (chamberRight - BARREL_L) * sc, (chBot - chTop) * sc);
+    STAGE_DOTS_BASE.forEach(p => {
+      const px = pistonX + p.x * (chamberRight - pistonX), py = chTop + p.y * (chBot - chTop);
+      gctx.beginPath(); gctx.arc(X(px), Y(py), 9 * sc, 0, TAU);
+      gctx.fillStyle = '#6cc3ea'; gctx.fill();
+      gctx.strokeStyle = '#1976a8'; gctx.lineWidth = 1.4 * sc; gctx.stroke();
+    });
+  }
+  gctx.restore();
+
+  // おし棒（ピストン＋ロッド）
+  gctx.fillStyle = '#0c3346';
+  gctx.beginPath(); gctx.roundRect(X(pistonX - pistonHeadW / 2), Y(BARREL_TOP - 6), pistonHeadW * sc, (BARREL_BOT - BARREL_TOP + 12) * sc, 4 * sc); gctx.fill();
+  const rodStartX = BARREL_L - 60;
+  gctx.fillStyle = '#7bb8d4';
+  gctx.fillRect(X(rodStartX), Y((BARREL_TOP + BARREL_BOT) / 2 - 7), (pistonX - pistonHeadW / 2 - rodStartX) * sc, 14 * sc);
+  gctx.beginPath(); gctx.arc(X(rodStartX), Y((BARREL_TOP + BARREL_BOT) / 2), 16 * sc, 0, TAU);
+  gctx.fillStyle = '#0c3346'; gctx.fill();
+
+  // 目もり（mL）
+  gctx.strokeStyle = '#1976a8'; gctx.fillStyle = '#2f6b8a'; gctx.font = `700 ${11 * sc}px sans-serif`; gctx.textAlign = 'center';
+  for (let v = 0; v <= 60; v += 10) {
+    const tx = chamberLeftAtFull + (1 - v / 60) * chamberFullLen;
+    gctx.lineWidth = 1.6 * sc;
+    gctx.beginPath(); gctx.moveTo(X(tx), Y(BARREL_BOT + 6)); gctx.lineTo(X(tx), Y(BARREL_BOT + 16)); gctx.stroke();
+    gctx.fillText(String(v), X(tx), Y(BARREL_BOT + 30));
+  }
+  return { volFrac, pistonX };
+}
+function drawResistBar(X, Y, sc, cx, cy, w, h, pct) {
+  gctx.fillStyle = '#bfe3f5';
+  gctx.beginPath(); gctx.roundRect(X(cx - w / 2), Y(cy - h / 2), w * sc, h * sc, 6 * sc); gctx.fill();
+  const fillW = w * clamp(pct / 100, 0, 1);
+  gctx.fillStyle = '#ff8a3d';
+  gctx.beginPath(); gctx.roundRect(X(cx - w / 2), Y(cy - h / 2), fillW * sc, h * sc, 6 * sc); gctx.fill();
+  gctx.strokeStyle = '#1976a8'; gctx.lineWidth = 2.4 * sc;
+  gctx.strokeRect(X(cx - w / 2), Y(cy - h / 2), w * sc, h * sc);
+  gctx.fillStyle = '#133a4d'; gctx.font = `700 ${14 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('てごたえ', X(cx), Y(cy - h / 2 - 16));
+  const face = pct < 25 ? '🙂' : pct < 65 ? '😣' : '💪';
+  gctx.font = `${28 * sc}px sans-serif`;
+  gctx.fillText(face, X(cx + w / 2 + 40), Y(cy));
+}
+
+// ---------- 2．とじこめた空気をおしてみよう（メイン操作・数値階段①〜⑧） ----------
+function drawOshikuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const v = S.oshikuIdxDisplay;
+  const idxNow = clamp(Math.round(v), 0, 7);
+  const vol = lerpArr(OSHIKU_VOLUME, v);
+  const resist = lerpArr(OSHIKU_RESIST, v);
+  drawTube(X, Y, sc, vol, false);
+  drawResistBar(X, Y, sc, 500, 460, 460, 34, resist);
+  gctx.fillStyle = '#133a4d'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[idxNow]}　おす力レベル${idxNow + 1}（空気）　${N_TAISEKI} やく${Math.round(vol)}mL`, X(500), Y(70));
+}
+
+// ---------- 3．とじこめた水をおしてみよう（対照実験・同じ①〜⑧のUI） ----------
+function drawMizuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const v = S.mizuIdxDisplay;
+  const idxNow = clamp(Math.round(v), 0, 7);
+  const vol = lerpArr(MIZU_VOLUME, v);
+  const resist = lerpArr(MIZU_RESIST, v);
+  drawTube(X, Y, sc, vol, true);
+  drawResistBar(X, Y, sc, 500, 460, 460, 34, resist);
+  gctx.fillStyle = '#133a4d'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[idxNow]}　おす力レベル${idxNow + 1}（水）　${N_TAISEKI} やく${Math.round(vol)}mL`, X(500), Y(70));
+}
+
+// ---------- 4．くらしの中の空気の力を発見しよう（発見型） ----------
+function drawKurashiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KURASHI_CARDS, S.kurashiFound, 4, '①〜④をタッチして、身の回りの例を発見しよう');
+}
+
+// ---------- 5．はかせ：空気の力とくらしの安全 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、空気の力とくらしの安全を見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'teppou') drawTeppouScene(X, Y, sc);
+  else if (S.scene === 'oshiku') drawOshikuScene(X, Y, sc);
+  else if (S.scene === 'mizu') drawMizuScene(X, Y, sc);
+  else if (S.scene === 'kurashi') drawKurashiScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ムギュの圧縮ビューア（丸窓） ----------
+const DENSITY_BASE = [
+  { x: 0, y: 0 }, { x: 0.55, y: 0.1 }, { x: -0.5, y: 0.25 }, { x: 0.2, y: -0.6 }, { x: -0.25, y: -0.55 },
+  { x: 0.65, y: -0.45 }, { x: -0.7, y: -0.15 }, { x: 0.15, y: 0.65 }, { x: -0.35, y: 0.6 },
+];
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fbfeff'); grd.addColorStop(1, '#cdeeff');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'density') {
+    drawDensity(R, S.scope.ratio, S.scope.water);
+    label(S.scope.label || '');
+  } else if (mode === 'point') {
+    sctx.fillStyle = '#1976a8';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#6cc3ea88'); g2.addColorStop(1, 'rgba(108,195,234,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#1976a8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌬️', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#1976a8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#133a4d';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawDensity(R, ratio, water) {
+    const cx = R, cy = R * 0.62;
+    if (water) {
+      sctx.beginPath(); sctx.arc(cx, cy, R * 0.5, 0, TAU);
+      sctx.fillStyle = '#1f5f96'; sctx.fill();
+      sctx.strokeStyle = 'rgba(255,255,255,.6)'; sctx.lineWidth = 1.5; sctx.stroke();
+      DENSITY_BASE.slice(0, 6).forEach(p => {
+        sctx.beginPath(); sctx.arc(cx + p.x * R * 0.32, cy + p.y * R * 0.32, R * 0.05, 0, TAU);
+        sctx.fillStyle = 'rgba(255,255,255,.3)'; sctx.fill();
+      });
+    } else {
+      const maxR = R * 0.5 * clamp(ratio, 0.28, 1);
+      DENSITY_BASE.forEach(p => {
+        const px = cx + p.x * maxR, py = cy + p.y * maxR;
+        sctx.beginPath(); sctx.arc(px, py, R * 0.09, 0, TAU);
+        sctx.fillStyle = '#6cc3ea'; sctx.fill();
+        sctx.strokeStyle = '#1976a8'; sctx.lineWidth = 1; sctx.stroke();
+      });
+    }
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1976a8', '#6cc3ea', '#ff8a3d', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    teppou: '💨 空気でっぽうのしくみを発見しよう',
+    oshiku: '🌬️ とじこめた空気をおしてみよう',
+    mizu: '💧 とじこめた水をおしてみよう',
+    kurashi: '🚲 くらしの中の空気の力を発見しよう',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🌬️ ムギュの実験小屋 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ムギュの実験小屋';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_teppou', 'm_oshiku', 'm_mizu', 'm_kurashi', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'teppou', icon: '💨', title: '空気でっぽうのしくみを発見しよう',
+    setup: () => { S.teppouFound = new Set(TEPPOU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🎯', name: 'おし返す力で玉がとび出す' }),
+    text: () => `つつの 中の 空気が ちぢんで、おし返す力で 前玉が とび出したね。` },
+  { scene: 'oshiku', icon: '🌬️', title: 'とじこめた空気をおしてみよう',
+    setup: () => { S.oshikuIdxDisplay = 7; },
+    scope: () => ({ type: 'density', ratio: OSHIKU_VOLUME[7] / 60, water: false, label: N_TAISEKI + ' やく' + OSHIKU_VOLUME[7] + 'mL' }),
+    text: () => `おす力を 強くするほど、空気の ${W.taiseki}は どんどん 小さくなり、てごたえも 強くなったね。` },
+  { scene: 'mizu', icon: '💧', title: 'とじこめた水をおしてみよう',
+    setup: () => { S.mizuIdxDisplay = 7; },
+    scope: () => ({ type: 'density', ratio: 1, water: true, label: N_TAISEKI + ' 60mLのまま' }),
+    text: () => `水は どんなに 強く おしても、${W.taiseki}は ほとんど かわらなかったね。` },
+  { scene: 'kurashi', icon: '🚲', title: 'くらしの中の空気の力を発見しよう',
+    setup: () => { S.kurashiFound = new Set(KURASHI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🚲', name: '身の回りにも空気の力がある' }),
+    text: () => `自転車の タイヤや うきわにも、とじこめた 空気の 力が 生かされていたね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'teppou', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">💨🌬️💧🚲</div>
+        <h1>ムギュの実験小屋</h1>
+        <div class="sub">〜 とじこめた 空気や 水（空気と水の性質） 〜</div>
+        <p class="talk">ようこそ！ わたしは 空気でっぽうの「ムギュッ」から 生まれた ${W.seirei}、<b>ムギュ</b>。この 実験小屋で、とじこめた 空気と 水の ひみつを、いっしょに たしかめよう。おしたら、空気と 水は 同じように 縮むと 思う？<br>
+        今日は、空気でっぽうの しくみから、くらしの 中の 空気の 力まで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">とじこめた 水を おもいっきり おすと、中の 水は どうなると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🔽</span><b>ア</b> ちぢむ（体積が小さくなる）</div>
+          <div class="vcard" data-v="1"><span class="vicon">😐</span><b>イ</b> かわらない</div>
+          <div class="vcard" data-v="2"><span class="vicon">💦</span><b>ウ</b> あふれ出る</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：空気でっぽうのしくみを発見しよう（発見型） ---
+  m_teppou: {
+    enter() {
+      Object.assign(S, { scene: 'teppou', scope: { type: 'idle' }, teppouFound: new Set() });
+      updateLoc();
+      setWish('💨', `①〜④を タッチして、空気でっぽうの しくみを 発見しよう。`);
+      say(`おし棒・とじこめた 空気・おし返す力・前玉。それぞれの やくわりを たしかめてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(TEPPOU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.teppouFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.teppouFound.size >= TEPPOU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.teppouFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`空気でっぽうの 玉が とび出すのは なぜ？`);
+      setButtons(choiceRow(['とじこめた空気がちぢんで、おし返す力が強くなるから', 'つつが熱くなるから', '風が強く吹くから'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_teppou'); S.phase = 'done';
+        say(`せいかい！ とじこめられた 空気は、おされて ちぢむと、もとに もどろうとして 強く おし返してくる。この 力が 前玉を 「パン！」と おし出すんだ。`);
+        setButtons([{ label: 'つぎへ（とじこめた空気をおしてみよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['とじこめた空気がちぢんで、おし返す力が強くなるから', 'つつが熱くなるから', '風が強く吹くから'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：とじこめた空気をおしてみよう（メイン操作・数値階段①〜⑧） ---
+  m_oshiku: {
+    enter() {
+      Object.assign(S, { scene: 'oshiku', oshikuIdx: 0, oshikuIdxDisplay: 0, scope: { type: 'density', ratio: OSHIKU_VOLUME[0] / 60, water: false, label: N_TAISEKI + ' やく' + OSHIKU_VOLUME[0] + 'mL' } });
+      updateLoc();
+      setWish('🌬️', `「おす力をふやす」ボタンで、①（いちばん弱い）から ⑧（いちばん強い）まで、じょじょに 強く おしていって、空気の ${W.taiseki}と てごたえの 変化を たしかめよう。`);
+      say(`①は いちばん 弱い 力。「おす力をふやす」ボタンで、つぎの 段階へ 進むよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.oshikuIdx >= OSHIKU_VOLUME.length - 1) { this.finish(); return; }
+      setControls([{ label: `🌬️ おす力をふやす（つぎの段階へ）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.oshikuIdx >= OSHIKU_VOLUME.length - 1) return;
+      setControls([]);
+      const fromV = S.oshikuIdx, toV = S.oshikuIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.oshikuIdxDisplay = v;
+        const vol = lerpArr(OSHIKU_VOLUME, v);
+        S.scope = { type: 'density', ratio: vol / 60, water: false, label: N_TAISEKI + ' やく' + Math.round(vol) + 'mL' };
+      }, () => {
+        S.oshikuIdx++; S.oshikuIdxDisplay = S.oshikuIdx;
+        sPush();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑧まで、おす力を 強くしたね。空気の ${W.taiseki}は どう 変わったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`おす力を どんどん 強くしていくと、とじこめた 空気の ${W.taiseki}は どうなる？`);
+      setButtons(choiceRow(['どんどん小さくなる', 'かわらない', '大きくなる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_oshiku'); S.phase = 'done';
+        say(`せいかい！ おす力を 強くするほど、空気は どんどん ちぢんで ${W.taiseki}が 小さくなる。でも 空気は、ちぢんだ ぶん 強く おし返してくる。空気は 目に 見えない 小さな つぶが 集まって できていて、つぶと つぶの 間に すきまが あるから、おすと ちぢむんだよ。`);
+        setButtons([{ label: 'つぎへ（とじこめた水をおしてみよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、てごたえメーターの 動きを 思い出してみよう。`);
+        setButtons(choiceRow(['どんどん小さくなる', 'かわらない', '大きくなる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：とじこめた水をおしてみよう（対照実験・同じ①〜⑧のUI） ---
+  m_mizu: {
+    enter() {
+      Object.assign(S, { scene: 'mizu', mizuIdx: 0, mizuIdxDisplay: 0, scope: { type: 'density', ratio: 1, water: true, label: N_TAISEKI + ' 60mLのまま' } });
+      updateLoc();
+      setWish('💧', `こんどは 水で ためそう。「おす力をふやす」ボタンで、さっきと 同じように ①から ⑧まで おしていって、水の ${W.taiseki}が どうなるか たしかめよう。`);
+      say(`空気の 時と 同じように、①から 力を 強くしていくよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.mizuIdx >= MIZU_VOLUME.length - 1) { this.finish(); return; }
+      setControls([{ label: `💧 おす力をふやす（つぎの段階へ）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.mizuIdx >= MIZU_VOLUME.length - 1) return;
+      setControls([]);
+      const fromV = S.mizuIdx, toV = S.mizuIdx + 1;
+      startTween(fromV, toV, 0.5, v => {
+        S.mizuIdxDisplay = v;
+        const vol = lerpArr(MIZU_VOLUME, v);
+        S.scope = { type: 'density', ratio: 1, water: true, label: N_TAISEKI + ' やく' + Math.round(vol) + 'mL' };
+      }, () => {
+        S.mizuIdx++; S.mizuIdxDisplay = S.mizuIdx;
+        sPush();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑧まで、水も おして みたね。${W.taiseki}は 空気の 時と くらべて どうだったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`水を おしても、${W.taiseki}は どうなった？`);
+      setButtons(choiceRow(['どんどん小さくなる', 'ほとんどかわらない', 'あふれ出た'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_mizu'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ 水は どんなに 強く おしても、${W.taiseki}は ほとんど かわらない。空気と ちがって、水の つぶは すでに ぎゅっと つまっているから、おしちぢめる すきまが ほとんど ないんだ。これが、空気と 水の 大きな ちがいだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（くらしの中の空気の力を発見しよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、水の ピストンの 動きを 思い出してみよう。`);
+        setButtons(choiceRow(['どんどん小さくなる', 'ほとんどかわらない', 'あふれ出た'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：くらしの中の空気の力を発見しよう（発見型） ---
+  m_kurashi: {
+    enter() {
+      Object.assign(S, { scene: 'kurashi', scope: { type: 'idle' }, kurashiFound: new Set() });
+      updateLoc();
+      setWish('🚲', `①〜④を タッチして、くらしの中の 空気の 力の 例を 発見しよう。`);
+      say(`とじこめた 空気の 力は、くらしの 中の 道具にも 生かされているよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KURASHI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.kurashiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.kurashiFound.size >= KURASHI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.kurashiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`自転車の タイヤが かたく はずむのは、中に 何を おしこんでいるから？`);
+      setButtons(choiceRow(['水', '空気', 'すな'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_kurashi'); S.phase = 'done';
+        say(`せいかい！ タイヤの 中には 空気が ぎゅっと おしこまれている。空気の おし返す力で、タイヤは かたく、じょうぶに なるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['水', '空気', 'すな'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：空気の力とくらしの安全 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 空気の 力と くらしの 安全を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`自転車の タイヤの ${W.kuukiatsu}を ときどき チェックするのは 何の ため？`);
+      setButtons(choiceRow(['タイヤの色をきれいに保つため', 'パンクやじこをふせぐため', '音を大きくするため'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ タイヤの ${W.kuukiatsu}が 低いと、パンクしやすく なったり、事故に つながったり する。空気は 便利だけど、ときどき 点検して 安全に 使う ことも 大切だよ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['タイヤの色をきれいに保つため', 'パンクやじこをふせぐため', '音を大きくするため'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ムギュの実験小屋 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① とじこめた 空気を おすと、体積は（<span class="blankWord" data-a="ちいさく">？？？</span>）なる。<br>
+        ② とじこめた 水を おすと、体積は（<span class="blankWord" data-a="かわらない">？？？</span>）。<br>
+        ③ ちぢんだ 空気が もとに もどろうとする 力を「（<span class="blankWord" data-a="おし返す">？？？</span>）力」という。<br>
+        ④ 自転車の タイヤの 中には（<span class="blankWord" data-a="空気">？？？</span>）が おしこまれている。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ かわらない</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①ペットボトルや ふくろに 空気を とじこめて、手で おしてみよう。水を 入れた ふくろとも くらべてみよう。<br>②自転車が あれば、タイヤを おして かたさを かくにんしてみよう（おうちの人と いっしょに）。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#1976a8'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「空気でっぽうの玉が飛ぶのはなぜ？」「おす力を強くすると空気の体積は？」「水をおすと体積はどうなる？」`);
+      setButtons([
+        { label: '💨 空気でっぽうの図', cls: 'sub', cb: () => this.show('teppou') },
+        { label: '🌬️ 空気をおす図', cls: 'sub', cb: () => this.show('oshiku') },
+        { label: '💧 水をおす図', cls: 'sub', cb: () => this.show('mizu') },
+        { label: '🚲 くらしの例の図', cls: 'sub', cb: () => this.show('kurashi') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_oshiku などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
