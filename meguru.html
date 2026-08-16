@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>メグルの庭 — 季節と生物（動物の活動・植物の成長） たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fff0f5 0%, #ffe0ea 45%, #ffc9d9 100%);
+    color: #7a2848;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #d9527a; text-shadow: 0 0 14px rgba(217, 82, 122, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #b83a60; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ffe3ec; border: 2px solid #f2b8cc;
+    font-size: clamp(16px, 1.8vw, 26px); color: #d99cb0;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffb8d0, #d9527a);
+    border-color: #a02850; color: #4a1226;
+    box-shadow: 0 0 16px rgba(217, 82, 122, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #fffaf9 0%, #ffe8ee 60%, #ffc2d4 100%);
+    border: 3px solid #e87a9e;
+    box-shadow: inset 0 0 40px rgba(120, 20, 60, .14), 0 4px 18px rgba(120, 20, 60, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #b83a60; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #d9527a; color: #fff8fa; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(120, 20, 60, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(230, 160, 190, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #f2b8cc; cursor: pointer;
+    background: linear-gradient(180deg, #ff9ec0, #d9527a); color: #fff;
+    box-shadow: 0 3px 0 #7a1a3a; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #d9527a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(120, 20, 60, .28), inset 0 0 24px rgba(150, 30, 70, .14);
+    flex-shrink: 0; background: #fff0f5;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #b83a60;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #d9527a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #fffafad9; border: 2px solid #f2c9d8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #b83a60; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #7a2848;
+    border: 1.5px solid #f2c9d8;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #d9527a; background: #ffe3ec; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #fffafa, #ffe3ec); color: #7a1a3a;
+    border: 2px solid #d9527a; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #d9527a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ff9ec0, #d9527a); color: #fff8fa;
+    box-shadow: 0 3px 0 #7a1a3a, 0 5px 12px rgba(120, 20, 60, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #7a1a3a; }
+  .btn.sub {
+    background: #ffe3ec; color: #a02850; box-shadow: 0 3px 0 #f0cdd8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #7a2848; box-shadow: 0 3px 0 #f2c9d8; font-weight: 400; border: 1.5px solid #f2c9d8; }
+  .btn.choice.picked { background: #ffe3ec; outline: 3px solid #d9527a; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(90, 20, 50, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fffafa, #ffe0ea);
+    border: 3px solid #e87a9e; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(90, 20, 50, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #d9527a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #d9527a; }
+  .panel .sub { color: #b83a60; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #7a2848; border: 1.5px solid #f2c9d8; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #b83a60; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #7a2848; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #f2c9d8; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #d9527a; background: #fff0f5; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #d9527a; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #d9527a;
+    color: #d9527a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #b83a60;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ffe3ec; color: #b83a60;
+    border: 1px solid #f2b8cc; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ffd0e0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🍂 メグルの庭<small>— 季節と生物（動物の活動・植物の成長） —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_doubutsu" title="動物の1年のようすを見つけよう">★</div>
+    <div class="badge" id="bd_m_shokubutsu" title="植物の1年のようすを見つけよう">★</div>
+    <div class="badge" id="bd_m_meguru" title="1年をめぐる、生き物カレンダー">★</div>
+    <div class="badge" id="bd_m_kion" title="気温と生き物の関係">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">メグルの庭</div>
+    <div id="locChip">メグルの庭</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🍂 メグルのこよみ 〜季節のうつりかわりを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#ff9ec0" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M60 6 Q66 14 60 20" fill="none"/>
+              <path d="M60 114 Q54 122 60 128" fill="none"/>
+              <path d="M6 66 Q14 60 20 66" fill="none"/>
+              <path d="M102 66 Q108 72 114 66" fill="none"/>
+              <path d="M20 26 Q28 30 26 38" fill="none"/>
+              <path d="M100 26 Q92 30 94 38" fill="none"/>
+              <path d="M20 106 Q28 102 26 94" fill="none"/>
+              <path d="M100 106 Q92 102 94 94" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#meguruGrad)" stroke="#7a1a3a" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="meguruGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fff0f5"/>
+                <stop offset="55%" stop-color="#ff9ec0"/>
+                <stop offset="100%" stop-color="#d9527a"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#7a1a3a"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#7a1a3a"/>
+            </g>
+            <path d="M48 80 Q60 88 72 80" fill="none" stroke="#7a1a3a" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#e8a33d" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#e8a33d" opacity=".5"/>
+          </svg>
+          <div class="catname"><ruby>季節<rt>きせつ</rt></ruby>の<ruby>巡<rt>めぐ</rt></ruby>りから生まれた<ruby>精霊<rt>せいれい</rt></ruby> メグル</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🍂 メグルの庭ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   メグルの庭 — 季節と生物・動物の活動/植物の成長（小4理科・生命分野5作目・協力型・1ファイル）
+   動物の1年のようすを見つけよう（発見型）→ 植物の1年のようすを見つけよう（発見型）→
+   1年をめぐる、生き物カレンダー（メイン操作・①〜⑧の時間送り）→ 気温と生き物の関係（発見/比較型）→
+   はかせ（季節と暮らしの知恵）。
+   数値：学習指導要領・小4理科「季節と生物」＝動物の活動、植物の成長は暖かい季節・寒い季節などに
+   よって違いがある。東京の月別平均気温の平年値（1991〜2020年、気象庁）：1月5.4℃・3月9.4℃・
+   4月14.3℃・6月21.9℃・8月26.9℃・10月18.0℃・11月12.5℃・12月7.7℃。東京のサクラ開花日は
+   平年3月下旬ごろ（気象庁生物季節観測）。ツバメは3月に西日本、4月に東日本の広範囲へ飛来し、
+   あたたかい季節を日本ですごした後、寒くなると南の国へ旅立つ。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+function lerpColor(c0, c1, f) {
+  const p = parseInt(c0.slice(1), 16), q = parseInt(c1.slice(1), 16);
+  const r0 = (p >> 16) & 255, g0 = (p >> 8) & 255, b0 = p & 255;
+  const r1 = (q >> 16) & 255, g1 = (q >> 8) & 255, b1 = q & 255;
+  return `rgb(${Math.round(lerp(r0, r1, f))},${Math.round(lerp(g0, g1, f))},${Math.round(lerp(b0, b1, f))})`;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  kisetsu: ruby('季節', 'きせつ'),
+  ikimono: ruby('生', 'い') + 'き' + ruby('物', 'もの'),
+  katsudou: ruby('活動', 'かつどう'),
+  kion: ruby('気温', 'きおん'),
+  su: ruby('巣', 'す'),
+  wataridori: ruby('渡', 'わた') + 'り' + ruby('鳥', 'どり'),
+  kouyou: ruby('紅葉', 'こうよう'),
+  fuyume: ruby('冬芽', 'ふゆめ'),
+  koromogae: ruby('衣替', 'ころもが') + 'え',
+  shun: ruby('旬', 'しゅん'),
+  mimamoru: ruby('見守', 'みまも') + 'る',
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_doubutsu：動物の1年のようすを見つけよう（発見型）
+const DOUBUTSU_CARDS = [
+  { key: 0, num: '①', icon: '🐦', name: 'ツバメがもどってくる', txt: `あたたかく なると、${W.wataridori}の ツバメが 南の 国から もどってきて、屋根の下などに ${W.su}を 作る。` },
+  { key: 1, num: '②', icon: '🦋', name: 'こん虫の活動が最も活発', txt: `あつく なると、チョウや ほかの こん虫の ${W.katsudou}が いちばん 活発に なる。` },
+  { key: 2, num: '③', icon: '🍂', name: '動物の動きがゆっくりに', txt: `すずしく なると、見かける ${W.ikimono}の 数が へって、動きも ゆっくりに なる。` },
+  { key: 3, num: '④', icon: '🥚', name: 'たまごですごす虫も', txt: `寒く なると、カマキリなどの こん虫は たまごの すがたで 冬を こす。多くの 動物は ${W.katsudou}を ひかえる。` },
+];
+
+// m_shokubutsu：植物の1年のようすを見つけよう（発見型・サクラの定点観察）
+const SHOKUBUTSU_CARDS = [
+  { key: 0, num: '①', icon: '🌸', name: 'サクラが花をさかせる', txt: `あたたかく なると、サクラの 花が さく。えだが のびて、新しい 葉も 出てくる。` },
+  { key: 1, num: '②', icon: '🌳', name: '緑の葉がしげる', txt: `あつく なると、葉が 大きく そだち、こい 緑色に なって しげる。` },
+  { key: 2, num: '③', icon: '🍁', name: '葉の色が変わる（紅葉）', txt: `すずしく なると、葉の 色が 黄色や 赤に 変わる。これが ${W.kouyou}。` },
+  { key: 3, num: '④', icon: '🌱', name: '冬芽ですごす', txt: `寒く なると、葉が 落ちて、えだの先の「${W.fuyume}」の すがたで 春を まつ。` },
+];
+
+// m_meguru：1年をめぐる、生き物カレンダー（メイン操作・時間送り①〜⑧）
+// 東京の月別平均気温の平年値（1991〜2020年、気象庁）から8か月を抽出。サクラは①〜④で開花〜葉しげる、
+// ⑤〜⑧で紅葉〜落葉。ツバメは②西日本に飛来→③東日本で巣作り→④ひな誕生→⑤活発→⑥南へ旅立ち始め→⑦不在。
+const MONTH_LABELS = ['1月', '3月', '4月', '6月', '8月', '10月', '11月', '12月'];
+const TEMP_STEPS = [5.4, 9.4, 14.3, 21.9, 26.9, 18.0, 12.5, 7.7];
+const SAKURA_COUNT = [0, 8, 40, 38, 36, 28, 10, 0];
+const SAKURA_COLORS = ['#f5b8c8', '#f5b8c8', '#ff9ec4', '#4caf50', '#2e7d32', '#e8a33d', '#c9502e', '#c9502e'];
+const TSUBAME_MODES = ['absent', 'flying', 'nesting', 'chicks', 'flying', 'flying', 'absent', 'absent'];
+const MEGURU_MESSAGES = [
+  `①は 1月。サクラは ${W.fuyume}の すがた、ツバメは 南の 国で 冬を すごしているよ。`,
+  `②は 3月。サクラの えだに つぼみが ふくらみ、ツバメが 西日本に もどってきたよ。`,
+  `③は 4月。サクラが 満開に なり、ツバメは 東日本にも 広がって、${W.su}を 作り始めたよ。`,
+  `④は 6月。サクラの 葉が しげり、ツバメの ひなが 生まれたよ。`,
+  `⑤は 8月。サクラは こい 緑色、ツバメは 元気に 飛び回って 虫を つかまえているよ。`,
+  `⑥は 10月。サクラの 葉が ${W.kouyou}し 始め、ツバメは 南へ 旅立ち始めたよ。`,
+  `⑦は 11月。サクラの 葉が 落ち、ツバメは もう 日本を はなれたよ。`,
+  `⑧は 12月。サクラは また 裸の えだに もどり、ツバメも いない。1年が ひとめぐり したね。`,
+];
+
+// m_kion：気温と生き物の関係（発見/比較型・m_meguruと同じ実測値を再利用）
+const KION_CARDS = [
+  { key: 0, num: '①', icon: '🌡️', name: '4月　やく14℃', txt: `4月の 東京の ${W.kion}は 平均 やく14℃（気象庁の 平年値）。サクラが さき、ツバメが もどってくる 季節。` },
+  { key: 1, num: '②', icon: '🌡️', name: '8月　やく27℃', txt: `8月の 東京の ${W.kion}は 平均 やく27℃。1年で いちばん あつく、${W.ikimono}の ${W.katsudou}も いちばん 活発に なる。` },
+  { key: 2, num: '③', icon: '🌡️', name: '10月　やく18℃', txt: `10月の 東京の ${W.kion}は 平均 やく18℃。すずしく なり、${W.ikimono}の 数も へっていく。` },
+  { key: 3, num: '④', icon: '🌡️', name: '1月　やく5℃', txt: `1月の 東京の ${W.kion}は 平均 やく5℃。1年で いちばん 寒く、${W.katsudou}している ${W.ikimono}は とても 少ない。` },
+];
+
+// はかせ：季節と暮らしの知恵（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '👕', name: '衣替え', txt: `${W.kisetsu}に 合わせて 服を 変える「${W.koromogae}」は、${W.kion}の 変化に 合わせた 昔からの 知恵。` },
+  { key: 1, letter: 'い', icon: '🍉', name: '旬の食べ物', txt: `野菜や くだものには、いちばん おいしく なる「${W.shun}」の ${W.kisetsu}が ある。夏は スイカ、秋は サツマイモなど。` },
+  { key: 2, letter: 'う', icon: '🐦', name: '渡り鳥を見守る', txt: `ツバメの ${W.su}を むやみに こわしたり、近づきすぎたり しないで、そっと ${W.mimamoru}ことも 大切。` },
+  { key: 3, letter: 'え', icon: '🐛', name: '冬ごしの生き物にやさしく', txt: `たまごや 土の 中で 冬を こす 虫たちも いる。落ち葉や 土を むやみに さわらないように 気を つけよう。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'doubutsu',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  doubutsuFound: new Set(),
+  shokubutsuFound: new Set(),
+  meguruIdx: 0,
+  meguruIdxDisplay: 0,
+  kionFound: new Set(),
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZap = () => { tone(880, 0, 0.08, 'square', 0.05); tone(1200, 0.05, 0.06, 'square', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#fffaf9'); g.addColorStop(1, '#f5c9d8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#d9527a' : '#f2c9d8';
+    gctx.fill(); gctx.strokeStyle = '#d9527a'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#7a2848'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#7a2848'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．動物の1年のようすを見つけよう（発見型） ----------
+function drawDoubutsuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, DOUBUTSU_CARDS, S.doubutsuFound, 4, '①〜④をタッチして、動物の1年のようすを見つけよう');
+}
+
+// ---------- 2．植物の1年のようすを見つけよう（発見型） ----------
+function drawShokubutsuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SHOKUBUTSU_CARDS, S.shokubutsuFound, 4, '①〜④をタッチして、サクラの1年のようすを見つけよう');
+}
+
+// ---------- サクラの木（枝ぶり＋花/葉/紅葉を点の集まりで表現） ----------
+function drawSakuraTree(X, Y, sc, v) {
+  const trunkX = 280, baseY = 520, topY = 280;
+  gctx.strokeStyle = '#7a5a3a'; gctx.lineWidth = 16 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(trunkX), Y(baseY)); gctx.lineTo(X(trunkX), Y(topY)); gctx.stroke();
+  gctx.lineWidth = 8 * sc;
+  gctx.beginPath(); gctx.moveTo(X(trunkX), Y(topY + 30)); gctx.lineTo(X(trunkX - 60), Y(topY - 20)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(trunkX), Y(topY + 30)); gctx.lineTo(X(trunkX + 60), Y(topY - 20)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(trunkX), Y(topY + 10)); gctx.lineTo(X(trunkX), Y(topY - 40)); gctx.stroke();
+
+  const i0 = clamp(Math.floor(v), 0, 7), i1 = clamp(Math.ceil(v), 0, 7), f = v - i0;
+  const count = Math.round(lerp(SAKURA_COUNT[i0], SAKURA_COUNT[i1], f));
+  const color = lerpColor(SAKURA_COLORS[i0], SAKURA_COLORS[i1], f);
+  const cx = trunkX, cy = 250, rx = 108, ry = 66, GA = 137.5 * Math.PI / 180;
+  for (let i = 0; i < count; i++) {
+    const ang = i * GA, rad = Math.sqrt(i / 40);
+    const px = cx + Math.cos(ang) * rad * rx, py = cy + Math.sin(ang) * rad * ry;
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 8 * sc, 0, TAU);
+    gctx.fillStyle = color; gctx.fill();
+  }
+}
+
+// ---------- 家とツバメの巣 ----------
+function drawHouseAndSwallow(X, Y, sc, v, t) {
+  gctx.beginPath();
+  gctx.moveTo(X(600), Y(300)); gctx.lineTo(X(720), Y(190)); gctx.lineTo(X(840), Y(300)); gctx.closePath();
+  gctx.fillStyle = '#c9502e'; gctx.fill(); gctx.strokeStyle = '#8a3018'; gctx.lineWidth = 2 * sc; gctx.stroke();
+  gctx.fillStyle = '#f5e8d8'; gctx.fillRect(X(620), Y(300), (840 - 620) * sc, (520 - 300) * sc);
+  gctx.strokeStyle = '#c9a878'; gctx.lineWidth = 2 * sc; gctx.strokeRect(X(620), Y(300), (840 - 620) * sc, (520 - 300) * sc);
+  gctx.fillStyle = '#8ab8d9'; gctx.fillRect(X(700), Y(360), 40 * sc, 40 * sc);
+
+  const idxNow = clamp(Math.round(v), 0, 7);
+  const mode = TSUBAME_MODES[idxNow];
+  const nestBuilt = idxNow >= 2;
+  const nestX = 700, nestY = 305;
+  if (nestBuilt) {
+    gctx.beginPath(); gctx.ellipse(X(nestX), Y(nestY), 22 * sc, 12 * sc, 0, 0, TAU);
+    gctx.fillStyle = '#a87850'; gctx.fill(); gctx.strokeStyle = '#7a5a3a'; gctx.lineWidth = 2 * sc; gctx.stroke();
+  }
+  if (mode === 'nesting' || mode === 'chicks') {
+    gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('🐦', X(nestX), Y(nestY - 14));
+    if (mode === 'chicks') {
+      [-12, 0, 12].forEach(dx => {
+        gctx.beginPath(); gctx.arc(X(nestX + dx), Y(nestY + 2), 5 * sc, 0, TAU);
+        gctx.fillStyle = '#ffe08a'; gctx.fill(); gctx.strokeStyle = '#c9a020'; gctx.lineWidth = 1 * sc; gctx.stroke();
+      });
+    }
+  } else if (mode === 'flying') {
+    const bx = 380 + (idxNow * 70) % 420, by = 140 + Math.sin(t * 2) * 10;
+    gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('🐦', X(bx), Y(by));
+  }
+}
+
+// ---------- 3．1年をめぐる、生き物カレンダー（メイン操作・時間送り①〜⑧） ----------
+function drawMeguruScene(X, Y, sc, t) {
+  bgFill(X, Y, sc);
+  gctx.strokeStyle = '#e8b8c8'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(50), Y(520)); gctx.lineTo(X(950), Y(520)); gctx.stroke();
+  const v = S.meguruIdxDisplay;
+  const idxNow = clamp(Math.round(v), 0, 7);
+  drawSakuraTree(X, Y, sc, v);
+  drawHouseAndSwallow(X, Y, sc, v, t);
+  const temp = lerpArr(TEMP_STEPS, v);
+  gctx.fillStyle = '#7a2848'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[idxNow]}　${MONTH_LABELS[idxNow]}　やく${Math.round(temp)}℃`, X(500), Y(50));
+}
+
+// ---------- 4．気温と生き物の関係（発見/比較型） ----------
+function drawKionScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KION_CARDS, S.kionFound, 4, '①〜④をタッチして、気温と生き物の関係を見つけよう');
+}
+
+// ---------- 5．はかせ：季節と暮らしの知恵 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、季節と暮らしの知恵を見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'doubutsu') drawDoubutsuScene(X, Y, sc);
+  else if (S.scene === 'shokubutsu') drawShokubutsuScene(X, Y, sc);
+  else if (S.scene === 'meguru') drawMeguruScene(X, Y, sc, t);
+  else if (S.scene === 'kion') drawKionScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- メグルのこよみ（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fffaf9'); grd.addColorStop(1, '#ffc2d4');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#d9527a';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffb8d088'); g2.addColorStop(1, 'rgba(255,184,208,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#d9527a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🍂', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#d9527a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#7a2848';
+    sctx.fillText(txt, R, ly);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#d9527a', '#ff9ec0', '#e8a33d', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    doubutsu: '🐦 動物の1年のようすを見つけよう',
+    shokubutsu: '🌸 植物の1年のようすを見つけよう',
+    meguru: '🍂 1年をめぐる、生き物カレンダー',
+    kion: '🌡️ 気温と生き物の関係',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🍂 メグルの庭 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'メグルの庭';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_doubutsu', 'm_shokubutsu', 'm_meguru', 'm_kion', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'doubutsu', icon: '🐦', title: '動物の1年のようすを見つけよう',
+    setup: () => { S.doubutsuFound = new Set(DOUBUTSU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🐦', name: '季節で動物の活動が変わる' }),
+    text: () => `あたたかい 季節ほど、動物の ${W.katsudou}は 活発に なったね。` },
+  { scene: 'shokubutsu', icon: '🌸', title: '植物の1年のようすを見つけよう',
+    setup: () => { S.shokubutsuFound = new Set(SHOKUBUTSU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🌸', name: 'サクラも季節でようすが変わる' }),
+    text: () => `サクラは 春に 花が さき、冬は ${W.fuyume}に もどったね。` },
+  { scene: 'meguru', icon: '🍂', title: '1年をめぐる、生き物カレンダー',
+    setup: () => { S.meguruIdxDisplay = 7; },
+    scope: () => ({ type: 'point', icon: '📅', name: MONTH_LABELS[7] + '　やく' + Math.round(TEMP_STEPS[7]) + '℃' }),
+    text: () => `サクラも ツバメも、1年を通して 大きく すがたを 変えていったね。` },
+  { scene: 'kion', icon: '🌡️', title: '気温と生き物の関係',
+    setup: () => { S.kionFound = new Set(KION_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🌡️', name: '気温が高いほど活発' }),
+    text: () => `${W.kion}が 高い ${W.kisetsu}ほど、${W.ikimono}の ${W.katsudou}は 活発に なったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'doubutsu', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🐦🌸🍂🌡️</div>
+        <h1>メグルの庭</h1>
+        <div class="sub">〜 ${W.kisetsu}と 生物（動物の ${W.katsudou}・植物の 成長） 〜</div>
+        <p class="talk">ようこそ！ わたしは ${W.kisetsu}の 巡りから 生まれた ${W.seirei}、<b>メグル</b>。この 庭には、サクラの 木と、ツバメの ${W.su}が あるよ。1年を通して、動物や 植物の ようすは どう 変わっていくと 思う？<br>
+        今日は、1年を 早送りで たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">ツバメは、1年中 日本に いると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🏠</span><b>ア</b> 1年中いる</div>
+          <div class="vcard" data-v="1"><span class="vicon">✈️</span><b>イ</b> あたたかい季節だけいて、寒くなると南の方へ旅立つ</div>
+          <div class="vcard" data-v="2"><span class="vicon">❄️</span><b>ウ</b> 寒い季節だけいる</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：動物の1年のようすを見つけよう（発見型） ---
+  m_doubutsu: {
+    enter() {
+      Object.assign(S, { scene: 'doubutsu', scope: { type: 'idle' }, doubutsuFound: new Set() });
+      updateLoc();
+      setWish('🐦', `①〜④を タッチして、動物の 1年の ようすを 見つけよう。`);
+      say(`${W.kisetsu}に よって、動物の ${W.katsudou}は どう 変わるかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(DOUBUTSU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.doubutsuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.doubutsuFound.size >= DOUBUTSU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.doubutsuFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`動物の ${W.katsudou}は、あたたかい ${W.kisetsu}ほど どうなる？`);
+      setButtons(choiceRow(['活発になる', '静かになる', 'かわらない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_doubutsu'); S.phase = 'done';
+        say(`せいかい！ あたたかく なると、ツバメが もどって きたり、こん虫の ${W.katsudou}が 活発に なったり する。寒く なると 逆に、動物の ${W.katsudou}は しずかに なるんだ。`);
+        setButtons([{ label: 'つぎへ（植物の1年のようすを見つけよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['活発になる', '静かになる', 'かわらない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：植物の1年のようすを見つけよう（発見型） ---
+  m_shokubutsu: {
+    enter() {
+      Object.assign(S, { scene: 'shokubutsu', scope: { type: 'idle' }, shokubutsuFound: new Set() });
+      updateLoc();
+      setWish('🌸', `①〜④を タッチして、サクラの 1年の ようすを 見つけよう。`);
+      say(`サクラの 木も、${W.kisetsu}に よって 大きく すがたを 変えるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHOKUBUTSU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.shokubutsuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.shokubutsuFound.size >= SHOKUBUTSU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.shokubutsuFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`サクラの 葉が 赤や 黄色に 変わるのは、どの ${W.kisetsu}？`);
+      setButtons(choiceRow(['春', '夏', '秋'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('m_shokubutsu'); S.phase = 'done';
+        say(`せいかい！ すずしく なる 秋に、サクラの 葉は ${W.kouyou}する。そして 寒く なると 葉が 落ちて、${W.fuyume}の すがたで 春を まつんだ。`);
+        setButtons([{ label: 'つぎへ（1年をめぐる、生き物カレンダー）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['春', '夏', '秋'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：1年をめぐる、生き物カレンダー（メイン操作・時間送り①〜⑧） ---
+  m_meguru: {
+    enter() {
+      Object.assign(S, { scene: 'meguru', meguruIdx: 0, meguruIdxDisplay: 0, scope: { type: 'point', icon: '📅', name: MONTH_LABELS[0] + '　やく' + Math.round(TEMP_STEPS[0]) + '℃' } });
+      updateLoc();
+      setWish('🍂', `「すすめる」ボタンで ①1月から ⑧12月まで、1年を すすめていって、サクラと ツバメの ようすを たしかめよう。`);
+      say(MEGURU_MESSAGES[0]);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.meguruIdx >= MONTH_LABELS.length - 1) { this.finish(); return; }
+      setControls([{ label: `🍂 すすめる（つぎの月へ）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.meguruIdx >= MONTH_LABELS.length - 1) return;
+      setControls([]);
+      const fromV = S.meguruIdx, toV = S.meguruIdx + 1;
+      startTween(fromV, toV, 0.8, v => {
+        S.meguruIdxDisplay = v;
+        const idxNow = clamp(Math.round(v), 0, 7);
+        S.scope = { type: 'point', icon: '📅', name: MONTH_LABELS[idxNow] + '　やく' + Math.round(lerpArr(TEMP_STEPS, v)) + '℃' };
+      }, () => {
+        S.meguruIdx++; S.meguruIdxDisplay = S.meguruIdx;
+        sTap();
+        say(MEGURU_MESSAGES[S.meguruIdx]);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑧まで、1年を すすめたね。ツバメは 1年中、日本に いたかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`ツバメは、1年中 日本に いると 思う？`);
+      setButtons(choiceRow(['1年中いる', 'あたたかい季節だけいて、寒くなると南の方へ旅立つ', '寒い季節だけいる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_meguru'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ ツバメは あたたかい ${W.kisetsu}だけ 日本で すごし、寒く なると 南の 国へ 旅立つ「${W.wataridori}」。サクラも ツバメも、${W.kion}の 変化に 合わせて、1年を通じて 大きく すがたを 変えているんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（気温と生き物の関係）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、⑥〜⑧の ツバメの ようすを 思い出してみよう。`);
+        setButtons(choiceRow(['1年中いる', 'あたたかい季節だけいて、寒くなると南の方へ旅立つ', '寒い季節だけいる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：気温と生き物の関係（発見/比較型） ---
+  m_kion: {
+    enter() {
+      Object.assign(S, { scene: 'kion', scope: { type: 'idle' }, kionFound: new Set() });
+      updateLoc();
+      setWish('🌡️', `①〜④を タッチして、${W.kion}と ${W.ikimono}の 関係を 見つけよう。`);
+      say(`4つの ${W.kisetsu}の 気温を くらべてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KION_CARDS.map(c => ({
+        label: c.num + ' ' + (S.kionFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.kionFound.size >= KION_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.kionFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`${W.kion}が 高い ${W.kisetsu}ほど、${W.ikimono}の ${W.katsudou}は どうなる？`);
+      setButtons(choiceRow(['活発になる', '静かになる', 'かわらない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_kion'); S.phase = 'done';
+        say(`せいかい！ ${W.kion}が 高い ${W.kisetsu}ほど、動物や 植物の ${W.katsudou}・成長は 活発に なる。反対に 寒い ${W.kisetsu}は、${W.ikimono}の 数も 少なく なるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['活発になる', '静かになる', 'かわらない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：季節と暮らしの知恵 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.kisetsu}と 暮らしの 知恵を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`ツバメの ${W.su}を 見つけたら、どうするのが いい？`);
+      setButtons(choiceRow(['そっと見守る', 'さわって確かめる', 'こわす'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ツバメの ${W.su}を 見つけたら、そっと ${W.mimamoru}のが いちばん。${W.kisetsu}の 変化に あわせた 暮らしの 知恵や、生き物への やさしさを 大切に しよう。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['そっと見守る', 'さわって確かめる', 'こわす'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ メグルの庭 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 動物の ${W.katsudou}は、あたたかい 季節ほど（<span class="blankWord" data-a="活発">？？？</span>）に なる。<br>
+        ② サクラは、寒く なると 葉が 落ちて、（<span class="blankWord" data-a="冬芽">？？？</span>）の すがたで 春を 待つ。<br>
+        ③ ツバメは、寒く なると（<span class="blankWord" data-a="南の国">？？？</span>）へ 旅立つ。<br>
+        ④ 気温が 高い 季節ほど、生き物の ${W.katsudou}は（<span class="blankWord" data-a="活発">？？？</span>）に なる。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ あたたかい季節だけいて、寒くなると南の方へ旅立つ</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①近くの木や花を観察して、季節によってどう変わるか記録してみよう。<br>②図鑑やインターネットで、他にどんな渡り鳥がいるか調べてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#d9527a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「動物の活動は季節でどう変わる？」「サクラの葉が紅葉するのはいつ？」「ツバメは1年中日本にいる？」`);
+      setButtons([
+        { label: '🐦 動物の1年の図', cls: 'sub', cb: () => this.show('doubutsu') },
+        { label: '🌸 植物の1年の図', cls: 'sub', cb: () => this.show('shokubutsu') },
+        { label: '🍂 生き物カレンダーの図', cls: 'sub', cb: () => this.show('meguru') },
+        { label: '🌡️ 気温と生き物の図', cls: 'sub', cb: () => this.show('kion') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_meguru などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>メグルの庭 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #d9527a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd54f; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #ffe3ec; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #ffe3ec; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="meguru.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🍂 メグルの庭 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      ツバメは、1年中 日本にいると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 1年中いる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> あたたかい季節だけいて、寒くなると南の方へ旅立つ</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 寒い季節だけいる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．動物の1年のようすを見つけよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①ツバメがもどる</th><th>②こん虫が活発</th><th>③動物の動きゆっくり</th><th>④たまごですごす虫</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      動物の活動は、あたたかい季節ほど（活発になる ／ 静かになる ／ かわらない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．植物の1年のようすを見つけよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①花がさく</th><th>②緑の葉がしげる</th><th>③紅葉</th><th>④冬芽ですごす</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      サクラの葉が赤や黄色に変わるのは、どの季節？（春 ／ 夏 ／ 秋）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．1年をめぐる、生き物カレンダー</span>
+    <div class="secBody">
+      「すすめる」ボタンで①〜⑧を進め、気温を記録しよう。
+      <table class="levelTable">
+        <tr><th>月</th><th>①1月</th><th>③4月</th><th>⑤8月</th><th>⑧12月</th></tr>
+        <tr><td>気温(℃)</td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      ツバメは、1年中 日本にいると思う？（1年中いる ／ あたたかい季節だけいて南へ旅立つ ／ 寒い季節だけいる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．気温と生き物の関係</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①4月やく14℃</th><th>②8月やく27℃</th><th>③10月やく18℃</th><th>④1月やく5℃</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      気温が高い季節ほど、生き物の活動は（活発になる ／ 静かになる ／ かわらない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（季節と暮らしの知恵）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 衣替え</th><th>い 旬の食べ物</th><th>う 渡り鳥を見守る</th><th>え 冬ごしの虫にやさしく</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      ツバメの巣を見つけたら、どうするのがいい？（そっと見守る ／ さわって確かめる ／ こわす）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 動物の活動は、あたたかい季節ほど（<span class="fillLine sm"></span>）になる。<br>
+      ② サクラは、寒くなると葉が落ちて、（<span class="fillLine"></span>）のすがたで春を待つ。<br>
+      ③ ツバメは、寒くなると（<span class="fillLine"></span>）へ旅立つ。<br>
+      ④ 気温が高い季節ほど、生き物の活動は（<span class="fillLine sm"></span>）になる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌸</span>
+        <div>
+          ①近くの木や花を観察して、季節によってどう変わるか記録してみよう。<br>
+          ②図鑑やインターネットで、他にどんな渡り鳥がいるか調べてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　メグルの庭 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】メグルの庭 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4理科「季節と生物」・学力幅あり・協力型／ 使うもの：「meguru.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・生命分野の5作目です（発芽＝めばえラボ、チョウの育ち方＝アオバの葉かげ、動物のたんじょう＝シズクの淵、水の通り道＝ミャクの森に続く）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_meguru</b> などで途中再開（m_doubutsu／m_shokubutsu／m_meguru／m_kion／hakase／ending）</li>
+      <li>☐ 可能であれば、学校の校庭や近所のサクラの木・渡り鳥の話題を事前に振っておくと、画面の内容と実感が結びつきやすい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🐦 動物の1年のようすを見つけよう</td><td>①〜④を発見し、季節で動物の活動が変わることを確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜16分</td><td>🌸 植物の1年のようすを見つけよう</td><td>①〜④を発見し、サクラの1年の変化を確認。シート３に記録</td></tr>
+      <tr><td class="min">16〜28分</td><td>🍂 1年をめぐる、生き物カレンダー（<b>今日の見せ場</b>）</td><td>「すすめる」で①〜⑧を進め、サクラとツバメが同時に変化する様子を観察。よそうタイムをここで回収。シート４に記録</td></tr>
+      <tr><td class="min">28〜35分</td><td>🌡️ 気温と生き物の関係</td><td>①〜④を発見し、気温と活動の関係に気づく。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🔎 はかせチャレンジ</td><td>季節と暮らしの知恵（衣替え・渡り鳥を見守るなど）を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「近くの木や花を観察しよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「気温と生き物の関係」を右下「つぎ▶」でスキップ可（<b>生き物カレンダー・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ あたたかい季節だけいて、寒くなると南の方へ旅立つ</b>／動物の1年＝<b>活発になる</b>／
+      植物の1年＝<b>秋</b>／生き物カレンダー＝<b>イ（同上）</b>／気温との関係＝<b>活発になる</b>／
+      はかせ＝<b>そっと見守る</b>／まとめ＝①<b>活発</b>　②<b>冬芽</b>　③<b>南の国</b>　④<b>活発</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：動物の活動、植物の成長は暖かい季節・寒い季節などによって違いがある（小学校学習指導要領・理科・第4学年）</li>
+      <li>東京の月別平均気温の平年値（1991〜2020年、気象庁）：1月5.4℃・3月9.4℃・4月14.3℃・6月21.9℃・8月26.9℃・10月18.0℃・11月12.5℃・12月7.7℃</li>
+      <li>東京のサクラ開花日は平年3月下旬ごろ（気象庁の生物季節観測。2026年は3月19日で平年より5日早いと発表された）</li>
+      <li>ツバメは3月に西日本・南西諸島、4月に東日本の広範囲、4月下旬には北海道にも飛来する。あたたかい季節を日本ですごし、寒くなると南の国へ旅立つ渡り鳥</li>
+      <li>気温が高い季節ほど、動物の活動や植物の成長は活発になる。数値は「典型的な1年の変化パターン」を表す目安値（実際の気温・生き物の様子は年や地域により変わる）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「1年をめぐる、生き物カレンダー」が今日いちばんの見せ場。1人ずつ交代で「すすめる」ボタンを押させると全員が参加できる</li>
+      <li>サクラの花や葉の色、ツバメの巣の様子が段階ごとに変わっていくことに気づかせ、実際に見たことがあるかを聞いてみると実感が深まる</li>
+      <li>「今はどの季節？」「今日の外の様子は画面のどの段階に近い？」と結びつけて話すとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「動物の活動は季節でどう変わる？」「サクラの葉が紅葉するのはいつ？」「ツバメは1年中日本にいる？」</li>
+      <li>おうちミッションでは、近くの木や花を実際に観察し、画面の学びと日常の体験を結びつける狙い。渡り鳥について調べる活動は生物の多様性への興味を広げるきっかけになる</li>
+      <li>理科・生命分野は本作でめばえラボ（発芽）・アオバの葉かげ（チョウの育ち方）・シズクの淵（動物のたんじょう）・ミャクの森（水の通り道）に続く5作目。理科の未着手単元は理科ロードマップに整理済み</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
