@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ミオの道場 — 人の体のつくりと運動（骨・筋肉・関節） たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eafaf5 0%, #d3f0e6 45%, #a8dcc8 100%);
+    color: #1a4a3a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #1f7a5c; text-shadow: 0 0 14px rgba(31, 122, 92, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #0f6a44; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #dff3ea; border: 2px solid #a8d9c2;
+    font-size: clamp(16px, 1.8vw, 26px); color: #8fc4ab;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #b8f0d0, #1f9c6c);
+    border-color: #0f6a44; color: #0a3a26;
+    box-shadow: 0 0 16px rgba(31, 156, 108, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #fbfffb 0%, #dff3ea 60%, #b8e0cc 100%);
+    border: 3px solid #4fae82;
+    box-shadow: inset 0 0 40px rgba(10, 80, 50, .14), 0 4px 18px rgba(10, 80, 50, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #0f6a44; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #1f7a5c; color: #f2fff8; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(10, 80, 50, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(140, 200, 170, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #a8d9c2; cursor: pointer;
+    background: linear-gradient(180deg, #5fc99a, #1f7a5c); color: #fff;
+    box-shadow: 0 3px 0 #0d4a30; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #1f7a5c; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(10, 80, 50, .28), inset 0 0 24px rgba(20, 100, 60, .14);
+    flex-shrink: 0; background: #eafaf5;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #0f6a44;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #1f7a5c; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #f8fffbd9; border: 2px solid #cdeadd; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #0f6a44; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #1a4a3a;
+    border: 1.5px solid #cdeadd;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1f7a5c; background: #dff3ea; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #f8fffb, #dff3ea); color: #0f5a3c;
+    border: 2px solid #1f7a5c; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #1f7a5c; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #5fc99a, #1f7a5c); color: #f2fff8;
+    box-shadow: 0 3px 0 #0d4a30, 0 5px 12px rgba(10, 80, 50, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0d4a30; }
+  .btn.sub {
+    background: #dff3ea; color: #0f6a44; box-shadow: 0 3px 0 #c5e5d5;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #1a4a3a; box-shadow: 0 3px 0 #cdeadd; font-weight: 400; border: 1.5px solid #cdeadd; }
+  .btn.choice.picked { background: #dff3ea; outline: 3px solid #2fae7a; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(10, 50, 35, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #fbfffb, #d3f0e6);
+    border: 3px solid #4fae82; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(10, 60, 40, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #1f7a5c; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #1f7a5c; }
+  .panel .sub { color: #0f6a44; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #1a4a3a; border: 1.5px solid #cdeadd; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #0f6a44; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #1a4a3a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #cdeadd; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #2fae7a; background: #eafcf3; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #2fae7a; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #1f7a5c;
+    color: #1f7a5c; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #0f6a44;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #dff3ea; color: #0f6a44;
+    border: 1px solid #a8d9c2; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #cdeadd; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">💪 ミオの道場<small>— 人の体のつくりと運動（骨・筋肉・関節） —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_mitsukeru" title="骨・筋肉・関節ってなに？">★</div>
+    <div class="badge" id="bd_m_ude" title="うでを曲げる・のばすしくみ">★</div>
+    <div class="badge" id="bd_m_kansetsu" title="体のいろいろな関節を見つけよう">★</div>
+    <div class="badge" id="bd_m_doubutsu" title="手羽先で見る、動物の体のつくり">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ミオの道場</div>
+    <div id="locChip">ミオの道場</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">💪 ミオのめがね 〜見えないきんにくを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#5fc99a" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M60 6 Q66 14 60 20" fill="none"/>
+              <path d="M60 114 Q54 122 60 128" fill="none"/>
+              <path d="M6 66 Q14 60 20 66" fill="none"/>
+              <path d="M102 66 Q108 72 114 66" fill="none"/>
+              <path d="M20 26 Q28 30 26 38" fill="none"/>
+              <path d="M100 26 Q92 30 94 38" fill="none"/>
+              <path d="M20 106 Q28 102 26 94" fill="none"/>
+              <path d="M100 106 Q92 102 94 94" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#mioGrad)" stroke="#0f5a3c" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="mioGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#d8fff0"/>
+                <stop offset="55%" stop-color="#5fc99a"/>
+                <stop offset="100%" stop-color="#1f7a5c"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#0f4a30"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#0f4a30"/>
+            </g>
+            <path d="M48 80 Q60 88 72 80" fill="none" stroke="#0f4a30" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#e8593f" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#e8593f" opacity=".5"/>
+          </svg>
+          <div class="catname"><ruby>筋肉<rt>きんにく</rt></ruby>から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ミオ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">💪 ミオの道場ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ミオの道場 — 人の体のつくりと運動・骨/筋肉/関節（小4理科・人体分野3作目・協力型・1ファイル）
+   骨・筋肉・関節ってなに？（発見型）→ うでを曲げる・のばすしくみ（メイン操作・①〜⑦の数値階段）→
+   体のいろいろな関節を見つけよう（発見型）→ 手羽先で見る、動物の体のつくり（発見/比較型）→
+   はかせ（骨と筋肉を守る生活の知恵）。
+   数値：学習指導要領・小4理科「人の体のつくりと運動」＝人や他の動物の体には骨と筋肉があり、
+   骨と骨のつなぎ目の関節でさまざまな動きができること。肘関節の参考可動域は屈曲145°
+   （日本整形外科学会・日本リハビリテーション医学会「関節可動域表示ならびに測定法」、WebSearchで裏取り）。
+   うでを曲げる時は力こぶがわの筋肉（上腕二頭筋）がちぢみ、反対がわ（上腕三頭筋）はゆるむ
+   拮抗筋の関係。ニワトリの手羽先は骨・関節のつくりが人のうでと相同で理科教育の定番教材。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+function lerpColor(c0, c1, f) {
+  const p = parseInt(c0.slice(1), 16), q = parseInt(c1.slice(1), 16);
+  const r0 = (p >> 16) & 255, g0 = (p >> 8) & 255, b0 = p & 255;
+  const r1 = (q >> 16) & 255, g1 = (q >> 8) & 255, b1 = q & 255;
+  return `rgb(${Math.round(lerp(r0, r1, f))},${Math.round(lerp(g0, g1, f))},${Math.round(lerp(b0, b1, f))})`;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  hone: ruby('骨', 'ほね'),
+  kinniku: ruby('筋肉', 'きんにく'),
+  kansetsu: ruby('関節', 'かんせつ'),
+  magege: ruby('曲', 'ま') + 'げのばし',
+  tebasaki: ruby('手羽先', 'てばさき'),
+  junbiundou: ruby('準備運動', 'じゅんびうんどう'),
+  shisei: ruby('姿勢', 'しせい'),
+  futan: ruby('負担', 'ふたん'),
+  seichouki: ruby('成長期', 'せいちょうき'),
+  kossetsu: ruby('骨折', 'こっせつ'),
+  koutei: ruby('固定', 'こてい'),
+  houkou: ruby('方向', 'ほうこう'),
+  sasaeru: ruby('支', 'ささ') + 'える',
+  nitou: ruby('上腕二頭筋', 'じょうわんにとうきん'),
+  santou: ruby('上腕三頭筋', 'じょうわんさんとうきん'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_mitsukeru：骨・筋肉・関節ってなに？（発見型）
+const MITSUKERU_CARDS = [
+  { key: 0, num: '①', icon: '🦴', name: 'ほね（骨）', txt: `うでを さわると、かたい ぼうのような ものが ある。これが ${W.hone}。体を ささえる やくわりが あるよ。` },
+  { key: 1, num: '②', icon: '💪', name: 'きんにく（筋肉）', txt: `うでに 力を 入れると、もりっと 動く やわらかい 部分が ある。これが ${W.kinniku}。ちぢんだり ゆるんだり して 体を 動かす。` },
+  { key: 2, num: '③', icon: '📐', name: 'かんせつ（関節）', txt: `ひじを 曲げてみると、ほねと ほねの つなぎ目で 曲がる 部分が ある。これが ${W.kansetsu}。${W.kansetsu}が あるから、体を ${W.magege} できる。` },
+];
+
+// m_ude：うでを曲げる・のばすしくみ（メイン操作・数値階段①〜⑦）
+// ひじの角度①0°（まっすぐ）〜⑦145°（いっぱいに曲げる）。145°は日本整形外科学会・
+// 日本リハビリテーション医学会「関節可動域表示ならびに測定法」の肘関節屈曲の参考可動域（WebSearchで裏取り済み）。
+// 曲げる時は力こぶがわの筋肉（上腕二頭筋）がちぢみ、反対がわ（上腕三頭筋）はゆるむ拮抗筋の関係。
+const ANGLE_STEPS = [0, 24, 48, 73, 97, 121, 145];
+function bendDegFor(v) { return lerpArr(ANGLE_STEPS, v); }
+function bendFracFor(v) { return bendDegFor(v) / 145; }
+
+// m_kansetsu：体のいろいろな関節を見つけよう（発見型）
+const KANSETSU_CARDS = [
+  { key: 0, num: '①', icon: '🙆', name: '肩（かた）', txt: `肩は ボールのような 形の ${W.kansetsu}。うでを ぐるぐる いろいろな ${W.houkou}に 大きく 動かせる。` },
+  { key: 1, num: '②', icon: '🦵', name: 'ひざ', txt: `ひざは ちょうつがいのような ${W.kansetsu}。前と 後ろの 1つの ${W.houkou}だけに 曲がる（ひじと 同じ なかま）。` },
+  { key: 2, num: '③', icon: '🖐️', name: 'ゆび', txt: `ゆびには 小さな ${W.kansetsu}が いくつも 並んでいる。1本の ゆびが 何か所かで 曲がるのは この ため。` },
+  { key: 3, num: '④', icon: '🔄', name: 'くび', txt: `くびは 頭を ${W.sasaeru}ながら、横や 前後に 動かせる ${W.kansetsu}。` },
+];
+
+// m_doubutsu：手羽先で見る、動物の体のつくり（発見/比較型）
+const DOUBUTSU_CARDS = [
+  { key: 0, num: '①', icon: '💪', name: '人のうで', txt: `人の うでには、${W.hone}・${W.kansetsu}・${W.kinniku}が ある。うでを ${W.magege} できるのは、この 3つの おかげ。` },
+  { key: 1, num: '②', icon: '🍗', name: 'ニワトリの手羽先', txt: `${W.tebasaki}にも、人の うでと よく にた ${W.hone}・${W.kansetsu}が ある。${W.hone}の つくりが にているから、動かし方も にているんだ。` },
+];
+
+// はかせ：骨と筋肉を守る生活の知恵（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '🤸', name: '準備運動でケガを防ぐ', txt: `運動の 前に ストレッチなどの ${W.junbiundou}を すると、${W.kinniku}や ${W.kansetsu}を いためにくく なる。` },
+  { key: 1, letter: 'い', icon: '🧍', name: 'よいしせい', txt: `${W.shisei}が 悪いと、${W.hone}や ${W.kinniku}に よぶんな ${W.futan}が かかってしまう。` },
+  { key: 2, letter: 'う', icon: '🥛', name: 'カルシウムと日光', txt: `${W.seichouki}は、カルシウムを とり、日光を あびて ビタミンDを 作ることで、${W.hone}が 強くなる。` },
+  { key: 3, letter: 'え', icon: '🚑', name: 'もし骨がおれたら', txt: `もし ${W.kossetsu}したかもしれない 時は、むりに 動かさず、そのまま そっと ${W.koutei}して、すぐ 病院へ 行こう。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'mitsukeru',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  mitsukeruFound: new Set(),
+  udeIdx: 0,
+  udeIdxDisplay: 0,
+  kansetsuFound: new Set(),
+  doubutsuFound: new Set(),
+  hakaseFound: new Set(),
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZap = () => { tone(880, 0, 0.08, 'square', 0.05); tone(1200, 0.05, 0.06, 'square', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#fbfffb'); g.addColorStop(1, '#c5e8d5');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1f7a5c' : '#cdeadd';
+    gctx.fill(); gctx.strokeStyle = '#1f7a5c'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#1a4a3a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#1a4a3a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．骨・筋肉・関節ってなに？（発見型） ----------
+function drawMitsukeruScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, MITSUKERU_CARDS, S.mitsukeruFound, 3, '①〜③をタッチして、うでの中を見つけよう');
+}
+
+// ---------- うでの図（骨・筋肉・関節） ----------
+function drawArmXray(X, Y, sc, bendDeg) {
+  const shoulder = { x: 230, y: 260 };
+  const upperLen = 190, forearmLen = 210;
+  const elbow = { x: shoulder.x + upperLen, y: shoulder.y };
+  const rad = bendDeg * Math.PI / 180;
+  const wrist = { x: elbow.x + forearmLen * Math.cos(rad), y: elbow.y - forearmLen * Math.sin(rad) };
+  const bendFrac = clamp(bendDeg / 145, 0, 1);
+
+  function seg(p0, p1, r, fill, stroke) {
+    const ang = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+    const len = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+    gctx.save();
+    gctx.translate(X(p0.x), Y(p0.y));
+    gctx.rotate(ang);
+    gctx.beginPath();
+    gctx.roundRect(0, -r * sc, len * sc, r * 2 * sc, r * sc);
+    gctx.fillStyle = fill; gctx.fill();
+    if (stroke) { gctx.strokeStyle = stroke; gctx.lineWidth = 2 * sc; gctx.stroke(); }
+    gctx.restore();
+  }
+
+  // 皮ふ（うでの外形）
+  seg(shoulder, elbow, 46, '#ffe8d8', '#e8b896');
+  seg(elbow, wrist, 38, '#ffe8d8', '#e8b896');
+
+  // きんにく：力こぶがわ（上）と反対がわ（下）。曲げるほど力こぶがわがちぢんで盛り上がる
+  const PALE = '#f5d9b8', VIVID = '#e8593f';
+  const midX = (shoulder.x + elbow.x) / 2, midY = shoulder.y;
+  const bicepR = 24 + bendFrac * 20, tricepR = 24 + (1 - bendFrac) * 20;
+  gctx.beginPath(); gctx.ellipse(X(midX), Y(midY - 30), 44 * sc, bicepR * sc, 0, 0, TAU);
+  gctx.fillStyle = lerpColor(PALE, VIVID, bendFrac); gctx.fill();
+  gctx.strokeStyle = '#8a4a2e'; gctx.lineWidth = 2 * sc; gctx.stroke();
+  gctx.beginPath(); gctx.ellipse(X(midX), Y(midY + 30), 44 * sc, tricepR * sc, 0, 0, TAU);
+  gctx.fillStyle = lerpColor(PALE, VIVID, 1 - bendFrac); gctx.fill();
+  gctx.strokeStyle = '#8a4a2e'; gctx.lineWidth = 2 * sc; gctx.stroke();
+
+  // ほね（中心の線）
+  gctx.strokeStyle = '#b8a888'; gctx.lineWidth = 6 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(shoulder.x), Y(shoulder.y)); gctx.lineTo(X(elbow.x), Y(elbow.y)); gctx.stroke();
+  gctx.beginPath(); gctx.moveTo(X(elbow.x), Y(elbow.y)); gctx.lineTo(X(wrist.x), Y(wrist.y)); gctx.stroke();
+
+  // かんせつ（ひじ）
+  gctx.beginPath(); gctx.arc(X(elbow.x), Y(elbow.y), 12 * sc, 0, TAU);
+  gctx.fillStyle = '#fff'; gctx.fill(); gctx.strokeStyle = '#1f7a5c'; gctx.lineWidth = 3 * sc; gctx.stroke();
+
+  // 手
+  gctx.font = `${28 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('✋', X(wrist.x), Y(wrist.y));
+
+  // ラベル
+  gctx.font = `700 ${12 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillStyle = '#8a4a2e';
+  gctx.fillText('力こぶがわ', X(midX), Y(midY - 62));
+  gctx.fillText('反対がわ', X(midX), Y(midY + 62));
+}
+
+// ---------- 2．うでを曲げる・のばすしくみ（メイン操作・数値階段①〜⑦） ----------
+function drawUdeScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const v = S.udeIdxDisplay;
+  const idxNow = clamp(Math.round(v), 0, 6);
+  const bendDeg = bendDegFor(v);
+  drawArmXray(X, Y, sc, bendDeg);
+  gctx.fillStyle = '#1a4a3a'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[idxNow]}　ひじの角度　やく${Math.round(bendDeg)}°`, X(500), Y(50));
+}
+
+// ---------- 3．体のいろいろな関節を見つけよう（発見型） ----------
+function drawKansetsuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KANSETSU_CARDS, S.kansetsuFound, 4, '①〜④をタッチして、いろいろな関節を見つけよう');
+}
+
+// ---------- 4．手羽先で見る、動物の体のつくり（発見/比較型） ----------
+function drawDoubutsuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, DOUBUTSU_CARDS, S.doubutsuFound, 2, '①②をタッチして、人とニワトリのつくりをくらべよう');
+}
+
+// ---------- 5．はかせ：骨と筋肉を守る生活の知恵 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、骨と筋肉を守る知恵を見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'mitsukeru') drawMitsukeruScene(X, Y, sc);
+  else if (S.scene === 'ude') drawUdeScene(X, Y, sc);
+  else if (S.scene === 'kansetsu') drawKansetsuScene(X, Y, sc);
+  else if (S.scene === 'doubutsu') drawDoubutsuScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ミオのめがね（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fbfffb'); grd.addColorStop(1, '#b8e0cc');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'musclebar') {
+    drawMuscleBar(R, S.scope.bicep, S.scope.tricep);
+  } else if (mode === 'point') {
+    sctx.fillStyle = '#1f7a5c';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#b8f0d088'); g2.addColorStop(1, 'rgba(184,240,208,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#1f7a5c'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('💪', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#1f7a5c'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#1a4a3a';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawMuscleBar(R, bicepFrac, tricepFrac) {
+    const barW = R * 0.22, gap = R * 0.16;
+    const x1 = R - gap / 2 - barW, x2 = R + gap / 2;
+    const baseY = R * 1.42, maxH = R * 0.82;
+    function bar(x, frac, color) {
+      const hh = maxH * clamp(frac || 0, 0, 1);
+      sctx.fillStyle = '#eef7f0'; sctx.fillRect(x, baseY - maxH, barW, maxH);
+      sctx.fillStyle = color; sctx.fillRect(x, baseY - hh, barW, hh);
+      sctx.strokeStyle = '#1f7a5c'; sctx.lineWidth = 1.6; sctx.strokeRect(x, baseY - maxH, barW, maxH);
+    }
+    bar(x1, bicepFrac, '#e8593f');
+    bar(x2, tricepFrac, '#f5d9b8');
+    sctx.font = `700 ${R * 0.082}px sans-serif`; sctx.textAlign = 'center'; sctx.fillStyle = '#1a4a3a';
+    sctx.fillText('力こぶ', x1 + barW / 2, baseY + R * 0.11);
+    sctx.fillText('反対', x2 + barW / 2, baseY + R * 0.11);
+    label('きんにくの ちぢみぐあい');
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1f7a5c', '#5fc99a', '#e8593f', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    mitsukeru: '🔍 骨・筋肉・関節ってなに？',
+    ude: '💪 うでを曲げる・のばすしくみ',
+    kansetsu: '🔄 体のいろいろな関節を見つけよう',
+    doubutsu: '🍗 手羽先で見る、動物の体のつくり',
+    hakase: '🔎 はかせチャレンジ',
+    done: '💪 ミオの道場 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ミオの道場';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_mitsukeru', 'm_ude', 'm_kansetsu', 'm_doubutsu', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'mitsukeru', icon: '🔍', title: '骨・筋肉・関節ってなに？',
+    setup: () => { S.mitsukeruFound = new Set(MITSUKERU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '📐', name: '骨・筋肉・関節' }),
+    text: () => `うでには ${W.hone}・${W.kinniku}・${W.kansetsu}が あったね。` },
+  { scene: 'ude', icon: '💪', title: 'うでを曲げる・のばすしくみ',
+    setup: () => { S.udeIdxDisplay = 6; },
+    scope: () => ({ type: 'musclebar', bicep: 1, tricep: 0 }),
+    text: () => `うでを 曲げると、力こぶがわの きんにくが ちぢんで、反対がわは ゆるんだね。` },
+  { scene: 'kansetsu', icon: '🔄', title: '体のいろいろな関節を見つけよう',
+    setup: () => { S.kansetsuFound = new Set(KANSETSU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🙆', name: '関節ごとに動く方向がちがう' }),
+    text: () => `肩と ひざでは、動く 方向が ちがったね。` },
+  { scene: 'doubutsu', icon: '🍗', title: '手羽先で見る、動物の体のつくり',
+    setup: () => { S.doubutsuFound = new Set(DOUBUTSU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🍗', name: '手羽先と人のうでは似ている' }),
+    text: () => `ニワトリの 手羽先と 人の うでは、ほねの つくりが にていたね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'mitsukeru', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🔍💪🔄🍗</div>
+        <h1>ミオの道場</h1>
+        <div class="sub">〜 人の 体の つくりと 運動（骨・筋肉・関節） 〜</div>
+        <p class="talk">ようこそ！ わたしは ${W.kinniku}から 生まれた ${W.seirei}、<b>ミオ</b>。この 道場で、体を 動かす しくみを いっしょに たしかめよう。うでを 曲げる 時、体の 中では 何が 起きていると 思う？<br>
+        今日は、${W.hone}・${W.kinniku}・${W.kansetsu}から、動物との くらべっこまで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">うでを 曲げる 時、力こぶがわの きんにくと、反対がわ（うでの 外がわ）の きんにく、両方とも ちぢむと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">💪</span><b>ア</b> 両方 ちぢむ</div>
+          <div class="vcard" data-v="1"><span class="vicon">🔄</span><b>イ</b> 片方だけ ちぢんで もう片方は ゆるむ</div>
+          <div class="vcard" data-v="2"><span class="vicon">😌</span><b>ウ</b> 両方とも ゆるむ</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：骨・筋肉・関節ってなに？（発見型） ---
+  m_mitsukeru: {
+    enter() {
+      Object.assign(S, { scene: 'mitsukeru', scope: { type: 'idle' }, mitsukeruFound: new Set() });
+      updateLoc();
+      setWish('🔍', `①〜③を タッチして、うでの 中に ある ものを 見つけよう。`);
+      say(`自分の うでを さわりながら たしかめてみよう。うでの 中には 3つの 大事な ものが あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(MITSUKERU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.mitsukeruFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.mitsukeruFound.size >= MITSUKERU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.mitsukeruFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`体を 動かせるのは、${W.hone}と 何の はたらきの おかげ？`);
+      setButtons(choiceRow(['きんにく', 'ひふ（皮ふ）', 'つめ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_mitsukeru'); S.phase = 'done';
+        say(`せいかい！ ${W.hone}が 体を ささえ、${W.kinniku}が ちぢんだり ゆるんだり して 体を 動かし、${W.kansetsu}が 曲げのばしを 可能に している んだ。`);
+        setButtons([{ label: 'つぎへ（うでを曲げる・のばすしくみ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['きんにく', 'ひふ（皮ふ）', 'つめ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：うでを曲げる・のばすしくみ（メイン操作・数値階段①〜⑦） ---
+  m_ude: {
+    enter() {
+      Object.assign(S, { scene: 'ude', udeIdx: 0, udeIdxDisplay: 0, scope: { type: 'musclebar', bicep: 0, tricep: 1 } });
+      updateLoc();
+      setWish('💪', `「曲げる」ボタンで ひじを ①0°から ⑦145°まで 曲げていって、きんにくの ようすを たしかめよう。`);
+      say(`①は うでを まっすぐ 伸ばした 状態（0°）。「曲げる」ボタンで、少しずつ 曲げていくよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.udeIdx >= ANGLE_STEPS.length - 1) { this.finish(); return; }
+      setControls([{ label: `💪 もっと 曲げる（つぎの段階へ）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.udeIdx >= ANGLE_STEPS.length - 1) return;
+      setControls([]);
+      const fromV = S.udeIdx, toV = S.udeIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.udeIdxDisplay = v;
+        const f = bendFracFor(v);
+        S.scope = { type: 'musclebar', bicep: f, tricep: 1 - f };
+      }, () => {
+        S.udeIdx++; S.udeIdxDisplay = S.udeIdx;
+        sTap();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([{ label: '💪 のばしてみる（元にもどす）', cb: () => this.reverse() }]);
+      say(`①〜⑦まで、ひじを 曲げたね。こんどは 伸ばして、きんにくが どう 変わるか 見てみよう。`);
+    },
+    reverse() {
+      setControls([]);
+      startTween(S.udeIdx, 0, 1.0, v => {
+        S.udeIdxDisplay = v;
+        const f = bendFracFor(v);
+        S.scope = { type: 'musclebar', bicep: f, tricep: 1 - f };
+      }, () => {
+        S.udeIdx = 0; S.udeIdxDisplay = 0;
+        sTap();
+        say(`伸ばすと、力こぶがわの きんにくが ゆるんで、反対がわが ちぢんだね。`);
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      });
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`うでを 曲げる 時、力こぶがわの きんにくと、反対がわの きんにく、どうなる？`);
+      setButtons(choiceRow(['両方ちぢむ', '片方だけちぢんでもう片方はゆるむ', '両方ともゆるむ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_ude'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ ひじの 曲がる 角度は 0°〜145°くらいまで（整形外科の 基準）。うでを 曲げる 時、力こぶがわの きんにく（${W.nitou}）が ちぢんで もりあがり、反対がわの きんにく（${W.santou}）は ゆるんで のびる。伸ばす 時は 逆に なるんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}<br><br>💡 <b>たいせつポイント</b><br>きんにくは ペアで はたらいて、片方が ちぢむと、もう片方は ゆるむ。`);
+        setButtons([{ label: 'つぎへ（体のいろいろな関節を見つけよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、力こぶの うごきを 思い出してみよう。`);
+        setButtons(choiceRow(['両方ちぢむ', '片方だけちぢんでもう片方はゆるむ', '両方ともゆるむ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：体のいろいろな関節を見つけよう（発見型） ---
+  m_kansetsu: {
+    enter() {
+      Object.assign(S, { scene: 'kansetsu', scope: { type: 'idle' }, kansetsuFound: new Set() });
+      updateLoc();
+      setWish('🔄', `①〜④を タッチして、体の いろいろな かんせつを 見つけよう。`);
+      say(`かんせつは、ひじだけじゃ ないよ。体の あちこちに あって、動く 方向も それぞれ ちがうんだ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KANSETSU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.kansetsuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.kansetsuFound.size >= KANSETSU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.kansetsuFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`肩と ひざ、同じような 動き方を する かんせつだと 思う？`);
+      setButtons(choiceRow(['同じような動き方をする', 'ちがう動き方をする（動く方向がちがう）', 'どちらも動かない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_kansetsu'); S.phase = 'done';
+        say(`せいかい！ 肩は いろいろな 方向に 大きく 動かせるけど、ひざは 前後の 1方向だけ。同じ かんせつでも、動き方は 場所に よって ちがうんだ。`);
+        setButtons([{ label: 'つぎへ（手羽先で見る、動物の体のつくり）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、①と ②の うごきを 思い出してみよう。`);
+        setButtons(choiceRow(['同じような動き方をする', 'ちがう動き方をする（動く方向がちがう）', 'どちらも動かない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：手羽先で見る、動物の体のつくり（発見/比較型） ---
+  m_doubutsu: {
+    enter() {
+      Object.assign(S, { scene: 'doubutsu', scope: { type: 'idle' }, doubutsuFound: new Set() });
+      updateLoc();
+      setWish('🍗', `①②を タッチして、人と ニワトリの うでの つくりを くらべよう。`);
+      say(`きんにくや かんせつが あるのは、人だけじゃ ないんだ。他の 動物とも くらべてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(DOUBUTSU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.doubutsuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.doubutsuFound.size >= DOUBUTSU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.doubutsuFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`${W.tebasaki}と 人の うで、ほねや かんせつの つくりは？`);
+      setButtons(choiceRow(['にている', 'まったくちがう', '手羽先にはほねがない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_doubutsu'); S.phase = 'done';
+        say(`せいかい！ ${W.tebasaki}にも、人の うでと よく にた ${W.hone}・${W.kansetsu}が ある。人だけでなく、他の 動物にも ${W.hone}や ${W.kinniku}が あって、体を ささえたり 動かしたり しているんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['にている', 'まったくちがう', '手羽先にはほねがない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：骨と筋肉を守る生活の知恵 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.hone}と ${W.kinniku}を 守る、生活の 知恵を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.seichouki}に ${W.hone}を 強くする ために 大切な ことは？`);
+      setButtons(choiceRow(['カルシウムをとり日光を浴びる', 'あまり動かない', 'いつも同じしせいでいる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.seichouki}は、カルシウムを とり、日光を あびて ビタミンDを 作ることで、${W.hone}が 強くなる。${W.junbiundou}や よい ${W.shisei}も、${W.hone}と ${W.kinniku}を 守る 大事な 習慣だよ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['カルシウムをとり日光を浴びる', 'あまり動かない', 'いつも同じしせいでいる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ミオの道場 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 体を 動かせるのは、ほねと（<span class="blankWord" data-a="きんにく">？？？</span>）の はたらきの おかげ。<br>
+        ② うでを 曲げると、力こぶがわの きんにくが（<span class="blankWord" data-a="ちぢみ">？？？</span>）、反対がわは ゆるむ。<br>
+        ③ 肩と ひざでは、動く（<span class="blankWord" data-a="方向">？？？</span>）が ちがう。<br>
+        ④ ニワトリの 手羽先と 人の うでは、ほねの つくりが（<span class="blankWord" data-a="にている">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 片方だけ ちぢんで もう片方は ゆるむ</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①自分の うでを さわりながら ゆっくり 曲げのばしして、力こぶがわと 反対がわ、どちらが ちぢむか たしかめてみよう。<br>②肩・ひざ・ゆびなど、いろんな かんせつが どんな 方向に 動くか、動かしてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#1f7a5c'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「体を動かせるのは、骨と何のおかげ？」「うでを曲げると力こぶがわはどうなる？」「肩とひざ、動き方は同じ？」`);
+      setButtons([
+        { label: '🔍 骨・筋肉・関節の図', cls: 'sub', cb: () => this.show('mitsukeru') },
+        { label: '💪 うでを曲げる図', cls: 'sub', cb: () => this.show('ude') },
+        { label: '🔄 いろいろな関節の図', cls: 'sub', cb: () => this.show('kansetsu') },
+        { label: '🍗 動物とのくらべっこの図', cls: 'sub', cb: () => this.show('doubutsu') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_ude などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ミオの道場 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f7a5c; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd54f; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #dff3ea; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #dff3ea; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="mio.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>💪 ミオの道場 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      うでを曲げる時、力こぶがわの筋肉と反対がわ（うでの外がわ）の筋肉、両方ともちぢむと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 両方ちぢむ</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 片方だけちぢんでもう片方はゆるむ</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 両方ともゆるむ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．骨・筋肉・関節ってなに？</span>
+    <div class="secBody">
+      ①〜③を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①ほね（骨）</th><th>②きんにく（筋肉）</th><th>③かんせつ（関節）</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      体を動かせるのは、骨と何のはたらきのおかげ？（きんにく ／ ひふ ／ つめ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．うでを曲げる・のばすしくみ</span>
+    <div class="secBody">
+      「曲げる」ボタンで①〜⑦を進め、ひじの角度を記録しよう。
+      <table class="levelTable">
+        <tr><th>段階</th><th>①0°</th><th>③</th><th>⑤</th><th>⑦145°</th></tr>
+        <tr><td>ひじの角度</td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      うでを曲げる時、力こぶがわの筋肉は（両方ちぢむ ／ 片方だけちぢんでもう片方はゆるむ ／ 両方ともゆるむ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．体のいろいろな関節を見つけよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①肩（かた）</th><th>②ひざ</th><th>③ゆび</th><th>④くび</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      肩とひざ、同じような動き方をする関節だと思う？（同じ ／ ちがう（動く方向がちがう） ／ どちらも動かない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．手羽先で見る、動物の体のつくり</span>
+    <div class="secBody">
+      ①②を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①人のうで</th><th>②ニワトリの手羽先</th></tr>
+        <tr><td>☐</td><td>☐</td></tr>
+      </table>
+      手羽先と人のうで、骨や関節のつくりは？（にている ／ まったくちがう ／ 手羽先には骨がない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（骨と筋肉を守る知恵）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 準備運動</th><th>い よいしせい</th><th>う カルシウムと日光</th><th>え 骨がおれたら</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      成長期に骨を強くするために大切なことは（カルシウムをとり日光を浴びる ／ あまり動かない ／ 同じしせいでいる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 体を動かせるのは、骨と（<span class="fillLine"></span>）のはたらきのおかげ。<br>
+      ② うでを曲げると、力こぶがわの筋肉が（<span class="fillLine sm"></span>）、反対がわはゆるむ。<br>
+      ③ 肩とひざでは、動く（<span class="fillLine sm"></span>）がちがう。<br>
+      ④ ニワトリの手羽先と人のうでは、骨のつくりが（<span class="fillLine"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">💪</span>
+        <div>
+          ①自分のうでをさわりながらゆっくり曲げのばしして、力こぶがわと反対がわ、どちらがちぢむかたしかめてみよう。<br>
+          ②肩・ひざ・ゆびなど、いろんな関節がどんな方向に動くか、動かしてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ミオの道場 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ミオの道場 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4理科「人の体のつくりと運動」・学力幅あり・協力型／ 使うもの：「mio.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・人体分野の3作目です（消化＝おなかのなか探検隊、呼吸・血液循環＝コドウの丘に続く）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_ude</b> などで途中再開（m_mitsukeru／m_ude／m_kansetsu／m_doubutsu／hakase／ending）</li>
+      <li>☐ 授業前に、子どもたち自身のうでを曲げのばししながら力こぶ側と反対側にそっとふれてもらう時間を少し取ると、画面の内容と実感が結びつきやすい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🔍 骨・筋肉・関節ってなに？</td><td>①〜③を発見し、うでの中には骨・筋肉・関節があることを確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜20分</td><td>💪 うでを曲げる・のばすしくみ（<b>今日の見せ場</b>）</td><td>「曲げる」で①〜⑦を進め、力こぶがわと反対がわの筋肉の変化を観察。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">20〜28分</td><td>🔄 体のいろいろな関節を見つけよう</td><td>①〜④を発見し、肩とひざで動く方向がちがうことを確認。シート４に記録</td></tr>
+      <tr><td class="min">28〜35分</td><td>🍗 手羽先で見る、動物の体のつくり</td><td>①②を発見し、人とニワトリのうでのつくりを比較。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🔎 はかせチャレンジ</td><td>骨と筋肉を守る知恵（準備運動・しせいなど）を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「自分のうでで確かめよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「手羽先で見る、動物の体のつくり」を右下「つぎ▶」でスキップ可（<b>うでを曲げる・のばすしくみ・いろいろな関節・まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 片方だけちぢんでもう片方はゆるむ</b>／骨・筋肉・関節＝<b>きんにく</b>／
+      うでを曲げるしくみ＝<b>片方だけちぢんでもう片方はゆるむ</b>／いろいろな関節＝<b>ちがう動き方をする</b>／
+      動物とのくらべっこ＝<b>にている</b>／はかせ＝<b>カルシウムをとり日光を浴びる</b>／
+      まとめ＝①<b>きんにく</b>　②<b>ちぢみ</b>　③<b>方向</b>　④<b>にている</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：人や他の動物の体には骨と筋肉があり、骨と骨のつなぎ目の関節でさまざまな動きができる（小学校学習指導要領・理科・第4学年）</li>
+      <li>肘関節の参考可動域は屈曲145°（日本整形外科学会・日本リハビリテーション医学会「関節可動域表示ならびに測定法」）。うでを曲げる時は力こぶがわの筋肉（上腕二頭筋）がちぢみ、反対がわ（上腕三頭筋）はゆるむ。伸ばす時は逆になる（拮抗筋の関係）</li>
+      <li>肩はボールのような形の関節でいろいろな方向に大きく動き、ひざはちょうつがいのような関節で前後の1方向だけに曲がる。関節によって動く方向がちがう</li>
+      <li>ニワトリの手羽先は骨・関節のつくりが人のうで（上腕骨・とう骨/尺骨相当）と相同で、理科教育の定番教材として使われている</li>
+      <li>成長期はカルシウムをとり日光を浴びてビタミンDを作ることで骨が強くなる。準備運動やよいしせいも骨と筋肉を守る大切な習慣</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「うでを曲げる・のばすしくみ」が今日いちばんの見せ場。1人ずつ交代で「曲げる」ボタンを押させると全員が参加できる</li>
+      <li>力こぶがわと反対がわの筋肉が入れかわる様子に「あ、色が変わった！」という気づきを拾い、自分のうででも同じことが起きているか確かめさせると印象に残る</li>
+      <li>肩をぐるぐる回す、ひざを曲げ伸ばしするなど、実際に体を動かして関節ごとの動き方のちがいを体感させるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「体を動かせるのは、骨と何のおかげ？」「うでを曲げると力こぶがわはどうなる？」「肩とひざ、動き方は同じ？」</li>
+      <li>おうちミッションでは、自分のうでや関節を実際に動かして確かめる活動で、画面の学びと日常の体験を結びつける狙い</li>
+      <li>理科・人体分野は本作でおなかのなか探検隊（消化）・コドウの丘（呼吸・血液循環）に続く3作目。理科の未着手単元は理科ロードマップに整理済み</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
