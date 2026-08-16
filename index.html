@@ -240,7 +240,8 @@
   }
   .nextup-body .card-mascot{ width:64px; height:64px; flex:0 0 64px; margin:0; }
   .nextup-text{ flex:1; min-width:150px; }
-  .nextup-text h3{ margin:0 0 4px; font-size:16px; }
+  .nextup-text .card-unit{ margin:0 0 2px; font-size:15.5px; }
+  .nextup-text .card-title{ font-size:12px; margin-bottom:3px; }
   .nextup-text .meta{ font-size:12.5px; color:#888; line-height:1.5; margin:0; }
   .nextup-progress{ font-size:12.5px; font-weight:bold; color:#c76b2c; margin-top:4px; }
   .nextup-btn{ flex:0 0 auto; }
@@ -425,6 +426,20 @@
     font-size:13px;
   }
 
+  /* ---- 単元名(主役)／造語タイトル(そえがき) ---- */
+  .card-unit{
+    font-weight:bold;
+    color: var(--fc, #444);
+    line-height:1.3;
+  }
+  .card-title{
+    color:#9a9a9a;
+    font-weight:normal;
+    line-height:1.3;
+  }
+  .card-title::before{ content:"「"; }
+  .card-title::after{ content:"」"; }
+
   .grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
@@ -437,7 +452,7 @@
     padding: 16px 14px 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,.08);
     border:1px solid #eee;
-    border-top: 4px solid var(--fc, #ccc);
+    border-top: 8px solid var(--fc, #ccc);
     position:relative;
     display:flex;
     flex-direction:column;
@@ -452,11 +467,12 @@
   .card-fibadge{
     position:absolute;
     top:10px; right:10px;
-    width:26px; height:26px;
+    width:34px; height:34px;
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-size:14px;
+    font-size:18px;
     background: var(--fc-bg);
+    border: 2px solid var(--fc, #ccc);
   }
   .played-badge{
     position:absolute;
@@ -495,9 +511,13 @@
   .card .mascot .eyes{ transform-box: fill-box; transform-origin: center; animation: card-blink 4.5s infinite; }
   @keyframes card-floaty{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
   @keyframes card-blink{ 0%,92%,100%{ transform:scaleY(1); } 96%{ transform:scaleY(.1); } }
-  .card h2{
-    margin: 2px 0 4px;
-    font-size: 18px;
+  .card .card-unit{
+    margin: 2px 0 3px;
+    font-size: 17px;
+  }
+  .card .card-title{
+    font-size: 13px;
+    margin-bottom: 6px;
   }
   .card .meta{
     font-size: 12.5px;
@@ -617,7 +637,8 @@
   }
   .road-body .card-mascot.emoji{ font-size:34px; }
   .road-text{ flex:1; min-width:160px; }
-  .road-text h3{ margin:2px 0 4px; font-size:16px; }
+  .road-text .card-unit{ margin:2px 0 2px; font-size:15px; }
+  .road-text .card-title{ font-size:12px; margin-bottom:3px; }
   .road-text .meta{ font-size:12.5px; color:#888; line-height:1.5; margin:0; }
   .road-body .btnrow{
     display:flex;
@@ -694,7 +715,8 @@
     width:110px; height:110px;
     margin:0 auto 4px;
   }
-  .pick-modal h2{ margin: 2px 0 4px; font-size:20px; }
+  .pick-modal .card-unit{ margin: 2px 0 2px; font-size:19px; }
+  .pick-modal .card-title{ font-size:14px; margin-bottom:6px; }
   .pick-again-btn{
     display:inline-flex;
     align-items:center;
@@ -1282,8 +1304,9 @@ function showPickModal(it){
   pickModalBodyEl.innerHTML = `
     <div class="pick-modal-label">🎲 これに きまり！</div>
     ${mascotHTML(it)}
-    <h2>${it.t}</h2>
-    <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
+    <h2 class="card-unit">${it.u}</h2>
+    <div class="card-title">${it.t}</div>
+    <div class="meta">${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
     <div class="btnrow" style="margin-top:10px;">
       <a class="main" data-slug="${it.slug}" href="${it.slug}.html">あそびに行く！</a>
     </div>
@@ -1378,8 +1401,9 @@ function renderNextUp(){
     <div class="nextup-body" style="--fc:${info.fc}">
       ${mascotHTML(it)}
       <div class="nextup-text">
-        <h3>${it.t}</h3>
-        <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
+        <h3 class="card-unit">${it.u}</h3>
+        <div class="card-title">${it.t}</div>
+        <div class="meta">${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
         ${progressLine}
       </div>
       <a class="main nextup-btn" data-slug="${it.slug}" href="${it.slug}.html">あそびに行く！</a>
@@ -1474,8 +1498,9 @@ function cardHTML(it, playedSet, badgeProgress){
       ${playedBadge}
       <span class="card-fibadge" style="--fc-bg:${info.bg}" title="${info.label}">${info.icon}</span>
       ${mascotHTML(it)}
-      <h2>${it.t}</h2>
-      <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
+      <h2 class="card-unit">${it.u}</h2>
+      <div class="card-title">${it.t}</div>
+      <div class="meta">${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
       <div class="btnrow">
         <a class="main" data-slug="${it.slug}" href="${it.slug}.html">じゅぎょう画面</a>
         <a class="sheet" href="${it.slug}-sheet.html">きろくシート</a>
@@ -1508,8 +1533,9 @@ function roadNodeHTML(it, num, isLast, playedSet, badgeProgress){
         <div class="road-body-top">
           ${mascotHTML(it)}
           <div class="road-text">
-            <h3>${it.t}</h3>
-            <div class="meta">${it.u}<br>${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
+            <h3 class="card-unit">${it.u}</h3>
+            <div class="card-title">${it.t}</div>
+            <div class="meta">${SUBJECT_LABEL[it.subj]}${it.gt} ／ ${info.label}</div>
           </div>
         </div>
         <div class="btnrow">
