@@ -1611,4 +1611,33 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#f2a154" opacity=".5"/>
             <circle cx="78" cy="76" r="5" fill="#f2a154" opacity=".5"/>
           </svg>`,
+  pachi: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#ffcf5c" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M60 6 Q66 14 60 20" fill="none"/>
+              <path d="M60 114 Q54 122 60 128" fill="none"/>
+              <path d="M6 66 Q14 60 20 66" fill="none"/>
+              <path d="M102 66 Q108 72 114 66" fill="none"/>
+              <path d="M20 26 Q28 30 26 38" fill="none"/>
+              <path d="M100 26 Q92 30 94 38" fill="none"/>
+              <path d="M20 106 Q28 102 26 94" fill="none"/>
+              <path d="M100 106 Q92 102 94 94" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#pachiGrad)" stroke="#6b4a00" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="pachiGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fffbe6"/>
+                <stop offset="55%" stop-color="#ffcf5c"/>
+                <stop offset="100%" stop-color="#b8860f"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#6b4a00"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#6b4a00"/>
+            </g>
+            <path d="M48 80 Q60 88 72 80" fill="none" stroke="#6b4a00" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#e85d75" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#e85d75" opacity=".5"/>
+          </svg>`,
 };

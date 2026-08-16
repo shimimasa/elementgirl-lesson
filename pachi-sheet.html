@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>パチの実験場 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #b8860f; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffd54f; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #fbedc8; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #fbedc8; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="pachi.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⚡ パチの実験場 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      かん電池を2こ、並列でつなぐと、1こだけの時とくらべて、モーターの回る速さはどうなると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 速くなる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> かわらない</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> おそくなる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．回路のきほんを発見しよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①かん電池</th><th>②どう線</th><th>③モーター</th><th>④スイッチ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      電池・どう線・モーターがひとまわりにつながった電気の通り道を（回路 ／ 電流 ／ 極）という
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．直列つなぎと並列つなぎをくらべよう</span>
+    <div class="secBody">
+      両方ためして、モーターの回る速さとメーターをくらべよう。
+      <table class="levelTable">
+        <tr><th>つなぎ方</th><th>ためした</th><th>メーターの様子</th></tr>
+        <tr><td>直列つなぎ</td><td class="res">☐</td><td class="res"></td></tr>
+        <tr><td>並列つなぎ</td><td class="res">☐</td><td class="res"></td></tr>
+      </table>
+      並列つなぎは、電池1こだけの時とくらべて（強くなる ／ かわらない ／ 弱くなる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．電池の数を増やしてみよう</span>
+    <div class="secBody">
+      ①〜④まで電池を増やして、メーターの数字を記録しよう。
+      <table class="roundTable">
+        <tr><th>①電池1こ</th><th>②電池2こ</th><th>③電池3こ</th><th>④電池4こ</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      直列つなぎで電池の数を増やすほど、電流は（大きくなる ／ かわらない ／ 小さくなる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．身の回りの直列・並列を発見しよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①懐中電灯</th><th>②リモコン</th><th>③イルミネーション</th><th>④おもちゃの車</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（電気を安全に使う知恵）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ ショート注意</th><th>い 極の向き</th><th>う リサイクル</th><th>え 発熱注意</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      ＋極と－極をどう線だけで直接つなぐことを（ショート ／ 直列 ／ 並列）という
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 電池を直列につなぐと、電流は（<span class="fillLine sm"></span>）なる。<br>
+      ② 電池を並列につなぐと、電流は（<span class="fillLine"></span>）。<br>
+      ③ ＋極と－極を直接つなぐことを（<span class="fillLine"></span>）という。<br>
+      ④ 電気の通り道を（<span class="fillLine sm"></span>）という。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🔦</span>
+        <div>
+          ①家の中の懐中電灯やリモコンを見て、かん電池が何こ入っているか数えてみよう。<br>
+          ②図書館やインターネットで、他にどんな直列・並列の使われ方があるか調べてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　パチの実験場 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】パチの実験場 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4理科「電流のはたらき」・学力幅あり・協力型／ 使うもの：「pachi.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・エネルギー分野の5作目です（光＝カガミの丘、電磁石＝ウズの実験室、発電/蓄電/センサー＝クルルの発電所、音＝ヒビキの谷に続く）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_denchi</b> などで途中再開（m_kihon／m_kurabe／m_denchi／m_kurashi／hakase／ending）</li>
+      <li>☐ 本単元は「電流のはたらき」の中でも乾電池のつなぎ方にしぼった内容です。電磁石はウズの実験室、発電・蓄電はクルルの発電所でも扱っているため、関連づけて紹介すると理解が深まります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🔍 回路のきほんを発見しよう</td><td>①〜④を発見し、かん電池・どう線・モーター・スイッチの役割を確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜22分</td><td>⚖️ 直列つなぎと並列つなぎをくらべよう（<b>今日の見せ場</b>）</td><td>直列・並列を両方切りかえてモーターの速さとメーターを比較。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">22〜32分</td><td>🔋 電池の数を増やしてみよう</td><td>「電池をふやす」ボタンで①〜④まで進め、メーターの数字を記録。シート４に記録</td></tr>
+      <tr><td class="min">32〜38分</td><td>🏠 身の回りの直列・並列を発見しよう</td><td>①〜④を発見し、身近な道具とのつながりを確認。シート５に記録</td></tr>
+      <tr><td class="min">38〜43分</td><td>🔎 はかせチャレンジ</td><td>電気を安全に使う知恵（ショート・極の向きなど）を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「懐中電灯の電池を数えよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「身の回りの直列・並列を発見しよう」を右下「つぎ▶」でスキップ可（<b>直列・並列くらべ／電池を増やす／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ かわらない</b>／回路のきほん＝<b>回路</b>／直列・並列くらべ＝<b>かわらない（並列）</b>／
+      電池を増やす＝<b>大きくなる</b>／はかせ＝<b>ショート</b>／
+      まとめ＝①<b>大きく</b>　②<b>かわらない</b>　③<b>ショート</b>　④<b>回路</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：乾電池のつなぎ方（直列・並列）と、モーターの回り方や豆電球の明るさ・電流の大きさの関係を、検流計を使って調べる（小学校学習指導要領・理科・第4学年）</li>
+      <li>直列つなぎ：回路に流れる電流が強くなり電気のはたらきが大きくなる（検流計の値は乾電池1個の時のおよそ2倍）</li>
+      <li>並列つなぎ：電流の強さ・電気のはたらきの大きさは乾電池1個の時とほとんど変わらない（多くの子が「2個つなげば必ず速くなる」と誤解しやすいポイント）</li>
+      <li>簡易検流計は回路に直列に接続し、針の振れで電流の向きと強さを調べる</li>
+      <li>＋極と－極をどう線だけで直接つなぐ「ショート」は、大きな電流が流れて発熱し危険なため、安全教育として扱う</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「直列つなぎと並列つなぎをくらべよう」が今日いちばんの見せ場。1人ずつ交代で切りかえボタンを押させると全員が参加できる</li>
+      <li>「電池を2個にしたら絶対速くなる」という直感を裏切る並列の結果に注目させ、「なぜ変わらないのか」を自分の言葉で説明させると理解が深まる</li>
+      <li>身近な道具（懐中電灯・リモコンなど）に置きかえて考えさせると実感が深まる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「電気の通り道を何という？」「直列つなぎで電池を増やすと電流はどうなる？」「並列つなぎだとモーターの速さは？」</li>
+      <li>おうちミッションでは、身近な道具の電池の数を数えたり直列・並列の使われ方を調べる活動で、画面の学びと日常の体験を結びつける狙い</li>
+      <li>理科・エネルギー分野は本作でカガミの丘（光）・ウズの実験室（電磁石）・クルルの発電所（発電/蓄電/センサー）・ヒビキの谷（音）に続く5作目。理科の未着手単元は理科ロードマップに整理済み</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
