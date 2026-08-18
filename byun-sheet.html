@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ビュンの原っぱ きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #4a9e3f; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #a5d76e; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #e8f5d0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #e8f5d0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="byun.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🍃 ビュンの原っぱ きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      ゴムをのばす長さを2倍にすると（4cmから8cmへ）、車が進む距離もちょうど2倍になると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> ちょうど2倍になる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 2倍よりもっと遠くまで進む</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 2倍より短くなる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．くらしの中の風とゴムの力を発見しよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①かざぐるま</th><th>②ヨット</th><th>③水風船</th><th>④わゴムでっぽう</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      ヨットが水の上を進む力のもとは、（風の力 ／ ゴムの力 ／ エンジンの力）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．風の力で車を走らせよう</span>
+    <div class="secBody">
+      弱・中・強の風で車を走らせて、進んだ様子を記録しよう。
+      <table class="levelTable">
+        <tr><th>風の強さ</th><th>弱</th><th>中</th><th>強</th></tr>
+        <tr><th>進んだ様子</th><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      風の力を強くするほど、車は（どんどん遠くまで進む ／ かわらない ／ 近くでとまる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．ゴムの力で車を走らせよう</span>
+    <div class="secBody">
+      ①〜⑧まで、ゴムをのばす長さを変えて、進んだ距離を記録しよう。
+      <table class="levelTable">
+        <tr><th></th><th>①5cm</th><th>②6cm</th><th>③7cm</th><th>④8cm</th><th>⑤9cm</th><th>⑥10cm</th><th>⑦11cm</th><th>⑧12cm</th></tr>
+        <tr><th>距離</th><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      ゴムをのばす長さを長くするほど、車は（どんどん遠くまで進む ／ かわらない ／ 近くでとまる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．ゴールに車をとめよう</span>
+    <div class="secBody">
+      8cmでは（とどかなかった ／ 行きすぎた）。12cmでは（とどかなかった ／ 行きすぎた）。<br>
+      ちょうどゴールにとめるには、のばす長さは（8cmより短く ／ 12cmより長く ／ 8cmと12cmの間くらい）がよさそう。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（風とゴムの力とくらしの安全）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ ゴムひこうき</th><th>い たこあげ</th><th>う 帆船・ヨット</th><th>え 安全のルール</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      わゴムでっぽうで遊ぶ時に気をつけることは、（人に向けて飛ばさない ／ できるだけ遠くまで飛ばす ／ 大きい音を出す）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 風の力を強くすると、車は（<span class="fillLine sm"></span>）まで進む。<br>
+      ② ゴムを（<span class="fillLine sm"></span>）のばすほど、車は遠くまで進む。<br>
+      ③ ゴムを2倍のばすと、進む距離は（<span class="fillLine"></span>）なる。<br>
+      ④ わゴムでっぽうは（<span class="fillLine"></span>）ように気をつけて遊ぶ。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🏹</span>
+        <div>
+          ①わゴムをのばしてはなし、もどる力を手でかんじてみよう（人に向けないでね）。<br>
+          ②うちわやせんぷうきの風を紙ひこうきに当てて、強さを変えると飛び方がどう変わるかためしてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ビュンの原っぱ 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ビュンの原っぱ — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小3理科「風とゴムの力の働き」・学力幅あり・協力型／ 使うもの：「byun.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・力学分野の3作目です（てこ＝てこの工房、振り子＝ふりこの間に続く）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_gomu</b> などで途中再開（m_kizuki／m_kaze／m_gomu／m_gooru／hakase／ending）</li>
+      <li>☐ 本単元は小3配当ですが、対象クラスの学力幅を考え、風は定性的な比較（弱・中・強）、ゴムは実測データに基づく定量的な数値（cm・m）と、あえて難易度に差をつけた構成にしています</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🎐 くらしの中の風とゴムの力を発見しよう</td><td>①〜④を発見し、かざぐるま・ヨット・水風船・わゴムでっぽうを確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜18分</td><td>💨 風の力で車を走らせよう</td><td>「風をふかせる」ボタンで弱→中→強の順に進め、車の進み方を記録。シート３に記録</td></tr>
+      <tr><td class="min">18〜28分</td><td>🏹 ゴムの力で車を走らせよう（<b>今日の見せ場</b>）</td><td>「ゴムをのばす」ボタンで①〜⑧まで進め、距離の変化を記録。よそうタイムをここで回収。シート４に記録</td></tr>
+      <tr><td class="min">28〜35分</td><td>🚩 ゴールに車をとめよう</td><td>8cm・12cmの結果から、ちょうどよい長さを推理。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🔎 はかせチャレンジ</td><td>風とゴムの力の応用と安全（人に向けないルール）を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「わゴムをのばしてためそう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「ゴールに車をとめよう」を右下「つぎ▶」でスキップ可（<b>風の実験／ゴムの実験／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 2倍よりもっと遠くまで進む</b>／くらしの例＝<b>風の力</b>／風の実験＝<b>どんどん遠くまで進む</b>／ゴムの実験＝<b>どんどん遠くまで進む</b>／ゴールゲーム＝<b>8cmと12cmの間くらい</b>／はかせ＝<b>人に向けて飛ばさない</b>／
+      まとめ＝①<b>遠く</b>　②<b>長く</b>　③<b>2倍より大きく</b>　④<b>人に向けない</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：風の力・ゴムの力は物を動かすことができ、力の大きさを変えると物の動く様子も変わる（小学校学習指導要領・理科・第3学年）</li>
+      <li>ゴムの伸びと距離の関係は、福井県教育委員会の学力調査(SASA2020)で実際に行われた実験の実測データを使用：輪ゴムをのばした長さ4cm・8cm・12cmで車を3回ずつ走らせた平均が、それぞれ約2.5m・約5.5m・約9.5m。この3点にぴったり一致する2次関数 distance=0.03125×(長さ)²+0.375×(長さ)+0.5 を使い、①〜⑧＝5〜12cm(1cm刻み)の距離を算出</li>
+      <li>ゴムを2倍(4cm→8cm)にのばすと、距離は2倍(2.5m→5.0m)ではなく2.2倍(2.5m→5.5m)になる。単純な比例ではなく、伸ばすほど効きが大きくなることが実測でわかっている</li>
+      <li>風の力による走行距離は、送風機の機種や車の作り方によって差が大きく、標準的な実測値が存在しないため、本作では具体的なmの数値を使わず「近い／中くらい／遠い」という相対的な表現にとどめている（数値をでっちあげない方針）</li>
+      <li>ゴールゲームは、SASA2020の実際の設問（「ゴールから50cm通りこした、2回目はどう調整する？」）を再現したもの</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「ゴムの力で車を走らせよう」が今日いちばんの見せ場。①から⑧まで一段ずつ丁寧に確かめ、進む距離がどんどん大きく伸びていく様子に注目させる</li>
+      <li>「風もゴムも、力を強くする・大きくすると、ものの動く様子が変わる」という共通点を、風とゴムの両方の実験を通して気づかせるとよい</li>
+      <li>ゴールゲームは正解を急がせず、「8cmと12cmの結果を比べるとどう考えられるか」を子どもたち自身に言葉にさせる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「風を強くすると車の進み方は？」「ゴムを長くのばすとどうなる？」「わゴムでっぽうで遊ぶ時に気をつけることは？」</li>
+      <li>おうちミッションでは、わゴムを手でのばしてもどる力を体感したり、うちわの風で紙ひこうきを飛ばしたりする活動で、画面の学びと日常の体験を結びつける狙い</li>
+      <li>理科・力学分野は本作でてこの工房（てこ）・ふりこの間（振り子）に続く3作目。理科の未着手単元は理科ロードマップに整理済み</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

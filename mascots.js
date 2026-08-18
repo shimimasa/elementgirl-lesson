@@ -1640,4 +1640,59 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#e85d75" opacity=".5"/>
             <circle cx="78" cy="76" r="5" fill="#e85d75" opacity=".5"/>
           </svg>`,
+  mugyu: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#6cc3ea" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M30 20 Q42 26 40 34" fill="none"/>
+              <path d="M90 20 Q78 26 80 34" fill="none"/>
+              <path d="M18 60 Q28 62 30 70" fill="none"/>
+              <path d="M102 60 Q92 62 90 70" fill="none"/>
+              <path d="M26 100 Q36 96 38 88" fill="none"/>
+              <path d="M94 100 Q84 96 82 88" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#mugyuGrad)" stroke="#0c3346" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="mugyuGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fbfeff"/>
+                <stop offset="55%" stop-color="#6cc3ea"/>
+                <stop offset="100%" stop-color="#1976a8"/>
+              </radialGradient>
+            </defs>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#0c3346"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#0c3346"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#0c3346" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+            <circle cx="78" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+          </svg>`,
+  byun: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#a5d76e" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M10 40 L34 40" fill="none"/>
+              <path d="M6 56 L36 56" fill="none"/>
+              <path d="M12 72 L34 72" fill="none"/>
+              <path d="M86 40 L110 40" fill="none"/>
+              <path d="M84 56 L114 56" fill="none"/>
+              <path d="M86 72 L108 72" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#byunGrad)" stroke="#2d5016" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="byunGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#f8fff0"/>
+                <stop offset="55%" stop-color="#a5d76e"/>
+                <stop offset="100%" stop-color="#4a9e3f"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="60" cy="28" rx="11" ry="7" fill="none" stroke="#4a9e3f" stroke-width="3.4"/>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#2d5016"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#2d5016"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#2d5016" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+            <circle cx="78" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+          </svg>`,
 };

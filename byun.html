@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ビュンの原っぱ — 風とゴムの力の働き たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f4fbe8 0%, #e3f4c8 45%, #c8e6a0 100%);
+    color: #2d4a1f;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #4a9e3f; text-shadow: 0 0 14px rgba(74, 158, 63, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4a7a35; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #eaf7d0; border: 2px solid #b8dc8a;
+    font-size: clamp(16px, 1.8vw, 26px); color: #8bbf6a;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #dff6bd, #4a9e3f);
+    border-color: #2d5016; color: #2d5016;
+    box-shadow: 0 0 16px rgba(74, 158, 63, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #f0f9e4 60%, #d8edb8 100%);
+    border: 3px solid #3d8b32;
+    box-shadow: inset 0 0 40px rgba(30, 70, 20, .14), 0 4px 18px rgba(30, 70, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #4a7a35; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #4a9e3f; color: #f4fff0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(30, 70, 20, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(160, 210, 120, .5) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #b8dc8a; cursor: pointer;
+    background: linear-gradient(180deg, #a5d76e, #4a9e3f); color: #fff;
+    box-shadow: 0 3px 0 #2d5016; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #4a9e3f; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(30, 70, 20, .28), inset 0 0 24px rgba(40, 100, 20, .14);
+    flex-shrink: 0; background: #f4fbe8;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #4a7a35;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #4a9e3f; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #d9edb0; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #4a7a35; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2d4a1f;
+    border: 1.5px solid #d9edb0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #4a9e3f; background: #e8f5d0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #e8f5d0); color: #2d4a1f;
+    border: 2px solid #4a9e3f; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #4a9e3f; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #a5d76e, #4a9e3f); color: #f4fff0;
+    box-shadow: 0 3px 0 #2d5016, 0 5px 12px rgba(30, 70, 20, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #2d5016; }
+  .btn.sub {
+    background: #e8f5d0; color: #4a7a35; box-shadow: 0 3px 0 #d9edb0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2d4a1f; box-shadow: 0 3px 0 #d9edb0; font-weight: 400; border: 1.5px solid #d9edb0; }
+  .btn.choice.picked { background: #e8f5d0; outline: 3px solid #4a9e3f; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(25, 55, 15, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #e3f4c8);
+    border: 3px solid #3d8b32; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(25, 55, 15, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #4a9e3f; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #4a9e3f; }
+  .panel .sub { color: #4a7a35; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2d4a1f; border: 1.5px solid #d9edb0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #4a7a35; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #2d4a1f; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d9edb0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #4a9e3f; background: #f4fbe8; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #4a9e3f; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #4a9e3f;
+    color: #4a9e3f; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #4a7a35;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e8f5d0; color: #4a7a35;
+    border: 1px solid #b8dc8a; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #d9edb0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🍃 ビュンの原っぱ<small>— 風とゴムの力の働き —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_kizuki" title="くらしの中の風とゴムの力を発見しよう">★</div>
+    <div class="badge" id="bd_m_kaze" title="風の力で車を走らせよう">★</div>
+    <div class="badge" id="bd_m_gomu" title="ゴムの力で車を走らせよう">★</div>
+    <div class="badge" id="bd_m_gooru" title="ゴールに車をとめよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ビュンの原っぱ</div>
+    <div id="locChip">ビュンの原っぱ</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🍃 ビュンのはやさビューア 〜見えない力の大きさを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#a5d76e" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M10 40 L34 40" fill="none"/>
+              <path d="M6 56 L36 56" fill="none"/>
+              <path d="M12 72 L34 72" fill="none"/>
+              <path d="M86 40 L110 40" fill="none"/>
+              <path d="M84 56 L114 56" fill="none"/>
+              <path d="M86 72 L108 72" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#byunGrad)" stroke="#2d5016" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="byunGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#f8fff0"/>
+                <stop offset="55%" stop-color="#a5d76e"/>
+                <stop offset="100%" stop-color="#4a9e3f"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="60" cy="28" rx="11" ry="7" fill="none" stroke="#4a9e3f" stroke-width="3.4"/>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#2d5016"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#2d5016"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#2d5016" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+            <circle cx="78" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
+          </svg>
+          <div class="catname">風とゴムの「ビュン」から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ビュン</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🍃 ビュンの原っぱミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ビュンの原っぱ — 風とゴムの力の働き（小3理科・力学分野3作目・協力型・1ファイル）
+   くらしの中の風とゴムの力を発見しよう（発見型）→ 風の力で車を走らせよう（メイン操作・弱中強の3段階）→
+   ゴムの力で車を走らせよう（メイン操作・①〜⑧の数値階段）→
+   ゴールに車をとめよう（応用・推理クイズ）→ はかせ（風とゴムの力とくらしの安全）。
+   数値：学習指導要領・小3理科「風とゴムの力の働き」＝風やゴムの力は物を動かすことができ、
+   力の大きさを変えると物の動く様子も変わる（お茶の水女子大学 理科教材データベースでWebSearch裏取り済み）。
+   ゴムの伸びと車の進む距離は、福井県学力調査(SASA2020)の実測データ
+   （輪ゴムをのばした長さ4cm/8cm/12cmで車の動いた距離を3回ずつ実測：4cm→約2.5m、8cm→約5.5m、12cm→約9.5m）
+   に厳密に一致する2次関数 distance(x) = 0.03125x^2 + 0.375x + 0.5 を導出して使用。
+   風の力は具体的な距離の実測データが環境依存で標準値がないため、数値を捏造せず
+   「近い／中くらい／遠い」ゾーンの定性的表現にとどめている。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  kyori: ruby('距離', 'きょり'),
+  jikken: ruby('実験', 'じっけん'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでplain()を通しても
+// タグが消えるだけで<rt>内の読みは残り「距離きょり」のように連結表示されてしまう。
+// canvasのfillTextに渡す時は必ずこの安全なプレーン文字列を使う）
+const N_KYORI = 'きょり';
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_kizuki：くらしの中の風とゴムの力を発見しよう（発見型）
+const KIZUKI_CARDS = [
+  { key: 0, num: '①', icon: '🎐', name: 'かざぐるま', txt: `風が 吹くと、はねが くるくる 回る。風の 力で ものを 動かせる いちばん 身近な れいだよ。` },
+  { key: 1, num: '②', icon: '⛵', name: 'ヨット', txt: `帆に 風を 受けて、水の 上を すいすい 進む。風が 強いほど、はやく 進めるよ。` },
+  { key: 2, num: '③', icon: '🎈', name: '水風船', txt: `ゴムが のびちぢみする 力で、水を たくさん ためられる。のばしすぎると われてしまうよ。` },
+  { key: 3, num: '④', icon: '🏹', name: 'わゴムでっぽう', txt: `ゴムを 引っぱって はなすと、もとに もどろうとする 力で、いきおいよく とび出す。` },
+];
+
+// m_kaze：風の力で車を走らせよう（メイン操作・弱→中→強の3段階）
+// 具体的な走行距離(m)は環境依存で標準的な実測値がないため数値を捏造せず、
+// コース上の相対位置（マップ座標）のみで「近い／中くらい／遠い」を表現する。
+const KAZE_LEVELS = [
+  { key: 0, label: '弱', icon: '🌬️', mapX: 330, zone: 'ちかい' },
+  { key: 1, label: '中', icon: '🌬️🌬️', mapX: 570, zone: 'まんなかくらい' },
+  { key: 2, label: '強', icon: '🌬️🌬️🌬️', mapX: 860, zone: 'とおい' },
+];
+
+// m_gomu：ゴムの力で車を走らせよう（メイン操作・数値階段①〜⑧）
+// 福井県学力調査(SASA2020)の実測データ：4cm→2.5m、8cm→5.5m、12cm→9.5m（3回実測平均）に
+// ぴったり一致する2次関数 distance = 0.03125x^2 + 0.375x + 0.5 を、実測範囲5〜12cm(1cm刻み)に適用。
+const GOMU_STRETCH = [5, 6, 7, 8, 9, 10, 11, 12];
+const GOMU_DIST = GOMU_STRETCH.map(x => Math.round((0.03125 * x * x + 0.375 * x + 0.5) * 10) / 10);
+// [3.2, 3.9, 4.7, 5.5, 6.4, 7.4, 8.4, 9.5]
+
+// m_gooru：ゴールに車をとめよう（応用・推理クイズ、SASA2020の設問を再現）
+const GOORU_TARGET = 7.4; // ⑥=10cmの結果と同じ地点をゴールに設定
+
+// はかせ：風とゴムの力とくらしの安全（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '✈️', name: 'ゴムひこうき', txt: `ねじった ゴムが もとに もどろうとする 力で プロペラが 回る。ゴムを ねじる 回数を 多くすると、もっと 遠くまで 飛ぶよ。` },
+  { key: 1, letter: 'い', icon: '🪁', name: 'たこあげ', txt: `風の 力を 受けて、たこは 空高く 上がる。風が ある日ほど、あげやすいよ。` },
+  { key: 2, letter: 'う', icon: '⛵', name: '帆船・ヨット', txt: `帆に 風を うけて、エンジンを 使わずに 水の 上を 進める。むかしから 使われてきた 知恵だよ。` },
+  { key: 3, letter: 'え', icon: '⚠️', name: '人に向けない', txt: `わゴムでっぽうなどは、人に 向けて 飛ばすと 目や 顔に あたって けがを する ことが ある。あそぶ 時は 人に 向けないように 気をつけよう。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'kizuki',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  kizukiFound: new Set(),
+  kazeIdx: -1,
+  kazeIdxDisplay: -1,
+  kazeDone: new Set(),
+  gomuIdx: 0,
+  gomuIdxDisplay: 0,
+  gooruStage: 0, // 0=未挑戦 1=1回目(8cm) 2=2回目(12cm) 3=正解
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eef9e0'); g.addColorStop(1, '#d3ecb0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#4a9e3f' : '#d9edb0';
+    gctx.fill(); gctx.strokeStyle = '#4a9e3f'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#2d4a1f'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#2d4a1f'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．くらしの中の風とゴムの力を発見しよう（発見型） ----------
+function drawKizukiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KIZUKI_CARDS, S.kizukiFound, 4, '①〜④をタッチして、風とゴムの力の身近な例を発見しよう');
+}
+
+// ---------- コース共通描画（風・ゴム・ゴールの主舞台） ----------
+const COURSE_L = 120, COURSE_R = 900, COURSE_Y = 430, MAX_M = 10;
+function drawCourseBase(X, Y, sc, opts) {
+  // 地面
+  gctx.fillStyle = '#c9e6a0';
+  gctx.fillRect(X(0), Y(COURSE_Y + 8), 1000 * sc, (COURSE_Y + 100) * sc - Y(COURSE_Y + 8) + Y(0) * 0);
+  gctx.fillRect(X(0), Y(COURSE_Y + 8), 1000 * sc, 200 * sc);
+  // コースライン
+  gctx.strokeStyle = '#2d5016'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(COURSE_L), Y(COURSE_Y)); gctx.lineTo(X(COURSE_R), Y(COURSE_Y)); gctx.stroke();
+  // スタート
+  gctx.fillStyle = '#2d5016'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('スタート', X(COURSE_L), Y(COURSE_Y + 34));
+  gctx.beginPath(); gctx.moveTo(X(COURSE_L), Y(COURSE_Y - 46)); gctx.lineTo(X(COURSE_L), Y(COURSE_Y + 6)); gctx.stroke();
+
+  if (opts && opts.showTicks) {
+    gctx.fillStyle = '#4a7a35'; gctx.font = `${11 * sc}px sans-serif`;
+    for (let m = 0; m <= MAX_M; m += 2) {
+      const tx = COURSE_L + (COURSE_R - COURSE_L) * (m / MAX_M);
+      gctx.strokeStyle = '#8bbf6a'; gctx.lineWidth = 1.6 * sc;
+      gctx.beginPath(); gctx.moveTo(X(tx), Y(COURSE_Y - 6)); gctx.lineTo(X(tx), Y(COURSE_Y + 6)); gctx.stroke();
+      gctx.fillText(m + 'm', X(tx), Y(COURSE_Y + 34));
+    }
+  } else if (opts && opts.zones) {
+    const zoneX = [COURSE_L, COURSE_L + (COURSE_R - COURSE_L) * 0.38, COURSE_L + (COURSE_R - COURSE_L) * 0.68, COURSE_R];
+    const zoneLabel = ['ちかい', 'まんなかくらい', 'とおい'];
+    for (let i = 0; i < 3; i++) {
+      gctx.fillStyle = '#4a7a35'; gctx.font = `${12 * sc}px sans-serif`;
+      gctx.fillText(zoneLabel[i], X((zoneX[i] + zoneX[i + 1]) / 2), Y(COURSE_Y + 34));
+    }
+  }
+}
+function drawCar(X, Y, sc, mapX, y) {
+  const cy = y || COURSE_Y;
+  gctx.save();
+  gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🚗', X(mapX), Y(cy - 26));
+  gctx.restore();
+}
+
+// ---------- 2．風の力で車を走らせよう（メイン操作・弱中強3段階） ----------
+function drawKazeScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  drawCourseBase(X, Y, sc, { zones: true });
+  // 送風機
+  gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('💨', X(COURSE_L - 60), Y(COURSE_Y - 20));
+  const idxNow = clamp(Math.round(S.kazeIdxDisplay), -1, 2);
+  const mapX = S.kazeIdxDisplay < 0 ? COURSE_L : lerpArr([COURSE_L, ...KAZE_LEVELS.map(k => k.mapX)], S.kazeIdxDisplay + 1);
+  drawCar(X, Y, sc, mapX);
+  gctx.fillStyle = '#2d4a1f'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const title = idxNow >= 0 ? `風の強さ：${KAZE_LEVELS[idxNow].label}` : '風の強さを えらんでみよう';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 3．ゴムの力で車を走らせよう（メイン操作・数値階段①〜⑧） ----------
+function drawGomuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  drawCourseBase(X, Y, sc, { showTicks: true });
+  // 発車装置（定規＋輪ゴム）
+  gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('📏', X(COURSE_L - 60), Y(COURSE_Y - 20));
+  const v = S.gomuIdxDisplay;
+  const idxNow = clamp(Math.round(v), 0, 7);
+  const dist = lerpArr(GOMU_DIST, v);
+  const mapX = COURSE_L + (COURSE_R - COURSE_L) * clamp(dist / MAX_M, 0, 1);
+  drawCar(X, Y, sc, mapX);
+  gctx.fillStyle = '#2d4a1f'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(`${NUMS[idxNow]}　ゴムをのばす長さ ${GOMU_STRETCH[idxNow]}cm　${N_KYORI} やく${dist.toFixed(1)}m`, X(500), Y(70));
+}
+
+// ---------- 4．ゴールに車をとめよう（応用・推理クイズ） ----------
+function drawGooruScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  drawCourseBase(X, Y, sc, { showTicks: true });
+  const goalX = COURSE_L + (COURSE_R - COURSE_L) * (GOORU_TARGET / MAX_M);
+  gctx.strokeStyle = '#ff8a3d'; gctx.lineWidth = 3.4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(goalX), Y(COURSE_Y - 60)); gctx.lineTo(X(goalX), Y(COURSE_Y + 6)); gctx.stroke();
+  gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🚩', X(goalX), Y(COURSE_Y - 76));
+  gctx.fillStyle = '#4a7a35'; gctx.font = `700 ${12 * sc}px sans-serif`;
+  gctx.fillText('ゴール', X(goalX), Y(COURSE_Y + 34));
+
+  let dist = 0, stretch = 0;
+  if (S.gooruStage >= 1) { dist = 5.5; stretch = 8; }
+  if (S.gooruStage >= 2) { dist = 9.5; stretch = 12; }
+  if (S.gooruStage >= 1) {
+    const mapX = COURSE_L + (COURSE_R - COURSE_L) * clamp(dist / MAX_M, 0, 1);
+    drawCar(X, Y, sc, mapX);
+  } else {
+    drawCar(X, Y, sc, COURSE_L);
+  }
+  gctx.fillStyle = '#2d4a1f'; gctx.font = `700 ${18 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const title = S.gooruStage === 0 ? 'ゴールに車をとめよう' : `ゴムをのばす長さ ${stretch}cm　${N_KYORI} やく${dist}m`;
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 5．はかせ：風とゴムの力とくらしの安全 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、風とゴムの力とくらしの安全を見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'kizuki') drawKizukiScene(X, Y, sc);
+  else if (S.scene === 'kaze') drawKazeScene(X, Y, sc);
+  else if (S.scene === 'gomu') drawGomuScene(X, Y, sc);
+  else if (S.scene === 'gooru') drawGooruScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ビュンのはやさビューア（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f8fff0'); grd.addColorStop(1, '#dcf0bd');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'wind') {
+    drawWindLines(R, S.scope.level);
+    label(S.scope.label || '');
+  } else if (mode === 'stretch') {
+    drawStretch(R, S.scope.ratio);
+    label(S.scope.label || '');
+  } else if (mode === 'point') {
+    sctx.fillStyle = '#4a9e3f';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#a5d76e88'); g2.addColorStop(1, 'rgba(165,215,110,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#4a9e3f'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🍃', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#4a9e3f'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2d4a1f';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawWindLines(R, level) {
+    const cx = R * 0.36, cy = R;
+    const n = clamp((level != null ? level : 0) + 1, 1, 3);
+    sctx.strokeStyle = '#4a9e3f'; sctx.lineCap = 'round';
+    for (let i = 0; i < n; i++) {
+      const ly = cy + (i - (n - 1) / 2) * R * 0.28;
+      sctx.lineWidth = R * 0.05;
+      sctx.beginPath(); sctx.moveTo(cx, ly); sctx.lineTo(cx + R * 1.1, ly); sctx.stroke();
+      sctx.beginPath();
+      sctx.moveTo(cx + R * 1.1, ly);
+      sctx.lineTo(cx + R * 0.96, ly - R * 0.09);
+      sctx.moveTo(cx + R * 1.1, ly);
+      sctx.lineTo(cx + R * 0.96, ly + R * 0.09);
+      sctx.stroke();
+    }
+  }
+  function drawStretch(R, ratio) {
+    const cy = R, half = R * 0.62 * clamp(ratio, 0.15, 1);
+    sctx.strokeStyle = '#4a9e3f'; sctx.lineWidth = R * 0.09; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(R - half, cy); sctx.lineTo(R + half, cy); sctx.stroke();
+    sctx.fillStyle = '#2d5016';
+    sctx.beginPath(); sctx.arc(R - half, cy, R * 0.07, 0, TAU); sctx.fill();
+    sctx.beginPath(); sctx.arc(R + half, cy, R * 0.07, 0, TAU); sctx.fill();
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#4a9e3f', '#a5d76e', '#ff8a3d', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    kizuki: '🎐 くらしの中の風とゴムの力を発見しよう',
+    kaze: '💨 風の力で車を走らせよう',
+    gomu: '🏹 ゴムの力で車を走らせよう',
+    gooru: '🚩 ゴールに車をとめよう',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🍃 ビュンの原っぱ ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ビュンの原っぱ';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_kizuki', 'm_kaze', 'm_gomu', 'm_gooru', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'kizuki', icon: '🎐', title: 'くらしの中の風とゴムの力を発見しよう',
+    setup: () => { S.kizukiFound = new Set(KIZUKI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '⛵', name: 'くらしの中に' }),
+    text: () => `かざぐるまや ヨット、水風船に わゴムでっぽう。風と ゴムの 力は、身の回りに たくさん あったね。` },
+  { scene: 'kaze', icon: '💨', title: '風の力で車を走らせよう',
+    setup: () => { S.kazeIdxDisplay = 2; },
+    scope: () => ({ type: 'wind', level: 2, label: '風：強' }),
+    text: () => `風を 強くするほど、車は 遠くまで 走ったね。` },
+  { scene: 'gomu', icon: '🏹', title: 'ゴムの力で車を走らせよう',
+    setup: () => { S.gomuIdxDisplay = 7; },
+    scope: () => ({ type: 'stretch', ratio: 1, label: N_KYORI + ' やく' + GOMU_DIST[7] + 'm' }),
+    text: () => `ゴムを 長く のばすほど、車は どんどん 遠くまで 走ったね。` },
+  { scene: 'gooru', icon: '🚩', title: 'ゴールに車をとめよう',
+    setup: () => { S.gooruStage = 2; },
+    scope: () => ({ type: 'point', icon: '🎯', name: 'よい力を予想' }),
+    text: () => `のばす長さを くらべながら、ちょうど よい 力を 予想できたね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'kizuki', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🎐💨🏹🚩</div>
+        <h1>ビュンの原っぱ</h1>
+        <div class="sub">〜 風と ゴムの 力の 働き 〜</div>
+        <p class="talk">ようこそ！ わたしは 風の「ビュン」と、ゴムが 飛ぶ「ビューン！」から 生まれた ${W.seirei}、<b>ビュン</b>。この 原っぱで、風と ゴムの 力の ひみつを、いっしょに たしかめよう。力を 強くすると、車は どれくらい 遠くまで 走ると 思う？<br>
+        今日は、身の回りの 例から、車を 走らせる ${W.jikken}まで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">ゴムをのばす長さを2倍にすると（4cmから8cmへ）、車が進む距離もちょうど2倍になると思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">➗</span><b>ア</b> ちょうど2倍になる</div>
+          <div class="vcard" data-v="1"><span class="vicon">📈</span><b>イ</b> 2倍よりもっと遠くまで進む</div>
+          <div class="vcard" data-v="2"><span class="vicon">📉</span><b>ウ</b> 2倍より短くなる</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：くらしの中の風とゴムの力を発見しよう（発見型） ---
+  m_kizuki: {
+    enter() {
+      Object.assign(S, { scene: 'kizuki', scope: { type: 'idle' }, kizukiFound: new Set() });
+      updateLoc();
+      setWish('🎐', `①〜④を タッチして、風とゴムの力の 身近な 例を 発見しよう。`);
+      say(`くらしの 中にも、風や ゴムの 力を 使った ものが たくさん あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KIZUKI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.kizukiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.kizukiFound.size >= KIZUKI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.kizukiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`ヨットが 水の上を 進む力の もとは 何？`);
+      setButtons(choiceRow(['風の力', 'ゴムの力', 'エンジンの力'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_kizuki'); S.phase = 'done';
+        say(`せいかい！ ヨットは 帆に 風を 受けて、その 力で 水の 上を 進む。エンジンを 使わなくても 動かせるんだ。`);
+        setButtons([{ label: 'つぎへ（風の力で車を走らせよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['風の力', 'ゴムの力', 'エンジンの力'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：風の力で車を走らせよう（メイン操作・弱中強3段階） ---
+  m_kaze: {
+    enter() {
+      Object.assign(S, { scene: 'kaze', kazeIdx: -1, kazeIdxDisplay: -1, kazeDone: new Set(), scope: { type: 'wind', level: null, label: 'ためす前' } });
+      updateLoc();
+      setWish('💨', `「風をふかせる」ボタンで、弱・中・強の じゅんに 風を 当てて、車が どこまで 進むか たしかめよう。`);
+      say(`まずは「弱」の 風から。ボタンを おすと、風が 車に 当たるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.kazeIdx >= KAZE_LEVELS.length - 1) { this.finish(); return; }
+      const nextLv = KAZE_LEVELS[S.kazeIdx + 1];
+      setControls([{ label: `💨 風をふかせる（${nextLv.label}）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.kazeIdx >= KAZE_LEVELS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.kazeIdx, toV = S.kazeIdx + 1;
+      const lv = KAZE_LEVELS[toV];
+      startTween(fromV, toV, 0.8, v => {
+        S.kazeIdxDisplay = v;
+        S.scope = { type: 'wind', level: v, label: '風：' + (KAZE_LEVELS[clamp(Math.round(v), 0, 2)].label) };
+      }, () => {
+        S.kazeIdx++; S.kazeIdxDisplay = S.kazeIdx; S.kazeDone.add(S.kazeIdx);
+        say(`風の強さ「${lv.label}」：車は「${lv.zone}」まで 進んだよ。`);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`弱・中・強、3つの 風で ためしたね。風の 強さと 車の 進む 様子は どうだったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`風を どんどん 強くしていくと、車が 進む 距離は どうなる？`);
+      setButtons(choiceRow(['どんどん遠くまで進む', 'かわらない', '近くでとまるようになる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_kaze'); S.phase = 'done';
+        say(`せいかい！ 風の 力を 強くするほど、車は 遠くまで 進む。風の 力の 大きさを 変えると、ものの 動く 様子も 変わるんだ。`);
+        setButtons([{ label: 'つぎへ（ゴムの力で車を走らせよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、車の 進み方を 思い出してみよう。`);
+        setButtons(choiceRow(['どんどん遠くまで進む', 'かわらない', '近くでとまるようになる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：ゴムの力で車を走らせよう（メイン操作・数値階段①〜⑧） ---
+  m_gomu: {
+    enter() {
+      Object.assign(S, { scene: 'gomu', gomuIdx: 0, gomuIdxDisplay: 0, scope: { type: 'stretch', ratio: GOMU_STRETCH[0] / 12, label: N_KYORI + ' やく' + GOMU_DIST[0] + 'm' } });
+      updateLoc();
+      setWish('🏹', `「ゴムをのばす」ボタンで、①（いちばん短い）から ⑧（いちばん長い）まで、じょじょに 長く のばしていって、車が 進む ${W.kyori}の 変化を たしかめよう。`);
+      say(`①は いちばん 短く のばした とき。「ゴムをのばす」ボタンで、つぎの 段階へ 進むよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.gomuIdx >= GOMU_STRETCH.length - 1) { this.finish(); return; }
+      setControls([{ label: `🏹 ゴムをのばす（つぎの段階へ）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.gomuIdx >= GOMU_STRETCH.length - 1) return;
+      setControls([]);
+      const fromV = S.gomuIdx, toV = S.gomuIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.gomuIdxDisplay = v;
+        const dist = lerpArr(GOMU_DIST, v);
+        const stretch = lerpArr(GOMU_STRETCH, v);
+        S.scope = { type: 'stretch', ratio: stretch / 12, label: N_KYORI + ' やく' + dist.toFixed(1) + 'm' };
+      }, () => {
+        S.gomuIdx++; S.gomuIdxDisplay = S.gomuIdx;
+        sZoom();
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑧まで、ゴムを のばしたね。のばす 長さと 進む ${W.kyori}は どう 変わったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`ゴムを のばす 長さを どんどん 長くしていくと、車の 進む ${W.kyori}は どうなる？`);
+      setButtons(choiceRow(['どんどん遠くまで進む', 'かわらない', '近くでとまるようになる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_gomu'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ ゴムを 長く のばすほど、もとに もどろうとする 力が 大きくなり、車は どんどん 遠くまで 進む。じつは 8cmでは やく5.5m、12cmでは やく9.5mと、のばす 長さを 3倍に すると ${W.kyori}は 3倍より 大きく のびるんだよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（ゴールに車をとめよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、車の 進み方を 思い出してみよう。`);
+        setButtons(choiceRow(['どんどん遠くまで進む', 'かわらない', '近くでとまるようになる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：ゴールに車をとめよう（応用・推理クイズ） ---
+  m_gooru: {
+    enter() {
+      Object.assign(S, { scene: 'gooru', gooruStage: 0, scope: { type: 'point', icon: '🚩', name: 'ねらおう' } });
+      updateLoc();
+      setWish('🚩', `ビュンが 用意した ゴールに、ちょうど 車を とめよう。まずは 8cm のばして 走らせてみるよ。`);
+      say(`①〜③で 学んだ ことを 使って、ゴールに ちょうど とまる のばし方を 考えよう。`);
+      setButtons([{ label: '① まず8cmでためす', cb: () => this.trial1() }]);
+    },
+    trial1() {
+      setButtons([]);
+      S.gooruStage = 1; sZoom();
+      say(`ゴムを 8cm のばして 走らせたら、やく5.5m。ゴールの 手前で とまってしまったね。`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask1() }]);
+    },
+    ask1() {
+      hideWish(); setButtons([]);
+      say(`ゴールまで 届かせるには、ゴムの のばし方を どうすればいい？`);
+      setButtons(choiceRow(['もっと短くする', 'そのままにする', 'もっと長くする'], (i, el) => this.judge1(i, el)));
+    },
+    judge1(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst();
+        say(`せいかい！ もっと 長く のばせば、力が 大きくなって、もっと 遠くまで 進む。こんどは 12cm のばして 走らせてみよう。`);
+        setButtons([{ label: '② 12cmでためす', cb: () => this.trial2() }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。ゴムを のばす 長さと 進む ${W.kyori}の 関係を 思い出してみよう。`);
+        setButtons(choiceRow(['もっと短くする', 'そのままにする', 'もっと長くする'], (i2, el2) => this.judge1(i2, el2)));
+      }
+    },
+    trial2() {
+      setButtons([]);
+      S.gooruStage = 2; sZoom();
+      say(`ゴムを 12cm のばして 走らせたら、やく9.5m。こんどは ゴールを 通りこしてしまったね。`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask2() }]);
+    },
+    ask2() {
+      hideWish(); setButtons([]);
+      say(`8cmでは 手前、12cmでは 行きすぎた。ちょうど ゴールに とめるには、どのくらいの 長さが よさそう？`);
+      setButtons(choiceRow(['8cmより短く', '12cmより長く', '8cmと12cmの間くらい'], (i, el) => this.judge2(i, el)));
+    },
+    judge2(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('m_gooru'); S.phase = 'done';
+        say(`せいかい！ 8cmと 12cmの あいだくらいの 長さなら、ちょうど よい 力に なりそうだね。のばす 長さを 少しずつ 変えて、ちょうど よい 力を 見つける。これが ${W.jikken}の おもしろさだよ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。8cmと 12cmの 結果を くらべて、もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['8cmより短く', '12cmより長く', '8cmと12cmの間くらい'], (i2, el2) => this.judge2(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：風とゴムの力とくらしの安全 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 風と ゴムの 力と くらしの 安全を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`わゴムでっぽうなどで あそぶ とき、気をつけないと いけない ことは？`);
+      setButtons(choiceRow(['人に向けて飛ばさない', 'できるだけ遠くまで飛ばす', '大きい音を出す'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ゴムでっぽうなどを 人に 向けて 飛ばすと、目や 顔に あたって けがを する ことが ある。楽しく あそぶ ためにも、人に 向けないように 気をつけよう。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['人に向けて飛ばさない', 'できるだけ遠くまで飛ばす', '大きい音を出す'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ビュンの原っぱ みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 風の 力を 強くすると、車は（<span class="blankWord" data-a="遠く">？？？</span>）まで 進む。<br>
+        ② ゴムを（<span class="blankWord" data-a="長く">？？？</span>）のばすほど、車は 遠くまで 進む。<br>
+        ③ ゴムを 2倍 のばすと、進む 距離は（<span class="blankWord" data-a="2倍より大きく">？？？</span>）なる。<br>
+        ④ わゴムでっぽうは（<span class="blankWord" data-a="人に向けない">？？？</span>）ように 気をつけて あそぶ。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 2倍よりもっと遠くまで進む</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①わゴムを のばして はなし、もどる 力を 手で かんじてみよう（人に 向けないでね）。<br>②うちわや せんぷうきの 風を 紙ひこうきに 当てて、強さを 変えると 飛び方が どう 変わるか ためしてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#4a9e3f'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「風を強くすると車の進み方は？」「ゴムを長くのばすとどうなる？」「わゴムでっぽうで遊ぶ時に気をつけることは？」`);
+      setButtons([
+        { label: '🎐 くらしの例の図', cls: 'sub', cb: () => this.show('kizuki') },
+        { label: '💨 風の実験の図', cls: 'sub', cb: () => this.show('kaze') },
+        { label: '🏹 ゴムの実験の図', cls: 'sub', cb: () => this.show('gomu') },
+        { label: '🚩 ゴールゲームの図', cls: 'sub', cb: () => this.show('gooru') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_gomu などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
