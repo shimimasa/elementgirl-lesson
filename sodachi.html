@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ソダチの学級園 — 植物の一生 たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f4fbea 0%, #e4f4d0 45%, #bfe3a6 100%);
+    color: #2b3d22;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #4f9d52; text-shadow: 0 0 14px rgba(79, 157, 82, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5f8a4c; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e9f7dc; border: 2px solid #bfe3a6;
+    font-size: clamp(16px, 1.8vw, 26px); color: #9bc088;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #d8f0c0, #4f9d52);
+    border-color: #2c5e2a; color: #2c5e2a;
+    box-shadow: 0 0 16px rgba(79, 157, 82, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eaf6d8 60%, #cfe8a8 100%);
+    border: 3px solid #7a9a4a;
+    box-shadow: inset 0 0 40px rgba(60, 90, 30, .14), 0 4px 18px rgba(60, 90, 30, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #4a6a3a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #4f9d52; color: #f4fbea; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(22, 58, 92, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(120, 160, 90, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #bfe3a6; cursor: pointer;
+    background: linear-gradient(180deg, #86c96b, #4f9d52); color: #fff;
+    box-shadow: 0 3px 0 #2c5e2a; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #4f9d52; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(22, 58, 92, .28), inset 0 0 24px rgba(79, 157, 82, .14);
+    flex-shrink: 0; background: #f4fbea;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #5f8a4c;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #4f9d52; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #bfe3a6; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #5f8a4c; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2b3d22;
+    border: 1.5px solid #bfe3a6;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #4f9d52; background: #e9f7dc; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #e9f7dc); color: #2b3d22;
+    border: 2px solid #4f9d52; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #4f9d52; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #86c96b, #4f9d52); color: #f4fbea;
+    box-shadow: 0 3px 0 #2c5e2a, 0 5px 12px rgba(22, 58, 92, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #2c5e2a; }
+  .btn.sub {
+    background: #e9f7dc; color: #5f8a4c; box-shadow: 0 3px 0 #bfe3a6;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2b3d22; box-shadow: 0 3px 0 #bfe3a6; font-weight: 400; border: 1.5px solid #bfe3a6; }
+  .btn.choice.picked { background: #e9f7dc; outline: 3px solid #4f9d52; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(15, 30, 50, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #e9f7dc);
+    border: 3px solid #4f9d52; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(15, 30, 50, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #4f9d52; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #4f9d52; }
+  .panel .sub { color: #5f8a4c; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2b3d22; border: 1.5px solid #bfe3a6; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #5f8a4c; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #2b3d22; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #bfe3a6; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #4f9d52; background: #f4fbea; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #4f9d52; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #4f9d52;
+    color: #4f9d52; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #5f8a4c;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e9f7dc; color: #5f8a4c;
+    border: 1px solid #bfe3a6; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #d4ecc0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🌱 ソダチの学級園<small>— 植物の一生 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_hatsuga" title="めが出るまでのようすを発見しよう">★</div>
+    <div class="badge" id="bd_m_seichou" title="週ごとのそだちをたしかめよう">★</div>
+    <div class="badge" id="bd_m_hajike" title="実がはじけるひみつを発見しよう">★</div>
+    <div class="badge" id="bd_m_kurabe" title="ホウセンカとヒマワリをくらべよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ソダチの学級園</div>
+    <div id="locChip">ソダチの学級園</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🌱 ソダチの そだちビューア 〜め・は・はな・みを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <defs>
+              <radialGradient id="sodachiBody" cx="35%" cy="30%">
+                <stop offset="0%" stop-color="#fff6e0"/>
+                <stop offset="55%" stop-color="#e8c98a"/>
+                <stop offset="100%" stop-color="#b9924f"/>
+              </radialGradient>
+              <linearGradient id="sodachiLeaf" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#4f9d52"/>
+                <stop offset="100%" stop-color="#8cc873"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="42" cy="26" rx="10" ry="22" fill="url(#sodachiLeaf)" stroke="#2c5e2a" stroke-width="1.6" transform="rotate(-28 42 26)"/>
+            <ellipse cx="78" cy="26" rx="10" ry="22" fill="url(#sodachiLeaf)" stroke="#2c5e2a" stroke-width="1.6" transform="rotate(28 78 26)"/>
+            <path d="M60 46 L60 34" stroke="#4f9d52" stroke-width="4" stroke-linecap="round"/>
+            <g stroke="#6fb552" stroke-width="3" stroke-linecap="round" fill="none" opacity=".7">
+              <path d="M18 74 Q10 66 14 56"/>
+              <path d="M102 74 Q110 66 106 56"/>
+            </g>
+            <ellipse cx="60" cy="84" rx="40" ry="42" fill="url(#sodachiBody)" stroke="#7a5a2e" stroke-width="2.5"/>
+            <g class="eyes">
+              <circle cx="46" cy="84" r="6" fill="#2b3d22"/>
+              <circle cx="74" cy="84" r="6" fill="#2b3d22"/>
+            </g>
+            <path d="M48 100 Q60 108 72 100" fill="none" stroke="#2b3d22" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="40" cy="94" r="5" fill="#e8a06a" opacity=".5"/>
+            <circle cx="80" cy="94" r="5" fill="#e8a06a" opacity=".5"/>
+          </svg>
+          <div class="catname">ホウセンカの たねから 生まれた <ruby>精霊<rt>せいれい</rt></ruby> ソダチ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌱 ソダチの学級園ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ソダチの学級園 — 植物の一生・ホウセンカ（小3理科・生命分野・優先度Cから選定・協力型・1ファイル）
+   めが出るまで（発見型）→そだちの記録（メイン操作・数値階段①〜⑧、週送りで草丈と段階を可視化）→
+   実がはじけるひみつ（発見型・驚き演出）→ホウセンカとヒマワリをくらべよう（応用推理）→
+   はかせ（いのちのリレー、一年草と多年草、みぢかな野菜も同じじゅんばん、かんさつを続ける大切さ）。
+   数値・事実：小学校学習指導要領・理科・第3学年B(1)「植物の育ち方」
+   （種子から発芽し、成長して開花し、結実するという一連の過程を、複数の植物を育てて
+    体のつくりや育ち方を比較しながら理解する）。
+   ホウセンカ：種まき適期4〜5月、発芽適温15〜20℃、条件がそろえば5〜7日で発芽、
+   本葉2〜3枚で間引き、開花6〜9月ごろ、実の中の種は約20個、実は触れると弾けて種が飛び散る
+   （いずれもWebSearchで裏取り済み）。週ごとの草丈（0/2/5/15/25/30/35/40cm）は複数の栽培記録
+   （種まきから約2か月で草丈40cm前後になる実例等）に基づくおおよその目安値であり、
+   個体差があることを前提とした教育的モデル値（数値を捏造しない方針）。
+   ヒマワリ（比較用）：種まき4〜6月、発芽適温20〜25℃、発芽まで1週間前後、開花から種が
+   熟すまで約2か月、草丈は品種により30cm〜3m超（矮性〜ロシアヒマワリ、WebSearchで裏取り済み）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+// W辞書はsay()/setWish()等のHTML文脈だけで使う（canvasのfillTextやscope.label/.name、
+// データ配列の.name/.iconには一切渡さない。plain()はHTMLタグを消すだけで<rt>内の読みは
+// 残るため、canvas文脈で使うとふりがなが本文に連結表示されるバグになる過去の教訓）。
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+};
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_hatsuga：めが出るまで（発見型）
+const HATSUGA_CARDS = [
+  { key: 0, num: '①', icon: '🌡️', name: 'めが出る じょうけん', txt: `ちょうどよい 温度(15℃から20℃)と 水が あると、たねは めを 出す じゅんびを はじめるよ。` },
+  { key: 1, num: '②', icon: '🌱', name: '子葉(双葉)が開く', txt: `じょうけんが そろうと、5日から7日ほどで、まるい 形の 子葉(双葉)が 2まい 開くよ。` },
+];
+
+// m_seichou：そだちの記録（メイン操作・数値階段①〜⑧、週送りで草丈と段階を可視化）
+// 週数と段階名は学習指導要領の一連の過程（発芽→成長→開花→結実）に沿った実際の生育順序。
+// 草丈(cm)は複数の栽培記録に基づくおおよその目安値（個体差がある教育的モデル値）。
+const SEICHOU_WEEK = ['①たねまき', '②はつが(1週め)', '③本葉が2〜3まい(2週め)', '④くきがぐんぐんのびる(4週め)', '⑤つぼみができる(6週め)', '⑥はなが さく(7週め)', '⑦みができはじめる(9週め)', '⑧たねが じゅくす(11週め)'];
+const SEICHOU_HEIGHT = [0, 2, 5, 15, 25, 30, 35, 40];
+const SEICHOU_ICON = ['🌰', '🌱', '🌿', '🪴', '🌷', '🌸', '🟢', '🟡'];
+
+// m_hajike：実がはじけるひみつ（発見型・驚き演出）
+const HAJIKE_CARDS = [
+  { key: 0, num: '①', icon: '🟢', name: 'まだ じゅくして いない実', txt: `緑色の 実は、まだ じゅくして いない。そっと さわっても、なにも 起きないよ。` },
+  { key: 1, num: '②', icon: '🟡', name: 'じゅくした実', txt: `黄色く なった 実は、じゅくした しるし。そっと ふれただけで、パチンと はじけて、中の たねが 飛び散るよ！` },
+];
+
+// m_kurabe：ホウセンカとヒマワリをくらべよう（応用推理）
+const KURABE_CARDS = [
+  { key: 0, num: '①', icon: '🌱', name: 'ホウセンカ', txt: `たねまきから 5日から7日で はつが。草たけは 40cmくらいまで のびる。実の 中の たねは 20つぶくらい。` },
+  { key: 1, num: '②', icon: '🌻', name: 'ヒマワリ', txt: `たねまきから 1週間前後で はつが。草たけは しゅるいに よって 30cmから 3mいじょうまで のびる。花が さいてから 2か月ほどで たねが じゅくす。` },
+];
+
+// はかせ：いのちのリレー・一年草と多年草・みぢかな野菜・かんさつの大切さ（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '💌', name: 'いのちの リレー', txt: `ホウセンカは、たねを のこして かれる。これは、いのちを つぎの 世代に つなぐ、だいじな しごとなんだ。` },
+  { key: 1, letter: 'い', icon: '🌳', name: '一年草と 多年草', txt: `ホウセンカや ヒマワリは、1年で いっしょうを おえる「一年草」。サクラなどの「多年草・木」は、同じ 株が 何年も 生きつづけるよ。` },
+  { key: 2, letter: 'う', icon: '🍅', name: 'みぢかな 野菜も 同じ じゅんばん', txt: `ミニトマトや アサガオも、たね→め→は→はな→みという 同じ じゅんばんで そだつよ。` },
+  { key: 3, letter: 'え', icon: '📔', name: 'かんさつを つづける たいせつさ', txt: `毎日 すこしずつ かわる ようすを きろくすると、小さな 変化にも 気づけるように なるよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'hatsuga',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  hatsugaFound: new Set(),
+  seichouIdx: -1,
+  seichouIdxDisplay: -1,
+  hajikeFound: new Set(),
+  kurabeFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+const sPop = () => { tone(880, 0, 0.07, 'square', 0.12); tone(1300, 0.05, 0.05, 'square', 0.1); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f4fbea'); g.addColorStop(1, '#cfe8a8');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#4f9d52' : '#bfe3a6';
+    gctx.fill(); gctx.strokeStyle = '#4f9d52'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#2b3d22'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#2b3d22'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．めが出るまで（発見型） ----------
+function drawHatsugaScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HATSUGA_CARDS, S.hatsugaFound, 2, '①②をタッチして、めが出るまでのようすを発見しよう');
+}
+
+// ---------- 2．そだちの記録（メイン操作・数値階段①〜⑧、週送り） ----------
+function drawSeichouScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const groundY = 520, potX = 500, rulerX = 220;
+  gctx.strokeStyle = '#5f8a4c'; gctx.lineWidth = 2 * sc;
+  gctx.beginPath(); gctx.moveTo(X(rulerX), Y(140)); gctx.lineTo(X(rulerX), Y(groundY)); gctx.stroke();
+  for (let cm = 0; cm <= 40; cm += 10) {
+    const ry = groundY - cm * 6.5;
+    gctx.beginPath(); gctx.moveTo(X(rulerX - 8), Y(ry)); gctx.lineTo(X(rulerX + 8), Y(ry)); gctx.stroke();
+    gctx.fillStyle = '#5f8a4c'; gctx.font = `${12 * sc}px sans-serif`; gctx.textAlign = 'right'; gctx.textBaseline = 'middle';
+    gctx.fillText(cm + 'cm', X(rulerX - 12), Y(ry));
+  }
+
+  const idxNow = clamp(Math.round(S.seichouIdxDisplay), 0, 7);
+  const v = clamp(S.seichouIdxDisplay, 0, 7);
+  const heightCm = S.seichouIdx >= 0 ? lerpArr(SEICHOU_HEIGHT, v) : 0;
+  const stemPx = heightCm * 6.5;
+  const stemTopY = groundY - stemPx;
+
+  gctx.fillStyle = '#a9784a';
+  gctx.beginPath(); gctx.roundRect(X(potX - 70), Y(groundY), 140 * sc, 26 * sc, 6 * sc); gctx.fill();
+
+  if (S.seichouIdx >= 0 && heightCm > 0) {
+    gctx.strokeStyle = '#4f9d52'; gctx.lineWidth = 7 * sc; gctx.lineCap = 'round';
+    gctx.beginPath(); gctx.moveTo(X(potX), Y(groundY)); gctx.lineTo(X(potX), Y(stemTopY)); gctx.stroke();
+    if (idxNow >= 2) {
+      const leafPairs = idxNow >= 4 ? 3 : idxNow >= 3 ? 2 : 1;
+      for (let i = 0; i < leafPairs; i++) {
+        const ly = groundY - stemPx * (0.35 + i * 0.22);
+        gctx.fillStyle = '#6fb552';
+        gctx.beginPath(); gctx.ellipse(X(potX - 26), Y(ly), 20 * sc, 10 * sc, -0.4, 0, TAU); gctx.fill();
+        gctx.beginPath(); gctx.ellipse(X(potX + 26), Y(ly), 20 * sc, 10 * sc, 0.4, 0, TAU); gctx.fill();
+      }
+    }
+    gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(SEICHOU_ICON[idxNow], X(potX), Y(stemTopY - 26));
+  } else {
+    gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText('🌰', X(potX), Y(groundY - 20));
+  }
+
+  gctx.fillStyle = '#2b3d22'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const title = S.seichouIdx >= 0 ? `${SEICHOU_WEEK[idxNow]}　草たけ ${Math.round(heightCm)}cm` : 'たねをまいたよ。「つぎの週へ」をおしてみよう';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 3．実がはじけるひみつ（発見型・驚き演出） ----------
+function drawHajikeScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAJIKE_CARDS, S.hajikeFound, 2, '①②をタッチして、実がじゅくすようすを発見しよう');
+}
+
+// ---------- 4．ホウセンカとヒマワリをくらべよう（応用推理） ----------
+function drawKurabeScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KURABE_CARDS, S.kurabeFound, 2, '①②をタッチして、ホウセンカとヒマワリをくらべよう');
+}
+
+// ---------- 5．はかせ：いのちのリレー・一年草と多年草・みぢかな野菜 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、いのちをつなぐひみつを見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'hatsuga') drawHatsugaScene(X, Y, sc);
+  else if (S.scene === 'seichou') drawSeichouScene(X, Y, sc);
+  else if (S.scene === 'hajike') drawHajikeScene(X, Y, sc);
+  else if (S.scene === 'kurabe') drawKurabeScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ソダチの そだちビューア（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f4fbea'); grd.addColorStop(1, '#cfe8a8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#4f9d52';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'growth') {
+    drawGrowthScope(R, S.scope.idx != null ? S.scope.idx : -1);
+    label(S.scope.label || '');
+  } else if (mode === 'seeds') {
+    drawSeedsScope(R, S.scope.count || 0);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#8cc87388'); g2.addColorStop(1, 'rgba(140,200,115,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#4f9d52'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌱', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#4f9d52'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2b3d22';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawGrowthScope(R, idxFloat) {
+    const v = clamp(idxFloat, 0, 7);
+    const idxNow = clamp(Math.round(v), 0, 7);
+    const heightCm = idxFloat < 0 ? 0 : lerpArr(SEICHOU_HEIGHT, v);
+    const baseY = R * 1.62;
+    const stemPx = (heightCm / 40) * R * 0.9;
+    sctx.fillStyle = '#a9784a';
+    sctx.beginPath(); sctx.roundRect(R - R * 0.35, baseY, R * 0.7, R * 0.14, R * 0.04); sctx.fill();
+    if (idxFloat >= 0 && heightCm > 0) {
+      sctx.strokeStyle = '#4f9d52'; sctx.lineWidth = R * 0.05; sctx.lineCap = 'round';
+      sctx.beginPath(); sctx.moveTo(R, baseY); sctx.lineTo(R, baseY - stemPx); sctx.stroke();
+      if (idxNow >= 2) {
+        const pairs = idxNow >= 4 ? 3 : idxNow >= 3 ? 2 : 1;
+        for (let i = 0; i < pairs; i++) {
+          const ly2 = baseY - stemPx * (0.35 + i * 0.22);
+          sctx.fillStyle = '#6fb552';
+          sctx.beginPath(); sctx.ellipse(R - R * 0.16, ly2, R * 0.15, R * 0.075, -0.4, 0, TAU); sctx.fill();
+          sctx.beginPath(); sctx.ellipse(R + R * 0.16, ly2, R * 0.15, R * 0.075, 0.4, 0, TAU); sctx.fill();
+        }
+      }
+      sctx.font = `${R * 0.32}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+      sctx.fillText(SEICHOU_ICON[idxNow], R, baseY - stemPx - R * 0.2);
+    } else {
+      sctx.font = `${R * 0.32}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+      sctx.fillText('🌰', R, baseY - R * 0.15);
+    }
+  }
+  function drawSeedsScope(R, count) {
+    const n = count || 0;
+    sctx.fillStyle = '#8a6a3a';
+    for (let i = 0; i < n; i++) {
+      const ang = i * 2.399963;
+      const rad = R * 0.72 * Math.sqrt(i / Math.max(1, n));
+      const px = R + Math.cos(ang) * rad, py = R * 1.05 + Math.sin(ang) * rad * 0.85;
+      sctx.beginPath(); sctx.arc(px, py, R * 0.045, 0, TAU); sctx.fill();
+    }
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#4f9d52', '#86c96b', '#e0973a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height * 0.4, 110);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    hatsuga: '🌱 めが出るまで',
+    seichou: '📏 そだちの記録',
+    hajike: '💥 実がはじける',
+    kurabe: '🌻 ホウセンカとヒマワリ',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🌱 ソダチの学級園 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ソダチの学級園';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_hatsuga', 'm_seichou', 'm_hajike', 'm_kurabe', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'hatsuga', icon: '🌱', title: 'めが出るまで',
+    setup: () => { S.hatsugaFound = new Set(HATSUGA_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🌱', name: '子葉が開く' }),
+    text: () => `ちょうどよい 温度と 水が あると、5日から7日で めが出て、子葉(双葉)が 開いたね。` },
+  { scene: 'seichou', icon: '📏', title: 'そだちの記録', video: 'KKlNFa2OHX0',
+    setup: () => { Object.assign(S, { seichouIdx: 7, seichouIdxDisplay: 7 }); },
+    scope: () => ({ type: 'growth', idx: 7, label: `⑧ 草たけ${SEICHOU_HEIGHT[7]}cm` }),
+    text: () => `たねまきから、め→本葉→つぼみ→はな→みへと、じゅんばんに そだったね。` },
+  { scene: 'hajike', icon: '💥', title: '実がはじける',
+    setup: () => { S.hajikeFound = new Set(HAJIKE_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'seeds', count: 20, label: 'たね やく20つぶ' }),
+    text: () => `実が じゅくすと、パチンと はじけて、たねが 遠くまで 飛び散ったね。` },
+  { scene: 'kurabe', icon: '🌻', title: 'ホウセンカとヒマワリ',
+    setup: () => { S.kurabeFound = new Set(KURABE_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🌻', name: 'くらべてみると' }),
+    text: () => `ホウセンカと ヒマワリ、じゅんばんは 同じでも、そだつ 速さや 大きさは ちがったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'hatsuga', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🌱📏💥🌻</div>
+        <h1>ソダチの学級園</h1>
+        <div class="sub">〜 植物の 一生 〜</div>
+        <p class="talk">ようこそ！ わたしは ホウセンカの たねから 生まれた ${W.seirei}、<b>ソダチ</b>。この 学級園で、植物の 一生を、いっしょに たしかめよう。たねを まいたら、次の日に すぐ 花が さくと 思う？<br>
+        今日は、めが出るまでから、そだち・実が はじけるひみつ、ほかの 植物との くらべっこまで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">ホウセンカが そだつ じゅんばんは、次の うち どれだと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🌸</span><b>ア</b> たね→はな→め→は→み</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌱</span><b>イ</b> たね→め→は(本葉)がふえる→つぼみ→はな→み</div>
+          <div class="vcard" data-v="2"><span class="vicon">🎲</span><b>ウ</b> 毎回ちがうじゅんばん</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：めが出るまで（発見型） ---
+  m_hatsuga: {
+    enter() {
+      Object.assign(S, { scene: 'hatsuga', scope: { type: 'idle' }, hatsugaFound: new Set() });
+      updateLoc();
+      setWish('🌱', `①②を タッチして、めが出るまでの ようすを 発見しよう。`);
+      say(`ホウセンカの たねを まいたよ。めは、いつ 出るかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HATSUGA_CARDS.map(c => ({
+        label: c.num + ' ' + (S.hatsugaFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.hatsugaFound.size >= HATSUGA_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.hatsugaFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`たねを まいたら、つぎの日に すぐ めが 出る？`);
+      setButtons(choiceRow(['次の日にすぐ出る', '5日から7日ほどかかる', '1か月以上かかる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_hatsuga'); S.phase = 'done';
+        say(`せいかい！ ちょうどよい 温度と 水が あっても、めが 出るまでには 5日から7日くらい かかるんだ。じっと まつのも、かんさつの たいせつな 時間だよ。`);
+        setButtons([{ label: 'つぎへ（そだちの記録）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['次の日にすぐ出る', '5日から7日ほどかかる', '1か月以上かかる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：そだちの記録（メイン操作・数値階段①〜⑧、週送り） ---
+  m_seichou: {
+    enter() {
+      Object.assign(S, { scene: 'seichou', seichouIdx: -1, seichouIdxDisplay: -1, scope: { type: 'growth', idx: -1, label: '' } });
+      updateLoc();
+      setWish('📏', `「つぎの週へ すすめる」ボタンで、①(たねまき)から ⑧(たねが じゅくす)まで、週ごとの そだちを たしかめよう。`);
+      say(`①は たねまきの 週。ボタンで、つぎの 週へ 進むよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.seichouIdx >= SEICHOU_HEIGHT.length - 1) { this.finish(); return; }
+      setControls([{ label: `🕐 つぎの週へ すすめる`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.seichouIdx >= SEICHOU_HEIGHT.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.seichouIdx, toV = S.seichouIdx + 1;
+      startTween(fromV, toV, 0.8, v => {
+        S.seichouIdxDisplay = v;
+        const idxNow2 = clamp(Math.round(v), 0, 7);
+        const cm = lerpArr(SEICHOU_HEIGHT, clamp(v, 0, 7));
+        S.scope = { type: 'growth', idx: v, label: `${SEICHOU_WEEK[idxNow2].slice(0, 1)} 草たけ${Math.round(cm)}cm` };
+      }, () => {
+        S.seichouIdx++; S.seichouIdxDisplay = S.seichouIdx;
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑧まで、じゅんばんに そだったね。たねから 実が できるまで、どんな じゅんばんだったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`たねから 実が できるまでの 正しい じゅんばんは？`);
+      setButtons(choiceRow(['たね→はな→め→は→み', 'たね→め(子葉)→は(本葉)がふえる→つぼみ→はな→み(たね)', '毎回ちがうじゅんばん'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_seichou'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ たねから めが出て、本葉が ふえて、くきが のびて、つぼみから はなが さき、実が できる。この じゅんばんは、いつも 同じなんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（実がはじけるひみつ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、①〜⑧の 記録を 思い出してみよう。`);
+        setButtons(choiceRow(['たね→はな→め→は→み', 'たね→め(子葉)→は(本葉)がふえる→つぼみ→はな→み(たね)', '毎回ちがうじゅんばん'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：実がはじけるひみつ（発見型・驚き演出） ---
+  m_hajike: {
+    enter() {
+      Object.assign(S, { scene: 'hajike', scope: { type: 'idle' }, hajikeFound: new Set() });
+      updateLoc();
+      setWish('💥', `①②を タッチして、実が じゅくすと どうなるか 発見しよう。`);
+      say(`花が さいたあと、実が できる。実は、じゅくすと ふしぎな ことが 起きるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAJIKE_CARDS.map(c => ({
+        label: c.num + ' ' + (S.hajikeFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.hajikeFound.size >= HAJIKE_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.hajikeFound.add(c.key);
+      if (c.key === 1) {
+        S.scope = { type: 'seeds', count: 20, label: 'たね やく20つぶ' };
+        sPop(); stageBurst();
+      } else {
+        S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      }
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`実が はじけて、たねを 遠くまで 飛ばすのは、なぜ？`);
+      setButtons(choiceRow(['遠くまで飛ぶのが好きだから', 'あたらしい場所でもめを出せるように', 'ただのぐうぜん'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_hajike'); S.phase = 'done';
+        say(`せいかい！ 同じ 場所に たねが かたまると、日光や 栄養の とりあいに なってしまう。実が はじけて 遠くまで たねを 飛ばすことで、あたらしい 場所でも めを 出せるように している。実の 中には、たねが 20つぶくらい 入っているよ。`);
+        setButtons([{ label: 'つぎへ（ホウセンカとヒマワリをくらべよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['遠くまで飛ぶのが好きだから', 'あたらしい場所でもめを出せるように', 'ただのぐうぜん'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：ホウセンカとヒマワリをくらべよう（応用推理） ---
+  m_kurabe: {
+    enter() {
+      Object.assign(S, { scene: 'kurabe', scope: { type: 'idle' }, kurabeFound: new Set() });
+      updateLoc();
+      setWish('🌻', `①②を タッチして、ホウセンカと ヒマワリを くらべよう。`);
+      say(`ホウセンカと おなじ じゅんばんで そだつ 植物は、ほかにも あるかな？ ヒマワリと くらべてみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KURABE_CARDS.map(c => ({
+        label: c.num + ' ' + (S.kurabeFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.kurabeFound.size >= KURABE_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.kurabeFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`ホウセンカと ヒマワリ、そだつ じゅんばんは？`);
+      setButtons(choiceRow(['ぜんぜんちがうじゅんばん', 'じゅんばんは同じで、速さや大きさがちがう', 'ヒマワリだけたねができない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_kurabe'); S.phase = 'done';
+        say(`せいかい！ どちらも たね→め→は→はな→みという 同じ じゅんばんで そだつ。でも、そだつ 速さや、大きさ、たねの 数は、しょくぶつに よって ちがうんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ぜんぜんちがうじゅんばん', 'じゅんばんは同じで、速さや大きさがちがう', 'ヒマワリだけたねができない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：いのちのリレー・一年草と多年草・みぢかな野菜・かんさつの大切さ ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ いのちを つなぐ ひみつを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`いのちを つぎの 世代に つなぐために、ホウセンカが さいごに のこす ものは？`);
+      setButtons(choiceRow(['葉っぱ', 'たね', 'くき'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ホウセンカは、たねを のこして かれることで、いのちを つぎの 世代に つないでいるんだ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['葉っぱ', 'たね', 'くき'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      hideOverlay();
+      if (slide.video) {
+        this.showVideo(slide, n, total, isLast);
+      } else {
+        this.showPlain(slide, n, total, isLast);
+      }
+    },
+    showPlain(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+    showVideo(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      hideWish();
+      setButtons([
+        { label: '▶ どうがを 見る', cb: () => this.playVideo(slide) },
+        { label: isLast ? 'まとめへ すすむ' : 'つぎへ', cls: 'sub', cb: goNext },
+      ]);
+    },
+    playVideo(slide) {
+      sTap();
+      showOverlay(`
+        <h2>${slide.icon} ${slide.title}</h2>
+        <div style="max-width:380px;margin:0 auto">
+          <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000">
+            <iframe width="100%" height="100%" style="position:absolute;inset:0;border:0"
+              src="https://www.youtube-nocookie.com/embed/${slide.video}?rel=0&modestbranding=1&iv_load_policy=3&autoplay=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+        <p class="foot">動画：熊取町公式チャンネル「3年理科　ホウセンカの一生」<br>https://www.youtube.com/watch?v=${slide.video}　（先生へ：外部サイトのため、事前に内容をご確認ください）</p>
+        <button class="btn" id="videoCloseBtn">とじる</button>
+      `);
+      $('videoCloseBtn').onclick = () => { sTap(); hideOverlay(); };
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ソダチの学級園 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① たねから めが出るまでには（<span class="blankWord" data-a="5日から7日">？？？</span>）くらい かかる。<br>
+        ② たねまきから じゅんばんに そだち、さいごは（<span class="blankWord" data-a="つぼみ→はな→み">？？？</span>）に なる。<br>
+        ③ 実が じゅくすと、（<span class="blankWord" data-a="はじけて">？？？</span>）たねが 遠くまで 飛び散る。<br>
+        ④ じゅんばんは 同じでも、そだつ 速さや 大きさは（<span class="blankWord" data-a="しょくぶつによってちがう">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ</b> でした！ たね→め(子葉)→は(本葉)が ふえる→つぼみ→はな→み(たね) の じゅんばんで そだちましたね。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①お家や 学校の まわりの 植物が、いま たね/め/葉/花/実の どの 段階か 見てみよう。②ミニトマトや アサガオなど、みぢかな 野菜や 花の たねを かんさつしてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#4f9d52'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「たねから めが出るまで何日？」「実がはじけるのはなぜ？」「ヒマワリとホウセンカ、何がちがう？」`);
+      setButtons([
+        { label: '🌱 めが出るまでの図', cls: 'sub', cb: () => this.show('hatsuga') },
+        { label: '📏 そだちの記録の図', cls: 'sub', cb: () => this.show('seichou') },
+        { label: '💥 実がはじける図', cls: 'sub', cb: () => this.show('hajike') },
+        { label: '🌻 ホウセンカとヒマワリの図', cls: 'sub', cb: () => this.show('kurabe') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_seichou などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1803,6 +1803,34 @@ const MASCOTS = {
             <circle cx="42" cy="80" r="5" fill="#ffb8a8" opacity=".55"/>
             <circle cx="78" cy="80" r="5" fill="#a8d0f0" opacity=".55"/>
           </svg>`,
+  sodachi: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <defs>
+              <radialGradient id="sodachiBody" cx="35%" cy="30%">
+                <stop offset="0%" stop-color="#fff6e0"/>
+                <stop offset="55%" stop-color="#e8c98a"/>
+                <stop offset="100%" stop-color="#b9924f"/>
+              </radialGradient>
+              <linearGradient id="sodachiLeaf" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#4f9d52"/>
+                <stop offset="100%" stop-color="#8cc873"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="42" cy="26" rx="10" ry="22" fill="url(#sodachiLeaf)" stroke="#2c5e2a" stroke-width="1.6" transform="rotate(-28 42 26)"/>
+            <ellipse cx="78" cy="26" rx="10" ry="22" fill="url(#sodachiLeaf)" stroke="#2c5e2a" stroke-width="1.6" transform="rotate(28 78 26)"/>
+            <path d="M60 46 L60 34" stroke="#4f9d52" stroke-width="4" stroke-linecap="round"/>
+            <g stroke="#6fb552" stroke-width="3" stroke-linecap="round" fill="none" opacity=".7">
+              <path d="M18 74 Q10 66 14 56"/>
+              <path d="M102 74 Q110 66 106 56"/>
+            </g>
+            <ellipse cx="60" cy="84" rx="40" ry="42" fill="url(#sodachiBody)" stroke="#7a5a2e" stroke-width="2.5"/>
+            <g class="eyes">
+              <circle cx="46" cy="84" r="6" fill="#2b3d22"/>
+              <circle cx="74" cy="84" r="6" fill="#2b3d22"/>
+            </g>
+            <path d="M48 100 Q60 108 72 100" fill="none" stroke="#2b3d22" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="40" cy="94" r="5" fill="#e8a06a" opacity=".5"/>
+            <circle cx="80" cy="94" r="5" fill="#e8a06a" opacity=".5"/>
+          </svg>`,
   todoke: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
             <g stroke="#6ec6ba" stroke-width="4" stroke-linecap="round" opacity=".85">
               <path d="M14 34 Q26 30 30 40" fill="none"/>
