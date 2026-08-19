@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>トドケの町やくば きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2a9d8f; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #6ec6ba; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #e4f4f0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #e4f4f0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="todoke.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>📮 トドケの町やくば きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      都道府県知事や市区町村長は、だれが選ぶと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 国会議員が選ぶ</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 内閣が選ぶ</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 住民が選挙で選ぶ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．まちの仕事を発見しよう</span>
+    <div class="secBody">
+      ①〜⑥を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①ごみ処理</th><th>②上下水道</th><th>③消防・救急</th><th>④学校</th><th>⑤公園・道路</th><th>⑥福祉</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      これらの仕事は、だれが行っているのかな、（国 ／ 都道府県や市区町村 ／ 会社）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．地方自治のしくみを調べよう</span>
+    <div class="secBody">
+      ①②を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①国のせいじ</th><th>②地方のせいじ</th></tr>
+        <tr><td>☐</td><td>☐</td></tr>
+      </table>
+      都道府県知事や市区町村長は、だれが選ぶ、（国会議員が選ぶ ／ 住民が選挙で選ぶ ／ 内閣が選ぶ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．まちのお金のゆくえを調べよう</span>
+    <div class="secBody">
+      ①〜③を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①一般財源(地方税など)</th><th>②国庫支出金</th><th>③その他(地方债など)</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      地方税だけで、自治体の仕事の費用は足りる、（十分足りる ／ 足りないので国からの支援もある ／ 足りないのでほかの市からもらう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．住民の声が政治を動かす</span>
+    <div class="secBody">
+      ①声をあげない場合、段差は（なくなる ／ なくならない）。<br>
+      ②声をあげる場合(陳情)、（議会で話し合われ実現につながる ／ ぜったいに無視される）。<br>
+      住民の願いを政治に届けるために大切なことは、（だまって待つ ／ 陳情や請願で声をあげる ／ 自分でこうじする）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（住民参加のいろいろな方法）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 陳情・請願</th><th>い 住民投票</th><th>う パブリックコメント</th><th>え まちづくりに参加</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      自分たちのまちをよくするために、住民ができることは、（意見を伝えたり選挙で投票したりする ／ 何もしない ／ 引っこす）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 都道府県知事や 市区町村長は、（<span class="fillLine"></span>）えらぶ。<br>
+      ② ごみ処理・上下水道・消防救急・学校などは、（<span class="fillLine"></span>）の しごと。<br>
+      ③ 地方税だけでは 足りないので、国からの（<span class="fillLine sm"></span>）もある。<br>
+      ④ 住民の 願いを 政治に 届ける 方法の 一つが、（<span class="fillLine"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">📮</span>
+        <div>
+          ①自分の住んでいる市区町村(または都道府県)のホームページを見て、どんな仕事をしているか調べてみよう。<br>
+          ②家族に、地域で困っていることや、良くしてほしいことを聞いてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　トドケの町やくば 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】トドケの町やくば — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小6社会「地方自治・わたしたちのくらしと政治」・学力幅あり・協力型／ 使うもの：「todoke.html」・プロジェクタ・このノート（1ページ目を人数分）。「テンビンの間」（国の政治のしくみ・三権分立）との対比を意識した、公民分野6作目です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_shikumi</b> などで途中再開（m_shigoto／m_shikumi／m_zaisei／m_sanka／hakase／ending）</li>
+      <li>☐ 可能であれば、「テンビンの間」（国の政治のしくみ・三権分立）を学んだ内容を振り返ってから始めると、国と地方の対比がスムーズです</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>📮 まちの仕事を発見しよう</td><td>①〜⑥を発見し、身近な公共サービスが市区町村の仕事であることを確認。シート２に記録</td></tr>
+      <tr><td class="min">11〜19分</td><td>🏢 地方自治のしくみを調べよう（<b>今日の見せ場</b>）</td><td>①②を発見し、国と地方の選び方の違い（二元代表制）を確認。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">19〜28分</td><td>💰 まちのお金のゆくえを調べよう</td><td>①〜③を発見し、地方税だけでは足りず国の支援もあることを確認。シート４に記録</td></tr>
+      <tr><td class="min">28〜37分</td><td>📝 住民の声が政治を動かす</td><td>①②の陳情の有無による違いを比較し、声をあげる大切さを確認。シート５に記録</td></tr>
+      <tr><td class="min">37〜43分</td><td>🔎 はかせチャレンジ</td><td>住民参加のいろいろな方法を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「市区町村のホームページを調べよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「まちのお金のゆくえを調べよう」を右下「つぎ▶」でスキップ可（<b>地方自治のしくみ／住民の声／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ 住民が選挙で選ぶ</b>／まちの仕事＝<b>都道府県や市区町村</b>／しくみ＝<b>住民が選挙で選ぶ</b>／お金のゆくえ＝<b>足りないので国からの支援もある</b>／住民の声＝<b>陳情や請願で声をあげる</b>／はかせ＝<b>意見を伝えたり選挙で投票したりする</b>／
+      まとめ＝①<b>住民が選挙で</b>　②<b>都道府県や市区町村</b>　③<b>支援</b>　④<b>陳情・請願</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の社会科です）</h2>
+    <ul>
+      <li>学習指導要領：地方公共団体の政治は住民の参加の下に、住民福祉の増進を図るために行われている（小学校学習指導要領・社会・第6学年「我が国の政治の働き」）</li>
+      <li>地方自治は「二元代表制」——住民が首長(都道府県知事・市区町村長)と地方議会議員の両方を直接選挙で選ぶ——という点で、内閣総理大臣を国会議員が指名する国の議院内閣制と異なる（「テンビンの間」で学んだ三権分立の続き）</li>
+      <li>全国の市区町村を合わせた歳入の内訳は、一般財源(地方税・地方交付税など)が約6割、国庫支出金が約1.5割、残りが地方债など（総務省・地方財政白書のデータ。単一の自治体の数値ではなく全国合計の公表統計を使い、数値の捏造を避けている）</li>
+      <li>陳情・請願は、住民が地方議会に正式に意見を伝える方法。地方自治法に規定されており、提出された陳情は所管の委員会で審査される</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「地方自治のしくみ」が今日いちばんの見せ場。「テンビンの間」を学んだクラスなら、「内閣総理大臣はだれが選ぶんだっけ？」と振り返らせてから、知事・市長との違いに気づかせる</li>
+      <li>「住民の声が政治を動かす」は正解を急がせず、①（声をあげない）と②（陳情を出す）の結果を比べさせてから理由を考えさせる</li>
+      <li>身近な市区町村の名前を挙げてもらい、「その市はどんな仕事をしているかな？」とその場で問いかけると盛り上がります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「知事や市長はだれが選ぶ？」「まちのお金は地方税だけで足りる？」「住民の願いを届ける方法は？」</li>
+      <li>おうちミッションでは、市区町村のホームページを見る活動と、家族に地域の困りごとを聞く活動で、画面の学びと日常の暮らしを結びつける狙い</li>
+      <li>社会・公民分野は本作でひとつぶ村（選挙）・テンビンの間（三権分立）・マルの蔵（税金）・ミハシラの杜（憲法・人権）・ムスビの丘（国際社会・SDGs）に続く6作目です</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>トドケの町やくば — 地方自治のひみつ たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fbfaf0 0%, #eef6f1 45%, #cfe8e0 100%);
+    color: #17403a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #2a9d8f; text-shadow: 0 0 14px rgba(42, 157, 143, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4a8a7e; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e4f4f0; border: 2px solid #b8e0d6;
+    font-size: clamp(16px, 1.8vw, 26px); color: #8ac4b8;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #c8ede2, #2a9d8f);
+    border-color: #14554d; color: #14554d;
+    box-shadow: 0 0 16px rgba(42, 157, 143, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #f2f8ee 60%, #dcecc4 100%);
+    border: 3px solid #5a9648;
+    box-shadow: inset 0 0 40px rgba(60, 90, 20, .14), 0 4px 18px rgba(60, 90, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #5a7a35; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #2a9d8f; color: #eefaf7; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(20, 85, 77, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(150, 190, 150, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #b8e0d6; cursor: pointer;
+    background: linear-gradient(180deg, #6ec6ba, #2a9d8f); color: #fff;
+    box-shadow: 0 3px 0 #14554d; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #2a9d8f; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(20, 85, 77, .28), inset 0 0 24px rgba(42, 157, 143, .14);
+    flex-shrink: 0; background: #eefaf7;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #4a8a7e;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #2a9d8f; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #b8e0d6; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #4a8a7e; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #17403a;
+    border: 1.5px solid #b8e0d6;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #2a9d8f; background: #e4f4f0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #e4f4f0); color: #17403a;
+    border: 2px solid #2a9d8f; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #2a9d8f; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #6ec6ba, #2a9d8f); color: #eefaf7;
+    box-shadow: 0 3px 0 #14554d, 0 5px 12px rgba(20, 85, 77, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #14554d; }
+  .btn.sub {
+    background: #e4f4f0; color: #4a8a7e; box-shadow: 0 3px 0 #b8e0d6;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #17403a; box-shadow: 0 3px 0 #b8e0d6; font-weight: 400; border: 1.5px solid #b8e0d6; }
+  .btn.choice.picked { background: #e4f4f0; outline: 3px solid #2a9d8f; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(15, 40, 35, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #e4f4f0);
+    border: 3px solid #2a9d8f; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(15, 40, 35, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #2a9d8f; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #2a9d8f; }
+  .panel .sub { color: #4a8a7e; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #17403a; border: 1.5px solid #b8e0d6; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #4a8a7e; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #17403a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #b8e0d6; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #2a9d8f; background: #eefaf7; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #2a9d8f; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #2a9d8f;
+    color: #2a9d8f; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #4a8a7e;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e4f4f0; color: #4a8a7e;
+    border: 1px solid #b8e0d6; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #cceae0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">📮 トドケの町やくば<small>— 地方自治のひみつ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_shigoto" title="まちの仕事を発見しよう">★</div>
+    <div class="badge" id="bd_m_shikumi" title="地方自治のしくみを調べよう">★</div>
+    <div class="badge" id="bd_m_zaisei" title="まちのお金のゆくえを調べよう">★</div>
+    <div class="badge" id="bd_m_sanka" title="住民の声が政治を動かす">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">トドケの町やくば</div>
+    <div id="locChip">トドケの町やくば</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">📮 トドケのまちビューア 〜声とお金のゆくえを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#6ec6ba" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 34 Q26 30 30 40" fill="none"/>
+              <path d="M8 54 L34 52" fill="none"/>
+              <path d="M16 74 Q26 78 32 70" fill="none"/>
+              <path d="M106 34 Q94 30 90 40" fill="none"/>
+              <path d="M112 54 L86 52" fill="none"/>
+              <path d="M104 74 Q94 78 88 70" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#todokeGrad)" stroke="#14554d" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="todokeGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#f0fbf8"/>
+                <stop offset="55%" stop-color="#6ec6ba"/>
+                <stop offset="100%" stop-color="#2a9d8f"/>
+              </radialGradient>
+            </defs>
+            <g>
+              <rect x="38" y="14" width="44" height="28" rx="3" fill="#fffef6" stroke="#14554d" stroke-width="2"/>
+              <path d="M38 16 L60 34 L82 16" fill="none" stroke="#14554d" stroke-width="2"/>
+            </g>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#14554d"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#14554d"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#14554d" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>
+          <div class="catname">住民の声を「<ruby>届<rt>とど</rt></ruby>ける」から生まれた<ruby>精霊<rt>せいれい</rt></ruby> トドケ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">📮 トドケの町やくばミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   トドケの町やくば — 地方自治・わたしたちのくらしと政治（小6社会公民・協力型・1ファイル）
+   「テンビンの間」（国の政治のしくみ・三権分立）で学んだ国政と対比しながら、
+   都道府県・市区町村という身近な地方自治を扱う公民6作目。
+   まちの仕事を発見しよう（発見型）→地方自治のしくみを調べよう（発見型・国政との対比）→
+   まちのお金のゆくえを調べよう（発見型・歳入の内訳）→住民の声が政治を動かす（応用推理）→
+   はかせ（住民参加のいろいろな方法）。
+   数値・事実：小学校学習指導要領・社会・第6学年「我が国の政治の働き」
+   （地方公共団体の政治は住民の参加の下に、住民福祉の増進を図るために行われていること）。
+   地方自治は「二元代表制」——住民が首長(知事・市区町村長)と地方議会議員の両方を直接選挙で選ぶ——
+   という点で、内閣総理大臣を国会議員が指名する国の議院内閣制と異なる（WebSearchで裏取り済み）。
+   全国市区町村合計の歳入内訳（一般財源(地方税・地方交付税など)約59%、国庫支出金約15%、その他約26%）は
+   総務省・地方財政白書のデータに基づく（WebSearchで裏取り済み、精密なcm値のような単一自治体の
+   数値ではなく全国合計の公表統計を採用することで数値の捏造を避けている）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  shuchou: ruby('首長', 'しゅちょう'),
+  gikai: ruby('議会', 'ぎかい'),
+  chinjou: ruby('陳情', 'ちんじょう'),
+  seigan: ruby('請願', 'せいがん'),
+  zaisei: ruby('財政', 'ざいせい'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでcanvasのfillTextや
+// scope.label/nameに渡すとタグが消えるだけで<rt>内の読みは残り連結表示されてしまう。
+// canvas文脈は必ずこの安全なひらがな定数を使う）
+const N_GIKAI = 'ぎかい';
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_shigoto：まちの仕事を発見しよう（発見型）
+const SHIGOTO_CARDS = [
+  { key: 0, num: '①', icon: '🗑️', name: 'ごみ処理', txt: `家庭から 出る ごみを 集めて、しょりするのも、市区町村の しごとだよ。` },
+  { key: 1, num: '②', icon: '🚰', name: '上下水道', txt: `水道の 水を とどけたり、使った 水を きれいに するのも、市区町村の しごとだよ。` },
+  { key: 2, num: '③', icon: '🚒', name: '消防・救急', txt: `火事を 消したり、きゅうきゅう車で 病院に 運んだりするのも、市区町村の しごとだよ。` },
+  { key: 3, num: '④', icon: '🏫', name: '学校', txt: `小学校や 中学校を たてたり、うんえいしたり するのも、市区町村の しごとだよ。` },
+  { key: 4, num: '⑤', icon: '🌳', name: '公園・道路', txt: `身近な 公園や 道路を せいびするのも、市区町村の しごとだよ。` },
+  { key: 5, num: '⑥', icon: '🤝', name: '福祉サービス', txt: `お年よりや 子育て中の 家族を 助ける サービスも、市区町村の しごとだよ。` },
+];
+
+// m_shikumi：地方自治のしくみを調べよう（発見型、国政との対比）
+const SHIKUMI_CARDS = [
+  { key: 0, num: '①', icon: '🏛️', name: '国のせいじ', txt: `国民が 選ぶのは 国会議員だけ。内閣総理大臣は、国会議員たちが 話し合って 指名するよ。` },
+  { key: 1, num: '②', icon: '🏢', name: '地方のせいじ', txt: `住民は、${W.shuchou}(都道府県知事・市区町村長)と、地方${W.gikai}の 議員の、両方を 直接 選挙で 選ぶよ。` },
+];
+
+// m_zaisei：まちのお金のゆくえを調べよう（発見型）
+// 全国市区町村合計の歳入内訳（一般財源約59%・国庫支出金約15%・その他約26%）は
+// 総務省・地方財政白書のデータに基づく。
+const ZAISEI_CARDS = [
+  { key: 0, num: '①', icon: '💰', name: '一般財源(地方税・地方交付税など)', pct: 59, txt: `住民や 会社の 税金(地方税)と、国から 配られる 地方交付税などを あわせた、自治体が 自由に 使える お金。歳入の 約6割を しめるよ。` },
+  { key: 1, num: '②', icon: '📮', name: '国庫支出金', pct: 15, txt: `国から 出る、使いみちが 決まった お金。学校の 建設や 道路の せいびなど、決まった 事業に 使われるよ。歳入の 約1.5割。` },
+  { key: 2, num: '③', icon: '🏦', name: 'その他(地方债など)', pct: 26, txt: `必要な 時に 自治体が 借りる お金(地方债)など。` },
+];
+
+// m_sanka：住民の声が政治を動かす（応用推理）
+const SANKA_CASES = [
+  { key: 0, num: '①', icon: '🤐', name: '声をあげない場合',
+    txt: `駅前の 歩道に 段差が あって、車いすの 人が 困っている。でも、だれも 声を あげなければ、市役所や ${W.gikai}には 伝わらない。`,
+    ask: { q: `このままだと、段差は なくなると 思う？`,
+      opts: ['なくなる', 'なくならない', 'すぐになくなる'], correct: 1,
+      explain: `せいかい！ だれも 声を あげなければ、市役所や ${W.gikai}には 伝わらず、そのままに なってしまう。` } },
+  { key: 1, num: '②', icon: '📝', name: '声をあげる場合',
+    txt: `住民が「歩道の 段差を なくしてほしい」と ${W.chinjou}を 出すと、${W.gikai}で 話し合われる。`,
+    ask: { q: `${W.chinjou}を 出すと、どうなる 可能性が ある？`,
+      opts: ['議会で話し合われ実現につながる', 'ぜったいに無視される', '市役所が閉まる'], correct: 0,
+      explain: `せいかい！ 住民の 願いを 正式に 伝える ${W.chinjou}や ${W.seigan}は、${W.gikai}で 話し合われ、予算が つけば バリアフリー工事のような 実現に つながることが あるんだ。` } },
+];
+
+// はかせ：住民参加のいろいろな方法（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '📝', name: '陳情・請願', txt: `住民が「こうしてほしい」という 願いを、正式な 文書で 地方${W.gikai}に 伝える 方法だよ。` },
+  { key: 1, letter: 'い', icon: '🗳️', name: '住民投票', txt: `まちの 合併など 大きな 問題について、住民 みんなの 意見を 聞く しくみだよ。` },
+  { key: 2, letter: 'う', icon: '💬', name: 'パブリックコメント', txt: `自治体が 計画を 作る時、住民から 意見を 集める しくみだよ。` },
+  { key: 3, letter: 'え', icon: '🏘️', name: 'まちづくりに参加', txt: `ボランティアや 地域活動に 参加することも、まちを よくする 参加の 一つだよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'shigoto',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  shigotoFound: new Set(),
+  shikumiFound: new Set(),
+  zaiseiFound: new Set(),
+  sankaFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f6fbe0'); g.addColorStop(1, '#d9ecb0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#2a9d8f' : '#b8e0d6';
+    gctx.fill(); gctx.strokeStyle = '#2a9d8f'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#17403a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#17403a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．まちの仕事を発見しよう（発見型） ----------
+function drawShigotoScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SHIGOTO_CARDS, S.shigotoFound, 3, '①〜⑥をタッチして、まちの仕事を発見しよう');
+}
+
+// ---------- 2．地方自治のしくみを調べよう（発見型） ----------
+function drawShikumiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SHIKUMI_CARDS, S.shikumiFound, 2, '①②をタッチして、国と地方のせいじのちがいを調べよう');
+}
+
+// ---------- 3．まちのお金のゆくえを調べよう（発見型） ----------
+function drawZaiseiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, ZAISEI_CARDS, S.zaiseiFound, 3, '①〜③をタッチして、まちのお金のゆくえを調べよう');
+}
+
+// ---------- 4．住民の声が政治を動かす（応用推理） ----------
+function drawSankaScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SANKA_CASES, S.sankaFound, 2, '①②をタッチして、住民の声がどう届くか調べよう');
+}
+
+// ---------- 5．はかせ：住民参加のいろいろな方法 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、住民参加のいろいろな方法を見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'shigoto') drawShigotoScene(X, Y, sc);
+  else if (S.scene === 'shikumi') drawShikumiScene(X, Y, sc);
+  else if (S.scene === 'zaisei') drawZaiseiScene(X, Y, sc);
+  else if (S.scene === 'sanka') drawSankaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- トドケのまちビューア（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f0fbf8'); grd.addColorStop(1, '#c4ece0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#2a9d8f';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'pie') {
+    drawPieScope(R, S.scope.highlight);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#6ec6ba88'); g2.addColorStop(1, 'rgba(110,198,186,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#2a9d8f'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('📮', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#2a9d8f'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.22;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#17403a';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawPieScope(R, highlight) {
+    const cx = R, cy = R * 0.78, rad = R * 0.5;
+    const segs = [
+      { key: 0, pct: 59, color: '#2a9d8f' },
+      { key: 1, pct: 15, color: '#e8873d' },
+      { key: 2, pct: 26, color: '#b8b8b8' },
+    ];
+    let a0 = -Math.PI / 2;
+    segs.forEach(s => {
+      const a1 = a0 + TAU * (s.pct / 100);
+      const isHi = highlight === s.key;
+      sctx.beginPath();
+      sctx.moveTo(cx, cy);
+      sctx.arc(cx, cy, isHi ? rad * 1.08 : rad, a0, a1);
+      sctx.closePath();
+      sctx.fillStyle = s.color;
+      sctx.globalAlpha = highlight == null || isHi ? 1 : 0.4;
+      sctx.fill();
+      sctx.globalAlpha = 1;
+      sctx.strokeStyle = '#fff'; sctx.lineWidth = R * 0.02; sctx.stroke();
+      a0 = a1;
+    });
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#2a9d8f', '#6ec6ba', '#e8873d', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    shigoto: '📮 まちの仕事',
+    shikumi: '🏢 地方自治のしくみ',
+    zaisei: '💰 まちのお金のゆくえ',
+    sanka: '📝 住民の声',
+    hakase: '🔎 はかせチャレンジ',
+    done: '📮 トドケの町やくば ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'トドケの町やくば';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_shigoto', 'm_shikumi', 'm_zaisei', 'm_sanka', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'shigoto', icon: '📮', title: 'まちの仕事',
+    setup: () => { S.shigotoFound = new Set(SHIGOTO_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🗑️', name: 'まちの仕事' }),
+    text: () => `ごみ処理、上下水道、消防・救急、学校、公園・道路、福祉サービス。どれも 市区町村の 仕事だったね。` },
+  { scene: 'shikumi', icon: '🏢', title: '地方自治のしくみ',
+    setup: () => { S.shikumiFound = new Set(SHIKUMI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🗳️', name: '住民が直接えらぶ' }),
+    text: () => `国は 内閣総理大臣を 国会議員が 指名するけど、地方は 住民が ${W.shuchou}と ${W.gikai}議員を どちらも 直接 選挙で 選んだね。` },
+  { scene: 'zaisei', icon: '💰', title: 'まちのお金のゆくえ',
+    setup: () => { S.zaiseiFound = new Set(ZAISEI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'pie', highlight: null, label: '一般財源59%・国庫支出金15%・その他26%' }),
+    text: () => `地方税だけでは 足りないから、国からの 支援も 合わせて、まちの くらしを 支えていたね。` },
+  { scene: 'sanka', icon: '📝', title: '住民の声',
+    setup: () => { S.sankaFound = new Set(SANKA_CASES.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '📝', name: '声をあげると届く' }),
+    text: () => `だまっていると 伝わらないけど、${W.chinjou}で 声を あげると、${W.gikai}に 届いて、実現に つながったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'shigoto', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">📮🏢💰📝</div>
+        <h1>トドケの町やくば</h1>
+        <div class="sub">〜 地方自治の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは 住民の 声を「届ける」から 生まれた ${W.seirei}、<b>トドケ</b>。この 町やくばで、わたしたちの くらしを 支える「地方自治」の ひみつを、いっしょに たしかめよう。都道府県知事や 市区町村長は、だれが 選ぶと 思う？<br>
+        今日は、まちの 仕事から、地方自治の しくみ、お金の ゆくえ、住民の 声まで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">都道府県知事や 市区町村長は、だれが 選ぶと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🏛️</span><b>ア</b> 国会議員が選ぶ</div>
+          <div class="vcard" data-v="1"><span class="vicon">👔</span><b>イ</b> 内閣が選ぶ</div>
+          <div class="vcard" data-v="2"><span class="vicon">🗳️</span><b>ウ</b> 住民が選挙で選ぶ</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：まちの仕事を発見しよう（発見型） ---
+  m_shigoto: {
+    enter() {
+      Object.assign(S, { scene: 'shigoto', scope: { type: 'idle' }, shigotoFound: new Set() });
+      updateLoc();
+      setWish('📮', `①〜⑥を タッチして、まちの 身近な 仕事を 発見しよう。`);
+      say(`わたしたちの くらしの まわりには、まちの 仕事が たくさん あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHIGOTO_CARDS.map(c => ({
+        label: c.num + ' ' + (S.shigotoFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.shigotoFound.size >= SHIGOTO_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.shigotoFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`これらの 仕事は、だれが 行っているのかな？`);
+      setButtons(choiceRow(['国', '都道府県や市区町村', '会社'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_shigoto'); S.phase = 'done';
+        say(`せいかい！ わたしたちの くらしに 身近な 仕事の 多くは、都道府県や 市区町村(地方公共団体)が 行っているんだ。`);
+        setButtons([{ label: 'つぎへ（地方自治のしくみを調べよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['国', '都道府県や市区町村', '会社'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：地方自治のしくみを調べよう（発見型） ---
+  m_shikumi: {
+    enter() {
+      Object.assign(S, { scene: 'shikumi', scope: { type: 'idle' }, shikumiFound: new Set() });
+      updateLoc();
+      setWish('🏢', `①②を タッチして、国の せいじと 地方の せいじの ちがいを 調べよう。`);
+      say(`国の せいじと、地方の せいじでは、選び方に ちがいが あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHIKUMI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.shikumiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.shikumiFound.size >= SHIKUMI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.shikumiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`都道府県知事や 市区町村長は、だれが 選ぶ？`);
+      setButtons(choiceRow(['国会議員が選ぶ', '住民が選挙で選ぶ', '内閣が選ぶ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_shikumi'); S.phase = 'done';
+        const votedRight = S.votePicked.has(2);
+        say(`せいかい！ 国の せいじと ちがって、地方の ${W.shuchou}は、住民が 直接 選挙で 選ぶんだ。これを「二元代表制」と いうよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（まちのお金のゆくえを調べよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['国会議員が選ぶ', '住民が選挙で選ぶ', '内閣が選ぶ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：まちのお金のゆくえを調べよう（発見型） ---
+  m_zaisei: {
+    enter() {
+      Object.assign(S, { scene: 'zaisei', scope: { type: 'pie', highlight: null, label: 'まちのお金' }, zaiseiFound: new Set() });
+      updateLoc();
+      setWish('💰', `①〜③を タッチして、まちに 入ってくる お金の しゅるいを 調べよう。`);
+      say(`まちの 仕事には、お金が かかる。その お金は どこから 来るのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(ZAISEI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.zaiseiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.zaiseiFound.size >= ZAISEI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.zaiseiFound.add(c.key);
+      S.scope = { type: 'pie', highlight: c.key, label: plain(c.name) + ' ' + c.pct + '%' };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`地方税だけで、自治体の 仕事の 費用は 足りる？`);
+      setButtons(choiceRow(['十分足りる', '足りないので国からの支援もある', '足りないのでほかの市からもらう'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_zaisei'); S.phase = 'done';
+        say(`せいかい！ 一般財源(地方税・地方交付税など)は 歳入の 約6割、国庫支出金は 約1.5割(総務省・地方${W.zaisei}白書)。地方税だけでは 足りないので、国からの 支援も 合わせて、まちの くらしを 支えているんだ。`);
+        setButtons([{ label: 'つぎへ（住民の声が政治を動かす）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['十分足りる', '足りないので国からの支援もある', '足りないのでほかの市からもらう'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：住民の声が政治を動かす（応用推理） ---
+  m_sanka: {
+    enter() {
+      Object.assign(S, { scene: 'sanka', scope: { type: 'idle' }, sankaFound: new Set() });
+      updateLoc();
+      setWish('📝', `①②を タッチして、住民の 声が どう 届くか 調べよう。`);
+      say(`まちの 中で 困っている ことが あったら、どうすれば いいのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SANKA_CASES.map(c => ({
+        label: c.num + ' ' + (S.sankaFound.has(c.key) ? plain(c.name) + ' ✓' : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.sankaFound.size >= SANKA_CASES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap();
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(c.txt);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.itemAsk(c) }]);
+    },
+    itemAsk(c) {
+      hideWish(); setButtons([]);
+      say(c.ask.q);
+      setButtons(choiceRow(c.ask.opts, (i, el) => this.judgeItem(c, i, el)));
+    },
+    judgeItem(c, i, el) {
+      markPicked(el);
+      if (i === c.ask.correct) {
+        sYes(); scopeBurst();
+        say(c.ask.explain);
+        S.sankaFound.add(c.key);
+        setWish('📝', `①②を タッチして、住民の 声が どう 届くか 調べよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(c.ask.opts, (i2, el2) => this.judgeItem(c, i2, el2)));
+      }
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`住民の 願いを 政治に 届けるために 大切な ことは？`);
+      setButtons(choiceRow(['だまって待つ', '陳情や請願で声をあげる', '自分でこうじする'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_sanka'); S.phase = 'done';
+        say(`せいかい！ ${W.chinjou}や ${W.seigan}で 声を あげることが、住民の 願いを 政治に 届ける 大切な 一歩に なるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['だまって待つ', '陳情や請願で声をあげる', '自分でこうじする'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：住民参加のいろいろな方法 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 住民 参加の いろいろな 方法を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`自分たちの まちを よくするために、住民が できることは？`);
+      setButtons(choiceRow(['意見を伝えたり選挙で投票したりする', '何もしない', '引っこす'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 意見を 伝えたり、選挙で 投票したり することが、まちを よくする 力に なるんだ。地方自治は、わたしたち 住民の 参加で 支えられているんだよ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['意見を伝えたり選挙で投票したりする', '何もしない', '引っこす'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ トドケの町やくば みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 都道府県知事や 市区町村長は、（<span class="blankWord" data-a="住民が選挙で">？？？</span>）えらぶ。<br>
+        ② ごみ処理・上下水道・消防救急・学校などは、（<span class="blankWord" data-a="都道府県や市区町村">？？？</span>）の しごと。<br>
+        ③ 地方税だけでは 足りないので、国からの（<span class="blankWord" data-a="支援">？？？</span>）も ある。<br>
+        ④ 住民の 願いを 政治に 届ける 方法の 一つが、（<span class="blankWord" data-a="陳情・請願">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ 住民が選挙で選ぶ</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①自分の 住んでいる 市区町村(または 都道府県)の ホームページを 見て、どんな 仕事を しているか 調べてみよう。②家族に、地域で 困っている ことや、良くしてほしい ことを 聞いてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#2a9d8f'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「知事や市長はだれが選ぶ？」「まちのお金は地方税だけで足りる？」「住民の願いを届ける方法は？」`);
+      setButtons([
+        { label: '📮 まちの仕事の図', cls: 'sub', cb: () => this.show('shigoto') },
+        { label: '🏢 しくみの図', cls: 'sub', cb: () => this.show('shikumi') },
+        { label: '💰 お金のゆくえの図', cls: 'sub', cb: () => this.show('zaisei') },
+        { label: '📝 住民の声の図', cls: 'sub', cb: () => this.show('sanka') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_zaisei などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
