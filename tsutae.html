@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ツタエの放送局 — 情報産業と情報化社会 たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f2f0fb 0%, #e6e0f5 45%, #cdc0ea 100%);
+    color: #2e1f4a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #7b4fb0; text-shadow: 0 0 14px rgba(123, 79, 176, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a4a8a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #ede6fa; border: 2px solid #d0c0ec;
+    font-size: clamp(16px, 1.8vw, 26px); color: #b09ad6;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ded0f5, #7b4fb0);
+    border-color: #4a2d70; color: #4a2d70;
+    box-shadow: 0 0 16px rgba(123, 79, 176, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef0f8 60%, #c8d4ec 100%);
+    border: 3px solid #3d6ba8;
+    box-shadow: inset 0 0 40px rgba(30, 50, 90, .14), 0 4px 18px rgba(30, 50, 90, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #3a5a8a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #7b4fb0; color: #f2eefa; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(74, 45, 112, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(150, 150, 200, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #d0c0ec; cursor: pointer;
+    background: linear-gradient(180deg, #b09ad6, #7b4fb0); color: #fff;
+    box-shadow: 0 3px 0 #4a2d70; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #7b4fb0; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(74, 45, 112, .28), inset 0 0 24px rgba(123, 79, 176, .14);
+    flex-shrink: 0; background: #f2eefa;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #6a4a8a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #7b4fb0; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #d0c0ec; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #6a4a8a; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #2e1f4a;
+    border: 1.5px solid #d0c0ec;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #7b4fb0; background: #ede6fa; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #ede6fa); color: #2e1f4a;
+    border: 2px solid #7b4fb0; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #7b4fb0; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #b09ad6, #7b4fb0); color: #f2eefa;
+    box-shadow: 0 3px 0 #4a2d70, 0 5px 12px rgba(74, 45, 112, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #4a2d70; }
+  .btn.sub {
+    background: #ede6fa; color: #6a4a8a; box-shadow: 0 3px 0 #d0c0ec;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #2e1f4a; box-shadow: 0 3px 0 #d0c0ec; font-weight: 400; border: 1.5px solid #d0c0ec; }
+  .btn.choice.picked { background: #ede6fa; outline: 3px solid #7b4fb0; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(30, 20, 45, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #ede6fa);
+    border: 3px solid #7b4fb0; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 20, 45, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #7b4fb0; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #7b4fb0; }
+  .panel .sub { color: #6a4a8a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #2e1f4a; border: 1.5px solid #d0c0ec; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #6a4a8a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #2e1f4a; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d0c0ec; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #7b4fb0; background: #f2eefa; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #7b4fb0; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #7b4fb0;
+    color: #7b4fb0; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #6a4a8a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #ede6fa; color: #6a4a8a;
+    border: 1px solid #d0c0ec; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ddd0f0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">📡 ツタエの放送局<small>— 情報産業と情報化社会 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_nagare" title="ニュースができるまでを体験しよう">★</div>
+    <div class="badge" id="bd_m_baitai" title="いろいろなメディアを発見しよう">★</div>
+    <div class="badge" id="bd_m_pos" title="情報を生かす商店を発見しよう">★</div>
+    <div class="badge" id="bd_m_hantei" title="正しい情報を選ぼう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ツタエの放送局</div>
+    <div id="locChip">ツタエの放送局</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">📡 ツタエの電波ビューア 〜情報の流れを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#b09ad6" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#tsutaeGrad)" stroke="#4a2d70" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="tsutaeGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#f6f0fc"/>
+                <stop offset="55%" stop-color="#b09ad6"/>
+                <stop offset="100%" stop-color="#7b4fb0"/>
+              </radialGradient>
+            </defs>
+            <g stroke="#4a2d70" stroke-width="2.6" fill="none" stroke-linecap="round">
+              <path d="M50 16 L60 4 L70 16"/>
+              <path d="M60 4 L60 22"/>
+              <path d="M44 24 Q60 12 76 24" opacity=".6"/>
+            </g>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#4a2d70"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#4a2d70"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#4a2d70" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>
+          <div class="catname">情報を「<ruby>伝<rt>つた</rt></ruby>える」から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ツタエ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">📡 ツタエの放送局ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ツタエの放送局 — 情報産業と情報化社会（小5社会地理・協力型・1ファイル）
+   ニュースができるまでを体験しよう（メイン操作・ステップ送り）→
+   いろいろなメディアを発見しよう（発見型）→情報を生かす商店を発見しよう（発見型）→
+   正しい情報を選ぼう（応用推理）→はかせ（情報を使う時に気をつけること）。
+   数値・事実：小学校学習指導要領・社会・第5学年「我が国の産業と情報との関わり」
+   （放送、新聞などの産業は、情報を集め、まとめ、伝えるなどの働きをし、国民生活に
+    大きな影響を及ぼしていること。大量の情報や情報通信技術の活用は、様々な産業を
+    発展させ、国民生活を向上させていること）。
+   ニュース番組は取材→編集→放送の工程を経て作られる（取材した情報がそのまま放送
+   されるわけではない）、POSシステム（バーコード読み取りで売上・在庫を記録し、
+   仕入れ・発注に活用する仕組み）はいずれもWebSearchで裏取り済み。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  shuzai: ruby('取材', 'しゅざい'),
+  henshuu: ruby('編集', 'へんしゅう'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでcanvasのfillTextや
+// scope.label/nameに渡すとタグが消えるだけで<rt>内の読みは残り連結表示されてしまう。
+// canvas文脈は必ずこの安全なひらがな定数を使う）
+const N_HENSHUU = 'へんしゅう';
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_nagare：ニュースができるまでを体験しよう（メイン操作・ステップ送り①〜③）
+// name はcanvas/ボタンラベル(plain()経由)にも使われるため、W辞書のruby文字列を使わずプレーン文字列にする
+// （HTML文脈でルビ付き表記をしたい場合はW.shuzai/W.henshuuを別途txtやダイアログ側で使う）
+const NAGARE_STEPS = [
+  { key: 0, icon: '🎤', name: '取材', txt: `記者が 現場に 行き、話を 聞いたり、映像を さつえいしたり して、情報を あつめる。` },
+  { key: 1, icon: '🖥️', name: '編集', txt: `あつめた 情報を せいりし、伝える 順番や 言葉を 考え、映像を つなぎ合わせて、原稿と 映像を 作る。` },
+  { key: 2, icon: '📺', name: '放送', txt: `スタジオで アナウンサーが 原稿を 読み、映像と いっしょに、多くの 人に 伝える。` },
+];
+
+// m_baitai：いろいろなメディアを発見しよう（発見型）
+const BAITAI_CARDS = [
+  { key: 0, num: '①', icon: '📺', name: 'テレビ', txt: `映像と 音で、はやく くわしく 伝えられる。多くの 人が 同時に 見られる。` },
+  { key: 1, num: '②', icon: '📰', name: '新聞', txt: `文字で くわしく 記録に 残る。あとから 読み返せる。` },
+  { key: 2, num: '③', icon: '📻', name: 'ラジオ', txt: `音声だけで 伝える。車の中や 作業中でも 聞ける。` },
+  { key: 3, num: '④', icon: '💻', name: 'インターネット', txt: `いちばん はやく 伝わるが、だれでも 発信できるので、正しくない 情報も 混ざる ことが ある。` },
+];
+
+// m_pos：情報を生かす商店を発見しよう（発見型、POSシステム）
+const POS_CARDS = [
+  { key: 0, num: '①', icon: '🛒', name: 'レジで読み取る', txt: `レジで バーコードを 読み取ると、いつ・何が・いくつ 売れたかが きろくされる。` },
+  { key: 1, num: '②', icon: '📊', name: '売れ行きを集める', txt: `お店や 本部が、集まった 売れ行きの 情報を 分析する。` },
+  { key: 2, num: '③', icon: '🚚', name: '仕入れに生かす', txt: `よく 売れる 商品を 多く 仕入れ、売れない 商品は 減らす。むだを へらせる。` },
+];
+
+// m_hantei：正しい情報を選ぼう（応用推理）
+const HANTEI_CASES = [
+  { key: 0, num: '①', icon: '💬', name: 'SNSのうわさ',
+    txt: `「明日、学校が休みに なるらしい」という SNSの 投稿を 見つけた。だれが 言っているのか わからない。`,
+    ask: { q: `この情報、そのまま 信じて いい？`,
+      opts: ['そのまま信じる', '出どころを確かめる', '友だちに広める'], correct: 1,
+      explain: `せいかい！ だれが 発信したか わからない 情報は、そのまま 信じずに、出どころを 確かめる ことが 大切。` } },
+  { key: 1, num: '②', icon: '🏫', name: '公式発表',
+    txt: `学校や 市役所の 公式サイトに「明日は 休みです」と 書いてある。`,
+    ask: { q: `この情報は？`,
+      opts: ['信頼できる公式な情報', 'うそかもしれない', 'どうでもいい'], correct: 0,
+      explain: `せいかい！ 学校や 市役所などの 公式な 発表は、出どころが はっきりしていて 信頼できる 情報だよ。` } },
+];
+
+// はかせ：情報を使う時に気をつけること（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '🔒', name: '個人情報を守る', txt: `名前・住所・写真などを、むやみに インターネットに 公開しないように 気をつけよう。` },
+  { key: 1, letter: 'い', icon: '⚠️', name: 'フェイクニュースに注意', txt: `1つの 情報を うのみに せず、ほかの 情報源でも 確かめる ことが 大切だよ。` },
+  { key: 2, letter: 'う', icon: '©️', name: '著作権を守る', txt: `人が 作った 文章・写真・音楽を、かってに 使わないように しよう。` },
+  { key: 3, letter: 'え', icon: '💡', name: '情報を正しく使う', txt: `情報を 正しく 活用すると、くらしが 便利に なる。使い方しだいなんだ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'nagare',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  nagareIdx: -1,
+  nagareIdxDisplay: -1,
+  baitaiFound: new Set(),
+  posFound: new Set(),
+  hanteiFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f0f2fb'); g.addColorStop(1, '#c8d4ec');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#7b4fb0' : '#d0c0ec';
+    gctx.fill(); gctx.strokeStyle = '#7b4fb0'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#2e1f4a'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#2e1f4a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．ニュースができるまでを体験しよう（メイン操作・ステップ送り） ----------
+function drawNagareScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const xs = [250, 500, 750];
+  gctx.strokeStyle = '#8a9ac0'; gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(xs[0]), Y(320)); gctx.lineTo(X(xs[2]), Y(320)); gctx.stroke();
+  const idxNow = clamp(Math.round(S.nagareIdxDisplay), 0, 2);
+  NAGARE_STEPS.forEach((st, i) => {
+    const done = S.nagareIdx >= i;
+    const active = S.nagareIdx >= 0 && idxNow === i;
+    gctx.beginPath(); gctx.arc(X(xs[i]), Y(320), (active ? 54 : 46) * sc, 0, TAU);
+    gctx.fillStyle = done ? '#7b4fb0' : '#d0c0ec';
+    gctx.fill(); gctx.strokeStyle = '#4a2d70'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(st.icon, X(xs[i]), Y(320 - 2));
+    gctx.fillStyle = '#2e1f4a'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText((i + 1) + ' ' + plain(st.name), X(xs[i]), Y(320 + 74));
+  });
+  gctx.fillStyle = '#2e1f4a'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const title = S.nagareIdx >= 0 ? `${plain(NAGARE_STEPS[idxNow].name)} の 工程` : 'ニュースが できるまでの 工程を 見てみよう';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 2．いろいろなメディアを発見しよう（発見型） ----------
+function drawBaitaiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, BAITAI_CARDS, S.baitaiFound, 4, '①〜④をタッチして、いろいろなメディアを発見しよう');
+}
+
+// ---------- 3．情報を生かす商店を発見しよう（発見型） ----------
+function drawPosScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, POS_CARDS, S.posFound, 3, '①〜③をタッチして、お店が情報をどう生かすか調べよう');
+}
+
+// ---------- 4．正しい情報を選ぼう（応用推理） ----------
+function drawHanteiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HANTEI_CASES, S.hanteiFound, 2, '①②をタッチして、正しい情報の見分け方を調べよう');
+}
+
+// ---------- 5．はかせ：情報を使う時に気をつけること ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、情報を使う時に気をつけることを見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'nagare') drawNagareScene(X, Y, sc);
+  else if (S.scene === 'baitai') drawBaitaiScene(X, Y, sc);
+  else if (S.scene === 'pos') drawPosScene(X, Y, sc);
+  else if (S.scene === 'hantei') drawHanteiScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ツタエの電波ビューア（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f6f0fc'); grd.addColorStop(1, '#dcc8f0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#7b4fb0';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'wave') {
+    drawWaveScope(R, S.scope.level);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#b09ad688'); g2.addColorStop(1, 'rgba(176,154,214,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#7b4fb0'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('📡', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#7b4fb0'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#2e1f4a';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawWaveScope(R, level) {
+    const cx = R * 0.3, cy = R;
+    const n = clamp((level != null ? level : 1), 1, 3);
+    sctx.strokeStyle = '#7b4fb0'; sctx.lineCap = 'round';
+    for (let i = 1; i <= n; i++) {
+      sctx.lineWidth = R * 0.045;
+      sctx.beginPath();
+      sctx.arc(cx, cy, R * 0.3 * i, -0.5, 0.5);
+      sctx.stroke();
+    }
+    sctx.fillStyle = '#4a2d70';
+    sctx.beginPath(); sctx.arc(cx, cy, R * 0.08, 0, TAU); sctx.fill();
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#7b4fb0', '#b09ad6', '#3d6ba8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    nagare: '📡 ニュースができるまで',
+    baitai: '📺 いろいろなメディア',
+    pos: '🛒 情報を生かす商店',
+    hantei: '🔍 正しい情報を選ぼう',
+    hakase: '🔎 はかせチャレンジ',
+    done: '📡 ツタエの放送局 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ツタエの放送局';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_nagare', 'm_baitai', 'm_pos', 'm_hantei', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'nagare', icon: '📡', title: 'ニュースができるまで',
+    setup: () => { Object.assign(S, { nagareIdx: 2, nagareIdxDisplay: 2 }); },
+    scope: () => ({ type: 'point', icon: '📺', name: '放送' }),
+    text: () => `${W.shuzai}した 情報は、${W.henshuu}を へて、整理されてから 放送されていたね。` },
+  { scene: 'baitai', icon: '📺', title: 'いろいろなメディア',
+    setup: () => { S.baitaiFound = new Set(BAITAI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '📰', name: 'メディアいろいろ' }),
+    text: () => `テレビ・新聞・ラジオ・インターネット。それぞれに 得意な ことが ちがったね。` },
+  { scene: 'pos', icon: '🛒', title: '情報を生かす商店',
+    setup: () => { S.posFound = new Set(POS_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🚚', name: '仕入れに生かす' }),
+    text: () => `お店は POSシステムで 集めた 売れ行きの 情報を、仕入れに 生かしていたね。` },
+  { scene: 'hantei', icon: '🔍', title: '正しい情報を選ぼう',
+    setup: () => { S.hanteiFound = new Set(HANTEI_CASES.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🏫', name: '出どころを確かめる' }),
+    text: () => `SNSの うわさと、公式な 発表。出どころを 確かめる ことが 大切だったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'nagare', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">📡📺🛒🔍</div>
+        <h1>ツタエの放送局</h1>
+        <div class="sub">〜 情報産業と 情報化社会 〜</div>
+        <p class="talk">ようこそ！ わたしは 情報を「伝える」から 生まれた ${W.seirei}、<b>ツタエ</b>。この 放送局で、情報産業と 情報化社会の ひみつを、いっしょに たしかめよう。ニュース番組は、${W.shuzai}した 情報が そのまま すぐに 放送されると 思う？<br>
+        今日は、ニュースが できるまでから、いろいろな メディア、正しい 情報の 選び方まで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">ニュース番組は、${W.shuzai}した 情報が そのまま すぐに 放送されると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🎤</span><b>ア</b> そのまま放送される</div>
+          <div class="vcard" data-v="1"><span class="vicon">🖥️</span><b>イ</b> 編集してから放送される</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：ニュースができるまでを体験しよう（メイン操作・ステップ送り） ---
+  m_nagare: {
+    enter() {
+      Object.assign(S, { scene: 'nagare', nagareIdx: -1, nagareIdxDisplay: -1, scope: { type: 'wave', level: 1, label: 'はじまる前' } });
+      updateLoc();
+      setWish('📡', `「つぎの工程へ」ボタンで、${W.shuzai}→${W.henshuu}→放送の 3つの 工程を、じゅんばんに 見てみよう。`);
+      say(`ニュース番組は、どんな 工程を へて できるのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.nagareIdx >= NAGARE_STEPS.length - 1) { this.finish(); return; }
+      const nextSt = NAGARE_STEPS[S.nagareIdx + 1];
+      setControls([{ label: `${nextSt.icon} つぎの工程へ（${plain(nextSt.name)}）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.nagareIdx >= NAGARE_STEPS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.nagareIdx, toV = S.nagareIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.nagareIdxDisplay = v;
+        S.scope = { type: 'wave', level: clamp(Math.round(v) + 1, 1, 3), label: plain(NAGARE_STEPS[clamp(Math.round(v), 0, 2)].name) };
+      }, () => {
+        S.nagareIdx++; S.nagareIdxDisplay = S.nagareIdx;
+        const st = NAGARE_STEPS[S.nagareIdx];
+        say(`${plain(st.name)}：${st.txt}`);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`${W.shuzai}→${W.henshuu}→放送の 3つの 工程を 見たね。取材した 情報は、そのまま 放送されたかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`${W.shuzai}した 情報は、そのまま すぐに 放送される？`);
+      setButtons(choiceRow(['そのまま放送される', '編集して整理してから放送される'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_nagare'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ ${W.shuzai}した 情報は、${W.henshuu}の 工程で 整理されてから、放送される。多くの 人に わかりやすく 正確に 伝える ための くふうなんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（いろいろなメディアを発見しよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、3つの 工程を 思い出してみよう。`);
+        setButtons(choiceRow(['そのまま放送される', '編集して整理してから放送される'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：いろいろなメディアを発見しよう（発見型） ---
+  m_baitai: {
+    enter() {
+      Object.assign(S, { scene: 'baitai', scope: { type: 'idle' }, baitaiFound: new Set() });
+      updateLoc();
+      setWish('📺', `①〜④を タッチして、いろいろな メディアの 特ちょうを 発見しよう。`);
+      say(`情報を 伝える 方法には、いろいろな 種類が あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(BAITAI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.baitaiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.baitaiFound.size >= BAITAI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.baitaiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`災害の 時、いちばん はやく 情報を 得られるのは？`);
+      setButtons(choiceRow(['新聞', 'テレビ・インターネット', 'どれも同じ速さ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_baitai'); S.phase = 'done';
+        say(`せいかい！ テレビや インターネットは、速報性が 高く、いち早く 情報を 伝えられる。新聞は くわしく 記録として 残る、という ちがった 良さが あるんだ。`);
+        setButtons([{ label: 'つぎへ（情報を生かす商店を発見しよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['新聞', 'テレビ・インターネット', 'どれも同じ速さ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：情報を生かす商店を発見しよう（発見型） ---
+  m_pos: {
+    enter() {
+      Object.assign(S, { scene: 'pos', scope: { type: 'idle' }, posFound: new Set() });
+      updateLoc();
+      setWish('🛒', `①〜③を タッチして、お店が 情報を どう 生かしているか 発見しよう。`);
+      say(`お店の レジにも、情報を 生かす しくみが あるんだよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(POS_CARDS.map(c => ({
+        label: c.num + ' ' + (S.posFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.posFound.size >= POS_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.posFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`お店が POSシステムで 集めた 情報を、何に 生かす？`);
+      setButtons(choiceRow(['仕入れ(発注)に生かす', '何にも使わない', '捨てる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_pos'); S.phase = 'done';
+        say(`せいかい！ お店は、レジで 集めた 売れ行きの 情報を、仕入れ(発注)に 生かしている。むだを へらし、お客さんの ほしい 商品を 用意できるんだ。`);
+        setButtons([{ label: 'つぎへ（正しい情報を選ぼう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['仕入れ(発注)に生かす', '何にも使わない', '捨てる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：正しい情報を選ぼう（応用推理） ---
+  m_hantei: {
+    enter() {
+      Object.assign(S, { scene: 'hantei', scope: { type: 'idle' }, hanteiFound: new Set() });
+      updateLoc();
+      setWish('🔍', `①②を タッチして、2つの 情報を くらべ、正しい 情報の 見分け方を 考えよう。`);
+      say(`世の中には、たくさんの 情報が あふれている。どうやって 見分ければ いいのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HANTEI_CASES.map(c => ({
+        label: c.num + ' ' + (S.hanteiFound.has(c.key) ? plain(c.name) + ' ✓' : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.hanteiFound.size >= HANTEI_CASES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap();
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(c.txt);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.itemAsk(c) }]);
+    },
+    itemAsk(c) {
+      hideWish(); setButtons([]);
+      say(c.ask.q);
+      setButtons(choiceRow(c.ask.opts, (i, el) => this.judgeItem(c, i, el)));
+    },
+    judgeItem(c, i, el) {
+      markPicked(el);
+      if (i === c.ask.correct) {
+        sYes(); scopeBurst();
+        say(c.ask.explain);
+        S.hanteiFound.add(c.key);
+        setWish('🔍', `①②を タッチして、2つの 情報を くらべ、正しい 情報の 見分け方を 考えよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(c.ask.opts, (i2, el2) => this.judgeItem(c, i2, el2)));
+      }
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`正しい 情報を 見分けるために 大切な ことは？`);
+      setButtons(choiceRow(['出どころを確かめる', '最初に見た情報をそのまま信じる', 'みんなが言っているから信じる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_hantei'); S.phase = 'done';
+        say(`せいかい！ だれが、どこから 発信した 情報かという「出どころ」を 確かめる ことが、正しい 情報を 見分ける 大切な コツなんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['出どころを確かめる', '最初に見た情報をそのまま信じる', 'みんなが言っているから信じる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：情報を使う時に気をつけること ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 情報を 使う時に 気をつける ことを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`インターネットを 使う時に 気をつける ことは？`);
+      setButtons(choiceRow(['個人情報や著作権を守り正しい情報か確かめる', '何でも自由に使ってよい', '気にしなくてよい'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 個人情報や 著作権を 守り、正しい 情報か 確かめる ことが、情報化社会を 生きる わたしたちに 大切な 心がけなんだ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['個人情報や著作権を守り正しい情報か確かめる', '何でも自由に使ってよい', '気にしなくてよい'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ツタエの放送局 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ニュースは 取材した あと、（<span class="blankWord" data-a="編集">？？？</span>）して 整理してから 放送される。<br>
+        ② 情報を はやく 得るには、（<span class="blankWord" data-a="テレビ・インターネット">？？？</span>）が 便利。<br>
+        ③ お店は POSシステムで 集めた 情報を（<span class="blankWord" data-a="仕入れ">？？？</span>）に 生かしている。<br>
+        ④ 正しい 情報を 見分けるには（<span class="blankWord" data-a="出どころ">？？？</span>）を 確かめる ことが 大切。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 編集してから放送される</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①家で ニュース番組を 見て、${W.shuzai}・${W.henshuu}・放送の どの 場面か 考えてみよう。②お店に 行った時、レジで バーコードを 読み取る 様子を 観察してみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#7b4fb0'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「ニュースは取材してすぐ放送される？」「お店は集めた情報を何に生かす？」「正しい情報を見分けるコツは？」`);
+      setButtons([
+        { label: '📡 ニュースの工程図', cls: 'sub', cb: () => this.show('nagare') },
+        { label: '📺 メディアの図', cls: 'sub', cb: () => this.show('baitai') },
+        { label: '🛒 お店の情報活用の図', cls: 'sub', cb: () => this.show('pos') },
+        { label: '🔍 正しい情報の図', cls: 'sub', cb: () => this.show('hantei') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_pos などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

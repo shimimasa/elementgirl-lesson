@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ツタエの放送局 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #7b4fb0; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #b09ad6; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #ede6fa; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #ede6fa; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="tsutae.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>📡 ツタエの放送局 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      ニュース番組は、取材した情報がそのまますぐに放送されると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> そのまま放送される</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 編集してから放送される</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．ニュースができるまでを体験しよう</span>
+    <div class="secBody">
+      ①〜③の工程を見て、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①取材</th><th>②編集</th><th>③放送</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      取材した情報は、そのまますぐに放送される、（そのまま放送される ／ 編集して整理してから放送される）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．いろいろなメディアを発見しよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①テレビ</th><th>②新聞</th><th>③ラジオ</th><th>④インターネット</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      災害の時、いちばんはやく情報を得られるのは、（新聞 ／ テレビ・インターネット ／ どれも同じ速さ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．情報を生かす商店を発見しよう</span>
+    <div class="secBody">
+      ①〜③を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①レジで読み取る</th><th>②売れ行きを集める</th><th>③仕入れに生かす</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      お店がPOSシステムで集めた情報を、何に生かす、（仕入れ(発注)に生かす ／ 何にも使わない ／ 捨てる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．正しい情報を選ぼう</span>
+    <div class="secBody">
+      ①SNSのうわさは、（そのまま信じる ／ 出どころを確かめる）。<br>
+      ②公式サイトの発表は、（信頼できる公式な情報 ／ うそかもしれない）。<br>
+      正しい情報を見分けるために大切なことは、（出どころを確かめる ／ 最初に見た情報をそのまま信じる ／ みんなが言っているから信じる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（情報を使う時に気をつけること）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 個人情報を守る</th><th>い フェイクニュースに注意</th><th>う 著作権を守る</th><th>え 情報を正しく使う</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      インターネットを使う時に気をつけることは、（個人情報や著作権を守り正しい情報か確かめる ／ 何でも自由に使ってよい ／ 気にしなくてよい）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① ニュースは 取材した あと、（<span class="fillLine"></span>）して 整理してから 放送される。<br>
+      ② 情報を はやく 得るには、（<span class="fillLine"></span>）が 便利。<br>
+      ③ お店は POSシステムで 集めた 情報を（<span class="fillLine sm"></span>）に 生かしている。<br>
+      ④ 正しい 情報を 見分けるには（<span class="fillLine"></span>）を 確かめる ことが 大切。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">📡</span>
+        <div>
+          ①家でニュース番組を見て、取材・編集・放送のどの場面か考えてみよう。<br>
+          ②お店に行ったとき、レジでバーコードを読み取る様子を観察してみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ツタエの放送局 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ツタエの放送局 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「情報産業と情報化社会」・学力幅あり・協力型／ 使うもの：「tsutae.html」・プロジェクタ・このノート（1ページ目を人数分）。社会・地理分野の13作目です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_pos</b> などで途中再開（m_nagare／m_baitai／m_pos／m_hantei／hakase／ending）</li>
+      <li>☐ 可能であれば、実際のニュース番組の映像を1分ほど見せてから始めると導入がスムーズです</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜13分</td><td>📡 ニュースができるまで（<b>今日の見せ場</b>）</td><td>「つぎの工程へ」ボタンで取材→編集→放送を進め、情報が整理される様子を確認。よそうタイムをここで回収。シート２に記録</td></tr>
+      <tr><td class="min">13〜21分</td><td>📺 いろいろなメディア</td><td>①〜④を発見し、テレビ・新聞・ラジオ・ネットの特徴を比較。シート３に記録</td></tr>
+      <tr><td class="min">21〜29分</td><td>🛒 情報を生かす商店</td><td>①〜③を発見し、POSシステムのしくみを確認。シート４に記録</td></tr>
+      <tr><td class="min">29〜38分</td><td>🔍 正しい情報を選ぼう</td><td>①②のSNSのうわさと公式発表を比較し、出どころを確かめる大切さを確認。シート５に記録</td></tr>
+      <tr><td class="min">38〜43分</td><td>🔎 はかせチャレンジ</td><td>情報を使う時に気をつけることを発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「ニュース番組を観察しよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「情報を生かす商店」を右下「つぎ▶」でスキップ可（<b>ニュースができるまで／正しい情報の選び方／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 編集してから放送される</b>／ニュースができるまで＝<b>編集して整理してから放送される</b>／メディア＝<b>テレビ・インターネット</b>／情報を生かす商店＝<b>仕入れ(発注)に生かす</b>／正しい情報＝<b>出どころを確かめる</b>／はかせ＝<b>個人情報や著作権を守り正しい情報か確かめる</b>／
+      まとめ＝①<b>編集</b>　②<b>テレビ・インターネット</b>　③<b>仕入れ</b>　④<b>出どころ</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の社会科です）</h2>
+    <ul>
+      <li>学習指導要領：放送、新聞などの産業は、情報を集め、まとめ、伝えるなどの働きをし、国民生活に大きな影響を及ぼしている。大量の情報や情報通信技術の活用は、様々な産業を発展させ、国民生活を向上させている（小学校学習指導要領・社会・第5学年「我が国の産業と情報との関わり」）</li>
+      <li>ニュース番組は、取材（記者が現場で情報を集める）→編集（情報を整理し原稿・映像を作る）→放送（アナウンサーが伝える）という工程を経て作られる。取材した情報がそのまま放送されるわけではない</li>
+      <li>POSシステム（Point of Sales・販売時点情報管理）は、レジでバーコードを読み取ることで売上・在庫を自動で記録・管理する仕組み。集めた情報は仕入れ・発注の最適化に活用される</li>
+      <li>情報化社会では、だれでも情報を発信できる一方、正しくない情報（フェイクニュース）も混ざる。出どころ（だれが、どこから発信したか）を確かめることが、正しい情報を見分ける基本</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「ニュースができるまで」が今日いちばんの見せ場。「取材した映像や話が、そのままテレビに映ると思う？」と問いかけ、編集という工程の存在に気づかせる</li>
+      <li>「正しい情報を選ぼう」は正解を急がせず、①（SNSのうわさ）と②（公式発表）の違いを比べさせてから理由を考えさせる</li>
+      <li>子どもたちが普段見ているニュースやSNSの話題を挙げてもらい、「その情報はどこから来たのかな？」とその場で問いかけると盛り上がります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「ニュースは取材してすぐ放送される？」「お店は集めた情報を何に生かす？」「正しい情報を見分けるコツは？」</li>
+      <li>おうちミッションでは、実際のニュース番組を観察する活動と、お店のレジを観察する活動で、画面の学びと日常の暮らしを結びつける狙い</li>
+      <li>社会・地理分野は本作でひだまり探偵社（地図）・みずの旅（水）・ミズヤの里〜リュウヒョウの岸（土地のくらし）・ネンリンの杜（森林）・ホシゾラの街（公害）・みのりの村（お米）・しおさいの湊（水産業）・ボルトの町工場（自動車工業）・トモシの浜（防災）に続く13作目です</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

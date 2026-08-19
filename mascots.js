@@ -1834,4 +1834,36 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
             <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
           </svg>`,
+  tsutae: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#b09ad6" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#tsutaeGrad)" stroke="#4a2d70" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="tsutaeGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#f6f0fc"/>
+                <stop offset="55%" stop-color="#b09ad6"/>
+                <stop offset="100%" stop-color="#7b4fb0"/>
+              </radialGradient>
+            </defs>
+            <g stroke="#4a2d70" stroke-width="2.6" fill="none" stroke-linecap="round">
+              <path d="M50 16 L60 4 L70 16"/>
+              <path d="M60 4 L60 22"/>
+              <path d="M44 24 Q60 12 76 24" opacity=".6"/>
+            </g>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#4a2d70"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#4a2d70"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#4a2d70" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>`,
 };
