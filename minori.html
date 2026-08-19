@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ミノリの花ばたけ — 植物の成長と結実 たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fffbe8 0%, #f5f3c8 45%, #d9eaa0 100%);
+    color: #4a3018;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #e8710e; text-shadow: 0 0 14px rgba(232, 113, 14, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #a86a3a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #fff3e0; border: 2px solid #ffe0b8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #e0b088;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe0b8, #e8710e);
+    border-color: #8a4a12; color: #8a4a12;
+    box-shadow: 0 0 16px rgba(232, 113, 14, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #f4fbe4 60%, #d8edb0 100%);
+    border: 3px solid #5a9648;
+    box-shadow: inset 0 0 40px rgba(60, 90, 20, .14), 0 4px 18px rgba(60, 90, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #5a7a35; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #e8710e; color: #fff5e0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(138, 74, 18, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(220, 190, 120, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #ffe0b8; cursor: pointer;
+    background: linear-gradient(180deg, #ffb066, #e8710e); color: #fff;
+    box-shadow: 0 3px 0 #8a4a12; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #e8710e; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(138, 74, 18, .28), inset 0 0 24px rgba(232, 113, 14, .14);
+    flex-shrink: 0; background: #fff5e0;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #a86a3a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #e8710e; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #ffe0b8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #a86a3a; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #4a3018;
+    border: 1.5px solid #ffe0b8;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #e8710e; background: #fff3e0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #fff3e0); color: #4a3018;
+    border: 2px solid #e8710e; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #e8710e; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ffb066, #e8710e); color: #fff5e0;
+    box-shadow: 0 3px 0 #8a4a12, 0 5px 12px rgba(138, 74, 18, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #8a4a12; }
+  .btn.sub {
+    background: #fff3e0; color: #a86a3a; box-shadow: 0 3px 0 #ffe0b8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #4a3018; box-shadow: 0 3px 0 #ffe0b8; font-weight: 400; border: 1.5px solid #ffe0b8; }
+  .btn.choice.picked { background: #fff3e0; outline: 3px solid #e8710e; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(60, 40, 15, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #fff3e0);
+    border: 3px solid #e8710e; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(60, 40, 15, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #e8710e; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #e8710e; }
+  .panel .sub { color: #a86a3a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #4a3018; border: 1.5px solid #ffe0b8; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #a86a3a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #4a3018; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ffe0b8; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #e8710e; background: #fff5f0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #e8710e; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #e8710e;
+    color: #e8710e; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #a86a3a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #fff3e0; color: #a86a3a;
+    border: 1px solid #ffe0b8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #ffe8c8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🌻 ミノリの花ばたけ<small>— 植物の成長と結実 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_hikari" title="日光と成長をくらべよう">★</div>
+    <div class="badge" id="bd_m_hiryo" title="肥料と成長をくらべよう">★</div>
+    <div class="badge" id="bd_m_hana" title="花のつくりを発見しよう">★</div>
+    <div class="badge" id="bd_m_jufun" title="受粉のひみつ">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ミノリの花ばたけ</div>
+    <div id="locChip">ミノリの花ばたけ</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🌻 ミノリの実りビューア 〜そだちのちがいをよく見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#ffd699" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <circle cx="60" cy="70" r="42" fill="url(#minoriGrad)" stroke="#8a4a12" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="minoriGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fff5e0"/>
+                <stop offset="55%" stop-color="#f2994a"/>
+                <stop offset="100%" stop-color="#d97706"/>
+              </radialGradient>
+            </defs>
+            <g fill="#ffd699" stroke="#8a4a12" stroke-width="1.3">
+              <ellipse cx="60" cy="16" rx="7" ry="10"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(72 60 16)"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(144 60 16)"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(216 60 16)"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(288 60 16)"/>
+            </g>
+            <circle cx="60" cy="16" r="5" fill="#ffb300" stroke="#8a4a12" stroke-width="1.3"/>
+            <g class="eyes">
+              <circle cx="48" cy="70" r="6" fill="#fff"/>
+              <circle cx="72" cy="70" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="70.8" r="3.2" fill="#8a4a12"/>
+              <circle cx="72.7" cy="70.8" r="3.2" fill="#8a4a12"/>
+            </g>
+            <path d="M48 86 Q60 94 72 86" fill="none" stroke="#8a4a12" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="80" r="5" fill="#ffe0b8" opacity=".6"/>
+            <circle cx="78" cy="80" r="5" fill="#ffe0b8" opacity=".6"/>
+          </svg>
+          <div class="catname">花が実になる「<ruby>実<rt>みの</rt></ruby>り」から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ミノリ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🌻 ミノリの花ばたけミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ミノリの花ばたけ — 植物の発芽、成長、結実（小5理科・生命分野8作目・協力型・1ファイル）
+   「めばえラボ」（発芽の条件＝水・空気・温度、発芽に光や肥料は不要）の正統な続編。
+   日光と成長をくらべよう（メイン操作・時間送り①〜⑦）→肥料と成長をくらべよう（発見型）→
+   花のつくりを発見しよう（発見型）→受粉のひみつ（応用推理）→はかせ（実や種子のでき方）。
+   数値・事実：小学校学習指導要領・理科・第5学年「植物の発芽、成長、結実」
+   （イ 植物の成長には日光や肥料などが関係する／ウ 花にはおしべやめしべなどがあり、
+    花粉がめしべの先につく＝受粉すると、めしべのもとが実になり実の中に種子ができる）。
+   日光に当てないインゲンマメは茎ばかりひょろひょろのびて葉の色もうすくなる（徒長・黄化）、
+   肥料を与えた方は葉の色が濃く葉の数も多いという定性的事実は複数の教育委員会資料でWebSearch裏取り済み
+   （具体的な生育日数ごとのcm値は環境依存で信頼できる標準データが見つからないため、数値を捏造せず
+    観察可能な葉の数という整数値と、方向性が確かな質的な差＝色・くきの太さで表現する）。
+   アブラナの花のつくり（がく4・花びら4・おしべ6＝4長2短・めしべ1）、アサガオの受粉実験
+   （つぼみのうちにおしべを取りのぞき袋をかぶせると受粉できず実ができない）もWebSearchで裏取り済み。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  jufun: ruby('受粉', 'じゅふん'),
+  kafun: ruby('花粉', 'かふん'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでcanvasのfillTextや
+// scope.label/nameに渡すとタグが消えるだけで<rt>内の読みは残り連結表示されてしまう。
+// canvas文脈は必ずこの安全なひらがな定数を使う）
+const N_JUFUN = 'じゅふん';
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_hikari：日光と成長をくらべよう（メイン操作・時間送り①〜⑦）
+// 葉の数は観察できる整数値、色・くきの太さの違い（徒長・黄化）は質的事実。cmの精密値は捏造しない。
+const HIKARI_DAYS = [3, 6, 9, 12, 15, 18, 21];
+const LEAF_LIGHT = [1, 2, 3, 4, 5, 5, 6];
+const LEAF_DARK = [0, 1, 1, 1, 2, 2, 3];
+const STEMH_LIGHT = [40, 55, 70, 85, 100, 110, 120];
+const STEMH_DARK = [45, 70, 95, 115, 135, 150, 165];
+
+// m_hiryo：肥料と成長をくらべよう（発見型）
+const HIRYO_CARDS = [
+  { key: 0, num: '①', icon: '🌿', name: '肥料ありの鉢', txt: `葉の 色が こく、はっぱの 数も 多い。ぐんぐん 育って、くきも しっかりしている。` },
+  { key: 1, num: '②', icon: '🥀', name: '肥料なしの鉢', txt: `葉の 色が うすく、はっぱの 数も 少なめ。育ちが ゆっくりで、あまり 大きく ならない。` },
+];
+
+// m_hana：花のつくりを発見しよう（発見型、アブラナの花）
+const HANA_CARDS = [
+  { key: 0, num: '①', icon: '🌿', name: 'がく', part: 'gaku', txt: `花の いちばん 外がわに あって、つぼみを 守っている。アブラナは 4まい。` },
+  { key: 1, num: '②', icon: '🌼', name: '花びら', part: 'hanabira', txt: `黄色い 花びらが 4まい、十字の 形に ならんでいる。` },
+  { key: 2, num: '③', icon: '🌾', name: 'おしべ', part: 'oshibe', txt: `6本 あり、うち 4本は 長く 2本は 短い。先には ${W.kafun}が ついている。` },
+  { key: 3, num: '④', icon: '📍', name: 'めしべ', part: 'meshibe', txt: `花の 真ん中に 1本。先は ねばねばしていて、${W.kafun}が つきやすく なっている。` },
+];
+
+// m_jufun：受粉のひみつ（応用推理、アサガオの受粉実験）
+const JUFUN_CASES = [
+  { key: 0, num: '①', icon: '🚫', name: '受粉させない実験',
+    txt: `あした 咲きそうな つぼみを 見つけて、花が ひらく前に おしべを 全部 取りのぞき、ふくろを かぶせて 虫が 来られないように した。`,
+    ask: { q: `この アサガオ、実が できると 思う？`,
+      opts: ['実ができる', '実ができない', '花がすぐしぼむ'], correct: 1,
+      explain: `せいかい！ おしべを 取りのぞいて ふくろを かぶせたので、${W.kafun}が めしべの 先に つかない＝${W.jufun}できない。だから 実が できないんだ。` } },
+  { key: 1, num: '②', icon: '✅', name: '受粉させる実験',
+    txt: `べつの アサガオは、ふくろを かぶせずに そのままに して、おしべの ${W.kafun}が めしべの 先に つくままに しておいた。`,
+    ask: { q: `この アサガオ、実が できると 思う？`,
+      opts: ['実ができる', '実ができない', '花の色が変わる'], correct: 0,
+      explain: `せいかい！ ${W.kafun}が めしべの 先に ついて ${W.jufun}できたので、めしべの もとが ふくらんで 実に なる。` } },
+];
+
+// はかせ：実や種子のでき方（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '🍎', name: '実の中の種子', txt: `${W.jufun}すると、めしべの もとが ふくらんで 実に なり、中に 種子が できる。` },
+  { key: 1, letter: 'い', icon: '🫛', name: 'いろいろな実', txt: `トマトや リンゴ、えだ豆も、もとは 花が ${W.jufun}して できた 実。えだ豆の さやが 実で、中の 豆が 種子だよ。` },
+  { key: 2, letter: 'う', icon: '🌱', name: 'たねからたねへ', txt: `できた 種子は、また 次の 年に 新しい 芽を 出す。フタバが 研究していた 「たね」も、こうして できた ものだったんだ。` },
+  { key: 3, letter: 'え', icon: '📝', name: 'そだてる時にたいせつなこと', txt: `発芽には 水・空気・てきおんが、成長には 日光・肥料が 必要。ここまでの 学びの まとめだよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'hikari',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  hikariIdx: -1,
+  hikariIdxDisplay: -1,
+  hiryoFound: new Set(),
+  hanaFound: new Set(),
+  jufunFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f6fbe0'); g.addColorStop(1, '#d9ecb0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#e8710e' : '#ffe0b8';
+    gctx.fill(); gctx.strokeStyle = '#e8710e'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#4a3018'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#4a3018'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．日光と成長をくらべよう（メイン操作・時間送り①〜⑦） ----------
+function drawPot(X, Y, sc, cx, stemH, leafCount, color) {
+  const baseY = 480;
+  gctx.fillStyle = '#a86a3a';
+  gctx.fillRect(X(cx - 34), Y(baseY), 68 * sc, 26 * sc);
+  gctx.strokeStyle = color; gctx.lineWidth = 5 * sc; gctx.lineCap = 'round';
+  gctx.beginPath(); gctx.moveTo(X(cx), Y(baseY)); gctx.lineTo(X(cx), Y(baseY - stemH)); gctx.stroke();
+  for (let i = 0; i < leafCount; i++) {
+    const t = (i + 1) / (leafCount + 1);
+    const ly = baseY - stemH * t;
+    const side = i % 2 === 0 ? -1 : 1;
+    gctx.fillStyle = color;
+    gctx.beginPath();
+    gctx.ellipse(X(cx + side * 26), Y(ly), 20 * sc, 10 * sc, side * 0.4, 0, TAU);
+    gctx.fill();
+  }
+}
+function drawHikariScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const idxNow = clamp(Math.round(S.hikariIdxDisplay), 0, 6);
+  const v = clamp(S.hikariIdxDisplay, 0, 6);
+  const leafL = S.hikariIdx >= 0 ? lerpArr(LEAF_LIGHT, v) : 0;
+  const leafD = S.hikariIdx >= 0 ? lerpArr(LEAF_DARK, v) : 0;
+  const stemL = S.hikariIdx >= 0 ? lerpArr(STEMH_LIGHT, v) : 18;
+  const stemD = S.hikariIdx >= 0 ? lerpArr(STEMH_DARK, v) : 18;
+  drawPot(X, Y, sc, 320, stemL, Math.round(leafL), '#4a9e3f');
+  drawPot(X, Y, sc, 680, stemD, Math.round(leafD), '#c9b23a');
+  gctx.fillStyle = '#4a3018'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('☀️ 日光あり', X(320), Y(520));
+  gctx.fillText('🌑 日光なし', X(680), Y(520));
+  gctx.font = `700 ${17 * sc}px sans-serif`;
+  const title = S.hikariIdx >= 0 ? `${NUMS[idxNow]}　${HIKARI_DAYS[idxNow]}日め` : '日光の あり・なしで そだち方を くらべよう';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 2．肥料と成長をくらべよう（発見型） ----------
+function drawHiryoScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HIRYO_CARDS, S.hiryoFound, 2, '①②をタッチして、肥料のあり・なしで育ち方をくらべよう');
+}
+
+// ---------- 3．花のつくりを発見しよう（発見型） ----------
+function drawHanaScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HANA_CARDS, S.hanaFound, 4, '①〜④をタッチして、アブラナの花のつくりを調べよう');
+}
+
+// ---------- 4．受粉のひみつ（応用推理） ----------
+function drawJufunScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, JUFUN_CASES, S.jufunFound, 2, '①②をタッチして、アサガオの受粉じっけんを見てみよう');
+}
+
+// ---------- 5．はかせ：実や種子のでき方 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、実や種子のでき方を見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'hikari') drawHikariScene(X, Y, sc);
+  else if (S.scene === 'hiryo') drawHiryoScene(X, Y, sc);
+  else if (S.scene === 'hana') drawHanaScene(X, Y, sc);
+  else if (S.scene === 'jufun') drawJufunScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ミノリの実りビューア（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fff5e0'); grd.addColorStop(1, '#ffd9a8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#e8710e';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'compare') {
+    drawCompareScope(R, S.scope.leafL, S.scope.leafD);
+    label(S.scope.label || '');
+  } else if (mode === 'flower') {
+    drawFlowerScope(R, S.scope.part);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ffb06688'); g2.addColorStop(1, 'rgba(255,176,102,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#e8710e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🌻', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#e8710e'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#4a3018';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawMiniPlant(cx, baseY, stemH, leafCount, color) {
+    sctx.fillStyle = '#a86a3a';
+    sctx.fillRect(cx - R * 0.16, baseY, R * 0.32, R * 0.09);
+    sctx.strokeStyle = color; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx, baseY); sctx.lineTo(cx, baseY - stemH); sctx.stroke();
+    for (let i = 0; i < leafCount; i++) {
+      const t2 = (i + 1) / (leafCount + 1);
+      const ly = baseY - stemH * t2;
+      const side = i % 2 === 0 ? -1 : 1;
+      sctx.fillStyle = color;
+      sctx.beginPath();
+      sctx.ellipse(cx + side * R * 0.14, ly, R * 0.13, R * 0.065, side * 0.4, 0, TAU);
+      sctx.fill();
+    }
+  }
+  function drawCompareScope(R, leafL, leafD) {
+    const baseY = R * 1.55;
+    drawMiniPlant(R * 0.62, baseY, R * (0.18 + (leafL || 0) * 0.05), leafL || 0, '#4a9e3f');
+    drawMiniPlant(R * 1.38, baseY, R * (0.2 + (leafL || 0) * 0.06), leafD || 0, '#c9b23a');
+  }
+
+  function drawFlowerScope(R, part) {
+    const cx = R, cy = R * 0.62;
+    const dim = c => part && part !== c;
+    sctx.fillStyle = dim('gaku') ? '#e0ded0' : '#5a9648';
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2 + Math.PI / 4;
+      const gx = cx + Math.cos(a) * R * 0.5, gy = cy + Math.sin(a) * R * 0.5;
+      sctx.beginPath(); sctx.ellipse(gx, gy, R * 0.16, R * 0.28, a, 0, TAU); sctx.fill();
+    }
+    sctx.fillStyle = dim('hanabira') ? '#e8e4d0' : '#ffcf40';
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2;
+      const px = cx + Math.cos(a) * R * 0.42, py = cy + Math.sin(a) * R * 0.42;
+      sctx.beginPath(); sctx.ellipse(px, py, R * 0.2, R * 0.32, a, 0, TAU); sctx.fill();
+    }
+    sctx.lineCap = 'round';
+    for (let i = 0; i < 6; i++) {
+      const a = i * TAU / 6 + 0.2;
+      const len = i < 4 ? R * 0.26 : R * 0.18;
+      const ex = cx + Math.cos(a) * len, ey = cy + Math.sin(a) * len;
+      sctx.strokeStyle = dim('oshibe') ? '#d8d4c0' : '#e8710e'; sctx.lineWidth = R * 0.035;
+      sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(ex, ey); sctx.stroke();
+      sctx.fillStyle = dim('oshibe') ? '#d8d4c0' : '#ffb300';
+      sctx.beginPath(); sctx.arc(ex, ey, R * 0.045, 0, TAU); sctx.fill();
+    }
+    sctx.strokeStyle = dim('meshibe') ? '#d8d4c0' : '#8a4a12'; sctx.lineWidth = R * 0.05;
+    sctx.beginPath(); sctx.moveTo(cx, cy); sctx.lineTo(cx, cy - R * 0.34); sctx.stroke();
+    sctx.fillStyle = dim('meshibe') ? '#d8d4c0' : '#fff5e0';
+    sctx.beginPath(); sctx.arc(cx, cy - R * 0.34, R * 0.06, 0, TAU); sctx.fill();
+    sctx.lineWidth = R * 0.015; sctx.stroke();
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#e8710e', '#ffb066', '#4a9e3f', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    hikari: '☀️ 日光と成長をくらべよう',
+    hiryo: '🌿 肥料と成長をくらべよう',
+    hana: '🌸 花のつくりを発見しよう',
+    jufun: '🐝 受粉のひみつ',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🌻 ミノリの花ばたけ ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ミノリの花ばたけ';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_hikari', 'm_hiryo', 'm_hana', 'm_jufun', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+// m_hanaのみ実写動画（日本コロムビア公式「小学校理科DVDシリーズ 5年 花から実へ」）、
+// 残り3つは自作アニメーション（既存のscene/scope再利用）のハイブリッド構成
+const FURIKAERI_SLIDES = [
+  { scene: 'hikari', icon: '☀️', title: '日光と成長をくらべよう',
+    setup: () => { Object.assign(S, { hikariIdx: 6, hikariIdxDisplay: 6 }); },
+    scope: () => ({ type: 'compare', leafL: LEAF_LIGHT[6], leafD: LEAF_DARK[6], label: 'あり' + LEAF_LIGHT[6] + 'まい・なし' + LEAF_DARK[6] + 'まい' }),
+    text: () => `日光に 当てないと、くきばかり ひょろひょろ のびて、葉の 色も うすく なったね。芽が 出た あとの 成長には、日光が 必要なんだ。` },
+  { scene: 'hana', icon: '🌸', title: '花のつくりを発見しよう',
+    video: '1vVCoIPkUQ0',
+    setup: () => { S.hanaFound = new Set(HANA_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'flower', part: null, label: 'がく・花びら・おしべ・めしべ' }),
+    text: () => `アブラナの 花には、がく・花びら・おしべ・めしべが あったね。おしべの 先には ${W.kafun}が ついていたね。` },
+  { scene: 'jufun', icon: '🐝', title: '受粉のひみつ',
+    setup: () => { S.jufunFound = new Set(JUFUN_CASES.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '✅', name: N_JUFUN + 'すると実に' }),
+    text: () => `おしべを 取りのぞいた 花は 実が できず、${W.jufun}した 花は 実が できたね。${W.jufun}が、実が できる カギだったんだ。` },
+  { scene: 'hakase', icon: '🍎', title: 'はかせチャレンジ',
+    setup: () => { S.hakaseFound = new Set(HAKASE_POINTS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🌱', name: 'たねからたねへ' }),
+    text: () => `${W.jufun}した めしべの もとは 実に なり、中に できた 種子は、また 新しい 芽を 出す。たねから たねへ、いのちは つながっているね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'hikari', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">☀️🌸🐝🍎</div>
+        <h1>ミノリの花ばたけ</h1>
+        <div class="sub">〜 植物の 成長と 結実 〜</div>
+        <p class="talk">ようこそ！ わたしは、花が 実に なる「実り」から 生まれた ${W.seirei}、<b>ミノリ</b>。フタバの めばえラボで 芽を 出した たねは、そのあと 大きく 育って、花を さかせ、実に なって、また 新しい たねを 作るんだ。芽が 出るのに 日光は いらなかったけど、そのあと 大きく 育つのにも、日光は いらないと 思う？<br>
+        今日は、そだち方の ちがいから、花の つくり、実の できかたまで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">めばえラボで、たねが 芽を 出すのに 日光は いらなかったね。芽が 出た あと、ぐんぐん 育つのにも 日光は いらないと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">☀️</span><b>ア</b> いる</div>
+          <div class="vcard" data-v="1"><span class="vicon">🌑</span><b>イ</b> いらない</div>
+          <div class="vcard" data-v="2"><span class="vicon">🌗</span><b>ウ</b> 少しだけ いる</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：日光と成長をくらべよう（メイン操作・時間送り①〜⑦） ---
+  m_hikari: {
+    enter() {
+      Object.assign(S, { scene: 'hikari', hikariIdx: -1, hikariIdxDisplay: -1, scope: { type: 'compare', leafL: 0, leafD: 0, label: 'そだてる前' } });
+      updateLoc();
+      setWish('☀️', `「○日後を見る」ボタンで、日光に 当てた 鉢と 当てない 鉢を、①〜⑦まで じかんを すすめて くらべよう。`);
+      say(`左は 日光に 当てた 鉢、右は 日光に 当てない 鉢。同じ 水・肥料で そだてるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.hikariIdx >= HIKARI_DAYS.length - 1) { this.finish(); return; }
+      const nextIdx = S.hikariIdx + 1;
+      setControls([{ label: `🕐 ${HIKARI_DAYS[nextIdx]}日後を 見る`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.hikariIdx >= HIKARI_DAYS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.hikariIdx, toV = S.hikariIdx + 1;
+      startTween(fromV, toV, 0.8, v => {
+        S.hikariIdxDisplay = v;
+        const leafL = lerpArr(LEAF_LIGHT, clamp(v, 0, 6));
+        const leafD = lerpArr(LEAF_DARK, clamp(v, 0, 6));
+        S.scope = { type: 'compare', leafL: Math.round(leafL), leafD: Math.round(leafD), label: 'あり' + Math.round(leafL) + 'まい・なし' + Math.round(leafD) + 'まい' };
+      }, () => {
+        S.hikariIdx++; S.hikariIdxDisplay = S.hikariIdx;
+        say(`${NUMS[S.hikariIdx]} ${HIKARI_DAYS[S.hikariIdx]}日め：日光ありは 葉が ${LEAF_LIGHT[S.hikariIdx]}まい、日光なしは 葉が ${LEAF_DARK[S.hikariIdx]}まい。`);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑦まで、日光を 当てた 鉢と 当てない 鉢を くらべたね。育ち方は どう ちがったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`日光に 当てないで 育てた 方は、日光に 当てた 方と くらべて どうだった？`);
+      setButtons(choiceRow(['同じように青々と育った', 'くきがひょろひょろのび、葉の色もうすく育ちがおそかった', 'ふつうより早く大きく育った'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_hikari'); S.phase = 'done';
+        const votedRight = S.votePicked.has(0);
+        say(`せいかい！ 日光に 当てないと、くきばかり ひょろひょろ のびて、葉の 色も うすく なり、育ちが おそくなる。発芽には 日光は いらなかったけど、そのあと 大きく 育つには 日光が 必要なんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（肥料と成長をくらべよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、2つの 鉢の ちがいを 思い出してみよう。`);
+        setButtons(choiceRow(['同じように青々と育った', 'くきがひょろひょろのび、葉の色もうすく育ちがおそかった', 'ふつうより早く大きく育った'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：肥料と成長をくらべよう（発見型） ---
+  m_hiryo: {
+    enter() {
+      Object.assign(S, { scene: 'hiryo', scope: { type: 'idle' }, hiryoFound: new Set() });
+      updateLoc();
+      setWish('🌿', `①②を タッチして、肥料の あり・なしで、育ち方が どう ちがうか 調べよう。`);
+      say(`日光の つぎは、肥料の ひみつを 調べよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HIRYO_CARDS.map(c => ({
+        label: c.num + ' ' + (S.hiryoFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.hiryoFound.size >= HIRYO_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.hiryoFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`植物が 大きく 育つために、日光の ほかに 必要な ものは？`);
+      setButtons(choiceRow(['ひりょう', '日かげ', 'つめたい水'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_hiryo'); S.phase = 'done';
+        say(`せいかい！ ひりょうには、植物が 育つための 養分が 入っている。日光と 肥料、両方 そろうと ぐんぐん 育つんだ。`);
+        setButtons([{ label: 'つぎへ（花のつくりを発見しよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ひりょう', '日かげ', 'つめたい水'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：花のつくりを発見しよう（発見型） ---
+  m_hana: {
+    enter() {
+      Object.assign(S, { scene: 'hana', scope: { type: 'idle' }, hanaFound: new Set() });
+      updateLoc();
+      setWish('🌸', `①〜④を タッチして、アブラナの 花の つくりを 調べよう。`);
+      say(`大きく 育つと、花を さかせるよ。花には どんな つくりが あるかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HANA_CARDS.map(c => ({
+        label: c.num + ' ' + (S.hanaFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.hanaFound.size >= HANA_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.hanaFound.add(c.key);
+      S.scope = { type: 'flower', part: c.part, label: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`おしべの 先に ついている もの、めしべの 先が 実に なるために 必要な ものは？`);
+      setButtons(choiceRow(['花粉', 'みつ', 'とげ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_hana'); S.phase = 'done';
+        say(`せいかい！ おしべの 先には ${W.kafun}が ある。この ${W.kafun}が めしべの 先に つくことを「${W.jufun}」と いうんだ。`);
+        setButtons([{ label: 'つぎへ（受粉のひみつ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['花粉', 'みつ', 'とげ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：受粉のひみつ（応用推理） ---
+  m_jufun: {
+    enter() {
+      Object.assign(S, { scene: 'jufun', scope: { type: 'idle' }, jufunFound: new Set() });
+      updateLoc();
+      setWish('🐝', `①②を タッチして、アサガオの ${W.jufun}じっけんを 見て、実が できる わけを 考えよう。`);
+      say(`花が さいた あと、実が できる かどうかは、あることが カギに なるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(JUFUN_CASES.map(c => ({
+        label: c.num + ' ' + (S.jufunFound.has(c.key) ? plain(c.name) + ' ✓' : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.jufunFound.size >= JUFUN_CASES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap();
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(c.txt);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.itemAsk(c) }]);
+    },
+    itemAsk(c) {
+      hideWish(); setButtons([]);
+      say(c.ask.q);
+      setButtons(choiceRow(c.ask.opts, (i, el) => this.judgeItem(c, i, el)));
+    },
+    judgeItem(c, i, el) {
+      markPicked(el);
+      if (i === c.ask.correct) {
+        sYes(); scopeBurst();
+        say(c.ask.explain);
+        S.jufunFound.add(c.key);
+        setWish('🐝', `①②を タッチして、アサガオの ${W.jufun}じっけんを 見て、実が できる わけを 考えよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(c.ask.opts, (i2, el2) => this.judgeItem(c, i2, el2)));
+      }
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`実が できるために、いちばん 大事な ことは？`);
+      setButtons(choiceRow(['花がさくこと', '受粉すること', '水をあげること'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_jufun'); S.phase = 'done';
+        say(`せいかい！ 花が さいても、${W.jufun}しなければ 実は できない。おしべの ${W.kafun}が めしべの 先に つく「${W.jufun}」が、実が できる ための カギなんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['花がさくこと', '受粉すること', '水をあげること'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：実や種子のでき方 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 実や 種子の でき方を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`${W.jufun}した あと、めしべの もとは どうなる？`);
+      setButtons(choiceRow(['実になり中に種子ができる', 'すぐにかれる', '葉になる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.jufun}すると、めしべの もとが ふくらんで 実に なり、中に 種子が できる。たねから たねへ、いのちは つながっていくんだ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['実になり中に種子ができる', 'すぐにかれる', '葉になる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      hideOverlay();
+      if (slide.video) {
+        this.showVideo(slide, n, total, isLast);
+      } else {
+        this.showPlain(slide, n, total, isLast);
+      }
+    },
+    showPlain(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+    showVideo(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      hideWish();
+      setButtons([
+        { label: '▶ どうがを 見る', cb: () => this.playVideo(slide) },
+        { label: isLast ? 'まとめへ すすむ' : 'つぎへ', cls: 'sub', cb: goNext },
+      ]);
+    },
+    playVideo(slide) {
+      sTap();
+      showOverlay(`
+        <h2>${slide.icon} ${slide.title}</h2>
+        <div style="max-width:380px;margin:0 auto">
+          <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000">
+            <iframe width="100%" height="100%" style="position:absolute;inset:0;border:0"
+              src="https://www.youtube-nocookie.com/embed/${slide.video}?rel=0&modestbranding=1&iv_load_policy=3&autoplay=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+        <p class="foot">動画：日本コロムビア公式YouTube「小学校理科DVDシリーズ 5年 花から実へ〜花のつくりと役わり、実のでき方〜」<br>https://www.youtube.com/watch?v=${slide.video}　（先生へ：外部サイトのため、事前に内容をご確認ください）</p>
+        <button class="btn" id="videoCloseBtn">とじる</button>
+      `);
+      $('videoCloseBtn').onclick = () => { sTap(); hideOverlay(); };
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(0);
+      showOverlay(`
+        <h2>⭐ ミノリの花ばたけ みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 発芽の あと、大きく 育つには（<span class="blankWord" data-a="日光">？？？</span>）が 必要。<br>
+        ② 花には、がく・花びら・（<span class="blankWord" data-a="おしべ">？？？</span>）・めしべが ある。<br>
+        ③ おしべの 花粉が めしべの 先に つくことを（<span class="blankWord" data-a="受粉">？？？</span>）と いう。<br>
+        ④ 受粉すると、めしべの もとが ふくらんで（<span class="blankWord" data-a="実">？？？</span>）に なり、中に 種子が できる。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ア いる</b>でした！ 芽が 出た あと、大きく 育つには 日光が 必要でしたね。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①お家や 近くの 植物の 花を 見つけて、がく・花びら・おしべ・めしべを さがしてみよう。②やさいや くだものを 食べる 時、中に たねが あるか さがしてみよう（たねが あれば、それは 実だった しょうこだよ）。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#e8710e'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「日光なしで育てるとどうなる？」「アブラナの花のおしべは何本？」「実ができるために大事なことは？」`);
+      setButtons([
+        { label: '☀️ 日光くらべの図', cls: 'sub', cb: () => this.show('hikari') },
+        { label: '🌿 肥料くらべの図', cls: 'sub', cb: () => this.show('hiryo') },
+        { label: '🌸 花のつくりの図', cls: 'sub', cb: () => this.show('hana') },
+        { label: '🐝 受粉のひみつの図', cls: 'sub', cb: () => this.show('jufun') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_hana などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

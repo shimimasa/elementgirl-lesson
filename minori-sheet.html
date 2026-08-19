@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ミノリの花ばたけ きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #e8710e; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ffb066; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #fff3e0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #fff3e0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="minori.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🌻 ミノリの花ばたけ きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      めばえラボで、たねが芽を出すのに日光はいらなかったね。芽が出たあと、ぐんぐん育つのにも日光はいらないと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> いる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> いらない</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 少しだけいる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．日光と成長をくらべよう</span>
+    <div class="secBody">
+      日光あり・日光なしの鉢の、はっぱの数を記録しよう。
+      <table class="levelTable">
+        <tr><th></th><th>①3日め</th><th>②6日め</th><th>③9日め</th><th>④12日め</th><th>⑤15日め</th><th>⑥18日め</th><th>⑦21日め</th></tr>
+        <tr><th>日光あり</th><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+        <tr><th>日光なし</th><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      日光に当てないで育てた方は、（同じように青々と育った ／ くきがひょろひょろのび、葉の色もうすく育ちがおそかった ／ 早く大きく育った）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．肥料と成長をくらべよう</span>
+    <div class="secBody">
+      ①②を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①肥料ありの鉢</th><th>②肥料なしの鉢</th></tr>
+        <tr><td>☐</td><td>☐</td></tr>
+      </table>
+      植物が大きく育つために、日光のほかに必要なものは、（ひりょう ／ 日かげ ／ つめたい水）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．花のつくりを発見しよう</span>
+    <div class="secBody">
+      アブラナの花で①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①がく</th><th>②花びら</th><th>③おしべ</th><th>④めしべ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      おしべの先についているもの、めしべの先が実になるために必要なものは、（花粉 ／ みつ ／ とげ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．受粉のひみつ</span>
+    <div class="secBody">
+      ①おしべを取りのぞいてふくろをかぶせたアサガオは、実が（できる ／ できない）。<br>
+      ②そのままにしたアサガオは、実が（できる ／ できない）。<br>
+      実ができるために、いちばん大事なことは、（花がさくこと ／ 受粉すること ／ 水をあげること）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（実や種子のでき方）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 実の中の種子</th><th>い いろいろな実</th><th>う たねからたねへ</th><th>え そだてる時にたいせつなこと</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      受粉したあと、めしべのもとはどうなる、（実になり中に種子ができる ／ すぐにかれる ／ 葉になる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 発芽の あと、大きく 育つには（<span class="fillLine sm"></span>）が 必要。<br>
+      ② 花には、がく・花びら・（<span class="fillLine sm"></span>）・めしべが ある。<br>
+      ③ おしべの 花粉が めしべの 先に つくことを（<span class="fillLine"></span>）と いう。<br>
+      ④ 受粉すると、めしべの もとが ふくらんで（<span class="fillLine sm"></span>）に なり、中に 種子が できる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🌻</span>
+        <div>
+          ①お家や近くの植物の花を見つけて、がく・花びら・おしべ・めしべをさがしてみよう。<br>
+          ②やさいやくだものを食べる時、中にたねがあるかさがしてみよう（たねがあれば、それは実だったしょうこだよ）。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ミノリの花ばたけ 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ミノリの花ばたけ — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5理科「植物の発芽、成長、結実」・学力幅あり・協力型／ 使うもの：「minori.html」・プロジェクタ・このノート（1ページ目を人数分）。「めばえラボ」（発芽の条件）の正統な続編で、理科・生命分野の8作目です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要。ふりかえりタイムの動画のみ要ネット接続）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_hana</b> などで途中再開（m_hikari／m_hiryo／m_hana／m_jufun／hakase／ending）</li>
+      <li>☐ 可能であれば、「めばえラボ」で発芽の3条件（水・空気・温度）を学んだことを振り返ってから始めると導入がスムーズです</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜14分</td><td>☀️ 日光と成長をくらべよう（<b>今日の見せ場</b>）</td><td>「○日後を見る」ボタンで①〜⑦まで進め、日光あり・なしの育ち方の違いを観察。よそうタイムをここで回収。シート２に記録</td></tr>
+      <tr><td class="min">14〜21分</td><td>🌿 肥料と成長をくらべよう</td><td>①②を発見し、肥料あり・なしの違いを確認。シート３に記録</td></tr>
+      <tr><td class="min">21〜30分</td><td>🌸 花のつくりを発見しよう</td><td>①〜④のがく・花びら・おしべ・めしべを発見。シート４に記録</td></tr>
+      <tr><td class="min">30〜38分</td><td>🐝 受粉のひみつ</td><td>アサガオの受粉実験の2ケースから、受粉が実のカギであることを推理。シート５に記録</td></tr>
+      <tr><td class="min">38〜43分</td><td>🔎 はかせチャレンジ</td><td>実や種子のでき方、たねからたねへの循環を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「花のつくりをさがそう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「肥料と成長をくらべよう」を右下「つぎ▶」でスキップ可（<b>日光の実験／花のつくり／受粉のひみつ／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ア いる</b>／日光の実験＝<b>くきがひょろひょろのび、葉の色もうすく育ちがおそかった</b>／肥料の実験＝<b>ひりょう</b>／花のつくり＝<b>花粉</b>／受粉のひみつ＝<b>受粉すること</b>／はかせ＝<b>実になり中に種子ができる</b>／
+      まとめ＝①<b>日光</b>　②<b>おしべ</b>　③<b>受粉</b>　④<b>実</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：植物の成長には日光や肥料などが関係している／花にはおしべやめしべなどがあり、花粉がめしべの先につく（受粉）と、めしべのもとが実になり実の中に種子ができる（小学校学習指導要領・理科・第5学年「植物の発芽、成長、結実」）</li>
+      <li>「めばえラボ」で確かめた発芽の条件（水・空気・適温）に日光・肥料は不要だが、発芽後の成長には日光・肥料が必要になる。日光に当てずに育てると、くきばかりひょろひょろとのびて葉の色もうすくなる（複数の教育委員会の指導資料でWebSearch裏取り済み。具体的な生育日数ごとのcm値は栽培環境で差が大きく標準データが存在しないため、観察できる葉の数という整数値と、方向性が確かな質的な違い＝色・くきの太さで表現し、数値を捏造していない）</li>
+      <li>アブラナの花のつくり：がく4枚・花びら4枚・おしべ6本（4本が長く2本が短い）・めしべ1本、という実数値</li>
+      <li>アサガオの受粉実験：あした咲きそうなつぼみのうちにおしべを全て取りのぞき袋をかぶせると、花粉がめしべの先（柱頭）につかず受粉できないため実ができない。この対照実験は小5理科の定番教材</li>
+      <li>受粉すると、めしべのもと（子房）がふくらんで実になり、その中に種子ができる。トマト・リンゴ・えだ豆（さやが実、中の豆が種子）なども同じしくみ</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「日光と成長をくらべよう」が今日いちばんの見せ場。「めばえラボで発芽に日光はいらなかったのに、今度は必要になるのはなぜ？」と問いかけ、発芽と成長で必要な条件が違うことに気づかせる</li>
+      <li>「受粉のひみつ」は正解を急がせず、①（おしべなし）と②（そのまま）の結果を比べさせてから理由を考えさせる</li>
+      <li>花のつくりは、可能であれば実物の花（アブラナやアサガオでなくてもよい）を用意して、がく・花びら・おしべ・めしべを実際に触って確認させると理解が深まる</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「日光なしで育てるとどうなる？」「アブラナの花のおしべは何本？」「実ができるために大事なことは？」</li>
+      <li>おうちミッションでは、身近な花の観察と、食べ物の中の種さがしという2つの活動で、画面の学びと日常の観察を結びつける狙い</li>
+      <li>理科・生命分野は本作で「めばえラボ」（発芽）・「アオバの葉かげ」（チョウの育ち方）・「シズクの淵」（メダカと人）・「ミャクの森」（水の通り道）・「メグルの庭」（季節と生物）・「ツナグの池」（生物と環境）・「ナナホシの花だん」（身の回りの生物）に続く8作目です</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

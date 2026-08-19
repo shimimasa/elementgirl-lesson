@@ -1728,4 +1728,39 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
             <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
           </svg>`,
+  minori: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#ffd699" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <circle cx="60" cy="70" r="42" fill="url(#minoriGrad)" stroke="#8a4a12" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="minoriGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fff5e0"/>
+                <stop offset="55%" stop-color="#f2994a"/>
+                <stop offset="100%" stop-color="#d97706"/>
+              </radialGradient>
+            </defs>
+            <g fill="#ffd699" stroke="#8a4a12" stroke-width="1.3">
+              <ellipse cx="60" cy="16" rx="7" ry="10"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(72 60 16)"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(144 60 16)"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(216 60 16)"/>
+              <ellipse cx="60" cy="16" rx="7" ry="10" transform="rotate(288 60 16)"/>
+            </g>
+            <circle cx="60" cy="16" r="5" fill="#ffb300" stroke="#8a4a12" stroke-width="1.3"/>
+            <g class="eyes">
+              <circle cx="48" cy="70" r="6" fill="#fff"/>
+              <circle cx="72" cy="70" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="70.8" r="3.2" fill="#8a4a12"/>
+              <circle cx="72.7" cy="70.8" r="3.2" fill="#8a4a12"/>
+            </g>
+            <path d="M48 86 Q60 94 72 86" fill="none" stroke="#8a4a12" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="80" r="5" fill="#ffe0b8" opacity=".6"/>
+            <circle cx="78" cy="80" r="5" fill="#ffe0b8" opacity=".6"/>
+          </svg>`,
 };
