@@ -1695,4 +1695,37 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
             <circle cx="78" cy="76" r="5" fill="#ff8a3d" opacity=".45"/>
           </svg>`,
+  nanahoshi: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#ff8a72" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 34 Q26 30 30 40" fill="none"/>
+              <path d="M8 54 L34 52" fill="none"/>
+              <path d="M16 74 Q26 78 32 70" fill="none"/>
+              <path d="M106 34 Q94 30 90 40" fill="none"/>
+              <path d="M112 54 L86 52" fill="none"/>
+              <path d="M104 74 Q94 78 88 70" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#nanahoshiGrad)" stroke="#7a1f18" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="nanahoshiGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fff5f0"/>
+                <stop offset="55%" stop-color="#ff8a72"/>
+                <stop offset="100%" stop-color="#d9463a"/>
+              </radialGradient>
+            </defs>
+            <path d="M32 28 Q60 16 88 28 Q88 38 60 40 Q32 38 32 28 Z" fill="#2b1210"/>
+            <circle cx="44" cy="50" r="3.2" fill="#2b1210"/>
+            <circle cx="76" cy="50" r="3.2" fill="#2b1210"/>
+            <circle cx="32" cy="78" r="2.8" fill="#2b1210"/>
+            <circle cx="88" cy="78" r="2.8" fill="#2b1210"/>
+            <circle cx="60" cy="97" r="2.6" fill="#2b1210"/>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#7a1f18"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#7a1f18"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#7a1f18" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>`,
 };

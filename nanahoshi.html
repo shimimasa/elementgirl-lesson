@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ナナホシの花だん — 身の回りの生物 たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fbfbe0 0%, #eef3c8 45%, #cfe6a0 100%);
+    color: #3d2a1f;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #d9463a; text-shadow: 0 0 14px rgba(217, 70, 58, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #a85a45; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #fdeee0; border: 2px solid #f0c4b4;
+    font-size: clamp(16px, 1.8vw, 26px); color: #e0a090;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe0d0, #d9463a);
+    border-color: #7a1f18; color: #7a1f18;
+    box-shadow: 0 0 16px rgba(217, 70, 58, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #f4fbe4 60%, #d8edb0 100%);
+    border: 3px solid #6b9e3f;
+    box-shadow: inset 0 0 40px rgba(60, 90, 20, .14), 0 4px 18px rgba(60, 90, 20, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #5a7a35; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #d9463a; color: #fff5f0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(122, 31, 24, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(220, 170, 120, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #f0c4b4; cursor: pointer;
+    background: linear-gradient(180deg, #ff8a72, #d9463a); color: #fff;
+    box-shadow: 0 3px 0 #7a1f18; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #d9463a; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(122, 31, 24, .28), inset 0 0 24px rgba(217, 70, 58, .14);
+    flex-shrink: 0; background: #fff5f0;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #a85a45;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #d9463a; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #f0c4b4; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #a85a45; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #3d2a1f;
+    border: 1.5px solid #f0c4b4;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #d9463a; background: #fdeee0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #fdeee0); color: #3d2a1f;
+    border: 2px solid #d9463a; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #d9463a; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #ff8a72, #d9463a); color: #fff5f0;
+    box-shadow: 0 3px 0 #7a1f18, 0 5px 12px rgba(122, 31, 24, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #7a1f18; }
+  .btn.sub {
+    background: #fdeee0; color: #a85a45; box-shadow: 0 3px 0 #f0c4b4;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #3d2a1f; box-shadow: 0 3px 0 #f0c4b4; font-weight: 400; border: 1.5px solid #f0c4b4; }
+  .btn.choice.picked { background: #fdeee0; outline: 3px solid #d9463a; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(60, 30, 15, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #fdeee0);
+    border: 3px solid #d9463a; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(60, 30, 15, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #d9463a; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #d9463a; }
+  .panel .sub { color: #a85a45; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #3d2a1f; border: 1.5px solid #f0c4b4; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #a85a45; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #3d2a1f; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #f0c4b4; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #d9463a; background: #fff5f0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #d9463a; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #d9463a;
+    color: #d9463a; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #a85a45;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #fdeee0; color: #a85a45;
+    border: 1px solid #f0c4b4; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #f5dcc8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🐞 ナナホシの花だん<small>— 身の回りの生物 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_sagashi" title="庭で生き物さがしをしよう">★</div>
+    <div class="badge" id="bd_m_konchu" title="こん虫の体のつくりを調べよう">★</div>
+    <div class="badge" id="bd_m_shokubutsu" title="植物の体のつくりを調べよう">★</div>
+    <div class="badge" id="bd_m_sumika" title="すみかのひみつを調べよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ナナホシの花だん</div>
+    <div id="locChip">ナナホシの花だん</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🐞 ナナホシの生き物めがね 〜小さなすがたをよく見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#ff8a72" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 34 Q26 30 30 40" fill="none"/>
+              <path d="M8 54 L34 52" fill="none"/>
+              <path d="M16 74 Q26 78 32 70" fill="none"/>
+              <path d="M106 34 Q94 30 90 40" fill="none"/>
+              <path d="M112 54 L86 52" fill="none"/>
+              <path d="M104 74 Q94 78 88 70" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#nanahoshiGrad)" stroke="#7a1f18" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="nanahoshiGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#fff5f0"/>
+                <stop offset="55%" stop-color="#ff8a72"/>
+                <stop offset="100%" stop-color="#d9463a"/>
+              </radialGradient>
+            </defs>
+            <path d="M32 28 Q60 16 88 28 Q88 38 60 40 Q32 38 32 28 Z" fill="#2b1210"/>
+            <circle cx="44" cy="50" r="3.2" fill="#2b1210"/>
+            <circle cx="76" cy="50" r="3.2" fill="#2b1210"/>
+            <circle cx="32" cy="78" r="2.8" fill="#2b1210"/>
+            <circle cx="88" cy="78" r="2.8" fill="#2b1210"/>
+            <circle cx="60" cy="97" r="2.6" fill="#2b1210"/>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#7a1f18"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#7a1f18"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#7a1f18" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>
+          <div class="catname">ナナホシテントウから生まれた<ruby>精霊<rt>せいれい</rt></ruby> ナナホシ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🐞 ナナホシの花だんミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ナナホシの花だん — 身の回りの生物（小3理科・生命分野7作目・協力型・1ファイル）
+   庭で生き物さがし（発見型）→ こん虫の体のつくり（メイン操作・分類ゲーム）→
+   植物の体のつくり（発見型）→ すみかのひみつ（応用推理）→ はかせ（生き延びる工夫といのちを大切に）。
+   数値・事実：小学校学習指導要領・理科・第3学年「身の回りの生物」
+   （ア 生物は色・形・大きさなどの姿に違いがあり、周辺の環境と関わって生きている／
+    イ 昆虫の体は頭・胸・腹からなり、胸に6本のあしがある／ウ 植物の体は根・茎・葉からなる）。
+   ダンゴムシ(あし14本・甲殻類)、クモ(あし8本・頭胸部と腹部の2部)は昆虫ではない。
+   ダンゴムシが石の下など暗く湿った場所を好むのは、体の水分が失われやすく乾燥に弱いため。
+   いずれもWebSearchで裏取り済み（一般に知られた理科・生物学の基礎知識）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  kansatsu: ruby('観察', 'かんさつ'),
+  kuki: ruby('茎', 'くき'),
+  hogoshoku: ruby('保護色', 'ほごしょく'),
+  gitai: ruby('擬態', 'ぎたい'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでcanvasのfillTextや
+// scope.label/nameに渡すとタグが消えるだけで<rt>内の読みが連結表示されてしまう。
+// canvas文脈は必ずこの安全なひらがな定数を使う）
+const N_ASHI = 'あし';
+const N_NE = 'ね', N_KUKI = 'くき', N_HA = 'は';
+
+// ---------- 数値データ（本物度） ----------
+// m_sagashi：庭で生き物さがし（発見型）
+const SAGASHI_CARDS = [
+  { key: 0, num: '①', icon: '🪲', name: '石の下のダンゴムシ', txt: `石を そっと めくると、ダンゴムシが いた。体は 丸くて 灰色。さわると 丸くなって 身を 守るよ。暗くて しめった 場所が 大すきなんだ。` },
+  { key: 1, num: '②', icon: '🦋', name: '花のまわりのチョウ', txt: `花の まわりを ひらひら 飛んでいたのは、モンシロチョウ。細長い 口を のばして、花の みつを すうよ。` },
+  { key: 2, num: '③', icon: '🪱', name: '土の中のミミズ', txt: `土を そっと ほると、ミミズが いた。体は 細長くて、あしは 1本も ない。しめった 土の中で くらしているよ。` },
+  { key: 3, num: '④', icon: '🦗', name: '落ち葉の下のバッタ', txt: `落ち葉を どけると、バッタが ぴょんと はねた。体の 色が 草や 落ち葉の 色に にていて、見つけにくいね。` },
+];
+
+// m_konchu：こん虫の体のつくり（メイン操作・分類ゲーム）
+// 昆虫は頭・胸・腹の3部構成、あしは胸から6本(3対)。クモ(8本・頭胸部+腹部の2部)、
+// ダンゴムシ(14本・エビやカニに近い甲殻類)、ミミズ(0本・節のある体)はこん虫ではない。
+const KONCHU_CREATURES = [
+  { key: 0, num: '①', icon: '🐞', name: 'テントウムシ', legs: 6, isInsect: true, note: `頭・むね・はらの 3つに 分かれていて、むねから あしが 6本 生えている。` },
+  { key: 1, num: '②', icon: '🦋', name: 'モンシロチョウ', legs: 6, isInsect: true, note: `テントウムシと 同じで、頭・むね・はらの 3つと、あし6本。羽も むねから 生えているよ。` },
+  { key: 2, num: '③', icon: '🦗', name: 'バッタ', legs: 6, isInsect: true, note: `ジャンプする 大きな あしも 数えると、ぜんぶで 6本。頭・むね・はらの つくりも 同じだね。` },
+  { key: 3, num: '④', icon: '🕷️', name: 'クモ', legs: 8, isInsect: false, note: `体は 頭むねと お腹の 2つだけ。あしは 8本も ある。こん虫の なかまでは ないんだ。` },
+  { key: 4, num: '⑤', icon: '🪲', name: 'ダンゴムシ', legs: 14, isInsect: false, note: `あしは 14本も ある。じつは エビや カニに 近い なかまで、こん虫では ないよ。` },
+  { key: 5, num: '⑥', icon: '🪱', name: 'ミミズ', legs: 0, isInsect: false, note: `あしが 1本も ない。体は 節(ふし)の ある 細長い つくりだよ。` },
+];
+
+// m_shokubutsu：植物の体のつくり（発見型）
+const SHOKUBUTSU_PLANTS = [
+  { key: 0, num: '①', icon: '🌱', name: 'ホウセンカ', txt: `赤い 花が さいたあと、実が はじけて 種が とびちる。根・茎・葉が どれも はっきり わかる、そだてやすい 植物だよ。` },
+  { key: 1, num: '②', icon: '🌻', name: 'ヒマワリ', txt: `大きな 花と 太い 茎が 目じるし。根も 太く、地面の 深くまで のびるよ。` },
+  { key: 2, num: '③', icon: '🌼', name: 'タンポポ', txt: `花だんで 育てなくても、野原に 自然に 生えている。葉は 地面近くに 広がり、茎は とても 短く 見える。それでも、根・茎・葉は ちゃんと あるんだ。` },
+];
+
+// m_sumika：すみかのひみつ（応用推理）
+// ダンゴムシが乾燥に弱く暗く湿った場所を好むこと、モンシロチョウが蜜のある花畑にとどまることはWebSearchで裏取り済み。
+const SUMIKA_CASES = [
+  { key: 0, num: '①', icon: '🪲', name: 'ダンゴムシの じっけん',
+    txt: `明るくて かわいた 場所に ダンゴムシを 置いてみると… すぐに 動きだし、暗い 場所を さがして 移動した。`,
+    ask: { q: `なぜ ダンゴムシは 明るい 場所から すぐ 逃げたのかな？`,
+      opts: ['明るいのが なんとなく きらいだから', '体が かわくと 弱って しまうから', 'ただの 気まぐれ'], correct: 1,
+      explain: `せいかい！ ダンゴムシは 体から 水分が 失われやすく、かわいてしまうと 弱ってしまう。だから 暗くて しめった 石の下を すみかに えらぶんだ。` } },
+  { key: 1, num: '②', icon: '🦋', name: 'モンシロチョウの じっけん',
+    txt: `花畑と、花の 1つも ない 空き地。モンシロチョウを はなしてみると… 花畑の ほうに ずっと とどまった。`,
+    ask: { q: `モンシロチョウは なぜ 花畑に とどまったのかな？`,
+      opts: ['花畑の ほうが 広いから', '花の みつを 食べ物に しているから', 'たまたま そちらに 飛んだだけ'], correct: 1,
+      explain: `せいかい！ モンシロチョウは 花の みつを エサに している。エサが ある 場所を すみかに えらぶのも、生き物の くらしの 知恵だよ。` } },
+];
+
+// はかせ：生き延びる工夫といのちを大切に（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '🦗', name: '保護色', txt: `バッタの 緑色は、草むらの 色に とけこんで、敵から 身を 守る 色。これを ${W.hogoshoku}と いうよ。` },
+  { key: 1, letter: 'い', icon: '🌿', name: 'ぎたい', txt: `ナナフシの 体は、木の 枝そっくり。じっと していると、敵に 見つかりにくい。これを ${W.gitai}と いうよ。` },
+  { key: 2, letter: 'う', icon: '🪲', name: '丸くなる', txt: `ダンゴムシは さわられると 丸くなり、かたい 体で 身を 守る。とても 身近な 身の 守り方だね。` },
+  { key: 3, letter: 'え', icon: '💚', name: 'いのちを大切に', txt: `生き物を つかまえて ${W.kansatsu}したら、よく 見た あとは、もといた 場所に そっと かえそう。生き物の 命を 大切に しよう。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'sagashi',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  sagashiFound: new Set(),
+  konchuFound: new Set(),
+  shokubutsuFound: new Set(),
+  sumikaFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f6fbe0'); g.addColorStop(1, '#d9ecb0');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#d9463a' : '#f0c4b4';
+    gctx.fill(); gctx.strokeStyle = '#d9463a'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#3d2a1f'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#3d2a1f'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．庭で生き物さがし（発見型） ----------
+function drawSagashiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SAGASHI_CARDS, S.sagashiFound, 4, '①〜④をタッチして、庭で生き物さがしをしよう');
+}
+
+// ---------- 2．こん虫の体のつくり（メイン操作・分類ゲーム） ----------
+function drawKonchuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KONCHU_CREATURES, S.konchuFound, 3, '①〜⑥をタッチして、こん虫かどうかを見分けよう');
+}
+
+// ---------- 3．植物の体のつくり（発見型） ----------
+function drawShokubutsuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SHOKUBUTSU_PLANTS, S.shokubutsuFound, 3, '①〜③をタッチして、植物の体のつくりを調べよう');
+}
+
+// ---------- 4．すみかのひみつ（応用推理） ----------
+function drawSumikaScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SUMIKA_CASES, S.sumikaFound, 2, '①②をタッチして、生き物のじっけんを見てみよう');
+}
+
+// ---------- 5．はかせ：生き延びる工夫といのちを大切に ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、生き延びる工夫といのちの大切さを見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'sagashi') drawSagashiScene(X, Y, sc);
+  else if (S.scene === 'konchu') drawKonchuScene(X, Y, sc);
+  else if (S.scene === 'shokubutsu') drawShokubutsuScene(X, Y, sc);
+  else if (S.scene === 'sumika') drawSumikaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ナナホシの生き物めがね（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fff5f0'); grd.addColorStop(1, '#f5c9b8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#d9463a';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'legs') {
+    drawLegsScope(R, S.scope.legs);
+    label(S.scope.label || '');
+  } else if (mode === 'parts') {
+    drawPartsScope(R);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#ff8a7288'); g2.addColorStop(1, 'rgba(255,138,114,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#d9463a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🐞', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#d9463a'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#3d2a1f';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawLegsScope(R, legs) {
+    const cx = R, cy = R * 0.95;
+    const n = clamp(legs != null ? legs : 0, 0, 14);
+    if (n === 0) {
+      // ミミズ：あしがないので細長い体を波打たせて表現
+      sctx.strokeStyle = '#c98a4a'; sctx.lineWidth = R * 0.11; sctx.lineCap = 'round';
+      sctx.beginPath();
+      sctx.moveTo(R - R * 0.5, cy - R * 0.1);
+      sctx.quadraticCurveTo(R - R * 0.15, cy - R * 0.32, R, cy - R * 0.05);
+      sctx.quadraticCurveTo(R + R * 0.25, cy + R * 0.18, R + R * 0.5, cy - R * 0.02);
+      sctx.stroke();
+      return;
+    }
+    // 体（頭＋おなか）
+    sctx.fillStyle = '#d9463a';
+    sctx.beginPath(); sctx.ellipse(cx, cy, R * 0.32, R * 0.22, 0, 0, TAU); sctx.fill();
+    sctx.beginPath(); sctx.arc(cx, cy - R * 0.30, R * 0.13, 0, TAU); sctx.fill();
+    // あし
+    const perSide = Math.ceil(n / 2);
+    sctx.strokeStyle = '#7a1f18'; sctx.lineWidth = R * 0.045; sctx.lineCap = 'round';
+    for (let i = 0; i < n; i++) {
+      const side = i % 2 === 0 ? -1 : 1;
+      const idx = Math.floor(i / 2);
+      const t2 = perSide <= 1 ? 0.5 : idx / (perSide - 1);
+      const ly = cy - R * 0.16 + t2 * R * 0.34;
+      sctx.beginPath();
+      sctx.moveTo(cx + side * R * 0.30, ly);
+      sctx.lineTo(cx + side * R * 0.58, ly + R * 0.10);
+      sctx.stroke();
+    }
+  }
+
+  function drawPartsScope(R) {
+    const cx = R;
+    // 葉
+    sctx.fillStyle = '#4a9e3f';
+    sctx.beginPath(); sctx.ellipse(cx - R * 0.30, R * 0.42, R * 0.22, R * 0.13, -0.4, 0, TAU); sctx.fill();
+    sctx.beginPath(); sctx.ellipse(cx + R * 0.30, R * 0.42, R * 0.22, R * 0.13, 0.4, 0, TAU); sctx.fill();
+    // 茎
+    sctx.strokeStyle = '#6b8f3d'; sctx.lineWidth = R * 0.06; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx, R * 0.42); sctx.lineTo(cx, R * 1.06); sctx.stroke();
+    // 根
+    sctx.strokeStyle = '#c98a4a'; sctx.lineWidth = R * 0.035; sctx.lineCap = 'round';
+    for (let i = -1; i <= 1; i++) {
+      sctx.beginPath();
+      sctx.moveTo(cx, R * 1.06);
+      sctx.quadraticCurveTo(cx + i * R * 0.2, R * 1.22, cx + i * R * 0.32, R * 1.42);
+      sctx.stroke();
+    }
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#d9463a', '#ff8a72', '#4a9e3f', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    sagashi: '🔍 庭で生き物さがし',
+    konchu: '🐞 こん虫の体のつくり',
+    shokubutsu: '🌱 植物の体のつくり',
+    sumika: '🏠 すみかのひみつ',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🐞 ナナホシの花だん ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ナナホシの花だん';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_sagashi', 'm_konchu', 'm_shokubutsu', 'm_sumika', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー
+// m_konchuのみ実写動画（日本コロムビア公式「小学校理科DVDシリーズ 3年 こん虫のかんさつ」）、
+// 残り3つは自作アニメーション（既存のscene/scope再利用）のハイブリッド構成
+const FURIKAERI_SLIDES = [
+  { scene: 'sagashi', icon: '🔍', title: '庭で生き物さがし',
+    setup: () => { S.sagashiFound = new Set(SAGASHI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🪲', name: '石の下に' }),
+    text: () => `石の下、花のまわり、土の中、落ち葉の下。生き物によって、すんでいる 場所も すがたも ちがったね。` },
+  { scene: 'konchu', icon: '🐞', title: 'こん虫の体のつくり',
+    video: 'I7394Q68Z9g',
+    setup: () => { S.konchuFound = new Set(KONCHU_CREATURES.map(c => c.key)); },
+    scope: () => ({ type: 'legs', legs: 6, label: N_ASHI + '6本' }),
+    text: () => `こん虫の 体は 頭・むね・はらの 3つ。あしは むねから 6本。テントウムシも チョウも バッタも、同じ つくりだったね。` },
+  { scene: 'shokubutsu', icon: '🌱', title: '植物の体のつくり',
+    setup: () => { S.shokubutsuFound = new Set(SHOKUBUTSU_PLANTS.map(c => c.key)); },
+    scope: () => ({ type: 'parts', label: N_NE + '・' + N_KUKI + '・' + N_HA }),
+    text: () => `ホウセンカも ヒマワリも タンポポも、見た目は ちがっても、根・茎・葉の 3つから できていたね。` },
+  { scene: 'sumika', icon: '🏠', title: 'すみかのひみつ',
+    setup: () => { S.sumikaFound = new Set(SUMIKA_CASES.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🏠', name: 'すみかのひみつ' }),
+    text: () => `ダンゴムシは しめった 場所、チョウは 花畑。生き物は、体の つくりや くらし方に 合った 場所で くらしていたね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'sagashi', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🔍🐞🌱🏠</div>
+        <h1>ナナホシの花だん</h1>
+        <div class="sub">〜 身の回りの 生物 〜</div>
+        <p class="talk">ようこそ！ わたしは 赤い 羽に 7つの 星(黒い点)を 持つ、ナナホシテントウから 生まれた ${W.seirei}、<b>ナナホシ</b>。この 花だんで、身の回りの 生き物や 植物の ひみつを、いっしょに たしかめよう。ダンゴムシと クモと テントウムシ、こん虫は どれだと 思う？<br>
+        今日は、庭の 生き物さがしから、こん虫と 植物の 体の つくり、すみかの ひみつまで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">つぎの 3ひきの うち、「こん虫」は どれだと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🪲</span><b>ア</b> ダンゴムシ</div>
+          <div class="vcard" data-v="1"><span class="vicon">🕷️</span><b>イ</b> クモ</div>
+          <div class="vcard" data-v="2"><span class="vicon">🐞</span><b>ウ</b> テントウムシ</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：庭で生き物さがし（発見型） ---
+  m_sagashi: {
+    enter() {
+      Object.assign(S, { scene: 'sagashi', scope: { type: 'idle' }, sagashiFound: new Set() });
+      updateLoc();
+      setWish('🔍', `①〜④を タッチして、庭の いろいろな 場所で 生き物を さがそう。`);
+      say(`庭には、色も 形も 大きさも ちがう 生き物が、たくさん くらしているよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SAGASHI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.sagashiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.sagashiFound.size >= SAGASHI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.sagashiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`見つけた 4ひきの 生き物、色・形・大きさは？`);
+      setButtons(choiceRow(['みんな同じ', 'みんなちがう', '半分だけ同じ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_sagashi'); S.phase = 'done';
+        say(`せいかい！ 生き物は 色・形・大きさが、それぞれ ぜんぜん ちがう。すんでいる 場所も、生き物によって ちがうんだ。`);
+        setButtons([{ label: 'つぎへ（こん虫の体のつくり）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 4ひきを 見くらべてみよう。`);
+        setButtons(choiceRow(['みんな同じ', 'みんなちがう', '半分だけ同じ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：こん虫の体のつくり（メイン操作・分類ゲーム） ---
+  m_konchu: {
+    enter() {
+      Object.assign(S, { scene: 'konchu', scope: { type: 'idle' }, konchuFound: new Set() });
+      updateLoc();
+      setWish('🐞', `①〜⑥を タッチして あしの 数を 調べ、こん虫か どうか 見分けよう。`);
+      say(`あしの 数を 数えると、こん虫かどうか わかるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KONCHU_CREATURES.map(c => ({
+        label: c.num + ' ' + (S.konchuFound.has(c.key) ? plain(c.name) + ' ✓' : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.konchuFound.size >= KONCHU_CREATURES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); sZoom();
+      S.scope = { type: 'legs', legs: c.legs, label: N_ASHI + c.legs + '本' };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：あしは ${c.legs}本。`);
+      hideWish();
+      setButtons(choiceRow(['こん虫だと思う', 'こん虫じゃないと思う'], (i, el) => this.judgeItem(c, i, el)));
+    },
+    judgeItem(c, i, el) {
+      markPicked(el);
+      const correct = c.isInsect ? 0 : 1;
+      if (i === correct) {
+        sYes(); scopeBurst();
+        say(`せいかい！ ${c.note}`);
+        S.konchuFound.add(c.key);
+        setWish('🐞', `①〜⑥を タッチして あしの 数を 調べ、こん虫か どうか 見分けよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。あしの 数は ${c.legs}本 だったね。もういちど 考えてみよう。`);
+        setButtons(choiceRow(['こん虫だと思う', 'こん虫じゃないと思う'], (i2, el2) => this.judgeItem(c, i2, el2)));
+      }
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`こん虫の 体は 頭・むね・はらの 3つと、あしは どこから 何本 生えている？`);
+      setButtons(choiceRow(['むねから6本', '頭から8本', 'はらから14本'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_konchu'); S.phase = 'done';
+        say(`せいかい！ こん虫は 頭・むね・はらの 3つに 分かれていて、あしは むねから 6本(3対)。クモ(8本)や ダンゴムシ(14本)、ミミズ(0本)は、こん虫じゃないんだ。`);
+        setButtons([{ label: 'つぎへ（植物の体のつくり）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(['むねから6本', '頭から8本', 'はらから14本'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：植物の体のつくり（発見型） ---
+  m_shokubutsu: {
+    enter() {
+      Object.assign(S, { scene: 'shokubutsu', scope: { type: 'idle' }, shokubutsuFound: new Set() });
+      updateLoc();
+      setWish('🌱', `①〜③を タッチして、いろいろな 植物の 体の つくりを 調べよう。`);
+      say(`花の 形が ちがっても、植物の 体には 共通する つくりが あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SHOKUBUTSU_PLANTS.map(c => ({
+        label: c.num + ' ' + (S.shokubutsuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.shokubutsuFound.size >= SHOKUBUTSU_PLANTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.shokubutsuFound.add(c.key);
+      S.scope = { type: 'parts', label: N_NE + '・' + N_KUKI + '・' + N_HA };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt} この 植物にも、${W.kuki}を 中心に、根・${W.kuki}・葉の つくりが あるよ。`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`花の 形や 色が ちがっても、植物の 体に 共通する ものは？`);
+      setButtons(choiceRow(['花の色', '根・茎・葉のつくり', '実の大きさ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_shokubutsu'); S.phase = 'done';
+        say(`せいかい！ 見た目が どんなに ちがっても、植物の 体は 根・${W.kuki}・葉の 3つから できている。これは どの 植物にも 共通する つくりなんだ。`);
+        setButtons([{ label: 'つぎへ（すみかのひみつ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(['花の色', '根・茎・葉のつくり', '実の大きさ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：すみかのひみつ（応用推理） ---
+  m_sumika: {
+    enter() {
+      Object.assign(S, { scene: 'sumika', scope: { type: 'idle' }, sumikaFound: new Set() });
+      updateLoc();
+      setWish('🏠', `①②を タッチして、生き物の じっけんを 見て、すみかの ひみつを 考えよう。`);
+      say(`生き物が すんでいる 場所には、ちゃんと わけが あるんだ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SUMIKA_CASES.map(c => ({
+        label: c.num + ' ' + (S.sumikaFound.has(c.key) ? plain(c.name) + ' ✓' : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.sumikaFound.size >= SUMIKA_CASES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap();
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(c.txt);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.itemAsk(c) }]);
+    },
+    itemAsk(c) {
+      hideWish(); setButtons([]);
+      say(c.ask.q);
+      setButtons(choiceRow(c.ask.opts, (i, el) => this.judgeItem(c, i, el)));
+    },
+    judgeItem(c, i, el) {
+      markPicked(el);
+      if (i === c.ask.correct) {
+        sYes(); scopeBurst();
+        say(c.ask.explain);
+        S.sumikaFound.add(c.key);
+        setWish('🏠', `①②を タッチして、生き物の じっけんを 見て、すみかの ひみつを 考えよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(c.ask.opts, (i2, el2) => this.judgeItem(c, i2, el2)));
+      }
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`生き物が ある 場所に すんでいる、いちばんの わけは？`);
+      setButtons(choiceRow(['その場所がなんとなく好きだから', '体のつくりやくらし方に合った場所だから', '決まりでそうなっているから'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_sumika'); S.phase = 'done';
+        say(`せいかい！ 生き物は、体の つくりや くらし方に 合った 場所を すみかに えらんで くらしている。すがたと 場所には、ちゃんと つながりが あるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(['その場所がなんとなく好きだから', '体のつくりやくらし方に合った場所だから', '決まりでそうなっているから'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：生き延びる工夫といのちを大切に ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 生き延びる 工夫と、いのちの 大切さを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`生き物を 観察した あとは、どうするのが いいかな？`);
+      setButtons(choiceRow(['つかまえたまま持って帰る', 'もといた場所にかえす', 'そのまますてる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.kansatsu}が おわったら、もといた 場所に そっと かえしてあげよう。それが 生き物の 命を 大切に する 気持ちだよ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['つかまえたまま持って帰る', 'もといた場所にかえす', 'そのまますてる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      hideOverlay();
+      if (slide.video) {
+        this.showVideo(slide, n, total, isLast);
+      } else {
+        this.showPlain(slide, n, total, isLast);
+      }
+    },
+    showPlain(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+    showVideo(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      hideWish();
+      setButtons([
+        { label: '▶ どうがを 見る', cb: () => this.playVideo(slide) },
+        { label: isLast ? 'まとめへ すすむ' : 'つぎへ', cls: 'sub', cb: goNext },
+      ]);
+    },
+    playVideo(slide) {
+      sTap();
+      showOverlay(`
+        <h2>${slide.icon} ${slide.title}</h2>
+        <div style="max-width:380px;margin:0 auto">
+          <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000">
+            <iframe width="100%" height="100%" style="position:absolute;inset:0;border:0"
+              src="https://www.youtube-nocookie.com/embed/${slide.video}?rel=0&modestbranding=1&iv_load_policy=3&autoplay=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+        <p class="foot">動画：日本コロムビア公式YouTube「小学校理科DVDシリーズ 3年 こん虫のかんさつ」<br>https://www.youtube.com/watch?v=${slide.video}　（先生へ：外部サイトのため、事前に内容をご確認ください）</p>
+        <button class="btn" id="videoCloseBtn">とじる</button>
+      `);
+      $('videoCloseBtn').onclick = () => { sTap(); hideOverlay(); };
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ ナナホシの花だん みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 生き物は 色・形・大きさが（<span class="blankWord" data-a="みんなちがう">？？？</span>）。<br>
+        ② こん虫の 体は 頭・むね・はらの 3つと、あし（<span class="blankWord" data-a="6本">？？？</span>）から できている。<br>
+        ③ 植物の 体は、見た目が ちがっても（<span class="blankWord" data-a="根・茎・葉">？？？</span>）の つくりが 共通。<br>
+        ④ 生き物は、体の つくりや くらし方に あった（<span class="blankWord" data-a="すみか">？？？</span>）で くらしている。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ テントウムシ</b>でした！（あしが6本なのはテントウムシだけ）${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①庭や 公園で 石を そっと めくって、下に どんな 生き物が いるか 見つけてみよう（見たら もとの 場所に もどしてね）。②お家や 近くに ある 植物の 根・茎・葉を さがして、指で さしてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#d9463a'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「こん虫のあしは何本？」「植物の体は何からできている？」「ダンゴムシが石の下にいるのはなぜ？」`);
+      setButtons([
+        { label: '🔍 生き物さがしの図', cls: 'sub', cb: () => this.show('sagashi') },
+        { label: '🐞 こん虫の分類の図', cls: 'sub', cb: () => this.show('konchu') },
+        { label: '🌱 植物のつくりの図', cls: 'sub', cb: () => this.show('shokubutsu') },
+        { label: '🏠 すみかのひみつの図', cls: 'sub', cb: () => this.show('sumika') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_konchu などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ナナホシの花だん きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #d9463a; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #ff8a72; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #fdeee0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #fdeee0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="nanahoshi.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🐞 ナナホシの花だん きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      つぎの3ひきのうち、「こん虫」はどれだと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> ダンゴムシ</div>
+        <div class="voteOpt"><span class="vnum">イ</span> クモ</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> テントウムシ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．庭で生き物さがし</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①石の下</th><th>②花のまわり</th><th>③土の中</th><th>④落ち葉の下</th></tr>
+        <tr><td>☐ダンゴムシ</td><td>☐チョウ</td><td>☐ミミズ</td><td>☐バッタ</td></tr>
+      </table>
+      見つけた4ひきの生き物、色・形・大きさは（みんな同じ ／ みんなちがう ／ 半分だけ同じ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．こん虫の体のつくり</span>
+    <div class="secBody">
+      あしの数を調べて、こん虫かどうかを記録しよう。
+      <table class="levelTable">
+        <tr><th></th><th>①テントウムシ</th><th>②チョウ</th><th>③バッタ</th><th>④クモ</th><th>⑤ダンゴムシ</th><th>⑥ミミズ</th></tr>
+        <tr><th>あしの数</th><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+        <tr><th>こん虫？</th><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      こん虫の体は頭・むね・はらの3つと、あしは（むねから6本 ／ 頭から8本 ／ はらから14本）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．植物の体のつくり</span>
+    <div class="secBody">
+      ①〜③を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①ホウセンカ</th><th>②ヒマワリ</th><th>③タンポポ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      花の形や色がちがっても、植物の体に共通するのは（花の色 ／ 根・茎・葉のつくり ／ 実の大きさ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．すみかのひみつ</span>
+    <div class="secBody">
+      ①ダンゴムシは、明るくかわいた場所だと（とどまる ／ すぐ逃げる）。わけは、体が（かわくと弱ってしまうから ／ あたたかいのがきらいだから）。<br>
+      ②モンシロチョウは、花畑と空き地では（花畑 ／ 空き地）にとどまる。わけは、花の（みつを食べ物にしているから ／ 色が好きだから）。<br>
+      生き物がある場所にすんでいるいちばんのわけは、（なんとなく好きだから ／ 体のつくりやくらし方に合った場所だから ／ 決まりだから）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（生き延びる工夫といのちを大切に）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 保護色</th><th>い ぎたい</th><th>う 丸くなる</th><th>え いのちを大切に</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      生き物を観察したあとは、（つかまえたまま持って帰る ／ もといた場所にかえす ／ そのまますてる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 生き物は 色・形・大きさが（<span class="fillLine"></span>）。<br>
+      ② こん虫の 体は 頭・むね・はらの 3つと、あし（<span class="fillLine sm"></span>）から できている。<br>
+      ③ 植物の 体は、見た目が ちがっても（<span class="fillLine"></span>）の つくりが 共通。<br>
+      ④ 生き物は、体の つくりや くらし方に あった（<span class="fillLine sm"></span>）で くらしている。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🐞</span>
+        <div>
+          ①庭や公園で石をそっとめくって、下にどんな生き物がいるか見つけてみよう（見たらもとの場所にもどしてね）。<br>
+          ②お家や近くにある植物の根・茎・葉をさがして、指でさしてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ナナホシの花だん 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ナナホシの花だん — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小3理科「身の回りの生物」・学力幅あり・協力型／ 使うもの：「nanahoshi.html」・プロジェクタ・このノート（1ページ目を人数分）。理科・生命分野の7作目です（めばえラボ・アオバの葉かげ・シズクの淵・ミャクの森・メグルの庭・ツナグの池に続く）。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要。ふりかえりタイムの動画のみ要ネット接続）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_konchu</b> などで途中再開（m_sagashi／m_konchu／m_shokubutsu／m_sumika／hakase／ending）</li>
+      <li>☐ 可能であれば、事前に校庭や中庭で「石の下・落ち葉の下」を実際にめくって生き物を見た経験があるかを聞いておくと、導入がスムーズです</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🔍 庭で生き物さがし</td><td>①〜④を発見し、石の下・花のまわり・土の中・落ち葉の下の生き物を確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜20分</td><td>🐞 こん虫の体のつくり（<b>今日の見せ場</b>）</td><td>①〜⑥のあしの数を調べて「こん虫」「こん虫じゃない」を見分ける。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">20〜27分</td><td>🌱 植物の体のつくり</td><td>①〜③のホウセンカ・ヒマワリ・タンポポで根・茎・葉の共通点を確認。シート４に記録</td></tr>
+      <tr><td class="min">27〜35分</td><td>🏠 すみかのひみつ</td><td>ダンゴムシ・モンシロチョウの実験結果から、すみかと体のつながりを推理。シート５に記録</td></tr>
+      <tr><td class="min">35〜43分</td><td>🔎 はかせチャレンジ</td><td>保護色・ぎたい・いのちを大切にする心を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「石をめくって生き物さがし」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「すみかのひみつ」を右下「つぎ▶」でスキップ可（<b>こん虫の体のつくり／植物の体のつくり／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ テントウムシ</b>（あしが6本なのはテントウムシだけ）／生き物さがし＝<b>みんなちがう</b>／こん虫＝<b>むねから6本</b>／植物＝<b>根・茎・葉のつくり</b>／すみか＝<b>体のつくりやくらし方に合った場所だから</b>／はかせ＝<b>もといた場所にかえす</b>／
+      まとめ＝①<b>みんなちがう</b>　②<b>6本</b>　③<b>根・茎・葉</b>　④<b>すみか</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：生物は色・形・大きさなどの姿に違いがあり、周辺の環境と関わって生きている／昆虫の体は頭・胸・腹からなり、胸に6本のあしがある／植物の体は根・茎・葉からなる（小学校学習指導要領・理科・第3学年「身の回りの生物」）</li>
+      <li>こん虫（頭・むね・はらの3部構成、あしはむねから6本＝3対）に対し、クモはあし8本で体が頭胸部とお腹の2部構成、ダンゴムシはあし14本でエビ・カニに近いなかま（甲殻類）、ミミズはあしが1本もない。いずれもこん虫ではない</li>
+      <li>ダンゴムシが石の下など暗くしめった場所を好むのは、体から水分が失われやすく乾燥に弱いため。明るくかわいた場所に置くとすぐに物陰を探して移動する</li>
+      <li>植物は見た目がどんなに違っても、体は根・茎・葉の3つから共通してできている。タンポポのように茎が短く見える植物でも、この3つの構造は変わらない</li>
+      <li>保護色（バッタの体色が草の色に似ていること）・擬態（ナナフシが枝そっくりの姿をしていること）は、いずれも敵から身を守るための生き物の工夫</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「こん虫の体のつくり」が今日いちばんの見せ場。あしの数を1匹ずつ数えさせ、「6本ならこん虫、それ以外はこん虫じゃない」というシンプルな基準に気づかせる</li>
+      <li>「すみかのひみつ」は正解を急がせず、「明るい場所でダンゴムシがどうなったか」を子どもたち自身に思い出させてから理由を考えさせる</li>
+      <li>身近な生き物（ダンゴムシ・アリ・クモなど）の名前を挙げてもらい、「それはこん虫かな？」とその場で問いかけると盛り上がります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「こん虫のあしは何本？」「植物の体は何からできている？」「ダンゴムシが石の下にいるのはなぜ？」</li>
+      <li>おうちミッションでは、石をめくって生き物を探す活動と、身近な植物の根・茎・葉を指でさす活動で、画面の学びと日常の観察を結びつける狙い（生き物を観察したら、もといた場所にそっとかえす約束も伝えるとよい）</li>
+      <li>理科・生命分野は本作でめばえラボ（発芽）・アオバの葉かげ（チョウの育ち方）・シズクの淵（メダカと人）・ミャクの森（水の通り道）・メグルの庭（季節と生物）・ツナグの池（生物と環境）に続く7作目です</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
