@@ -1763,4 +1763,44 @@ const MASCOTS = {
             <circle cx="42" cy="80" r="5" fill="#ffe0b8" opacity=".6"/>
             <circle cx="78" cy="80" r="5" fill="#ffe0b8" opacity=".6"/>
           </svg>`,
+  kyoku: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#e8867a" stroke-width="4" stroke-linecap="round" opacity=".8">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+            </g>
+            <g stroke="#7ab0e0" stroke-width="4" stroke-linecap="round" opacity=".8">
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <defs>
+              <clipPath id="kyokuLeftHalf"><rect x="16" y="22" width="44" height="88"/></clipPath>
+              <clipPath id="kyokuRightHalf"><rect x="60" y="22" width="44" height="88"/></clipPath>
+              <radialGradient id="kyokuGradN" cx="30%" cy="35%">
+                <stop offset="0%" stop-color="#ffe0da"/>
+                <stop offset="55%" stop-color="#e8867a"/>
+                <stop offset="100%" stop-color="#c14a3a"/>
+              </radialGradient>
+              <radialGradient id="kyokuGradS" cx="70%" cy="35%">
+                <stop offset="0%" stop-color="#dcecfa"/>
+                <stop offset="55%" stop-color="#7ab0e0"/>
+                <stop offset="100%" stop-color="#2e6da8"/>
+              </radialGradient>
+            </defs>
+            <circle cx="60" cy="66" r="42" fill="url(#kyokuGradN)" clip-path="url(#kyokuLeftHalf)"/>
+            <circle cx="60" cy="66" r="42" fill="url(#kyokuGradS)" clip-path="url(#kyokuRightHalf)"/>
+            <circle cx="60" cy="66" r="42" fill="none" stroke="#163a5c" stroke-width="2.5"/>
+            <text x="34" y="52" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">N</text>
+            <text x="86" y="52" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">S</text>
+            <g class="eyes">
+              <circle cx="48" cy="70" r="6" fill="#fff"/>
+              <circle cx="72" cy="70" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="70.8" r="3.2" fill="#163a5c"/>
+              <circle cx="72.7" cy="70.8" r="3.2" fill="#163a5c"/>
+            </g>
+            <path d="M48 86 Q60 94 72 86" fill="none" stroke="#163a5c" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="80" r="5" fill="#ffb8a8" opacity=".55"/>
+            <circle cx="78" cy="80" r="5" fill="#a8d0f0" opacity=".55"/>
+          </svg>`,
 };

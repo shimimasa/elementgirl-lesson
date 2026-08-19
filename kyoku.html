@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>キョクの洞窟 — 磁石のひみつ たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4fb 0%, #dce8f5 45%, #b8d0e8 100%);
+    color: #1f3550;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #2e6da8; text-shadow: 0 0 14px rgba(46, 109, 168, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4a7098; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #e6f0fa; border: 2px solid #b8d0e8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #90b0d0;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #cfe0f5, #2e6da8);
+    border-color: #163a5c; color: #163a5c;
+    box-shadow: 0 0 16px rgba(46, 109, 168, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #ece4f4 60%, #c4b4dc 100%);
+    border: 3px solid #6b4a8a;
+    box-shadow: inset 0 0 40px rgba(60, 30, 90, .14), 0 4px 18px rgba(60, 30, 90, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #5a4a7a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #2e6da8; color: #eef4fb; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(22, 58, 92, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(150, 130, 190, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #b8d0e8; cursor: pointer;
+    background: linear-gradient(180deg, #6ba3d6, #2e6da8); color: #fff;
+    box-shadow: 0 3px 0 #163a5c; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #2e6da8; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(22, 58, 92, .28), inset 0 0 24px rgba(46, 109, 168, .14);
+    flex-shrink: 0; background: #eef4fb;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #4a7098;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #2e6da8; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #b8d0e8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #4a7098; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #1f3550;
+    border: 1.5px solid #b8d0e8;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #2e6da8; background: #e6f0fa; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #e6f0fa); color: #1f3550;
+    border: 2px solid #2e6da8; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #2e6da8; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #6ba3d6, #2e6da8); color: #eef4fb;
+    box-shadow: 0 3px 0 #163a5c, 0 5px 12px rgba(22, 58, 92, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #163a5c; }
+  .btn.sub {
+    background: #e6f0fa; color: #4a7098; box-shadow: 0 3px 0 #b8d0e8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #1f3550; box-shadow: 0 3px 0 #b8d0e8; font-weight: 400; border: 1.5px solid #b8d0e8; }
+  .btn.choice.picked { background: #e6f0fa; outline: 3px solid #2e6da8; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(15, 30, 50, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #e6f0fa);
+    border: 3px solid #2e6da8; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(15, 30, 50, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #2e6da8; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #2e6da8; }
+  .panel .sub { color: #4a7098; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #1f3550; border: 1.5px solid #b8d0e8; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #4a7098; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #1f3550; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #b8d0e8; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #2e6da8; background: #eef4fb; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #2e6da8; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #2e6da8;
+    color: #2e6da8; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #4a7098;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #e6f0fa; color: #4a7098;
+    border: 1px solid #b8d0e8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #d0e0f0; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🧲 キョクの洞窟<small>— 磁石のひみつ —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_hikitsuke" title="つくもの・つかないものを見分けよう">★</div>
+    <div class="badge" id="bd_m_jika" title="磁石になる鉄を発見しよう">★</div>
+    <div class="badge" id="bd_m_kyoku" title="きょくの引き合いを調べよう">★</div>
+    <div class="badge" id="bd_m_tsuyosa" title="磁石の強さを調べよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">キョクの洞窟</div>
+    <div id="locChip">キョクの洞窟</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🧲 キョクの磁力ビューア 〜見えない力を見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#e8867a" stroke-width="4" stroke-linecap="round" opacity=".8">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+            </g>
+            <g stroke="#7ab0e0" stroke-width="4" stroke-linecap="round" opacity=".8">
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <defs>
+              <clipPath id="kyokuLeftHalf"><rect x="16" y="22" width="44" height="88"/></clipPath>
+              <clipPath id="kyokuRightHalf"><rect x="60" y="22" width="44" height="88"/></clipPath>
+              <radialGradient id="kyokuGradN" cx="30%" cy="35%">
+                <stop offset="0%" stop-color="#ffe0da"/>
+                <stop offset="55%" stop-color="#e8867a"/>
+                <stop offset="100%" stop-color="#c14a3a"/>
+              </radialGradient>
+              <radialGradient id="kyokuGradS" cx="70%" cy="35%">
+                <stop offset="0%" stop-color="#dcecfa"/>
+                <stop offset="55%" stop-color="#7ab0e0"/>
+                <stop offset="100%" stop-color="#2e6da8"/>
+              </radialGradient>
+            </defs>
+            <circle cx="60" cy="66" r="42" fill="url(#kyokuGradN)" clip-path="url(#kyokuLeftHalf)"/>
+            <circle cx="60" cy="66" r="42" fill="url(#kyokuGradS)" clip-path="url(#kyokuRightHalf)"/>
+            <circle cx="60" cy="66" r="42" fill="none" stroke="#163a5c" stroke-width="2.5"/>
+            <text x="34" y="52" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">N</text>
+            <text x="86" y="52" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">S</text>
+            <g class="eyes">
+              <circle cx="48" cy="70" r="6" fill="#fff"/>
+              <circle cx="72" cy="70" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="70.8" r="3.2" fill="#163a5c"/>
+              <circle cx="72.7" cy="70.8" r="3.2" fill="#163a5c"/>
+            </g>
+            <path d="M48 86 Q60 94 72 86" fill="none" stroke="#163a5c" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="80" r="5" fill="#ffb8a8" opacity=".55"/>
+            <circle cx="78" cy="80" r="5" fill="#a8d0f0" opacity=".55"/>
+          </svg>
+          <div class="catname">N<ruby>極<rt>きょく</rt></ruby>・S<ruby>極<rt>きょく</rt></ruby>から生まれた<ruby>精霊<rt>せいれい</rt></ruby> キョク</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🧲 キョクの洞窟ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   キョクの洞窟 — 磁石の性質（小3理科・力学に近い物理分野・優先度Cから選定・協力型・1ファイル）
+   つくもの・つかないものを見分けよう（分類ゲーム）→磁石になる鉄を発見しよう（発見型）→
+   きょくの引き合いを調べよう（発見型・N極S極4パターン）→
+   磁石の強さを調べよう（メイン操作・数値階段①〜⑧、位置ごとのクリップ数）→
+   はかせ（磁石と電磁石のちがい＝「ウズの実験室」との接続、方位磁針、くらしの中の磁石、安全）。
+   数値・事実：小学校学習指導要領・理科・第3学年「磁石の性質」
+   （ア 磁石に引きつけられる物と引きつけられない物があり、磁石に近付けると磁石になる物がある／
+    イ 磁石の異極は引き合い、同極は退け合う）。
+   磁石につくのは鉄・ニッケル・コバルトとその合金のみ。金・銀・銅・アルミニウムはつかない
+   （WebSearchで裏取り済み）。棒磁石は両端(極)が最も強く、真ん中が最も弱いという実験結果は
+   複数の理科教材でWebSearch裏取り済みだが、位置ごとの正確なクリップ本数は磁石の強さで
+   変わり単一の標準データが存在しないため、両端で強く中央で弱いという実測傾向に忠実な
+   対称的なモデル値（①〜⑧）を用いて数値を捏造しない方針を取る。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  jishaku: ruby('磁石', 'じしゃく'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでcanvasのfillTextや
+// scope.label/nameに渡すとタグが消えるだけで<rt>内の読みは残り連結表示されてしまう。
+// canvas文脈は必ずこの安全なひらがな定数を使う）
+const N_JISHAKU = 'じしゃく';
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_hikitsuke：つくもの・つかないものを見分けよう（分類ゲーム）
+// 磁石につくのは鉄・ニッケル・コバルトとその合金のみ。金・銀・銅・アルミニウムはつかない。
+const HIKITSUKE_ITEMS = [
+  { key: 0, num: '①', icon: '🔩', name: '鉄くぎ', attract: true, note: `鉄で できているから、${W.jishaku}に つく。` },
+  { key: 1, num: '②', icon: '🥫', name: 'スチールかん', attract: true, note: `スチール(鉄)で できているから、${W.jishaku}に つく。` },
+  { key: 2, num: '③', icon: '📎', name: 'クリップ', attract: true, note: `鉄で できているから、${W.jishaku}に つく。` },
+  { key: 3, num: '④', icon: '🪙', name: '10円玉', attract: false, note: `銅(どう)で できているから、${W.jishaku}には つかない。` },
+  { key: 4, num: '⑤', icon: '🧃', name: 'アルミかん', attract: false, note: `アルミニウムで できているから、${W.jishaku}には つかない。` },
+  { key: 5, num: '⑥', icon: '✏️', name: 'えんぴつ', attract: false, note: `木で できているから、${W.jishaku}には つかない。` },
+];
+
+// m_jika：磁石になる鉄を発見しよう（発見型）
+const JIKA_CARDS = [
+  { key: 0, num: '①', icon: '📎', name: 'クリップをつなげる', txt: `${W.jishaku}に クリップを 1こ つけると、その クリップにも、べつの クリップが くっつく。クリップどうしが くさりのように つながっていくよ。` },
+  { key: 1, num: '②', icon: '🔗', name: '磁石をはなす', txt: `${W.jishaku}を クリップから 遠ざけると、くさりのように なっていた クリップは、バラバラに なって 落ちてしまう。` },
+];
+
+// m_kyoku：きょくの引き合いを調べよう（発見型、N極とS極の4パターン）
+const KYOKU_CASES = [
+  { key: 0, num: '①', icon: '🧲', left: 'N', right: 'N', result: 'repel', name: 'N極とN極', txt: `同じ 極(N極どうし)を 近づけると、しりぞけ合って、くっつかない。` },
+  { key: 1, num: '②', icon: '🧲', left: 'N', right: 'S', result: 'attract', name: 'N極とS極', txt: `ちがう 極(N極とS極)を 近づけると、引き合って、くっつく。` },
+  { key: 2, num: '③', icon: '🧲', left: 'S', right: 'N', result: 'attract', name: 'S極とN極', txt: `ちがう 極(S極とN極)を 近づけると、引き合って、くっつく。` },
+  { key: 3, num: '④', icon: '🧲', left: 'S', right: 'S', result: 'repel', name: 'S極とS極', txt: `同じ 極(S極どうし)を 近づけると、しりぞけ合って、くっつかない。` },
+];
+
+// m_tsuyosa：磁石の強さを調べよう（メイン操作・数値階段①〜⑧、位置ごとのクリップ数）
+// 両端(極)が最も強く真ん中が最も弱いという実測の傾向は本物、位置ごとの正確なクリップ本数は
+// 磁石の強さで変わり標準データが存在しないため、対称的なモデル値を採用（数値の捏造ではなく
+// 傾向を忠実に再現したモデル値であることを明記）。
+const POS_LABEL = ['①はし(N極)', '②', '③', '④まんなか', '⑤まんなか', '⑥', '⑦', '⑧はし(S極)'];
+const CLIP_COUNTS = [5, 4, 2, 1, 1, 2, 4, 5];
+
+// はかせ：磁石と電磁石のちがい・くらしの中の磁石・安全（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '🔌', name: '磁石と電磁石のちがい', txt: `${W.jishaku}は、いつも 磁力が ある。電磁石(「ウズの実験室」で 学んだね)は、電流を 流している 時だけ 磁力が あるよ。` },
+  { key: 1, letter: 'い', icon: '🧭', name: '方位磁針', txt: `${W.jishaku}を 自由に 動くように すると、N極が 北を 指す。方位磁針は、この せいしつを 使って 方角を 調べる 道具だよ。` },
+  { key: 2, letter: 'う', icon: '🚪', name: 'くらしの中の磁石', txt: `冷蔵庫の とびら、ホワイトボードの マグネット、財布の 留め具など、身のまわりには ${W.jishaku}が たくさん 使われているよ。` },
+  { key: 3, letter: 'え', icon: '⚠️', name: '安全な使い方', txt: `スマホや ICカード、時計などの せいみつな 機器に 強い ${W.jishaku}を 近づけると、こわれてしまう ことが ある。使う 時は 気をつけよう。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'hikitsuke',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  hikitsukeFound: new Set(),
+  jikaFound: new Set(),
+  kyokuFound: new Set(),
+  tsuyosaIdx: -1,
+  tsuyosaIdxDisplay: -1,
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f4f0fa'); g.addColorStop(1, '#d4c4ec');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#2e6da8' : '#b8d0e8';
+    gctx.fill(); gctx.strokeStyle = '#2e6da8'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#1f3550'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#1f3550'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．つくもの・つかないものを見分けよう（分類ゲーム） ----------
+function drawHikitsukeScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HIKITSUKE_ITEMS, S.hikitsukeFound, 3, '①〜⑥をタッチして、磁石につくかどうかを見分けよう');
+}
+
+// ---------- 2．磁石になる鉄を発見しよう（発見型） ----------
+function drawJikaScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, JIKA_CARDS, S.jikaFound, 2, '①②をタッチして、磁石になる鉄を発見しよう');
+}
+
+// ---------- 3．きょくの引き合いを調べよう（発見型） ----------
+function drawKyokuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KYOKU_CASES, S.kyokuFound, 4, '①〜④をタッチして、N極とS極の組み合わせを調べよう');
+}
+
+// ---------- 4．磁石の強さを調べよう（メイン操作・数値階段①〜⑧） ----------
+function drawTsuyosaScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const barL = 200, barR = 800, barY = 340;
+  const grad = gctx.createLinearGradient(X(barL), 0, X(barR), 0);
+  grad.addColorStop(0, '#c14a3a'); grad.addColorStop(1, '#2e6da8');
+  gctx.fillStyle = grad;
+  gctx.beginPath();
+  gctx.roundRect(X(barL), Y(barY - 34), (barR - barL) * sc, 68 * sc, 16 * sc);
+  gctx.fill();
+  gctx.strokeStyle = '#1f3550'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+  gctx.fillStyle = '#fff'; gctx.font = `700 ${16 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('N', X(barL + 30), Y(barY));
+  gctx.fillText('S', X(barR - 30), Y(barY));
+
+  const idxNow = clamp(Math.round(S.tsuyosaIdxDisplay), 0, 7);
+  const v = clamp(S.tsuyosaIdxDisplay, 0, 7);
+  const px = S.tsuyosaIdx >= 0 ? lerp(barL, barR, v / 7) : barL - 40;
+  if (S.tsuyosaIdx >= 0) {
+    gctx.strokeStyle = '#1f3550'; gctx.lineWidth = 3 * sc;
+    gctx.beginPath(); gctx.moveTo(X(px), Y(barY - 60)); gctx.lineTo(X(px), Y(barY + 60)); gctx.stroke();
+    gctx.font = `${30 * sc}px sans-serif`;
+    gctx.fillText('🔍', X(px), Y(barY - 90));
+    const cnt = Math.round(lerpArr(CLIP_COUNTS, v));
+    for (let i = 0; i < cnt; i++) {
+      gctx.font = `${20 * sc}px sans-serif`;
+      gctx.fillText('📎', X(px - 60 + (i % 5) * 26), Y(barY + 110 + Math.floor(i / 5) * 26));
+    }
+  }
+  gctx.fillStyle = '#1f3550'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const title = S.tsuyosaIdx >= 0 ? `${NUMS[idxNow]}　${POS_LABEL[idxNow]}　クリップ ${Math.round(lerpArr(CLIP_COUNTS, v))}こ` : '磁石の いろいろな 位置で 強さを 調べよう';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 5．はかせ：磁石と電磁石のちがい・くらし・安全 ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、磁石のひみつとくらしの中の利用を見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'hikitsuke') drawHikitsukeScene(X, Y, sc);
+  else if (S.scene === 'jika') drawJikaScene(X, Y, sc);
+  else if (S.scene === 'kyoku') drawKyokuScene(X, Y, sc);
+  else if (S.scene === 'tsuyosa') drawTsuyosaScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- キョクの磁力ビューア（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#eef4fb'); grd.addColorStop(1, '#c4d8ee');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#2e6da8';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'poles') {
+    drawPolesScope(R, S.scope.left, S.scope.right, S.scope.result);
+    label(S.scope.label || '');
+  } else if (mode === 'gauge') {
+    drawGaugeScope(R, S.scope.count);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#6ba3d688'); g2.addColorStop(1, 'rgba(107,163,214,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#2e6da8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🧲', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#2e6da8'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#1f3550';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawMagnetBar(cx, cy, nearPole) {
+    const w2 = R * 0.16, h2 = R * 0.52;
+    const nCol = '#c14a3a', sCol = '#2e6da8';
+    const topIsN = nearPole === 'N' ? false : true;
+    sctx.fillStyle = topIsN ? nCol : sCol;
+    sctx.fillRect(cx - w2 / 2, cy - h2 / 2, w2, h2 / 2);
+    sctx.fillStyle = topIsN ? sCol : nCol;
+    sctx.fillRect(cx - w2 / 2, cy, w2, h2 / 2);
+    sctx.strokeStyle = '#163a5c'; sctx.lineWidth = R * 0.014;
+    sctx.strokeRect(cx - w2 / 2, cy - h2 / 2, w2, h2);
+    sctx.fillStyle = '#fff'; sctx.font = `700 ${R * 0.08}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(topIsN ? 'N' : 'S', cx, cy - h2 / 4);
+    sctx.fillText(topIsN ? 'S' : 'N', cx, cy + h2 / 4);
+  }
+  function drawPolesScope(R, left, right, result) {
+    const cy = R;
+    drawMagnetBar(R * 0.6, cy, left);
+    drawMagnetBar(R * 1.4, cy, right);
+    sctx.strokeStyle = '#1f3550'; sctx.lineWidth = R * 0.03; sctx.lineCap = 'round';
+    const midL = R * 0.6 + R * 0.14, midR = R * 1.4 - R * 0.14;
+    if (result === 'attract') {
+      sctx.beginPath(); sctx.moveTo(midL, cy - R * 0.12); sctx.lineTo(midL + R * 0.14, cy - R * 0.12); sctx.stroke();
+      sctx.beginPath(); sctx.moveTo(midL + R * 0.14, cy - R * 0.12); sctx.lineTo(midL + R * 0.07, cy - R * 0.2); sctx.moveTo(midL + R * 0.14, cy - R * 0.12); sctx.lineTo(midL + R * 0.07, cy - R * 0.04); sctx.stroke();
+      sctx.beginPath(); sctx.moveTo(midR, cy - R * 0.12); sctx.lineTo(midR - R * 0.14, cy - R * 0.12); sctx.stroke();
+      sctx.beginPath(); sctx.moveTo(midR - R * 0.14, cy - R * 0.12); sctx.lineTo(midR - R * 0.07, cy - R * 0.2); sctx.moveTo(midR - R * 0.14, cy - R * 0.12); sctx.lineTo(midR - R * 0.07, cy - R * 0.04); sctx.stroke();
+    } else {
+      sctx.beginPath(); sctx.moveTo(R, cy - R * 0.2); sctx.lineTo(R, cy + R * 0.2); sctx.stroke();
+      sctx.beginPath(); sctx.moveTo(R - R * 0.06, cy - R * 0.14); sctx.lineTo(R + R * 0.06, cy + R * 0.14);
+      sctx.moveTo(R + R * 0.06, cy - R * 0.14); sctx.lineTo(R - R * 0.06, cy + R * 0.14); sctx.stroke();
+    }
+  }
+  function drawGaugeScope(R, count) {
+    const n = count != null ? count : 0;
+    const cx = R, baseY = R * 1.55, unit = R * 0.24;
+    sctx.strokeStyle = '#2e6da8'; sctx.lineWidth = R * 0.05; sctx.lineCap = 'round';
+    sctx.beginPath(); sctx.moveTo(cx - R * 0.55, baseY); sctx.lineTo(cx + R * 0.55, baseY); sctx.stroke();
+    for (let i = 0; i < n; i++) {
+      const px = cx - R * 0.5 + (i % 5) * unit;
+      const py = baseY - unit * (0.5 + Math.floor(i / 5));
+      sctx.font = `${R * 0.22}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+      sctx.fillText('📎', px, py);
+    }
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#2e6da8', '#6ba3d6', '#c14a3a', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    hikitsuke: '🧲 つくもの・つかないもの',
+    jika: '📎 磁石になる鉄',
+    kyoku: '🔄 きょくの引き合い',
+    tsuyosa: '💪 磁石の強さ',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🧲 キョクの洞窟 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'キョクの洞窟';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_hikitsuke', 'm_jika', 'm_kyoku', 'm_tsuyosa', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'hikitsuke', icon: '🧲', title: 'つくもの・つかないもの',
+    setup: () => { S.hikitsukeFound = new Set(HIKITSUKE_ITEMS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🔩', name: '鉄はつく' }),
+    text: () => `磁石に つくのは、鉄などの 一部の 金属だけ。アルミや 銅は、金属でも つかなかったね。` },
+  { scene: 'jika', icon: '📎', title: '磁石になる鉄',
+    setup: () => { S.jikaFound = new Set(JIKA_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🔗', name: 'いちじ的な磁石' }),
+    text: () => `磁石を 近づけると、鉄で できた クリップも、いちじ的に 磁石に なったね。` },
+  { scene: 'kyoku', icon: '🔄', title: 'きょくの引き合い',
+    setup: () => { S.kyokuFound = new Set(KYOKU_CASES.map(c => c.key)); },
+    scope: () => ({ type: 'poles', left: 'N', right: 'S', result: 'attract', label: 'ちがう極は引き合う' }),
+    text: () => `同じ 極どうしは しりぞけ合い、ちがう 極どうしは 引き合ったね。` },
+  { scene: 'tsuyosa', icon: '💪', title: '磁石の強さ',
+    setup: () => { Object.assign(S, { tsuyosaIdx: 7, tsuyosaIdxDisplay: 7 }); },
+    scope: () => ({ type: 'gauge', count: CLIP_COUNTS[7], label: '両はしがいちばん強い' }),
+    text: () => `磁石の 力が いちばん 強いのは、両はしの 極。真ん中は いちばん 弱かったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'hikitsuke', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🧲📎🔄💪</div>
+        <h1>キョクの洞窟</h1>
+        <div class="sub">〜 磁石の ひみつ 〜</div>
+        <p class="talk">ようこそ！ わたしは N極と S極の「きょく」から 生まれた ${W.seirei}、<b>キョク</b>。この 洞窟で、${W.jishaku}の ひみつを、いっしょに たしかめよう。10円玉と スチールかん、どちらも 金属だけど、両方とも ${W.jishaku}に つくと 思う？<br>
+        今日は、つくもの・つかないものから、きょくの 引き合い、${W.jishaku}の 強さまで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">10円玉と、スチールかん。どちらも 金属だけど、両方とも ${W.jishaku}に つくと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">✅</span><b>ア</b> 両方つく</div>
+          <div class="vcard" data-v="1"><span class="vicon">🚫</span><b>イ</b> 両方つかない</div>
+          <div class="vcard" data-v="2"><span class="vicon">🤔</span><b>ウ</b> 片方だけつく</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：つくもの・つかないものを見分けよう（分類ゲーム） ---
+  m_hikitsuke: {
+    enter() {
+      Object.assign(S, { scene: 'hikitsuke', scope: { type: 'idle' }, hikitsukeFound: new Set() });
+      updateLoc();
+      setWish('🧲', `①〜⑥を タッチして、${W.jishaku}に つくか どうか 見分けよう。`);
+      say(`身の回りの 物には、${W.jishaku}に つく 物と、つかない 物が あるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HIKITSUKE_ITEMS.map(c => ({
+        label: c.num + ' ' + (S.hikitsukeFound.has(c.key) ? plain(c.name) + ' ✓' : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.hikitsukeFound.size >= HIKITSUKE_ITEMS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap();
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：これは ${W.jishaku}に つくかな？`);
+      hideWish();
+      setButtons(choiceRow(['磁石につくと思う', '磁石につかないと思う'], (i, el) => this.judgeItem(c, i, el)));
+    },
+    judgeItem(c, i, el) {
+      markPicked(el);
+      const correct = c.attract ? 0 : 1;
+      if (i === correct) {
+        sYes(); scopeBurst();
+        say(`せいかい！ ${c.note}`);
+        S.hikitsukeFound.add(c.key);
+        setWish('🧲', `①〜⑥を タッチして、${W.jishaku}に つくか どうか 見分けよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(['磁石につくと思う', '磁石につかないと思う'], (i2, el2) => this.judgeItem(c, i2, el2)));
+      }
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`金属なら、みんな ${W.jishaku}に つくと 思う？`);
+      setButtons(choiceRow(['みんなつく', 'つかないものもある', '金属はぜんぶつかない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_hikitsuke'); S.phase = 'done';
+        const votedRight = S.votePicked.has(2);
+        say(`せいかい！ ${W.jishaku}に つくのは、鉄・ニッケル・コバルトなど、一部の 金属だけ。アルミニウムや 銅は、金属でも つかないんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（磁石になる鉄を発見しよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、①〜⑥の 結果を 思い出してみよう。`);
+        setButtons(choiceRow(['みんなつく', 'つかないものもある', '金属はぜんぶつかない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：磁石になる鉄を発見しよう（発見型） ---
+  m_jika: {
+    enter() {
+      Object.assign(S, { scene: 'jika', scope: { type: 'idle' }, jikaFound: new Set() });
+      updateLoc();
+      setWish('📎', `①②を タッチして、${W.jishaku}に 近づけた 鉄が どう なるか 発見しよう。`);
+      say(`${W.jishaku}に 近づけると、鉄にも ふしぎな ことが 起きるよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(JIKA_CARDS.map(c => ({
+        label: c.num + ' ' + (S.jikaFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.jikaFound.size >= JIKA_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.jikaFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`${W.jishaku}を 近づけると、クリップは どうなる？`);
+      setButtons(choiceRow(['なにも変わらない', 'クリップもいちじ的に磁石になる', 'とけてしまう'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_jika'); S.phase = 'done';
+        say(`せいかい！ ${W.jishaku}を 近づけると、鉄で できた クリップも、いちじ的に ${W.jishaku}に なる。だから、べつの クリップを 引きつけられるんだ。${W.jishaku}を はなすと、その 力は なくなるよ。`);
+        setButtons([{ label: 'つぎへ（きょくの引き合いを調べよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['なにも変わらない', 'クリップもいちじ的に磁石になる', 'とけてしまう'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：きょくの引き合いを調べよう（発見型） ---
+  m_kyoku: {
+    enter() {
+      Object.assign(S, { scene: 'kyoku', scope: { type: 'idle' }, kyokuFound: new Set() });
+      updateLoc();
+      setWish('🔄', `①〜④を タッチして、N極と S極の 組み合わせを 調べよう。`);
+      say(`${W.jishaku}には N極と S極が ある。組み合わせを 変えると、どうなるかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KYOKU_CASES.map(c => ({
+        label: c.num + ' ' + (S.kyokuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.kyokuFound.size >= KYOKU_CASES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.kyokuFound.add(c.key);
+      S.scope = { type: 'poles', left: c.left, right: c.right, result: c.result, label: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`同じ 極どうしを 近づけると？`);
+      setButtons(choiceRow(['引き合う', 'しりぞけ合う', '何も起きない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_kyoku'); S.phase = 'done';
+        say(`せいかい！ 同じ 極どうしは しりぞけ合い、ちがう 極どうしは 引き合う。これが ${W.jishaku}の きょくの きまりだよ。`);
+        setButtons([{ label: 'つぎへ（磁石の強さを調べよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['引き合う', 'しりぞけ合う', '何も起きない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：磁石の強さを調べよう（メイン操作・数値階段①〜⑧） ---
+  m_tsuyosa: {
+    enter() {
+      Object.assign(S, { scene: 'tsuyosa', tsuyosaIdx: -1, tsuyosaIdxDisplay: -1, scope: { type: 'gauge', count: 0, label: 'しらべる前' } });
+      updateLoc();
+      setWish('💪', `「つぎの 位置を しらべる」ボタンで、①(はし)から ⑧(反対の はし)まで、磁石の いろいろな 位置で クリップが 何こ つくか くらべよう。`);
+      say(`①は 磁石の いちばん はし(N極)。ボタンで、つぎの 位置へ 進むよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.tsuyosaIdx >= CLIP_COUNTS.length - 1) { this.finish(); return; }
+      setControls([{ label: `🔍 つぎの位置を しらべる`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.tsuyosaIdx >= CLIP_COUNTS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.tsuyosaIdx, toV = S.tsuyosaIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.tsuyosaIdxDisplay = v;
+        const cnt = lerpArr(CLIP_COUNTS, clamp(v, 0, 7));
+        S.scope = { type: 'gauge', count: Math.round(cnt), label: 'クリップ ' + Math.round(cnt) + 'こ' };
+      }, () => {
+        S.tsuyosaIdx++; S.tsuyosaIdxDisplay = S.tsuyosaIdx;
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑧まで、位置を 変えて しらべたね。どの 位置が いちばん 多く クリップが ついたかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`${W.jishaku}の どこが、いちばん 力が 強い？`);
+      setButtons(choiceRow(['両はし(極)', '真ん中', 'どこも同じ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_tsuyosa'); S.phase = 'done';
+        say(`せいかい！ ${W.jishaku}の 力が いちばん 強いのは、両はしの 極。真ん中は、いちばん 弱いんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、①〜⑧の 結果を 思い出してみよう。`);
+        setButtons(choiceRow(['両はし(極)', '真ん中', 'どこも同じ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：磁石と電磁石のちがい・くらし・安全 ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.jishaku}の ひみつと、くらしの中の 利用を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`電流を 流している 時だけ 磁力が あるのは、${W.jishaku}と 電磁石の どっち？`);
+      setButtons(choiceRow(['磁石', '電磁石'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ ${W.jishaku}は いつも 磁力が あるけど、電磁石は 電流を 流している 時だけ 磁力が ある。スイッチで 磁力を 消せるのが、電磁石の 便利な ところなんだ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['磁石', '電磁石'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(2);
+      showOverlay(`
+        <h2>⭐ キョクの洞窟 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① ${W.jishaku}に つくのは 鉄などの 一部の 金属だけで、（<span class="blankWord" data-a="アルミや銅">？？？</span>）は つかない。<br>
+        ② ${W.jishaku}を 近づけると、鉄も いちじ的に（<span class="blankWord" data-a="磁石">？？？</span>）に なる。<br>
+        ③ 同じ 極どうしは（<span class="blankWord" data-a="しりぞけ合い">？？？</span>）、ちがう 極どうしは 引き合う。<br>
+        ④ ${W.jishaku}の 力が いちばん 強いのは（<span class="blankWord" data-a="両はし(極)">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>ウ 片方だけつく</b>でした！ 10円玉(銅)は つかず、スチールかん(鉄)だけ つきましたね。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①お家に ある 物(10円玉・スチールかん・アルミかん・はさみなど)に ${W.jishaku}を 近づけて、つくか つかないか 調べてみよう。②冷蔵庫の とびらや マグネットで、${W.jishaku}の はたらきを 見つけてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#2e6da8'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「磁石につく金属は？」「同じ極どうしはどうなる？」「磁石の一番強いところは？」`);
+      setButtons([
+        { label: '🧲 つくもの図鑑', cls: 'sub', cb: () => this.show('hikitsuke') },
+        { label: '📎 磁石になる鉄の図', cls: 'sub', cb: () => this.show('jika') },
+        { label: '🔄 きょくの引き合いの図', cls: 'sub', cb: () => this.show('kyoku') },
+        { label: '💪 磁石の強さの図', cls: 'sub', cb: () => this.show('tsuyosa') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_kyoku などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

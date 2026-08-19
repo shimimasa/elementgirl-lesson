@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>キョクの洞窟 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #2e6da8; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #6ba3d6; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #e6f0fa; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #e6f0fa; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="kyoku.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>🧲 キョクの洞窟 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      10円玉と、スチールかん。どちらも金属だけど、両方とも磁石につくと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 両方つく</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 両方つかない</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 片方だけつく</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．つくもの・つかないものを見分けよう</span>
+    <div class="secBody">
+      ①〜⑥について、磁石につくかどうかを記録しよう。
+      <table class="levelTable">
+        <tr><th>①鉄くぎ</th><th>②スチールかん</th><th>③クリップ</th><th>④10円玉</th><th>⑤アルミかん</th><th>⑥えんぴつ</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      金属なら、みんな磁石につくと思う？（みんなつく ／ つかないものもある ／ 金属はぜんぶつかない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．磁石になる鉄を発見しよう</span>
+    <div class="secBody">
+      ①②を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①クリップをつなげる</th><th>②磁石をはなす</th></tr>
+        <tr><td>☐</td><td>☐</td></tr>
+      </table>
+      磁石を近づけると、クリップはどうなる、（なにも変わらない ／ クリップもいちじ的に磁石になる ／ とけてしまう）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．きょくの引き合いを調べよう</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①N極とN極</th><th>②N極とS極</th><th>③S極とN極</th><th>④S極とS極</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      同じ極どうしを近づけると、（引き合う ／ しりぞけ合う ／ 何も起きない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．磁石の強さを調べよう</span>
+    <div class="secBody">
+      位置ごとに、つくクリップの数を記録しよう。
+      <table class="levelTable">
+        <tr><th></th><th>①はし</th><th>②</th><th>③</th><th>④まん中</th><th>⑤まん中</th><th>⑥</th><th>⑦</th><th>⑧はし</th></tr>
+        <tr><th>クリップの数</th><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      磁石のどこが、いちばん力が強い、（両はし(極) ／ 真ん中 ／ どこも同じ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（磁石のひみつとくらしの利用）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 磁石と電磁石のちがい</th><th>い 方位磁針</th><th>う くらしの中の磁石</th><th>え 安全な使い方</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      電流を流している時だけ磁力があるのは、磁石と電磁石のどっち、（磁石 ／ 電磁石）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 磁石につくのは鉄などの一部の金属だけで、（<span class="fillLine"></span>）はつかない。<br>
+      ② 磁石を近づけると、鉄もいちじ的に（<span class="fillLine sm"></span>）になる。<br>
+      ③ 同じ極どうしは（<span class="fillLine"></span>）、ちがう極どうしは引き合う。<br>
+      ④ 磁石の力がいちばん強いのは（<span class="fillLine"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">🧲</span>
+        <div>
+          ①お家にある物(10円玉・スチールかん・アルミかん・はさみなど)に磁石を近づけて、つくかつかないか調べてみよう。<br>
+          ②冷蔵庫のとびらやマグネットで、磁石のはたらきを見つけてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　キョクの洞窟 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】キョクの洞窟 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小3理科「磁石の性質」・学力幅あり・協力型／ 使うもの：「kyoku.html」・プロジェクタ・このノート（1ページ目を人数分）。理科の未着手単元（優先度C）から選定、「ウズの実験室」（電磁石）との対比を意識した設計です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kyoku</b> などで途中再開（m_hikitsuke／m_jika／m_kyoku／m_tsuyosa／hakase／ending）</li>
+      <li>☐ 可能であれば、実物の磁石とクリップ・10円玉・アルミ缶などを用意しておくと、画面と実物の両方で確かめられます</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜13分</td><td>🧲 つくもの・つかないもの（<b>今日の見せ場</b>）</td><td>①〜⑥を1つずつ調べ、磁石につくかどうかを分類。よそうタイムをここで回収。シート２に記録</td></tr>
+      <tr><td class="min">13〜20分</td><td>📎 磁石になる鉄を発見しよう</td><td>①②を発見し、鉄が一時的に磁石になることを確認。シート３に記録</td></tr>
+      <tr><td class="min">20〜28分</td><td>🔄 きょくの引き合いを調べよう</td><td>①〜④のN極・S極の組み合わせを発見。シート４に記録</td></tr>
+      <tr><td class="min">28〜37分</td><td>💪 磁石の強さを調べよう</td><td>「つぎの位置をしらべる」ボタンで①〜⑧まで進め、両端が強いことを確認。シート５に記録</td></tr>
+      <tr><td class="min">37〜43分</td><td>🔎 はかせチャレンジ</td><td>磁石と電磁石のちがい・くらしの中の磁石・安全を発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「お家の物で調べよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「磁石になる鉄を発見しよう」を右下「つぎ▶」でスキップ可（<b>つくもの・つかないもの／きょくの引き合い／磁石の強さ／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>ウ 片方だけつく</b>（スチールかんだけ）／つくもの＝<b>つかないものもある</b>／磁石になる鉄＝<b>クリップもいちじ的に磁石になる</b>／きょくの引き合い＝<b>しりぞけ合う</b>／磁石の強さ＝<b>両はし(極)</b>／はかせ＝<b>電磁石</b>／
+      まとめ＝①<b>アルミや銅</b>　②<b>磁石</b>　③<b>しりぞけ合い</b>　④<b>両はし(極)</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の理科です）</h2>
+    <ul>
+      <li>学習指導要領：磁石に引きつけられる物と引きつけられない物があり、磁石に近付けると磁石になる物がある／磁石の異極は引き合い、同極は退け合う（小学校学習指導要領・理科・第3学年「磁石の性質」）</li>
+      <li>磁石につく金属は、鉄・ニッケル・コバルトとその合金だけ。金・銀・銅・アルミニウムなど、身近な金属の多くは磁石につかない（10円玉＝銅、アルミ缶＝アルミニウムはつかず、スチール缶＝鉄はつく、という対比が誤概念を裏切る核心）</li>
+      <li>磁石を鉄に近づけると、その鉄も一時的に磁石になる（クリップが鎖状につながる実験）。磁石を離すとこの力は失われる</li>
+      <li>棒磁石は両端（極）が最も磁力が強く、真ん中が最も弱いという実測の傾向は理科教材で広く確認されている実物の事実。位置ごとの正確なクリップ本数は磁石の強さによって変わり単一の標準データが存在しないため、本作では両端で強く中央で弱いという傾向に忠実な対称的なモデル値を使用し、数値を捏造していない</li>
+      <li>「ウズの実験室」で学んだ電磁石との違い：磁石はいつも磁力があるが、電磁石は電流を流している時だけ磁力がある（スイッチで磁力のON/OFFができる）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「つくもの・つかないもの」が今日いちばんの見せ場。「10円玉とスチール缶、どちらも金属なのに結果が違うのはなぜ？」と問いかけ、「金属＝磁石につく」という思い込みを崩す</li>
+      <li>「磁石の強さ」は正解を急がせず、①〜⑧で記録したクリップの数を見比べさせてから「どこが一番多い？」を考えさせる</li>
+      <li>「ウズの実験室」を作った/見たクラスなら、「電磁石と磁石、どこが同じでどこが違う？」を自由に話し合わせるとよい</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「磁石につく金属は？」「同じ極どうしはどうなる？」「磁石の一番強いところは？」</li>
+      <li>おうちミッションでは、身近な物で磁石につくかどうかを調べる活動と、冷蔵庫のとびら等で磁石の実用例を見つける活動で、画面の学びと日常の観察を結びつける狙い</li>
+      <li>理科の未着手単元は`理科ロードマップ.md`に整理済み。本作は優先度Cの「磁石の性質」を「ウズの実験室（電磁石）との対比」という画面化価値で選定した</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
