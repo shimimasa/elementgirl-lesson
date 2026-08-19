@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ハコブの港 — 貿易と工業生産の広がり たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eaf6fb 0%, #cfe8f5 45%, #8fc4dd 100%);
+    color: #123a52;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #1f6f96; text-shadow: 0 0 14px rgba(31, 111, 150, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #3d7a9c; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #eaf6fb; border: 2px solid #bfe0f0;
+    font-size: clamp(16px, 1.8vw, 26px); color: #7fc4e0;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe3ba, #e67e22);
+    border-color: #a8540f; color: #6b3305;
+    box-shadow: 0 0 16px rgba(230, 126, 34, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef0f8 60%, #c8d4ec 100%);
+    border: 3px solid #3d6ba8;
+    box-shadow: inset 0 0 40px rgba(30, 50, 90, .14), 0 4px 18px rgba(30, 50, 90, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #3a5a8a; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #e67e22; color: #fff8ef; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(168, 84, 15, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(150, 150, 200, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #bfe0f0; cursor: pointer;
+    background: linear-gradient(180deg, #7fc4e0, #1f6f96); color: #fff;
+    box-shadow: 0 3px 0 #123a52; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #c17a2c, #8a4a14); border-color: #e0ad6c; box-shadow: 0 3px 0 #5c3410; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #f0a838, #c9821e); border-color: #f5ddb0; box-shadow: 0 3px 0 #8a5a10; color: #3a2a10; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #1f6f96; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(18, 58, 82, .28), inset 0 0 24px rgba(31, 111, 150, .14);
+    flex-shrink: 0; background: #eaf6fb;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #3d7a9c;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #1f6f96; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #bfe0f0; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #3d7a9c; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #123a52;
+    border: 1.5px solid #bfe0f0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #1f6f96; background: #eaf6fb; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #eaf6fb); color: #123a52;
+    border: 2px solid #1f6f96; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #1f6f96; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #7fc4e0, #1f6f96); color: #eaf6fb;
+    box-shadow: 0 3px 0 #123a52, 0 5px 12px rgba(18, 58, 82, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #123a52; }
+  .btn.sub {
+    background: #eaf6fb; color: #3d7a9c; box-shadow: 0 3px 0 #bfe0f0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #123a52; box-shadow: 0 3px 0 #bfe0f0; font-weight: 400; border: 1.5px solid #bfe0f0; }
+  .btn.choice.picked { background: #eaf6fb; outline: 3px solid #1f6f96; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(30, 20, 45, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #eaf6fb);
+    border: 3px solid #1f6f96; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 20, 45, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #1f6f96; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #1f6f96; }
+  .panel .sub { color: #3d7a9c; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #123a52; border: 1.5px solid #bfe0f0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #3d7a9c; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #123a52; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #bfe0f0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #1f6f96; background: #eaf6fb; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #1f6f96; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #1f6f96;
+    color: #1f6f96; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #3d7a9c;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #eaf6fb; color: #3d7a9c;
+    border: 1px solid #bfe0f0; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #daeef8; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">🚢 ハコブの港<small>— 貿易と工業生産の広がり —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_genryou" title="輸入品さがしに挑戦しよう">★</div>
+    <div class="badge" id="bd_m_kachi" title="加工貿易のしくみを確かめよう">★</div>
+    <div class="badge" id="bd_m_kouwan" title="貿易港とコンテナ船を体験しよう">★</div>
+    <div class="badge" id="bd_m_masatsu" title="貿易まさつと海外生産をたどろう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ハコブの港</div>
+    <div id="locChip">ハコブの港</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">🚢 ハコブの見はりまど 〜貿易の流れを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#7fc4e0" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <rect x="20" y="28" width="80" height="66" rx="10" fill="url(#hakobuGrad)" stroke="#6b3305" stroke-width="2.5"/>
+            <defs>
+              <linearGradient id="hakobuGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffd9a0"/>
+                <stop offset="55%" stop-color="#f0a838"/>
+                <stop offset="100%" stop-color="#e67e22"/>
+              </linearGradient>
+            </defs>
+            <g stroke="#c8620f" stroke-width="2" opacity=".55">
+              <line x1="24" y1="46" x2="96" y2="46"/>
+              <line x1="24" y1="60" x2="96" y2="60"/>
+              <line x1="24" y1="74" x2="96" y2="74"/>
+            </g>
+            <g stroke="#123a52" stroke-width="2.6" fill="none" stroke-linecap="round">
+              <path d="M50 16 Q60 4 70 16"/>
+              <circle cx="60" cy="13" r="3.4" fill="#123a52" stroke="none"/>
+            </g>
+            <g class="eyes">
+              <circle cx="48" cy="60" r="6.5" fill="#fff"/>
+              <circle cx="72" cy="60" r="6.5" fill="#fff"/>
+              <circle cx="48.7" cy="60.8" r="3.4" fill="#123a52"/>
+              <circle cx="72.7" cy="60.8" r="3.4" fill="#123a52"/>
+            </g>
+            <path d="M48 76 Q60 84 72 76" fill="none" stroke="#123a52" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="30" cy="70" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="90" cy="70" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>
+          <div class="catname"><ruby>貨物<rt>かもつ</rt></ruby>を「<ruby>運<rt>はこ</rt></ruby>ぶ」から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ハコブ</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">🚢 ハコブの港ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ハコブの港 — 貿易と工業生産の広がり（小5社会地理・協力型・1ファイル）
+   輸入品さがし（発見型）→加工貿易のしくみ（メイン操作・段階送り）→
+   港とコンテナ船（メイン操作・数値階段①〜⑧）→貿易まさつと海外生産（メイン操作・年送り）→
+   はかせ（中小工場が支える日本のものづくり・発見型）。
+   数値・事実（WebSearchで裏取り済み）：
+   ・日本のエネルギー自給率は15.1%（2023年度、資源エネルギー庁）、鉄鉱石は国内でほぼ
+     とれずほぼ100%輸入。2024年の輸出品目トップは機械類及び輸送用機器（構成比57.6%）、
+     輸入は原油・LNG・石炭などの鉱物性燃料が上位（財務省貿易統計）。
+   ・名古屋港は自動車輸出台数が1979年から連続日本一、成田空港は精密機械・IC中心、
+     千葉港は原油・LNGを扱う港。大型コンテナ船は最大級で24,000TEU超。
+   ・日米自動車貿易摩擦：1980年輸出597万台（過去最高）→1981年対米自主輸出規制
+     （168万台の枠）→1982年ホンダが米オハイオ州で現地生産開始→現在は海外生産台数が
+     国内の約2倍、海外生産比率は約67%。
+   ・中小工場は日本の工場数の約99%、中小企業は日本企業数の99.7%・従業者数の69.7%。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  boueki: ruby('貿易', 'ぼうえき'),
+  kakou: ruby('加工', 'かこう'),
+  masatsu: ruby('貿易摩擦', 'ぼうえきまさつ'),
+  kaigaiseisan: ruby('海外生産', 'かいがいせいさん'),
+  chuushou: ruby('中小工場', 'ちゅうしょうこうじょう'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでcanvasのfillTextや
+// scope.label/nameに渡すとタグが消えるだけで<rt>内の読みは残り連結表示されてしまう。
+// canvas文脈・データ配列のname/labelは必ずルビなしのプレーン文字列で定義する）
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_genryou：輸入品さがし（発見型）
+const GENRYOU_CARDS = [
+  { key: 0, num: '①', icon: '🛢️', name: '原油(石油)', txt: `自動車を 走らせる ガソリンなど、いろいろな 製品の 原料に なる。日本は ほぼ 100%を 外国からの ${W.boueki}に たよっている。` },
+  { key: 1, num: '②', icon: '⛏️', name: '鉄鉱石', txt: `鉄を 作る もとに なる 鉱石。自動車や 建物に 欠かせないが、日本国内では ほとんど とれず、ほぼ 100%を 輸入している。` },
+  { key: 2, num: '③', icon: '🪨', name: '石炭', txt: `鉄を 作る 時の 燃料や、発電にも 使われる。日本国内でも 少し とれるが、多くは 外国からの 輸入。` },
+  { key: 3, num: '④', icon: '🔥', name: '天然ガス(LNG)', txt: `発電などに 使われる 燃料。船で ひやして 液体に して 運ばれて くる。日本の エネルギー自給率は、わずか 15%ほど。` },
+];
+
+// m_kachi：加工貿易のしくみ（メイン操作・段階送り①〜③）
+// name はcanvas/ボタンラベル(plain()経由)にも使われるため、W辞書のruby文字列を使わずプレーン文字列にする
+const KACHI_STEPS = [
+  { key: 0, icon: '🪨', name: '原料', value: 0.15, txt: `鉄鉱石や 原油などの 原料は、そのままでは 安い。日本には ほとんど なく、外国から 船で 運ばれて くる。` },
+  { key: 1, icon: '🏭', name: '加工', value: 0.55, txt: `工場で、鉄を とかして 鋼板を 作ったり、部品を 組み立てたり する。手間を かけるほど、ねうちが 上がって いく。` },
+  { key: 2, icon: '🚗', name: '製品', value: 0.95, txt: `できあがった 自動車などの 製品は、原料の ころより ずっと ねうちが 高い。この 製品を 外国に 輸出して いるんだ。` },
+];
+
+// m_kouwan：港とコンテナ船（メイン操作・数値階段①〜⑧、単位TEU＝20フィートコンテナ1個分）
+const KOUWAN_TEU = [500, 2000, 4000, 8000, 12000, 16000, 20000, 24000];
+function judgeKouwan(n) { // n: 1-8 コンテナ船の大きさ
+  if (n <= 2) return { level: 'low' };
+  if (n >= 7) return { level: 'high' };
+  return { level: 'good' };
+}
+
+// m_masatsu：貿易まさつと海外生産（メイン操作・年送り①〜④、史実の年代を追う）
+// domestic/overseasは1980〜1982年は史実上ほぼ100%国内生産（海外生産は1982年のホンダ
+// オハイオ工場が最初のため、数値を偽らずnewPlantフラグで「はじまり」のみを示す）
+const MASATSU_STEPS = [
+  { key: 0, year: '1980年', icon: '🚗', domestic: 1, overseas: 0, newPlant: false,
+    txt: `日本の 自動車生産は 1000万台を こえ、世界一に なった。輸出も 過去最高の 597万台。まだ ほとんど 国内の 工場で 作っていた。` },
+  { key: 1, year: '1981年', icon: '⚠️', domestic: 1, overseas: 0, newPlant: false,
+    txt: `アメリカへの 輸出が 増えすぎて、アメリカの 自動車工場で 働く 人たちが 仕事を 失う「${W.masatsu}」が おきた。日本は 輸出台数を 自分から へらす 取り決めを した。` },
+  { key: 2, year: '1982年', icon: '🏭', domestic: 1, overseas: 0, newPlant: true,
+    txt: `ホンダが アメリカの オハイオ州に 工場を 作り、現地で 車を 作り始めた。これが 日本車 「${W.kaigaiseisan}」の はじまり。` },
+  { key: 3, year: '今', icon: '🌏', domestic: 0.33, overseas: 0.67, newPlant: false,
+    txt: `今では、日本の 自動車メーカーは、国内より 外国の 工場で 作る 台数の 方が 多い。${W.kaigaiseisan}の 割合は およそ 67%に なった。` },
+];
+
+// はかせ：中小工場が支える日本のものづくり（発見型）
+const CHUSHO_CARDS = [
+  { key: 0, letter: 'あ', icon: '🏭', name: '工場の数のほとんど', txt: `日本には たくさんの 工場が あるが、その 中で ${W.chuushou}が しめる 割合は、なんと 約99%。大工場は ほんの 一部なんだ。` },
+  { key: 1, letter: 'い', icon: '🔩', name: 'ねじや金型を作る', txt: `小さな 部品や、製品の 形を 作る「型」を、高い 技術で 作る 職人が いる 工場も 多い。大工場の ものづくりを ささえている。` },
+  { key: 2, letter: 'う', icon: '🤝', name: '大工場とのつながり', txt: `自動車工場のような 大工場は、まわりの 多くの ${W.chuushou}から 部品を 仕入れて、車を 組み立てている。` },
+  { key: 3, letter: 'え', icon: '💎', name: '日本の技術を大切に', txt: `小さな 工場の 高い 技術は、世界でも 評価されている。ものづくりを ささえる 人たちに 感謝しよう。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'genryou',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  genryouFound: new Set(),
+  kachiIdx: -1,
+  kachiIdxDisplay: -1,
+  kouwanLevel: 4,
+  kouwan: { levelF: 0 },
+  kouwanResult: null,
+  masatsuIdx: -1,
+  masatsuIdxDisplay: -1,
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+const sHonk = () => { tone(300, 0, 0.2, 'square', 0.08); tone(300, 0.22, 0.2, 'square', 0.08); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#f0f2fb'); g.addColorStop(1, '#c8d4ec');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#1f6f96' : '#bfe0f0';
+    gctx.fill(); gctx.strokeStyle = '#1f6f96'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#123a52'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#123a52'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．輸入品さがし（発見型） ----------
+function drawGenryouScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, GENRYOU_CARDS, S.genryouFound, 4, '①〜④をタッチして、日本が外国から買っている物を発見しよう');
+}
+
+// ---------- 2．加工貿易のしくみ（メイン操作・段階送り①〜③） ----------
+function drawKachiScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const xs = [250, 500, 750];
+  gctx.strokeStyle = '#8a9ac0'; gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(xs[0]), Y(320)); gctx.lineTo(X(xs[2]), Y(320)); gctx.stroke();
+  const idxNow = clamp(Math.round(S.kachiIdxDisplay), 0, 2);
+  KACHI_STEPS.forEach((st, i) => {
+    const done = S.kachiIdx >= i;
+    const active = S.kachiIdx >= 0 && idxNow === i;
+    gctx.beginPath(); gctx.arc(X(xs[i]), Y(320), (active ? 54 : 46) * sc, 0, TAU);
+    gctx.fillStyle = done ? '#e67e22' : '#bfe0f0';
+    gctx.fill(); gctx.strokeStyle = '#123a52'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(st.icon, X(xs[i]), Y(320 - 2));
+    gctx.fillStyle = '#123a52'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText((i + 1) + ' ' + st.name, X(xs[i]), Y(320 + 74));
+  });
+  // ねうちメーター
+  const barY = 460, barX0 = 250, barX1 = 750, barH = 26;
+  gctx.strokeStyle = '#123a52'; gctx.lineWidth = 2 * sc;
+  gctx.strokeRect(X(barX0), Y(barY), (barX1 - barX0) * sc, barH * sc);
+  const val = S.kachiIdx >= 0 ? lerpArr(KACHI_STEPS.map(s => s.value), S.kachiIdxDisplay) : 0;
+  gctx.fillStyle = '#e67e22';
+  gctx.fillRect(X(barX0), Y(barY), (barX1 - barX0) * val * sc, barH * sc);
+  gctx.fillStyle = '#123a52'; gctx.font = `700 ${14 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('ねうちメーター', X(500), Y(barY - 14));
+  gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textBaseline = 'middle';
+  const title = S.kachiIdx >= 0 ? `${KACHI_STEPS[idxNow].name} の 段階` : '原料が 製品に 変わる 様子を 見てみよう';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 3．港とコンテナ船（メイン操作・数値階段①〜⑧） ----------
+function drawKouwanScene(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eaf6fb'); g.addColorStop(1, '#8fc4dd');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+  gctx.fillStyle = '#2e86ab';
+  gctx.fillRect(X(0), Y(430), 1000 * sc, 210 * sc);
+
+  gctx.fillStyle = '#8a9aa0'; gctx.strokeStyle = '#123a52'; gctx.lineWidth = 2.4 * sc;
+  gctx.fillRect(X(40), Y(360), 160 * sc, 90 * sc); gctx.strokeRect(X(40), Y(360), 160 * sc, 90 * sc);
+  gctx.fillStyle = '#123a52'; gctx.font = `700 ${15 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('日本の 港', X(120), Y(350));
+
+  const levelF = (S.kouwan && S.kouwan.levelF) || 0;
+  const n = Math.round(levelF);
+  const hullX = 420, hullY = 470, hullW = 420, hullH = 46;
+  gctx.fillStyle = '#f5fbfe'; gctx.strokeStyle = '#123a52'; gctx.lineWidth = 2.6 * sc;
+  gctx.beginPath();
+  gctx.moveTo(X(hullX - hullW / 2), Y(hullY));
+  gctx.lineTo(X(hullX + hullW / 2), Y(hullY));
+  gctx.lineTo(X(hullX + hullW / 2 - 30), Y(hullY + hullH));
+  gctx.lineTo(X(hullX - hullW / 2 + 30), Y(hullY + hullH));
+  gctx.closePath(); gctx.fill(); gctx.stroke();
+
+  const cols = ['#e67e22', '#c0392b', '#f1c40f', '#2e86ab'];
+  const perRow = 4, boxW = 46, boxH = 30, gap = 6;
+  for (let i = 0; i < n; i++) {
+    const row = Math.floor(i / perRow), col = i % perRow;
+    const bx = hullX - hullW / 2 + 40 + col * (boxW + gap);
+    const by = hullY - 16 - row * (boxH + gap);
+    gctx.fillStyle = cols[i % cols.length];
+    gctx.strokeStyle = '#123a52'; gctx.lineWidth = 1.6 * sc;
+    gctx.fillRect(X(bx), Y(by - boxH), boxW * sc, boxH * sc);
+    gctx.strokeRect(X(bx), Y(by - boxH), boxW * sc, boxH * sc);
+  }
+
+  gctx.fillStyle = '#123a52'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const teu = n >= 1 ? KOUWAN_TEU[clamp(n - 1, 0, 7)] : 0;
+  gctx.fillText(n >= 1 ? `つみに ${teu.toLocaleString()}TEU` : 'コンテナ船の 大きさを えらぼう', X(500), Y(70));
+
+  if (S.kouwanResult) {
+    gctx.font = `${40 * sc}px sans-serif`;
+    gctx.fillText(S.kouwanResult === 'good' ? '✅' : S.kouwanResult === 'high' ? '⛔' : '🔁', X(180), Y(300));
+  }
+}
+
+// ---------- 4．貿易まさつと海外生産（メイン操作・年送り①〜④） ----------
+function drawMasatsuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const idxNow = clamp(Math.round(S.masatsuIdxDisplay), 0, 3);
+  const domArr = MASATSU_STEPS.map(s => s.domestic), ovsArr = MASATSU_STEPS.map(s => s.overseas);
+  const domV = S.masatsuIdx >= 0 ? lerpArr(domArr, S.masatsuIdxDisplay) : domArr[0];
+  const ovsV = S.masatsuIdx >= 0 ? lerpArr(ovsArr, S.masatsuIdxDisplay) : ovsArr[0];
+
+  const baseY = 500, maxH = 300, bw = 120;
+  const bars = [
+    { x: 380, v: domV, label: '国内生産', col: '#2e86ab' },
+    { x: 620, v: ovsV, label: '海外生産', col: '#e67e22' },
+  ];
+  bars.forEach(b => {
+    const h = maxH * b.v;
+    gctx.strokeStyle = '#123a52'; gctx.lineWidth = 2 * sc;
+    gctx.strokeRect(X(b.x - bw / 2), Y(baseY - maxH), bw * sc, maxH * sc);
+    gctx.fillStyle = b.col;
+    gctx.fillRect(X(b.x - bw / 2), Y(baseY - h), bw * sc, h * sc);
+    gctx.fillStyle = '#123a52'; gctx.font = `700 ${15 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText(b.label, X(b.x), Y(baseY + 26));
+  });
+
+  gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textBaseline = 'middle';
+  const title = S.masatsuIdx >= 0 ? MASATSU_STEPS[idxNow].year : '年代を おって、生産の 場所の 変化を 見てみよう';
+  gctx.fillText(title, X(500), Y(70));
+
+  if (MASATSU_STEPS[idxNow].newPlant && S.masatsuIdx >= 2) {
+    gctx.font = `${30 * sc}px sans-serif`; gctx.textAlign = 'center';
+    gctx.fillText('🏭', X(620), Y(baseY - maxH - 24));
+  }
+}
+
+// ---------- 5．はかせ：中小工場が支える日本のものづくり ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, CHUSHO_CARDS, S.hakaseFound, 4, 'あ〜えをタッチして、日本のものづくりをささえる工場を発見しよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'genryou') drawGenryouScene(X, Y, sc);
+  else if (S.scene === 'kachi') drawKachiScene(X, Y, sc);
+  else if (S.scene === 'kouwan') drawKouwanScene(X, Y, sc);
+  else if (S.scene === 'masatsu') drawMasatsuScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ハコブの見はりまど（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f5fbfe'); grd.addColorStop(1, '#bfe0f0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#1f6f96';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'ship') {
+    drawShipScope(R, S.scope.n);
+    label(S.scope.label || (S.scope.n != null ? String(S.scope.n) + ' つみ' : ''));
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#7fc4e088'); g2.addColorStop(1, 'rgba(230,126,34,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#1f6f96'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🚢', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#1f6f96'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#123a52';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawShipScope(R, n) {
+    const cx = R, cy = R * 1.15, hw = R * 0.62, hh = R * 0.22;
+    sctx.fillStyle = '#f5fbfe'; sctx.strokeStyle = '#123a52'; sctx.lineWidth = R * 0.025;
+    sctx.beginPath();
+    sctx.moveTo(cx - hw, cy);
+    sctx.lineTo(cx + hw, cy);
+    sctx.lineTo(cx + hw * 0.8, cy + hh);
+    sctx.lineTo(cx - hw * 0.8, cy + hh);
+    sctx.closePath(); sctx.fill(); sctx.stroke();
+
+    const cols = ['#e67e22', '#c0392b', '#f1c40f', '#2e86ab'];
+    const count = clamp(n || 0, 0, 8);
+    const perRow = 4, bw = (hw * 2 / perRow) * 0.82, bh = R * 0.18, gap = (hw * 2 / perRow) * 0.18;
+    for (let i = 0; i < count; i++) {
+      const row = Math.floor(i / perRow), col = i % perRow;
+      const bx = cx - hw + gap / 2 + col * (bw + gap);
+      const by = cy - R * 0.06 - row * (bh + 4);
+      sctx.fillStyle = cols[i % cols.length];
+      sctx.strokeStyle = '#123a52'; sctx.lineWidth = R * 0.012;
+      sctx.fillRect(bx, by - bh, bw, bh);
+      sctx.strokeRect(bx, by - bh, bw, bh);
+    }
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#1f6f96', '#7fc4e0', '#3d6ba8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    genryou: '📦 輸入品さがし',
+    kachi: '🏭 加工貿易のしくみ',
+    kouwan: '🚢 港とコンテナ船',
+    masatsu: '📈 貿易まさつと海外生産',
+    hakase: '🔎 はかせチャレンジ',
+    done: '🚢 ハコブの港 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ハコブの港';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_genryou', 'm_kachi', 'm_kouwan', 'm_masatsu', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'genryou', icon: '📦', title: '輸入品さがし',
+    setup: () => { S.genryouFound = new Set(GENRYOU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '⛏️', name: '鉄鉱石' }),
+    text: () => `原油も 鉄鉱石も、日本国内では ほとんど とれず、外国からの 輸入に たよっていたね。` },
+  { scene: 'kachi', icon: '🏭', title: '加工貿易のしくみ',
+    setup: () => { Object.assign(S, { kachiIdx: 2, kachiIdxDisplay: 2 }); },
+    scope: () => ({ type: 'ship', n: 8, label: '製品' }),
+    text: () => `原料を 工場で 加工して、ねうちの 高い 製品に 変えて 輸出する。これが「${W.kakou}${W.boueki}」だったね。` },
+  { scene: 'kouwan', icon: '🚢', title: '港とコンテナ船',
+    setup: () => { Object.assign(S, { kouwan: { levelF: 5 }, kouwanLevel: 5, kouwanResult: 'good' }); },
+    scope: () => ({ type: 'ship', n: 5 }),
+    text: () => `コンテナ船は 大きさが 大切。日本の おもな 港には、ちょうど よい 大きさの 船が 入って きていたね。` },
+  { scene: 'masatsu', icon: '📈', title: '貿易まさつと海外生産',
+    setup: () => { Object.assign(S, { masatsuIdx: 3, masatsuIdxDisplay: 3 }); },
+    scope: () => ({ type: 'point', icon: '🌏', name: '今' }),
+    text: () => `${W.masatsu}を きっかけに、日本の 自動車づくりは 海外へも 広がって いったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'genryou', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">📦🏭🚢📈</div>
+        <h1>ハコブの港</h1>
+        <div class="sub">〜 貿易と 工業生産の 広がり 〜</div>
+        <p class="talk">ようこそ！ わたしは 貨物を「運ぶ」から 生まれた ${W.seirei}、<b>ハコブ</b>。この 港で、日本の ${W.boueki}と 工業生産の ひみつを、いっしょに たしかめよう。日本は 鉄や 石油などの 資源が 少ない 国なのに、なぜ 工業製品を たくさん 作れるんだろう？<br>
+        今日は、外国から 買っている物から、港を 出入りする 船、貿易の 変化まで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">日本は 鉄や 石油などの 資源が 少ない 国なのに、なぜ 工業製品を たくさん 作れるのかな？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">⛰️</span><b>ア</b> 資源も自分の国でたくさんとれる</div>
+          <div class="vcard" data-v="1"><span class="vicon">🚢</span><b>イ</b> 外国から原料を買い、工場で製品に変えている</div>
+          <div class="vcard" data-v="2"><span class="vicon">🌏</span><b>ウ</b> 製品も外国の工場に作ってもらっている</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：輸入品さがし（発見型） ---
+  m_genryou: {
+    enter() {
+      Object.assign(S, { scene: 'genryou', scope: { type: 'idle' }, genryouFound: new Set() });
+      updateLoc();
+      setWish('📦', `①〜④を タッチして、日本が 外国から 買っている物を 発見しよう。`);
+      say(`日本の 工場が 使う 原料は、いったい どこから 来るのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(GENRYOU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.genryouFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.genryouFound.size >= GENRYOU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.genryouFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`鉄鉱石は、日本の 国内で どれくらい とれる？`);
+      setButtons(choiceRow(['ほとんど100%、国内でとれる', '半分くらいとれる', 'ほとんど0%で、外国から買っている'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('m_genryou'); S.phase = 'done';
+        say(`せいかい！ 鉄鉱石も 原油も、日本国内では ほとんど とれず、ほぼ すべてを 外国からの 輸入に たよっているんだ。日本の エネルギー自給率は、わずか 15%ほど。`);
+        setButtons([{ label: 'つぎへ（加工貿易のしくみ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['ほとんど100%、国内でとれる', '半分くらいとれる', 'ほとんど0%で、外国から買っている'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：加工貿易のしくみ（メイン操作・段階送り） ---
+  m_kachi: {
+    enter() {
+      Object.assign(S, { scene: 'kachi', kachiIdx: -1, kachiIdxDisplay: -1, scope: { type: 'ship', n: 0, label: 'はじまる前' } });
+      updateLoc();
+      setWish('🏭', `「つぎの段階へ」ボタンで、原料→加工→製品の 3つの 段階を、じゅんばんに 見てみよう。`);
+      say(`外国から 買った 原料は、そのあと どうなるのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.kachiIdx >= KACHI_STEPS.length - 1) { this.finish(); return; }
+      const nextSt = KACHI_STEPS[S.kachiIdx + 1];
+      setControls([{ label: `${nextSt.icon} つぎの段階へ（${nextSt.name}）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.kachiIdx >= KACHI_STEPS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.kachiIdx, toV = S.kachiIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.kachiIdxDisplay = v;
+        const i = clamp(Math.round(v), 0, 2);
+        S.scope = { type: 'ship', n: Math.round(lerpArr([0, 2, 5, 8], v + 1)), label: KACHI_STEPS[i].name };
+      }, () => {
+        S.kachiIdx++; S.kachiIdxDisplay = S.kachiIdx;
+        const st = KACHI_STEPS[S.kachiIdx];
+        say(`${st.name}：${st.txt}`);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`原料→加工→製品の 3つの 段階を 見たね。原料の ままより、製品に した 方が ねうちが 上がっていたね。`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`日本は、外国から 買った 原料を、そのあと どうしている？`);
+      setButtons(choiceRow(['そのまま外国に売り返す', '工場で製品に変えて、外国に売っている', '使わずに置いておく'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_kachi'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ 原料を 買って、工場で 手間を かけて 製品に 変えて、外国に 売る。これが 日本の 得意な「${W.kakou}${W.boueki}」の しくみなんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（港とコンテナ船）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['そのまま外国に売り返す', '工場で製品に変えて、外国に売っている', '使わずに置いておく'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：港とコンテナ船（メイン操作・数値階段①〜⑧） ---
+  m_kouwan: {
+    enter() {
+      Object.assign(S, { scene: 'kouwan', scope: { type: 'ship', n: 0 }, kouwan: { levelF: 0 }, kouwanResult: null });
+      updateLoc();
+      hideWish();
+      say(`名古屋港は 自動車の 輸出で 日本一、成田空港は 集積回路(IC)などの 軽くて 高い物、千葉港は 原油を あつかう。目もり①〜⑧で コンテナ船の 大きさを えらび、日本の 港に ちょうど よい 大きさを たしかめよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      const list = [];
+      for (let n = 1; n <= 8; n++) list.push({ label: NUMS[n - 1], cls: 'pos' + (S.kouwanLevel === n ? ' sel' : ''), cb: () => { S.kouwanLevel = n; this.refreshCtl(); } });
+      list.push({ label: '⚓ 出航させる', cb: () => this.run() });
+      setControls(list);
+    },
+    run() {
+      setControls([]);
+      S.kouwanResult = null;
+      say(`目もり ${NUMS[S.kouwanLevel - 1]} の 大きさの コンテナ船を、港に 入れてみる……`);
+      sClank();
+      startTween(0, S.kouwanLevel, 1.0, v => {
+        S.kouwan.levelF = v;
+        S.scope = { type: 'ship', n: Math.round(v) };
+      }, () => this.judge());
+    },
+    judge() {
+      const r = judgeKouwan(S.kouwanLevel);
+      S.kouwanResult = r.level;
+      const teu = KOUWAN_TEU[S.kouwanLevel - 1];
+      if (r.level === 'good') {
+        sYes(); scopeBurst(); award('m_kouwan'); S.phase = 'done';
+        say(`✨ ${teu.toLocaleString()}TEUの 船が、すいすい 港に 入って いった！ ✨<br><br>💡 <b>たいせつポイント</b><br>これくらいの 大きさが、名古屋港のような 日本の おもな 貿易港に ちょうど よい 大きさ。一度に たくさん 運べて、効率が いいんだ。`);
+        setButtons([{ label: 'つぎへ（貿易まさつと海外生産）', cb: nextStep }]);
+      } else if (r.level === 'low') {
+        sHonk();
+        say(`${teu.toLocaleString()}TEUでは 小さすぎて、一度に あまり 運べない。何度も 行き来しなくちゃ ならないよ……もういちど 大きさを えらんでみよう。`);
+        this.refreshCtl();
+      } else {
+        sHonk();
+        say(`${teu.toLocaleString()}TEUは 大きすぎて、日本の ほとんどの 港では 受け入れられないよ……もういちど 大きさを えらんでみよう。`);
+        this.refreshCtl();
+      }
+    },
+  },
+
+  // --- M4：貿易まさつと海外生産（メイン操作・年送り） ---
+  m_masatsu: {
+    enter() {
+      Object.assign(S, { scene: 'masatsu', masatsuIdx: -1, masatsuIdxDisplay: -1, scope: { type: 'point', icon: '📅', name: 'はじまる前' } });
+      updateLoc();
+      setWish('📈', `「つぎの年へ」ボタンで、1980年から 今までの 変化を、じゅんばんに たどってみよう。`);
+      say(`日本の 自動車づくりは、どこで 行われるように 変わって きたのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.masatsuIdx >= MASATSU_STEPS.length - 1) { this.finish(); return; }
+      const nextSt = MASATSU_STEPS[S.masatsuIdx + 1];
+      setControls([{ label: `${nextSt.icon} つぎの年へ（${nextSt.year}）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.masatsuIdx >= MASATSU_STEPS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.masatsuIdx, toV = S.masatsuIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.masatsuIdxDisplay = v;
+        const i = clamp(Math.round(v), 0, 3);
+        S.scope = { type: 'point', icon: MASATSU_STEPS[i].icon, name: MASATSU_STEPS[i].year };
+      }, () => {
+        S.masatsuIdx++; S.masatsuIdxDisplay = S.masatsuIdx;
+        const st = MASATSU_STEPS[S.masatsuIdx];
+        say(`${st.year}：${st.txt}`);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`1980年から 今までの 変化を 見たね。今は、国内と 外国、どちらで 作る 台数が 多いかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`今、日本の 自動車メーカーは、どこで いちばん 多く 車を 作っている？`);
+      setButtons(choiceRow(['日本国内', '外国(海外の工場)'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_masatsu'); S.phase = 'done';
+        say(`せいかい！ ${W.masatsu}を きっかけに 海外での 生産が 始まり、今では ${W.kaigaiseisan}の 割合が およそ 67%。国内より 外国で 作る 台数の 方が 多くなったんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['日本国内', '外国(海外の工場)'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：中小工場が支える日本のものづくり ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ 日本の ものづくりを ささえる 工場を 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(CHUSHO_CARDS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= CHUSHO_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`日本の 工場の 数の うち、${W.chuushou}が しめる 割合は?`);
+      setButtons(choiceRow(['約10%', '約50%', '約99%'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 日本の 工場の 約99%は ${W.chuushou}。大きな 工場を、数えきれない 中小工場の 高い 技術が ささえているんだ。日本の ものづくりを、これからも 大切に していきたいね。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['約10%', '約50%', '約99%'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ハコブの港 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 鉄鉱石や 原油は、ほとんどを（<span class="blankWord" data-a="外国からの輸入">？？？</span>）に たよっている。<br>
+        ② 原料を 工場で 製品に 変えると、（<span class="blankWord" data-a="ねうち(価値)">？？？</span>）が 上がる。<br>
+        ③ 貿易港には、船の（<span class="blankWord" data-a="大きさ">？？？</span>）が ちょうど よいものが ある。<br>
+        ④ 今、日本車の 海外生産の 割合は、およそ（<span class="blankWord" data-a="67%">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 外国から原料を買い、工場で製品に変えている</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①家に ある物の パッケージを 見て、「made in ...」などの 表示から どこの 国で 作られたか 調べてみよう。②お店で 買い物する時、レジで バーコードを 読み取る 様子を 観察してみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#1f6f96'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「鉄鉱石は日本国内でどれくらいとれる?」「原料と製品、どちらがねうちが高い?」「コンテナ船はどれくらいの大きさがちょうどいい?」「今、日本車はどこで多く作られている?」`);
+      setButtons([
+        { label: '📦 輸入品の図', cls: 'sub', cb: () => this.show('genryou') },
+        { label: '🏭 加工貿易の図', cls: 'sub', cb: () => this.show('kachi') },
+        { label: '🚢 港とコンテナ船の図', cls: 'sub', cb: () => this.show('kouwan') },
+        { label: '📈 貿易まさつの図', cls: 'sub', cb: () => this.show('masatsu') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_pos などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

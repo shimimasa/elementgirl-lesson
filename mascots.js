@@ -1866,4 +1866,40 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
             <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
           </svg>`,
+  hakobu: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#7fc4e0" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <rect x="20" y="28" width="80" height="66" rx="10" fill="url(#hakobuGrad)" stroke="#6b3305" stroke-width="2.5"/>
+            <defs>
+              <linearGradient id="hakobuGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffd9a0"/>
+                <stop offset="55%" stop-color="#f0a838"/>
+                <stop offset="100%" stop-color="#e67e22"/>
+              </linearGradient>
+            </defs>
+            <g stroke="#c8620f" stroke-width="2" opacity=".55">
+              <line x1="24" y1="46" x2="96" y2="46"/>
+              <line x1="24" y1="60" x2="96" y2="60"/>
+              <line x1="24" y1="74" x2="96" y2="74"/>
+            </g>
+            <g stroke="#123a52" stroke-width="2.6" fill="none" stroke-linecap="round">
+              <path d="M50 16 Q60 4 70 16"/>
+              <circle cx="60" cy="13" r="3.4" fill="#123a52" stroke="none"/>
+            </g>
+            <g class="eyes">
+              <circle cx="48" cy="60" r="6.5" fill="#fff"/>
+              <circle cx="72" cy="60" r="6.5" fill="#fff"/>
+              <circle cx="48.7" cy="60.8" r="3.4" fill="#123a52"/>
+              <circle cx="72.7" cy="60.8" r="3.4" fill="#123a52"/>
+            </g>
+            <path d="M48 76 Q60 84 72 76" fill="none" stroke="#123a52" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="30" cy="70" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="90" cy="70" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>`,
 };

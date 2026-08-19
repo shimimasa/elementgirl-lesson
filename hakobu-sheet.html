@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ハコブの港 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #1f6f96; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #7fc4e0; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #eaf6fb; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #eaf6fb; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="hakobu.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>📦 ハコブの港 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      日本は鉄や石油などの資源が少ない国なのに、なぜ工業製品をたくさん作れるのかな？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 資源も自分の国でたくさんとれる</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 外国から原料を買い、工場で製品に変えている</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 製品も外国の工場に作ってもらっている</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．輸入品さがし</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①原油(石油)</th><th>②鉄鉱石</th><th>③石炭</th><th>④天然ガス(LNG)</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      鉄鉱石は、日本の国内でどれくらいとれる、（ほとんど100%、国内でとれる ／ 半分くらいとれる ／ ほとんど0%で、外国から買っている）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．加工貿易のしくみ</span>
+    <div class="secBody">
+      ①〜③の段階を見て、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①原料</th><th>②加工</th><th>③製品</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      日本は、外国から買った原料を、そのあとどうしている、（そのまま外国に売り返す ／ 工場で製品に変えて、外国に売っている ／ 使わずに置いておく）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．港とコンテナ船</span>
+    <div class="secBody">
+      コンテナ船の大きさ①〜⑧のうち、日本の港にちょうどよかった大きさに 〇をつけよう。
+      <table class="levelTable">
+        <tr><th>①</th><th>②</th><th>③</th><th>④</th><th>⑤</th><th>⑥</th><th>⑦</th><th>⑧</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      自動車の輸出で日本一の港は、（名古屋港 ／ 成田空港 ／ 千葉港）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．貿易まさつと海外生産</span>
+    <div class="secBody">
+      ①〜④の年代を見て、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①1980年</th><th>②1981年</th><th>③1982年</th><th>④今</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      今、日本の自動車メーカーは、どこでいちばん多く車を作っている、（日本国内 ／ 外国(海外の工場)）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（中小工場が支える日本のものづくり）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 工場の数のほとんど</th><th>い ねじや金型を作る</th><th>う 大工場とのつながり</th><th>え 日本の技術を大切に</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      日本の工場の数のうち、中小工場が占める割合は、（約10% ／ 約50% ／ 約99%）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 鉄鉱石や 原油は、ほとんどを（<span class="fillLine"></span>）に たよっている。<br>
+      ② 原料を 工場で 製品に 変えると、（<span class="fillLine"></span>）が 上がる。<br>
+      ③ 貿易港には、船の（<span class="fillLine sm"></span>）が ちょうど よいものが ある。<br>
+      ④ 今、日本車の 海外生産の 割合は、およそ（<span class="fillLine sm"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">📦</span>
+        <div>
+          ①家にある物のパッケージを見て、「made in ...」などの表示からどこの国で作られたか調べてみよう。<br>
+          ②お店で買い物する時、レジでバーコードを読み取る様子を観察してみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ハコブの港 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ハコブの港 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小5社会「貿易と工業生産の広がり」・学力幅あり・協力型／ 使うもの：「hakobu.html」・プロジェクタ・このノート（1ページ目を人数分）。社会・地理分野の14作目です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kouwan</b> などで途中再開（m_genryou／m_kachi／m_kouwan／m_masatsu／hakase／ending）</li>
+      <li>☐ 可能であれば、家にある製品のパッケージ（「made in ...」表示）をいくつか見せてから始めると導入がスムーズです</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>📦 輸入品さがし</td><td>①〜④を発見し、原油・鉄鉱石・石炭・天然ガスが外国頼みであることを確認。シート２に記録</td></tr>
+      <tr><td class="min">11〜19分</td><td>🏭 加工貿易のしくみ（<b>今日の見せ場</b>）</td><td>「つぎの段階へ」ボタンで原料→加工→製品を進め、ねうちメーターが上がる様子を確認。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">19〜28分</td><td>🚢 港とコンテナ船</td><td>目もり①〜⑧でコンテナ船の大きさを選び、「小さすぎ／ちょうどよい／大きすぎ」を試す。シート４に記録</td></tr>
+      <tr><td class="min">28〜36分</td><td>📈 貿易まさつと海外生産</td><td>「つぎの年へ」ボタンで1980年→今の変化をたどり、国内生産・海外生産のバーの変化を確認。シート５に記録</td></tr>
+      <tr><td class="min">36〜43分</td><td>🔎 はかせチャレンジ</td><td>中小工場が支える日本のものづくりを発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「パッケージの表示を調べよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「港とコンテナ船」を右下「つぎ▶」でスキップ可（<b>加工貿易のしくみ／貿易まさつと海外生産／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 外国から原料を買い、工場で製品に変えている</b>／輸入品さがし＝<b>ほとんど0%で、外国から買っている</b>／加工貿易のしくみ＝<b>工場で製品に変えて、外国に売っている</b>／港とコンテナ船＝<b>③〜⑥がちょうどよい大きさ</b>／貿易まさつと海外生産＝<b>外国(海外の工場)</b>／はかせ＝<b>約99%</b>／
+      まとめ＝①<b>外国からの輸入</b>　②<b>ねうち(価値)</b>　③<b>大きさ</b>　④<b>67%</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の社会科です）</h2>
+    <ul>
+      <li>日本のエネルギー自給率は15.1%（2023年度、資源エネルギー庁）。鉄鉱石は国内でほぼとれずほぼ100%輸入。2024年の輸出品目トップは機械類及び輸送用機器（構成比57.6%）、輸入は原油・LNG・石炭などの鉱物性燃料が上位（財務省貿易統計）</li>
+      <li>名古屋港は自動車輸出台数が1979年から連続日本一、成田空港は精密機械・IC中心、千葉港は原油・LNGを扱う港。大型コンテナ船は最大級で24,000TEU超</li>
+      <li>日米自動車貿易摩擦：1980年輸出597万台（過去最高）→1981年対米自主輸出規制（168万台の枠）→1982年ホンダが米オハイオ州で現地生産開始→現在は海外生産台数が国内の約2倍、海外生産比率は約67%</li>
+      <li>中小工場は日本の工場数の約99%を占める。中小企業は日本企業数の99.7%・従業者数の69.7%（中小企業庁）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「加工貿易のしくみ」が今日いちばんの見せ場。「同じ重さの鉄でも、車になったらねうちはどう変わると思う？」と問いかけ、手間をかけることで価値が生まれることに気づかせる</li>
+      <li>「港とコンテナ船」は正解を急がせず、小さすぎ・ちょうどよい・大きすぎの3パターンを実際に試させてから理由を考えさせる</li>
+      <li>子どもたちが持っている物や着ている服のタグを見て、「どこの国で作られたか書いてあるかな？」とその場で問いかけると盛り上がります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「鉄鉱石は日本国内でどれくらいとれる？」「原料と製品、どちらがねうちが高い？」「コンテナ船はどれくらいの大きさがちょうどいい？」「今、日本車はどこで多く作られている？」</li>
+      <li>おうちミッションでは、身の回りの製品の産地表示を調べる活動と、お店のレジを観察する活動で、画面の学びと日常の暮らしを結びつける狙い</li>
+      <li>社会・地理分野は本作でひだまり探偵社（地図）・みずの旅（水）・ミズヤの里〜リュウヒョウの岸（土地のくらし）・ネンリンの杜（森林）・ホシゾラの街（公害）・みのりの村（お米）・しおさいの湊（水産業）・ボルトの町工場（自動車工業）・トモシの浜（防災）・ツタエの放送局（情報産業）に続く14作目です</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
