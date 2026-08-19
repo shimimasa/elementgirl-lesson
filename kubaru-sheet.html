@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>クバルの送電塔 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #d98c2b; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #f0b25a; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #fdf2df; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #fdf2df; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="kubaru.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>⚡ クバルの送電塔 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      大きな地震などでライフラインが止まったら、いちばん早くもとにもどるのはどれだと思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> 水道</div>
+        <div class="voteOpt"><span class="vnum">イ</span> 電気</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> 都市ガス</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．発電の種類を発見しよう</span>
+    <div class="secBody">
+      ①〜⑤を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①火力発電</th><th>②水力発電</th><th>③原子力発電</th><th>④太陽光発電</th><th>⑤風力発電</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      日本の発電の中心になっているのは、（火力発電 ／ 水力発電 ／ 太陽光発電）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．電気の旅</span>
+    <div class="secBody">
+      電気が発電所から家庭にとどくまでの電圧を記録しよう。
+      <table class="levelTable">
+        <tr><th>①発電所</th><th>②超高圧変電所</th><th>③一次変電所</th><th>④二次変電所</th><th>⑤配電用変電所</th><th>⑥柱上トランス</th><th>⑦家庭のコンセント</th></tr>
+        <tr><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td><td class="res"></td></tr>
+      </table>
+      電気は、発電所から家庭にとどくまで、電圧がどう変わっていった、（ずっと同じ電圧のまま ／ いっきに高くしてから、少しずつ下げていく ／ どんどん高くなり続ける）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．ガスの旅</span>
+    <div class="secBody">
+      ①〜③を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①LNG基地</th><th>②気化・付臭</th><th>③導管で家庭へ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      都市ガスは、どうやって家庭にとどく、（地下のガス管(導管)を通って ／ ボンベにつめて配送されて ／ 電線を通って）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．もしもの時にそなえよう</span>
+    <div class="secBody">
+      ①〜③を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①電気</th><th>②水道</th><th>③都市ガス</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      電気・水道・都市ガスの中で、もとにもどるまでいちばん時間がかかるのは、（電気 ／ 水道 ／ 都市ガス）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（くらしを支えるくふう）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ 節電の工夫</th><th>い オール電化とガス</th><th>う 再生可能エネルギー</th><th>え もしもの時の備え</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      電気やガスが止まった時のために、日ごろから用意しておくとよい物は、（懐中電灯やカセットコンロ ／ 特に何も必要ない ／ ガスボンベを増やすだけ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 日本の発電の中心は（<span class="fillLine"></span>）。<br>
+      ② 電気の電圧は、送る時にいっきに高くしてから、家庭にとどくまで（<span class="fillLine"></span>）。<br>
+      ③ 都市ガスは（<span class="fillLine"></span>）を通って家庭にとどく。<br>
+      ④ 大きな地震のあと、いちばん時間がかかってもとにもどるのは（<span class="fillLine sm"></span>）。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">⚡</span>
+        <div>
+          ①お家の電気やガスのメーターや検針票を見つけてみよう。<br>
+          ②懐中電灯やカセットコンロなど、もしもの時の備えがあるか、おうちの人といっしょに確認してみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　クバルの送電塔 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】クバルの送電塔 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4社会「電気・ガスの供給」・学力幅あり・協力型／ 使うもの：「kubaru.html」・プロジェクタ・このノート（1ページ目を人数分）。社会・地理分野の16作目、みずの旅（水道）・ワケルの清掃工場（ごみ）に続くライフライン3点セットの最後の1つです。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_soden</b> などで途中再開（m_hatsuden／m_soden／m_gas／m_bousai／hakase／ending）</li>
+      <li>☐ 可能であれば、おうちの電気・ガスの検針票（もしあれば）を見せると、身近な話として導入しやすくなります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜10分</td><td>🏭 発電の種類を発見しよう</td><td>①〜⑤を発見し、火力発電が中心であることを確認。シート２に記録</td></tr>
+      <tr><td class="min">10〜20分</td><td>⚡ 電気の旅（<b>今日の見せ場</b>）</td><td>「つぎへすすめる」ボタンで①〜⑦まで進め、電圧がいっきに上がってから少しずつ下がる様子を確認。シート３に記録</td></tr>
+      <tr><td class="min">20〜27分</td><td>🔥 ガスの旅</td><td>①〜③を発見し、LNG基地から導管を通って家庭にとどく流れを確認。シート４に記録</td></tr>
+      <tr><td class="min">27〜36分</td><td>⚠️ もしもの時にそなえよう</td><td>①〜③を発見し、復旧までの日数を比較。よそうタイムをここで回収。シート５に記録</td></tr>
+      <tr><td class="min">36〜43分</td><td>🔎 はかせチャレンジ</td><td>節電・オール電化・再生可能エネルギー・家庭の備えを発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「お家のメーターを見つけよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「ガスの旅」を右下「つぎ▶」でスキップ可（<b>電気の旅／もしもの時にそなえよう／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ 電気</b>／発電の種類＝<b>火力発電</b>／電気の旅＝<b>いっきに高くしてから、少しずつ下げていく</b>／ガスの旅＝<b>地下のガス管(導管)を通って</b>／もしもの時にそなえよう＝<b>都市ガス</b>／はかせ＝<b>懐中電灯やカセットコンロ</b>／
+      まとめ＝①<b>火力発電</b>　②<b>少しずつ下がる</b>　③<b>地下の導管</b>　④<b>都市ガス</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の社会科です）</h2>
+    <ul>
+      <li>送電電圧の段階：発電所（数千V〜2万V、代表値11,000V）→超高圧変電所（275,000V）→一次変電所（154,000V）→二次変電所（66,000V）→配電用変電所（6,600V）→柱上トランス（200V）→家庭のコンセント（100V）。高電圧にする理由は送電時の発熱によるロスを減らすため</li>
+      <li>日本の電源構成（2024年度確報）：火力67.5％・再エネ23.1％・原子力9.4％（政府目標は2030年に再エネ36〜38％・原子力20〜22％・火力41％以下）</li>
+      <li>都市ガスはLNG（液化天然ガス）を海外から輸入し受入基地のタンクに貯蔵、気化・熱量調整・付臭してから地下の導管で家庭へ。LPガスは液体のまま専用ボンベで各戸へ配送という供給方式のちがい</li>
+      <li>災害時のライフライン復旧目安（内閣府想定、首都直下地震等）：電気は約6日、水道は約30日、都市ガスは約55日で復旧（ガスが最も遅いのは、再開栓の際に一軒ずつ安全確認が必要なため）</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「電気の旅」が今日いちばんの見せ場。「①〜⑦、電圧はどう変わった？」「どうしていったん高くするんだろう？」と、記録した数値を見比べさせながら問いかける</li>
+      <li>「もしもの時にそなえよう」は正解を急がせず、①〜③の日数を見比べさせてから「なぜガスがいちばん遅いのか」を考えさせる</li>
+      <li>お家の検針票やメーターを見たことがあるか聞いてみると、身近な話として盛り上がります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「日本の発電の中心は？」「電気は発電所からどう変化する？」「都市ガスはどうやって届く？」「地震のあと一番時間がかかるのは？」</li>
+      <li>おうちミッションでは、お家のメーターや検針票を確認する活動と、もしもの時の備えを家族と確認する活動で、画面の学びと日常の暮らしを結びつける狙い</li>
+      <li>社会・地理分野は本作でひだまり探偵社（地図）・みずの旅（水）・ミズヤの里〜リュウヒョウの岸（土地のくらし）・ネンリンの杜（森林）・ホシゾラの街（公害）・みのりの村（お米）・しおさいの湊（水産業）・ボルトの町工場（自動車工業）・トモシの浜（防災）・ツタエの放送局（情報産業）・ハコブの港（貿易）・ワケルの清掃工場（ごみ）に続く16作目で、みずの旅・ワケルの清掃工場とあわせてライフライン3点セットが完成しました</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

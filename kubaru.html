@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>クバルの送電塔 — 電気・ガスの供給 たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #fffaf0 0%, #fdeecb 45%, #ecd2a0 100%);
+    color: #3a3226;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #c8791b; text-shadow: 0 0 14px rgba(200, 121, 27, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8a6a34; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #fdf2df; border: 2px solid #ecd2a0;
+    font-size: clamp(16px, 1.8vw, 26px); color: #c8a56a;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #ffe6b0, #d98c2b);
+    border-color: #7a4a12; color: #5a3408;
+    box-shadow: 0 0 16px rgba(217, 140, 43, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #fdeecb 60%, #cddce6 100%);
+    border: 3px solid #6b4a1c;
+    box-shadow: inset 0 0 40px rgba(90, 60, 10, .14), 0 4px 18px rgba(90, 60, 10, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #7a5a24; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #d98c2b; color: #fffaf0; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(122, 74, 18, .3);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(160, 120, 60, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #ecd2a0; cursor: pointer;
+    background: linear-gradient(180deg, #f0b25a, #d98c2b); color: #fff;
+    box-shadow: 0 3px 0 #7a4a12; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #d98c2b; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(90, 60, 10, .28), inset 0 0 24px rgba(217, 140, 43, .14);
+    flex-shrink: 0; background: #fffaf0;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #8a6a34;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #c8791b; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #ecd2a0; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #8a6a34; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #3a3226;
+    border: 1.5px solid #ecd2a0;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #c8791b; background: #fdf2df; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #fdf2df); color: #3a3226;
+    border: 2px solid #d98c2b; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #c8791b; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #f0b25a, #d98c2b); color: #fffaf0;
+    box-shadow: 0 3px 0 #7a4a12, 0 5px 12px rgba(90, 60, 10, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #7a4a12; }
+  .btn.sub {
+    background: #fdf2df; color: #8a6a34; box-shadow: 0 3px 0 #ecd2a0;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #3a3226; box-shadow: 0 3px 0 #ecd2a0; font-weight: 400; border: 1.5px solid #ecd2a0; }
+  .btn.choice.picked { background: #fdf2df; outline: 3px solid #d98c2b; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(35, 25, 10, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #fdf2df);
+    border: 3px solid #d98c2b; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(35, 25, 10, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #c8791b; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #c8791b; }
+  .panel .sub { color: #8a6a34; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #3a3226; border: 1.5px solid #ecd2a0; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #8a6a34; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #3a3226; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #ecd2a0; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #d98c2b; background: #fffaf0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #d98c2b; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #d98c2b;
+    color: #c8791b; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #8a6a34;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #fdf2df; color: #8a6a34;
+    border: 1px solid #ecd2a0; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #f5e2bd; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">⚡ クバルの送電塔<small>— 電気・ガスの供給 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_hatsuden" title="発電の種類を発見しよう">★</div>
+    <div class="badge" id="bd_m_soden" title="電気の旅をたどろう">★</div>
+    <div class="badge" id="bd_m_gas" title="ガスの旅を発見しよう">★</div>
+    <div class="badge" id="bd_m_bousai" title="もしもの時にそなえよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">クバルの送電塔</div>
+    <div id="locChip">クバルの送電塔</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">⚡ クバルの送電ビューア 〜見えない電気・ガスの流れを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <defs>
+              <radialGradient id="kubaruBody" cx="35%" cy="30%">
+                <stop offset="0%" stop-color="#fff3d6"/>
+                <stop offset="55%" stop-color="#f0b25a"/>
+                <stop offset="100%" stop-color="#c87a1f"/>
+              </radialGradient>
+            </defs>
+            <g stroke="#d98c2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".85">
+              <path d="M18 44 L28 44 L22 56 L32 56 L16 76"/>
+              <path d="M102 44 L92 44 L98 56 L88 56 L104 76"/>
+            </g>
+            <g fill="#9aa5ae" stroke="#4a5560" stroke-width="1.6">
+              <ellipse cx="60" cy="14" rx="8" ry="4"/>
+              <ellipse cx="60" cy="20" rx="10" ry="4.5"/>
+              <ellipse cx="60" cy="27" rx="11" ry="5"/>
+            </g>
+            <line x1="60" y1="27" x2="60" y2="40" stroke="#4a5560" stroke-width="2.4"/>
+            <circle cx="60" cy="70" r="42" fill="url(#kubaruBody)" stroke="#7a4a12" stroke-width="2.5"/>
+            <g class="eyes">
+              <circle cx="48" cy="70" r="6" fill="#fff"/>
+              <circle cx="72" cy="70" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="70.8" r="3.2" fill="#3a3226"/>
+              <circle cx="72.7" cy="70.8" r="3.2" fill="#3a3226"/>
+            </g>
+            <path d="M48 86 Q60 94 72 86" fill="none" stroke="#3a3226" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="80" r="5" fill="#5a7a94" opacity=".4"/>
+            <circle cx="78" cy="80" r="5" fill="#5a7a94" opacity=".4"/>
+          </svg>
+          <div class="catname">電気と ガスを「<ruby>配<rt>くば</rt></ruby>る」から 生まれた<ruby>精霊<rt>せいれい</rt></ruby> クバル</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">⚡ クバルの送電塔ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   クバルの送電塔 — 電気・ガスの供給（小4社会・地理・協力型・1ファイル）
+   発電の種類（発見型）→電気の旅（メイン操作・数値階段①〜⑦、電圧の変化）→
+   ガスの旅（発見型）→もしもの時にそなえよう（応用推理・災害時の復旧日数比較）→
+   はかせ（節電・オール電化・再生可能エネルギー・家庭の備え・発見型）。
+   数値・事実（WebSearchで裏取り済み）：
+   ・送電電圧の段階：発電所（数千V〜2万V、代表値11,000V）→超高圧変電所（275,000V）
+     →一次変電所（154,000V）→二次変電所（66,000V）→配電用変電所（6,600V）
+     →柱上トランス（200V）→家庭のコンセント（100V）。高電圧にする理由は送電時の
+     発熱によるロスを減らすため。
+   ・日本の電源構成（2024年度確報）：火力67.5%・再エネ23.1%・原子力9.4%
+     （2030年目標は再エネ36〜38%・原子力20〜22%・火力41%以下）。
+   ・都市ガスはLNG（液化天然ガス）を海外から輸入し受入基地のタンクに貯蔵、
+     気化・熱量調整・付臭してから地下の導管で家庭へ。LPガスは液体のまま
+     専用ボンベで各戸へ配送という供給方式のちがい。
+   ・災害時のライフライン復旧目安（内閣府想定、首都直下地震等）：電気は約6日、
+     水道は約30日、都市ガスは約55日（ガスが最も遅いのは一軒ずつ安全確認が
+     必要なため）。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+function fmtVolt(v) {
+  if (v >= 10000) {
+    const man = v / 10000;
+    return (Number.isInteger(man) ? man : man.toFixed(1)) + '万V';
+  }
+  return Math.round(v).toLocaleString() + 'V';
+}
+
+// W辞書はsay()/setWish()等のHTML文脈だけで使う（canvasのfillTextやscope.label/.name、
+// データ配列の.name/.iconには一切渡さない。plain()はHTMLタグを消すだけで<rt>内の読みは
+// 残るため、canvas文脈で使うとふりがなが本文に連結表示されるバグになる過去の教訓）。
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+};
+
+const NUMS = '①②③④⑤⑥⑦';
+
+// ---------- 数値データ（本物度） ----------
+// m_hatsuden：発電の種類を発見しよう（発見型）
+const HATSUDEN_CARDS = [
+  { key: 0, num: '①', icon: '🏭', name: '火力発電', txt: `石油や 天然ガス、石炭を もやして 水を 沸かし、その 蒸気の 力で タービンを まわす。日本の 発電の 中心で、電気の 約7割近くを 作っている。` },
+  { key: 1, num: '②', icon: '💧', name: '水力発電', txt: `ダムに ためた 水を 落とす 力で、タービンを まわす。` },
+  { key: 2, num: '③', icon: '☢️', name: '原子力発電', txt: `ウランが 核分裂する 時に 出る 熱で 水を 沸かし、蒸気の 力で タービンを まわす。` },
+  { key: 3, num: '④', icon: '☀️', name: '太陽光発電', txt: `太陽の 光を、パネルで 直接 電気に 変える。天気に 発電量が 左右される。` },
+  { key: 4, num: '⑤', icon: '🌬️', name: '風力発電', txt: `風の 力で 大きな 羽根(ブレード)を まわし、電気を 作る。` },
+];
+
+// m_soden：電気の旅（メイン操作・数値階段①〜⑦、電圧の変化＝今日の見せ場）
+// 電圧はWebSearchで裏取りした代表値。超高圧変電所でいっきに昇圧し、以降は段階的に降圧する。
+const SODEN_STEPS = [
+  { icon: '🏭', label: '①発電所', volt: 11000, txt: `発電所で 電気が 作られる。電圧は 数千Vから 2万Vくらいだよ。` },
+  { icon: '🗼', label: '②超高圧変電所', volt: 275000, txt: `遠くまで 送る ために、電圧を いっきに 27万5千Vまで 高くする。電圧を 高く すると、送る 時に 熱として 失われる 電気の 量(ロス)を へらせるんだ。` },
+  { icon: '⚡', label: '③一次変電所', volt: 154000, txt: `電圧を 15万4千Vまで 下げる。` },
+  { icon: '⚡', label: '④二次変電所', volt: 66000, txt: `電圧を 6万6千Vまで 下げる。` },
+  { icon: '⚡', label: '⑤配電用変電所', volt: 6600, txt: `電圧を 6千6百Vまで 下げる。街の 電柱を 通る 電線の 電圧だよ。` },
+  { icon: '🔌', label: '⑥柱上トランス', volt: 200, txt: `電柱の 上の トランス(柱上変圧器)で、200Vまで 下げる。` },
+  { icon: '💡', label: '⑦家庭のコンセント', volt: 100, txt: `さいごに 100Vに なって、家庭の コンセントに とどく。` },
+];
+const VOLT_VALUES = SODEN_STEPS.map(s => s.volt);
+const VOLT_LOGS = VOLT_VALUES.map(v => Math.log10(v));
+const LOG_MIN = Math.min(...VOLT_LOGS), LOG_MAX = Math.max(...VOLT_LOGS);
+const VOLT_FRACS = VOLT_LOGS.map(l => (l - LOG_MIN) / (LOG_MAX - LOG_MIN));
+
+// m_gas：ガスの旅（発見型）
+const GAS_CARDS = [
+  { key: 0, num: '①', icon: '🚢', name: 'LNG基地', txt: `外国から 船で 運ばれた 天然ガスを、冷やして 液体(LNG)に した 物を、大きな タンクに ためて おく。` },
+  { key: 1, num: '②', icon: '🌬️', name: '気化・付臭', txt: `ためた LNGを あたためて 気体に もどし、ガス漏れに 気づけるように、わざと においを つける。` },
+  { key: 2, num: '③', icon: '🏠', name: '導管で家庭へ', txt: `地下に うめた ガス管(導管)を 通って、家庭に とどく。これが 都市ガス。ボンベで 配送される LPガスとは ちがう しくみだよ。` },
+];
+
+// m_bousai：もしもの時にそなえよう（応用推理・比較）
+const BOUSAI_CARDS = [
+  { key: 0, num: '①', icon: '⚡', name: '電気', txt: `大きな 地震の あと、電気は 約6日ほどで もとに もどると 考えられている(内閣府の想定)。` },
+  { key: 1, num: '②', icon: '💧', name: '水道', txt: `水道は 約30日ほどで もとに もどると 考えられている。` },
+  { key: 2, num: '③', icon: '🔥', name: '都市ガス', txt: `都市ガスは 約55日ほどと、いちばん 時間が かかると 考えられている。一けん一けん、安全を たしかめてから ガスを 再開する 必要が あるからなんだ。` },
+];
+
+// はかせ：節電・オール電化・再生可能エネルギー・家庭の備え（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '💡', name: '節電の工夫', txt: `使わない 電気は こまめに 消す、LED照明に かえるなど、節電の 工夫で むだな 電気を へらせるよ。` },
+  { key: 1, letter: 'い', icon: '🍳', name: 'オール電化とガス', txt: `料理や お湯を、電気だけで まかなう「オール電化」の 家も 増えている。電気と ガス、それぞれに 良さが あるんだ。` },
+  { key: 2, letter: 'う', icon: '☀️', name: '再生可能エネルギー', txt: `太陽光や 風力などの 再生可能エネルギーを 増やす 取り組みが 進んでいる(2030年の 目標は 再エネ36〜38%)。` },
+  { key: 3, letter: 'え', icon: '🎒', name: 'もしもの時の備え', txt: `懐中電灯・カセットコンロ・モバイルバッテリーなど、電気や ガスが 止まった 時の ために、日ごろから 用意して おくと 安心だよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'hatsuden',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  hatsudenFound: new Set(),
+  sodenIdx: -1,
+  sodenIdxDisplay: -1,
+  gasFound: new Set(),
+  bousaiFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#fffaf0'); g.addColorStop(1, '#cddce6');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  const xs5 = [140, 320, 500, 680, 860];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : cols === 5 ? xs5[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#d98c2b' : '#ecd2a0';
+    gctx.fill(); gctx.strokeStyle = '#d98c2b'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#3a3226'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#3a3226'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．発電の種類を発見しよう（発見型） ----------
+function drawHatsudenScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HATSUDEN_CARDS, S.hatsudenFound, 5, '①〜⑤をタッチして、発電の種類を発見しよう');
+}
+
+// ---------- 2．電気の旅（メイン操作・数値階段①〜⑦） ----------
+function drawSodenScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const barX = 500, baseY = 520, topY = 150, maxH = baseY - topY, barW = 90;
+  gctx.strokeStyle = '#9aa5ae'; gctx.lineWidth = 3 * sc;
+  gctx.strokeRect(X(barX - barW / 2), Y(topY), barW * sc, maxH * sc);
+
+  const idxNow = clamp(Math.round(S.sodenIdxDisplay), 0, 6);
+  const v = clamp(S.sodenIdxDisplay, 0, 6);
+  const frac = S.sodenIdx >= 0 ? lerpArr(VOLT_FRACS, v) : 0;
+  const fillH = maxH * frac;
+  const grad = gctx.createLinearGradient(0, Y(baseY), 0, Y(baseY - fillH || 1));
+  grad.addColorStop(0, '#7a4a12'); grad.addColorStop(1, '#f0b25a');
+  gctx.fillStyle = grad;
+  gctx.fillRect(X(barX - barW / 2), Y(baseY - fillH), barW * sc, fillH * sc);
+
+  gctx.font = `${44 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(S.sodenIdx >= 0 ? SODEN_STEPS[idxNow].icon : '🏭', X(barX), Y(baseY - fillH - 38));
+
+  gctx.fillStyle = '#3a3226'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  const volt = S.sodenIdx >= 0 ? lerpArr(VOLT_VALUES, v) : null;
+  const title = S.sodenIdx >= 0 ? `${SODEN_STEPS[idxNow].label}　${fmtVolt(volt)}` : '発電所から 家庭まで、電気の 旅を たどろう';
+  gctx.fillText(title, X(500), Y(72));
+}
+
+// ---------- 3．ガスの旅（発見型） ----------
+function drawGasScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, GAS_CARDS, S.gasFound, 3, '①〜③をタッチして、ガスの旅を発見しよう');
+}
+
+// ---------- 4．もしもの時にそなえよう（応用推理） ----------
+function drawBousaiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, BOUSAI_CARDS, S.bousaiFound, 3, '①〜③をタッチして、災害時の復旧までの日数をくらべよう');
+}
+
+// ---------- 5．はかせ：節電・オール電化・再生可能エネルギー・家庭の備え ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、くらしを支えるくふうを見てみよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'hatsuden') drawHatsudenScene(X, Y, sc);
+  else if (S.scene === 'soden') drawSodenScene(X, Y, sc);
+  else if (S.scene === 'gas') drawGasScene(X, Y, sc);
+  else if (S.scene === 'bousai') drawBousaiScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- クバルの送電ビューア（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#fffaf0'); grd.addColorStop(1, '#f0d9a0');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#d98c2b';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'voltage') {
+    drawVoltageScope(R, S.scope.idx != null ? S.scope.idx : -1);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#f0b25a88'); g2.addColorStop(1, 'rgba(217,140,43,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#d98c2b'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('⚡', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#d98c2b'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#3a3226';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawVoltageScope(R, idxFloat) {
+    const v = clamp(idxFloat, 0, 6);
+    const idxNow = clamp(Math.round(v), 0, 6);
+    const frac = idxFloat < 0 ? 0 : lerpArr(VOLT_FRACS, v);
+    const baseY = R * 1.62, maxH = R * 1.1, barW = R * 0.5;
+    sctx.strokeStyle = '#9aa5ae'; sctx.lineWidth = R * 0.03;
+    sctx.strokeRect(R - barW / 2, baseY - maxH, barW, maxH);
+    const fillH = maxH * frac;
+    const grad = sctx.createLinearGradient(0, baseY, 0, baseY - maxH);
+    grad.addColorStop(0, '#7a4a12'); grad.addColorStop(1, '#f0b25a');
+    sctx.fillStyle = grad;
+    sctx.fillRect(R - barW / 2, baseY - fillH, barW, fillH);
+    sctx.font = `${R * 0.3}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(idxFloat >= 0 ? SODEN_STEPS[idxNow].icon : '🏭', R, baseY - maxH - R * 0.18);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#d98c2b', '#f0b25a', '#5a7a94', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    hatsuden: '🏭 発電の種類',
+    soden: '⚡ 電気の旅',
+    gas: '🔥 ガスの旅',
+    bousai: '⚠️ もしもの時にそなえよう',
+    hakase: '🔎 はかせチャレンジ',
+    done: '⚡ クバルの送電塔 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'クバルの送電塔';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_hatsuden', 'm_soden', 'm_gas', 'm_bousai', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'hatsuden', icon: '🏭', title: '発電の種類',
+    setup: () => { S.hatsudenFound = new Set(HATSUDEN_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🏭', name: '火力発電' }),
+    text: () => `日本の 発電は、火力発電が 中心。水力・原子力・太陽光・風力も あったね。` },
+  { scene: 'soden', icon: '⚡', title: '電気の旅', video: '4RUfOuBAFbw',
+    setup: () => { Object.assign(S, { sodenIdx: 6, sodenIdxDisplay: 6 }); },
+    scope: () => ({ type: 'voltage', idx: 6, label: `⑦${fmtVolt(SODEN_STEPS[6].volt)}` }),
+    text: () => `発電所から 家庭まで、電圧は いっきに 上がってから、少しずつ 下がっていったね。` },
+  { scene: 'gas', icon: '🔥', title: 'ガスの旅',
+    setup: () => { S.gasFound = new Set(GAS_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🏠', name: '導管で家庭へ' }),
+    text: () => `都市ガスは LNG基地から 気化・付臭されて、地下の 導管を 通って 家庭に とどいたね。` },
+  { scene: 'bousai', icon: '⚠️', title: 'もしもの時にそなえよう',
+    setup: () => { S.bousaiFound = new Set(BOUSAI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🔥', name: '都市ガス' }),
+    text: () => `もしもの時、電気は はやく、都市ガスは いちばん 時間が かかって もとに もどったね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'hatsuden', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">🏭⚡🔥⚠️</div>
+        <h1>クバルの送電塔</h1>
+        <div class="sub">〜 電気・ガスの 供給 〜</div>
+        <p class="talk">ようこそ！ わたしは 電気と ガスを「配る」から 生まれた ${W.seirei}、<b>クバル</b>。この 送電塔で、電気や ガスが 家庭に とどくまでの ひみつを、いっしょに たしかめよう。スイッチを 入れると すぐ 光る 電気は、どこから 来ると 思う？<br>
+        今日は、発電の 種類から、電気の 旅、ガスの 旅、もしもの時の そなえまで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">大きな 地震などで ライフラインが 止まったら、いちばん 早く もとに もどるのは どれだと 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">💧</span><b>ア</b> 水道</div>
+          <div class="vcard" data-v="1"><span class="vicon">⚡</span><b>イ</b> 電気</div>
+          <div class="vcard" data-v="2"><span class="vicon">🔥</span><b>ウ</b> 都市ガス</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：発電の種類を発見しよう（発見型） ---
+  m_hatsuden: {
+    enter() {
+      Object.assign(S, { scene: 'hatsuden', scope: { type: 'idle' }, hatsudenFound: new Set() });
+      updateLoc();
+      setWish('🏭', `①〜⑤を タッチして、発電の 種類を 発見しよう。`);
+      say(`電気は、いろいろな 方法で 作られているよ。どんな 発電方法が あるかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HATSUDEN_CARDS.map(c => ({
+        label: c.num + ' ' + (S.hatsudenFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.hatsudenFound.size >= HATSUDEN_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.hatsudenFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`日本の 発電の 中心に なっているのは、どの 発電方法？`);
+      setButtons(choiceRow(['火力発電', '水力発電', '太陽光発電'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_hatsuden'); S.phase = 'done';
+        say(`せいかい！ 日本の 発電は、火力発電が 中心(2024年度で 約67%)。石油・天然ガス・石炭を もやして 発電しているよ。`);
+        setButtons([{ label: 'つぎへ（電気の旅）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['火力発電', '水力発電', '太陽光発電'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：電気の旅（メイン操作・数値階段①〜⑦） ---
+  m_soden: {
+    enter() {
+      Object.assign(S, { scene: 'soden', sodenIdx: -1, sodenIdxDisplay: -1, scope: { type: 'voltage', idx: -1, label: '' } });
+      updateLoc();
+      setWish('⚡', `「つぎへ すすめる」ボタンで、①(発電所)から ⑦(家庭のコンセント)まで、電気の 旅を たどろう。`);
+      say(`①は 発電所。ボタンで、つぎの 場所へ 進むよ。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.sodenIdx >= SODEN_STEPS.length - 1) { this.finish(); return; }
+      const nextSt = SODEN_STEPS[S.sodenIdx + 1];
+      setControls([{ label: `${nextSt.icon} つぎへ すすめる（${nextSt.label.slice(1)}）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.sodenIdx >= SODEN_STEPS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.sodenIdx, toV = S.sodenIdx + 1;
+      startTween(fromV, toV, 0.8, v => {
+        S.sodenIdxDisplay = v;
+        const idxNow2 = clamp(Math.round(v), 0, 6);
+        S.scope = { type: 'voltage', idx: v, label: `${SODEN_STEPS[idxNow2].label.slice(0, 1)}${fmtVolt(lerpArr(VOLT_VALUES, clamp(v, 0, 6)))}` };
+      }, () => {
+        S.sodenIdx++; S.sodenIdxDisplay = S.sodenIdx;
+        const st = SODEN_STEPS[S.sodenIdx];
+        say(`${st.label}：${st.txt}`);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`①〜⑦まで、電気の 旅を たどったね。電圧は どんな ふうに 変わっていったかな？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`電気は、発電所から 家庭に とどくまで、電圧が どう 変わっていった？`);
+      setButtons(choiceRow(['ずっと同じ電圧のまま', 'いっきに高くしてから、少しずつ下げていく', 'どんどん高くなり続ける'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_soden'); S.phase = 'done';
+        say(`せいかい！ 発電所で 作った 電気は、送る 時の ロスを へらす ために いっきに 電圧を 高くし、そのあと 変電所を 通るたびに 少しずつ 電圧を 下げて、さいごは 家庭で 使える 100Vに なるんだ。`);
+        setButtons([{ label: 'つぎへ（ガスの旅）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど、①〜⑦の 記録を 思い出してみよう。`);
+        setButtons(choiceRow(['ずっと同じ電圧のまま', 'いっきに高くしてから、少しずつ下げていく', 'どんどん高くなり続ける'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：ガスの旅（発見型） ---
+  m_gas: {
+    enter() {
+      Object.assign(S, { scene: 'gas', scope: { type: 'idle' }, gasFound: new Set() });
+      updateLoc();
+      setWish('🔥', `①〜③を タッチして、ガスの 旅を 発見しよう。`);
+      say(`都市ガスは、どうやって 外国から 家庭まで とどくのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(GAS_CARDS.map(c => ({
+        label: c.num + ' ' + (S.gasFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.gasFound.size >= GAS_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.gasFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`都市ガスは、どうやって 家庭に とどく？`);
+      setButtons(choiceRow(['地下のガス管(導管)を通って', 'ボンベにつめて配送されて', '電線を通って'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_gas'); S.phase = 'done';
+        say(`せいかい！ 都市ガスは、地下の ガス管(導管)を 通って とどく。ボンベで 配送される LPガスとは ちがう しくみなんだ。`);
+        setButtons([{ label: 'つぎへ（もしもの時にそなえよう）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['地下のガス管(導管)を通って', 'ボンベにつめて配送されて', '電線を通って'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：もしもの時にそなえよう（応用推理） ---
+  m_bousai: {
+    enter() {
+      Object.assign(S, { scene: 'bousai', scope: { type: 'idle' }, bousaiFound: new Set() });
+      updateLoc();
+      setWish('⚠️', `①〜③を タッチして、災害時の 復旧までの 日数を くらべよう。`);
+      say(`大きな 地震が 起きたら、電気・水道・都市ガスは、どのくらいで もとに もどるのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(BOUSAI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.bousaiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.bousaiFound.size >= BOUSAI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.bousaiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`電気・水道・都市ガスの中で、もとに もどるまで いちばん 時間が かかるのは？`);
+      setButtons(choiceRow(['電気', '水道', '都市ガス'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 2) {
+        sYes(); scopeBurst(); award('m_bousai'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ 都市ガスは、もれが ないか 一けん一けん たしかめてから 使えるように するため、もとに もどるまでに いちばん 時間が かかるんだ。だから、もしもの 時の ために、カセットコンロなどを 用意して おくと 安心だね。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['電気', '水道', '都市ガス'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：節電・オール電化・再生可能エネルギー・家庭の備え ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ くらしを 支える くふうを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`電気や ガスが 止まった 時の ために、日ごろから 用意して おくと よい 物は？`);
+      setButtons(choiceRow(['懐中電灯やカセットコンロ', '特に何も必要ない', 'ガスボンベを増やすだけ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ 懐中電灯・カセットコンロ・モバイルバッテリーなど、日ごろからの 備えが、もしもの 時に 役立つよ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['懐中電灯やカセットコンロ', '特に何も必要ない', 'ガスボンベを増やすだけ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      hideOverlay();
+      if (slide.video) {
+        this.showVideo(slide, n, total, isLast);
+      } else {
+        this.showPlain(slide, n, total, isLast);
+      }
+    },
+    showPlain(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+    showVideo(slide, n, total, isLast) {
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      hideWish();
+      setButtons([
+        { label: '▶ どうがを 見る', cb: () => this.playVideo(slide) },
+        { label: isLast ? 'まとめへ すすむ' : 'つぎへ', cls: 'sub', cb: goNext },
+      ]);
+    },
+    playVideo(slide) {
+      sTap();
+      showOverlay(`
+        <h2>${slide.icon} ${slide.title}</h2>
+        <div style="max-width:380px;margin:0 auto">
+          <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000">
+            <iframe width="100%" height="100%" style="position:absolute;inset:0;border:0"
+              src="https://www.youtube-nocookie.com/embed/${slide.video}?rel=0&modestbranding=1&iv_load_policy=3&autoplay=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+        <p class="foot">動画：エネルギー大学「50万ボルト 電気が作られて家庭にいくまでの流れ」<br>https://www.youtube.com/watch?v=${slide.video}　（先生へ：外部サイトのため、事前に内容をご確認ください）</p>
+        <button class="btn" id="videoCloseBtn">とじる</button>
+      `);
+      $('videoCloseBtn').onclick = () => { sTap(); hideOverlay(); };
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ クバルの送電塔 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 日本の 発電の 中心は（<span class="blankWord" data-a="火力発電">？？？</span>）。<br>
+        ② 電気の 電圧は、送る 時に いっきに 高くしてから、家庭に とどくまで（<span class="blankWord" data-a="少しずつ下がる">？？？</span>）。<br>
+        ③ 都市ガスは（<span class="blankWord" data-a="地下の導管">？？？</span>）を 通って 家庭に とどく。<br>
+        ④ 大きな 地震の あと、いちばん 時間が かかって もとに もどるのは（<span class="blankWord" data-a="都市ガス">？？？</span>）。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ 電気</b>でした！ 電気は 約6日、水道は 約30日、都市ガスは 約55日で もとに もどると 考えられているよ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①お家の 電気や ガスの メーターや 検針票を 見つけてみよう。②懐中電灯や カセットコンロなど、もしもの時の 備えが あるか、おうちの 人と いっしょに 確認してみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#d98c2b'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「日本の発電の中心は？」「電気は発電所からどう変化する？」「都市ガスはどうやって届く？」「地震のあと一番時間がかかるのは？」`);
+      setButtons([
+        { label: '🏭 発電の種類の図', cls: 'sub', cb: () => this.show('hatsuden') },
+        { label: '⚡ 電気の旅の図', cls: 'sub', cb: () => this.show('soden') },
+        { label: '🔥 ガスの旅の図', cls: 'sub', cb: () => this.show('gas') },
+        { label: '⚠️ そなえの図', cls: 'sub', cb: () => this.show('bousai') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_soden などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

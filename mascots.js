@@ -1967,4 +1967,33 @@ const MASCOTS = {
             <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
             <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
           </svg>`,
+  kubaru: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <defs>
+              <radialGradient id="kubaruBody" cx="35%" cy="30%">
+                <stop offset="0%" stop-color="#fff3d6"/>
+                <stop offset="55%" stop-color="#f0b25a"/>
+                <stop offset="100%" stop-color="#c87a1f"/>
+              </radialGradient>
+            </defs>
+            <g stroke="#d98c2b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".85">
+              <path d="M18 44 L28 44 L22 56 L32 56 L16 76"/>
+              <path d="M102 44 L92 44 L98 56 L88 56 L104 76"/>
+            </g>
+            <g fill="#9aa5ae" stroke="#4a5560" stroke-width="1.6">
+              <ellipse cx="60" cy="14" rx="8" ry="4"/>
+              <ellipse cx="60" cy="20" rx="10" ry="4.5"/>
+              <ellipse cx="60" cy="27" rx="11" ry="5"/>
+            </g>
+            <line x1="60" y1="27" x2="60" y2="40" stroke="#4a5560" stroke-width="2.4"/>
+            <circle cx="60" cy="70" r="42" fill="url(#kubaruBody)" stroke="#7a4a12" stroke-width="2.5"/>
+            <g class="eyes">
+              <circle cx="48" cy="70" r="6" fill="#fff"/>
+              <circle cx="72" cy="70" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="70.8" r="3.2" fill="#3a3226"/>
+              <circle cx="72.7" cy="70.8" r="3.2" fill="#3a3226"/>
+            </g>
+            <path d="M48 86 Q60 94 72 86" fill="none" stroke="#3a3226" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="80" r="5" fill="#5a7a94" opacity=".4"/>
+            <circle cx="78" cy="80" r="5" fill="#5a7a94" opacity=".4"/>
+          </svg>`,
 };
