@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ワケルの清掃工場 — ごみのゆくえと再利用 たいけん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef2f0 0%, #dbe4e0 45%, #b0c0ba 100%);
+    color: #33403c;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: .6vh 1.4vw .3vh;
+  }
+  #logo {
+    font-size: clamp(18px, 2.1vw, 29px); font-weight: 700;
+    color: #5c6b68; text-shadow: 0 0 14px rgba(92, 107, 104, .25);
+    white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5f6f6a; font-weight: 400; margin-left: .6em; }
+  #badges { display: flex; gap: .5vw; margin-left: auto; }
+  .badge {
+    width: clamp(30px, 3.2vw, 44px); height: clamp(30px, 3.2vw, 44px);
+    display: grid; place-items: center; border-radius: 50%;
+    background: #eef2f0; border: 2px solid #d3ddd8;
+    font-size: clamp(16px, 1.8vw, 26px); color: #a3b3ae;
+    transition: all .3s;
+  }
+  .badge.on {
+    background: radial-gradient(circle at 35% 30%, #cdf0dc, #3fae6f);
+    border-color: #276b45; color: #1f4a30;
+    box-shadow: 0 0 16px rgba(63, 174, 111, .65);
+    animation: pop .5s;
+  }
+  @keyframes pop { 0% { transform: scale(.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* ---------- メインレイアウト ---------- */
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; gap: 1.1vw;
+    padding: .4vh 1.2vw 1.2vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1.5; position: relative; min-width: 0;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef2ee 60%, #c7d3cc 100%);
+    border: 3px solid #4d6b5c;
+    box-shadow: inset 0 0 40px rgba(51, 64, 60, .14), 0 4px 18px rgba(51, 64, 60, .22);
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+  #stageTitle {
+    position: absolute; top: .55vh; left: 1.4vw; pointer-events: none;
+    color: #4a6a58; font-size: clamp(12px, 1.25vw, 17px);
+    max-width: 56%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #locChip {
+    position: absolute; top: .45vh; right: 1.2vw;
+    background: #3fae6f; color: #eafbf2; font-weight: 700;
+    font-size: clamp(13px, 1.4vw, 19px);
+    padding: .26em .8em; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(39, 107, 69, .35);
+  }
+  /* 操作ボタン */
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .4vw; justify-content: center; align-items: center;
+    padding: .8vh .5vw; background: linear-gradient(180deg, transparent, rgba(140, 153, 148, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(13px, 1.4vw, 20px); font-weight: 700;
+    padding: .42em .8em; border-radius: 14px; border: 2px solid #d3ddd8; cursor: pointer;
+    background: linear-gradient(180deg, #a3b3ae, #5c6b68); color: #fff;
+    box-shadow: 0 3px 0 #33403c; transition: transform .1s, opacity .2s;
+    white-space: nowrap;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+  .ctl.pos { background: linear-gradient(180deg, #4a7a5e, #2c5c42); border-color: #9fcdb0; box-shadow: 0 3px 0 #1f3e2c; }
+  .ctl.pos.sel { background: linear-gradient(180deg, #8fd4ab, #57a377); border-color: #cdeeda; box-shadow: 0 3px 0 #2f6b4a; color: #24352c; }
+
+  #side { flex: 1; display: flex; flex-direction: column; gap: .7vh; min-width: 280px; padding-bottom: 32px; }
+  #scopeWrap {
+    position: relative; width: min(100%, 25vh); aspect-ratio: 1;
+    margin: 0 auto; border-radius: 50%;
+    border: 4px solid #5c6b68; overflow: hidden;
+    box-shadow: 0 3px 14px rgba(51, 64, 60, .28), inset 0 0 24px rgba(92, 107, 104, .14);
+    flex-shrink: 0; background: #eef2f0;
+  }
+  #scope { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #scopeCaption {
+    text-align: center; color: #5f6f6a;
+    font-size: clamp(11px, 1.15vw, 15px); margin-top: .3vh;
+  }
+  #stateName {
+    text-align: center; font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 25px);
+    color: #5c6b68; min-height: 1.3em; line-height: 1.35;
+  }
+
+  /* ---------- ミッションカード ---------- */
+  #missionCard {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6vh;
+    background: #ffffffd9; border: 2px solid #d3ddd8; border-radius: 18px;
+    padding: .8vh .9vw; overflow-y: auto;
+  }
+  #catRow { display: flex; gap: .7vw; align-items: flex-start; }
+  #catBox { flex-shrink: 0; width: clamp(64px, 6.5vw, 96px); text-align: center; }
+  #catBox .catname { font-size: clamp(11px, 1vw, 14px); color: #5f6f6a; }
+  .mascot { width: 100%; animation: floaty 3.7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .mascot .eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+  #bubble {
+    flex: 1; background: #fff; color: #33403c;
+    border: 1.5px solid #d3ddd8;
+    border-radius: 16px; padding: .55em .85em; position: relative;
+    font-size: clamp(14px, 1.4vw, 20px); line-height: 1.6;
+    animation: fadeUp .35s;
+  }
+  #bubble::before {
+    content: ""; position: absolute; left: -10px; top: 26px;
+    border: 7px solid transparent; border-right-color: #fff;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  #bubble b { color: #5c6b68; background: #eef2f0; padding: 0 .2em; border-radius: 4px; }
+
+  #wishCard {
+    display: none; align-items: center; gap: .7vw;
+    background: linear-gradient(180deg, #ffffff, #eef2f0); color: #33403c;
+    border: 2px solid #5c6b68; border-radius: 6px;
+    padding: .4em .7em; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.55;
+    animation: fadeUp .35s; position: relative;
+  }
+  #wishCard .icon { font-size: clamp(26px, 3vw, 42px); flex-shrink: 0; }
+  #wishCard .wtitle { font-size: .75em; color: #5c6b68; font-weight: 700; }
+
+  #btnRow { display: flex; flex-wrap: wrap; gap: .6vw .8vw; justify-content: center; }
+  .btn {
+    font-family: inherit; font-size: clamp(15px, 1.6vw, 22px); font-weight: 700;
+    padding: .45em 1.2em; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(180deg, #a3b3ae, #5c6b68); color: #eef2f0;
+    box-shadow: 0 3px 0 #33403c, 0 5px 12px rgba(51, 64, 60, .3);
+    transition: transform .1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #33403c; }
+  .btn.sub {
+    background: #eef2f0; color: #5f6f6a; box-shadow: 0 3px 0 #d3ddd8;
+    font-weight: 400; font-size: clamp(14px, 1.4vw, 19px);
+  }
+  .btn.choice { background: #fff; color: #33403c; box-shadow: 0 3px 0 #d3ddd8; font-weight: 400; border: 1.5px solid #d3ddd8; }
+  .btn.choice.picked { background: #eef2f0; outline: 3px solid #5c6b68; font-weight: 700; }
+
+  /* ---------- オーバーレイ ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(30, 20, 45, .78);
+  }
+  #overlay.show { display: flex; }
+  .panel {
+    max-width: min(900px, 94vw); max-height: 94vh; overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #eef2f0);
+    border: 3px solid #5c6b68; border-radius: 22px;
+    padding: 2.4vh 3vw; text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 20, 45, .4);
+    animation: fadeUp .4s;
+  }
+  .panel h1 {
+    margin: .1em 0; font-size: clamp(28px, 4.6vw, 54px);
+    color: #5c6b68; text-shadow: 0 2px 0 #fff;
+    letter-spacing: .04em;
+  }
+  .panel h2 { margin: 0 0 .3em; font-size: clamp(20px, 2.6vw, 32px); color: #5c6b68; }
+  .panel .sub { color: #5f6f6a; font-size: clamp(14px, 1.6vw, 21px); margin-bottom: 1.5vh; }
+  .panel p.talk {
+    background: #fff; color: #33403c; border: 1.5px solid #d3ddd8; border-radius: 16px;
+    padding: .5em .8em; font-size: clamp(14px, 1.55vw, 20px); line-height: 1.6;
+    text-align: left; margin: .6vh auto; max-width: 660px;
+  }
+  .panel .foot { color: #5f6f6a; font-size: clamp(11px, 1.1vw, 14px); margin-top: 1.6vh; }
+  .phasesStrip { font-size: clamp(20px, 2.6vw, 34px); letter-spacing: .3em; margin: .2vh 0; }
+
+  .voteCards { display: flex; gap: 1vw; justify-content: center; flex-wrap: wrap; margin: 1.5vh 0; }
+  .vcard {
+    width: clamp(170px, 24vw, 250px); cursor: pointer;
+    background: #fff; color: #33403c; border-radius: 14px;
+    padding: 1.1em .8em; font-size: clamp(14px, 1.5vw, 20px); line-height: 1.6;
+    border: 3px solid #d3ddd8; position: relative; transition: transform .12s;
+  }
+  .vcard:hover { transform: translateY(-3px); }
+  .vcard .vicon { font-size: clamp(30px, 3.6vw, 52px); display: block; margin-bottom: .2em; }
+  .vcard.picked { border-color: #5c6b68; background: #eef2f0; }
+  .vcard.picked::after {
+    content: "✔"; position: absolute; top: -14px; right: -8px;
+    background: #5c6b68; color: #fff; width: 34px; height: 34px; line-height: 34px;
+    border-radius: 50%; font-size: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  #blankArea span.blankWord {
+    display: inline-block; min-width: 3.2em; border-bottom: 3px solid #5c6b68;
+    color: #5c6b68; font-weight: 700; cursor: pointer; text-align: center;
+  }
+
+  /* ---------- エフェクト・先生バー ---------- */
+  #fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; display: none; }
+  #teacherBar {
+    position: fixed; right: 8px; bottom: 6px; z-index: 60;
+    display: flex; gap: 6px; align-items: center;
+    opacity: .4; transition: opacity .2s; font-size: 12px; color: #5f6f6a;
+  }
+  #teacherBar:hover { opacity: 1; }
+  #teacherBar button {
+    font-family: inherit; background: #eef2f0; color: #5f6f6a;
+    border: 1px solid #d3ddd8; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  #teacherBar button:hover { background: #e4eae7; }
+</style>
+</head>
+<body>
+<script>
+/* === 施設PC/古ブラウザ対策 安全スクリプト（ES5で記述） ===
+   ・JSエラーを画面に赤字表示 → 「白画面で原因不明」を防ぐ
+   ・ctx.roundRect ポリフィル（Edge/Chrome 99未満で無く白画面になる対策） */
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+
+<a href="index.html" class="backHome" title="さくひん一覧にもどる">🏠 いちらん</a>
+<header>
+  <div id="logo">♻️ ワケルの清掃工場<small>— ごみのゆくえと再利用 —</small></div>
+  <div id="badges">
+    <div class="badge" id="bd_m_bunbetsu" title="ごみの分別さがしに挑戦しよう">★</div>
+    <div class="badge" id="bd_m_shoukyaku" title="清掃工場で燃やす様子を確かめよう">★</div>
+    <div class="badge" id="bd_m_kiken" title="分別をまちがえるとどうなるか調べよう">★</div>
+    <div class="badge" id="bd_m_saisei" title="資源ごみの生まれ変わりを発見しよう">★</div>
+    <div class="badge" id="bd_hakase" title="はかせ">★</div>
+  </div>
+</header>
+
+<main>
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div id="stageTitle">ワケルの清掃工場</div>
+    <div id="locChip">ワケルの清掃工場</div>
+    <div id="controls"></div>
+  </section>
+
+  <aside id="side">
+    <div id="scopeWrap">
+      <canvas id="scope"></canvas>
+    </div>
+    <div id="scopeCaption">♻️ ワケルの見はりまど 〜ごみのゆくえを見る〜</div>
+    <div id="stateName"></div>
+    <div id="missionCard">
+      <div id="catRow">
+        <div id="catBox">
+          <svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#a3b3ae" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#wakeruGrad)" stroke="#1f4a30" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="wakeruGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#eafbf2"/>
+                <stop offset="55%" stop-color="#8fd4ab"/>
+                <stop offset="100%" stop-color="#3fae6f"/>
+              </radialGradient>
+            </defs>
+            <g stroke="#1f4a30" stroke-width="4" fill="none" stroke-linecap="round" opacity=".5">
+              <path d="M60 44 a22 22 0 0 1 19 11" transform="rotate(0 60 66)"/>
+              <path d="M60 44 a22 22 0 0 1 19 11" transform="rotate(120 60 66)"/>
+              <path d="M60 44 a22 22 0 0 1 19 11" transform="rotate(240 60 66)"/>
+            </g>
+            <g stroke="#33403c" stroke-width="2.4" fill="#8a9994">
+              <rect x="52" y="8" width="13" height="17" rx="2"/>
+            </g>
+            <circle cx="58" cy="5" r="3.4" fill="#d3ddd8" opacity=".7"/>
+            <circle cx="62" cy="0" r="4.4" fill="#d3ddd8" opacity=".5"/>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#33403c"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#33403c"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#33403c" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>
+          <div class="catname"><ruby>塵<rt>ごみ</rt></ruby>を「<ruby>分<rt>わ</rt></ruby>ける」から生まれた<ruby>精霊<rt>せいれい</rt></ruby> ワケル</div>
+        </div>
+        <div id="bubble"></div>
+      </div>
+      <div id="wishCard">
+        <span class="icon"></span>
+        <span class="wtext"><span class="wtitle">♻️ ワケルの清掃工場ミッション</span><br><span class="wbody"></span></span>
+      </div>
+      <div id="btnRow"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay"><div class="panel" id="panelBody"></div></div>
+<canvas id="fx"></canvas>
+
+<div id="teacherBar">
+  <span>せんせい用</span>
+  <button id="tbSound" title="音のオン・オフ">🔊</button>
+  <button id="tbPrev" title="ひとつ前へ">◀ まえ</button>
+  <button id="tbNext" title="次へ（スキップ）">つぎ ▶</button>
+  <button id="tbReset" title="さいしょからやりなおす">↺</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   ワケルの清掃工場 — ごみのゆくえと再利用（小4社会・協力型・1ファイル）
+   ごみの分別さがし（発見型）→清掃工場で燃やす（メイン操作・段階送り）→
+   分別をまちがえるとどうなる？（応用推理）→資源ごみの生まれ変わり（発見型）→
+   はかせ（清掃工場の余熱利用と3R・発見型）。
+   数値・事実（WebSearchで裏取り済み）：
+   ・ごみ総排出量（2024年度）は3811万トン、リサイクル率19.3%（環境省調査）。
+   ・最終処分場は全国1,554施設、残余年数は全国平均で約24.8年（2023年度、環境省）。
+   ・焼却炉は3段階構造（乾燥→燃焼→後燃焼）で完全に燃やしきる。
+   ・清掃工場の余熱は発電・売電や、隣接する温水プール等への熱供給に利用される。
+   ・ペットボトルは約33.7%がペットボトルに再生、他は卵パック・食品トレー・衣類繊維に。
+     びんは繰り返し使う「リターナブルびん」やガラス原料として新しいびんに再生される。
+   ・スプレー缶・カセットボンベを中身が残ったまま出すと、ごみ収集車内で押しつぶされ
+     漏れたガスに引火し火災・爆発事故につながる例が全国の自治体で多発している。
+   ===================================================== */
+
+// ---------- ユーティリティ ----------
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ruby = (k, f) => `<ruby>${k}<rt>${f}</rt></ruby>`;
+const plain = s => s.replace(/<[^>]+>/g, '');
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+function lerpArr(arr, floatIdx) {
+  const last = arr.length - 1;
+  const i0 = clamp(Math.floor(floatIdx), 0, last), i1 = clamp(Math.ceil(floatIdx), 0, last), f = floatIdx - i0;
+  return arr[i0] + (arr[i1] - arr[i0]) * f;
+}
+
+const W = {
+  seirei: ruby('精霊', 'せいれい'),
+  bunbetsu: ruby('分別', 'ぶんべつ'),
+  seisou: ruby('清掃工場', 'せいそうこうじょう'),
+  shoukyaku: ruby('焼却炉', 'しょうきゃくろ'),
+  saishuushobun: ruby('最終処分場', 'さいしゅうしょぶんじょう'),
+  shigen: ruby('資源', 'しげん'),
+  yonetsu: ruby('余熱', 'よねつ'),
+};
+// canvas専用のプレーン文字列（W.xxxはルビ入りHTML文字列なのでcanvasのfillTextや
+// scope.label/nameに渡すとタグが消えるだけで<rt>内の読みは残り連結表示されてしまう。
+// canvas文脈・データ配列のname/labelは必ずルビなしのプレーン文字列で定義する）
+
+const NUMS = '①②③④⑤⑥⑦⑧';
+
+// ---------- 数値データ（本物度） ----------
+// m_bunbetsu：ごみの分別さがし（発見型）
+const BUNBETSU_CARDS = [
+  { key: 0, num: '①', icon: '🍌', name: '生ごみ', txt: `食べ残しや 野菜の 皮など。もえる ごみとして 出すと、${W.seisou}で もやされる。` },
+  { key: 1, num: '②', icon: '🥫', name: 'われた食器・金属', txt: `もえない ごみ。くだいて うめ立てたり、中の 金属を とり出して 再利用したり する。` },
+  { key: 2, num: '③', icon: '♻️', name: 'ペット・かん・びん', txt: `${W.shigen}ごみ。あらって 出すと、リサイクルされて 新しい 製品に 生まれ変わる。` },
+  { key: 3, num: '④', icon: '🪑', name: 'こわれたいす・ふとん', txt: `粗大ごみ。決まった 日に 申しこんで 出す。大きい ため、こわして 処理される。` },
+];
+
+// m_shoukyaku：清掃工場で燃やす（メイン操作・段階送り①〜③）
+// name はcanvas/ボタンラベル(plain()経由)にも使われるため、W辞書のruby文字列を使わずプレーン文字列にする
+// ash：焼却炉内で「もえて灰になった割合」をlerpArr()で補間しゲージ表示する
+const SHOUKYAKU_STEPS = [
+  { key: 0, icon: '💨', name: 'かんそう', ash: 0.15, txt: `まず、ごみの 水分を とばして かわかす。かわいた 方が よく もえる。` },
+  { key: 1, icon: '🔥', name: 'ねんしょう', ash: 0.55, txt: `高い 温度で、ごみの ほとんどを もやす。もえた 熱は、電気や 温水にも 使われる。` },
+  { key: 2, icon: '✨', name: 'あとねんしょう', ash: 0.95, txt: `もえ残りが ないように、さいごまで しっかり もやしきる。` },
+];
+
+// m_kiken：分別をまちがえるとどうなる？（応用推理）
+const KIKEN_CASES = [
+  { key: 0, num: '①', icon: '🧯', name: 'スプレーかん',
+    txt: `中身の 残った スプレーかんを、もえない ごみの ふくろに 入れて 出した。`,
+    ask: { q: `これ、そのまま 出しても だいじょうぶ？`,
+      opts: ['そのまま出してだいじょうぶ', '中身を使い切ってから出す', '気にしなくてよい'], correct: 1,
+      explain: `せいかい！ 中身の 残った スプレーかんは、収集車の 中で つぶれた時に もれた ガスに 火が つき、火事や 爆発の 事故が 全国で 何度も おきているよ。` } },
+  { key: 1, num: '②', icon: '🍙', name: 'よごれた容器',
+    txt: `食べ残しの ある 弁当ようきを、${W.shigen}ごみの ふくろに 入れて 出した。`,
+    ask: { q: `これ、そのまま 出しても だいじょうぶ？`,
+      opts: ['そのまま出してだいじょうぶ', 'よごれを落としてから資源ごみに出す', '気にしなくてよい'], correct: 1,
+      explain: `せいかい！ 食べ残しなどで よごれた ものは、${W.shigen}として 生まれ変われなく なって しまう。きれいに 洗ってから 出す ことが 大切なんだ。` } },
+];
+
+// m_saisei：資源ごみの生まれ変わり（発見型）
+const SAISEI_CARDS = [
+  { key: 0, num: '①', icon: '🧴', name: 'ペットボトル', txt: `あらって 出すと、服の 生地(フリースなど)や 卵パック、また 新しい ペットボトルに 生まれ変わる。` },
+  { key: 1, num: '②', icon: '🥤', name: 'かん', txt: `とかして、新しい かんや 金属製品に 生まれ変わる。` },
+  { key: 2, num: '③', icon: '🍾', name: 'びん', txt: `きれいに 洗って くり返し 使う「リターナブルびん」に なったり、とかして 新しい びんに 生まれ変わったり する。` },
+  { key: 3, num: '④', icon: '📰', name: '紙', txt: `とかして、新しい 紙(トイレットペーパーなど)に 生まれ変わる。` },
+];
+
+// はかせ：清掃工場の余熱利用と3R（発見型）
+const HAKASE_POINTS = [
+  { key: 0, letter: 'あ', icon: '⚡', name: 'もやした熱で発電', txt: `ごみを もやした 熱で タービンを まわし、電気を 作る。工場で 使ったり、電力会社に 売ったり する。` },
+  { key: 1, letter: 'い', icon: '♨️', name: '温水プールを温める', txt: `${W.yonetsu}を 使って お湯を 作り、近くの 温水プールなどに とどける ${W.seisou}も あるよ。` },
+  { key: 2, letter: 'う', icon: '🔄', name: '3R', txt: `ごみを へらす(リデュース)・くり返し 使う(リユース)・再利用する(リサイクル)。3つの Rが、ごみを 減らす 合言葉。` },
+  { key: 3, letter: 'え', icon: '🌏', name: 'わたしたちの心がけ', txt: `買いすぎない、つめかえを 使う、しっかり ${W.bunbetsu}する。小さな 心がけが、${W.saishuushobun}を 守る ことに つながるよ。` },
+];
+
+// ---------- 状態 ----------
+const S = {
+  stepIndex: 0,
+  scene: 'bunbetsu',
+  scope: { type: 'idle' },
+  sound: true,
+  votePicked: new Set(),
+  badges: new Set(),
+  tween: null,
+  phase: '',
+  bunbetsuFound: new Set(),
+  shoukyakuIdx: -1,
+  shoukyakuIdxDisplay: -1,
+  kikenFound: new Set(),
+  saiseiFound: new Set(),
+  hakaseFound: new Set(),
+  furikaeriIdx: 0,
+};
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c || !S.sound) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(660, 0, 0.09, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sZoom = () => { tone(240, 0, 0.28, 'sawtooth', 0.05); tone(340, 0.05, 0.22, 'sawtooth', 0.04); };
+const sClank = () => { tone(220, 0, 0.14, 'square', 0.05); tone(180, 0.08, 0.22, 'square', 0.05); };
+const sHonk = () => { tone(300, 0, 0.2, 'square', 0.08); tone(300, 0.22, 0.2, 'square', 0.08); };
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), scopeCv = $('scope'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), sctx = scopeCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+// ---------- 座標変換 ----------
+const PAD_T = 54, PAD_B = 60, PAD_X = 10;
+const MAPW = 1000, MAPH = 640;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+function bgFill(X, Y, sc) {
+  const g = gctx.createLinearGradient(0, Y(0), 0, Y(640));
+  g.addColorStop(0, '#eef2ee'); g.addColorStop(1, '#c7d3cc');
+  gctx.fillStyle = g; gctx.fillRect(X(0), Y(0), 1000 * sc, 640 * sc);
+}
+
+// ---------- カード描画（発見型ミッション共通） ----------
+function drawCardGrid(X, Y, sc, cards, foundSet, cols, title) {
+  bgFill(X, Y, sc);
+  const xs3 = [220, 500, 780];
+  const xs4 = [180, 380, 620, 820];
+  const xs2 = [340, 660];
+  cards.forEach((c, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const px = cols === 3 ? xs3[col] : cols === 2 ? xs2[col] : xs4[col];
+    const py = row === 0 ? 250 : 440;
+    const done = foundSet.has(c.key);
+    gctx.beginPath(); gctx.arc(X(px), Y(py), 46 * sc, 0, TAU);
+    gctx.fillStyle = done ? '#5c6b68' : '#d3ddd8';
+    gctx.fill(); gctx.strokeStyle = '#5c6b68'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(c.icon, X(px), Y(py - 2));
+    gctx.fillStyle = '#33403c'; gctx.font = `700 ${13 * sc}px sans-serif`;
+    gctx.fillText((c.num || c.letter) + ' ' + plain(c.name), X(px), Y(py + 62));
+  });
+  gctx.fillStyle = '#33403c'; gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 1．ごみの分別さがし（発見型） ----------
+function drawBunbetsuScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, BUNBETSU_CARDS, S.bunbetsuFound, 4, '①〜④をタッチして、ごみの分け方を発見しよう');
+}
+
+// ---------- 2．清掃工場で燃やす（メイン操作・段階送り①〜③） ----------
+function drawShoukyakuScene(X, Y, sc) {
+  bgFill(X, Y, sc);
+  const xs = [250, 500, 750];
+  gctx.strokeStyle = '#8a9c96'; gctx.lineWidth = 4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(xs[0]), Y(320)); gctx.lineTo(X(xs[2]), Y(320)); gctx.stroke();
+  const idxNow = clamp(Math.round(S.shoukyakuIdxDisplay), 0, 2);
+  SHOUKYAKU_STEPS.forEach((st, i) => {
+    const done = S.shoukyakuIdx >= i;
+    const active = S.shoukyakuIdx >= 0 && idxNow === i;
+    gctx.beginPath(); gctx.arc(X(xs[i]), Y(320), (active ? 54 : 46) * sc, 0, TAU);
+    gctx.fillStyle = done ? '#3fae6f' : '#d3ddd8';
+    gctx.fill(); gctx.strokeStyle = '#33403c'; gctx.lineWidth = 2.4 * sc; gctx.stroke();
+    gctx.font = `${34 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+    gctx.fillText(st.icon, X(xs[i]), Y(320 - 2));
+    gctx.fillStyle = '#33403c'; gctx.font = `700 ${14 * sc}px sans-serif`;
+    gctx.fillText((i + 1) + ' ' + st.name, X(xs[i]), Y(320 + 74));
+  });
+  // はい(灰)ゲージ
+  const barY = 460, barX0 = 250, barX1 = 750, barH = 26;
+  gctx.strokeStyle = '#33403c'; gctx.lineWidth = 2 * sc;
+  gctx.strokeRect(X(barX0), Y(barY), (barX1 - barX0) * sc, barH * sc);
+  const val = S.shoukyakuIdx >= 0 ? lerpArr(SHOUKYAKU_STEPS.map(s => s.ash), S.shoukyakuIdxDisplay) : 0;
+  gctx.fillStyle = '#8a9994';
+  gctx.fillRect(X(barX0), Y(barY), (barX1 - barX0) * val * sc, barH * sc);
+  gctx.fillStyle = '#33403c'; gctx.font = `700 ${14 * sc}px sans-serif`; gctx.textAlign = 'center';
+  gctx.fillText('はい(灰)ゲージ', X(500), Y(barY - 14));
+  gctx.font = `700 ${17 * sc}px sans-serif`; gctx.textBaseline = 'middle';
+  const title = S.shoukyakuIdx >= 0 ? `${SHOUKYAKU_STEPS[idxNow].name} の 段階` : 'ごみが もえて 灰に 変わる 様子を 見てみよう';
+  gctx.fillText(title, X(500), Y(70));
+}
+
+// ---------- 3．分別をまちがえるとどうなる？（応用推理） ----------
+function drawKikenScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, KIKEN_CASES, S.kikenFound, 2, '①②をタッチして、2つのケースを調べよう');
+}
+
+// ---------- 4．資源ごみの生まれ変わり（発見型） ----------
+function drawSaiseiScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, SAISEI_CARDS, S.saiseiFound, 4, '①〜④をタッチして、資源ごみの生まれ変わりを発見しよう');
+}
+
+// ---------- 5．はかせ：清掃工場の余熱利用と3R ----------
+function drawHakaseScene(X, Y, sc) {
+  drawCardGrid(X, Y, sc, HAKASE_POINTS, S.hakaseFound, 4, 'あ〜えをタッチして、清掃工場の熱の使いみちを発見しよう');
+}
+
+// ---------- ステージ描画 ----------
+function drawStage(t, dt) {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  if (S.scene === 'bunbetsu') drawBunbetsuScene(X, Y, sc);
+  else if (S.scene === 'shoukyaku') drawShoukyakuScene(X, Y, sc);
+  else if (S.scene === 'kiken') drawKikenScene(X, Y, sc);
+  else if (S.scene === 'saisei') drawSaiseiScene(X, Y, sc);
+  else if (S.scene === 'hakase') drawHakaseScene(X, Y, sc);
+  else if (S.scene === 'done') drawHakaseScene(X, Y, sc);
+}
+
+// ---------- ワケルの見はりまど（丸窓） ----------
+function drawScope(t, dt) {
+  const { w, h, dpr } = fitCanvas(scopeCv);
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  const R = w / 2;
+
+  let grd = sctx.createRadialGradient(R, R, 0, R, R, R);
+  grd.addColorStop(0, '#f7faf9'); grd.addColorStop(1, '#d3ddd8');
+  sctx.fillStyle = grd; sctx.fillRect(0, 0, w, h);
+
+  const mode = S.scope.type;
+  if (mode === 'point') {
+    sctx.fillStyle = '#5c6b68';
+    sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText(S.scope.icon || '🔍', R, R * 0.85);
+    label(S.scope.name || '');
+  } else if (mode === 'burn') {
+    drawBurnScope(R, S.scope.level);
+    label(S.scope.label || '');
+  } else if (mode === 'glow') {
+    const g2 = sctx.createRadialGradient(R, R * 0.85, 0, R, R * 0.85, R * 0.7);
+    g2.addColorStop(0, '#a3b3ae88'); g2.addColorStop(1, 'rgba(63,174,111,0)');
+    sctx.fillStyle = g2; sctx.beginPath(); sctx.arc(R, R * 0.85, R * 0.7, 0, TAU); sctx.fill();
+    sctx.fillStyle = '#5c6b68'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('♻️', R, R * 0.85);
+    label('かんせい！');
+  } else {
+    sctx.fillStyle = '#5c6b68'; sctx.font = `${R * 0.4}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔍', R, R * 0.85);
+    label('お話を きいてみよう');
+  }
+
+  function label(txt) {
+    sctx.font = `700 ${R * 0.098}px sans-serif`;
+    sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    const ly = h - R * 0.24;
+    const tw = sctx.measureText(txt).width;
+    sctx.fillStyle = 'rgba(255,255,255,.88)';
+    sctx.beginPath();
+    sctx.roundRect(R - tw / 2 - 8, ly - R * 0.09, tw + 16, R * 0.18, R * 0.09);
+    sctx.fill();
+    sctx.fillStyle = '#33403c';
+    sctx.fillText(txt, R, ly);
+  }
+
+  function drawBurnScope(R, level) {
+    const lv = clamp(level != null ? level : 0, 0, 1);
+    // はい(灰)がたまっていく縦ゲージ
+    const bx = R * 1.45, bw = R * 0.34, bh = R * 1.1, by0 = R * 1.55;
+    sctx.strokeStyle = '#33403c'; sctx.lineWidth = R * 0.03;
+    sctx.strokeRect(bx - bw / 2, by0 - bh, bw, bh);
+    sctx.fillStyle = '#8a9994';
+    const fh = bh * lv;
+    sctx.fillRect(bx - bw / 2, by0 - fh, bw, fh);
+    // 炎アイコン
+    sctx.font = `${R * 0.5}px sans-serif`; sctx.textAlign = 'center'; sctx.textBaseline = 'middle';
+    sctx.fillText('🔥', R * 0.55, R * 0.85);
+  }
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 70); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 260;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#5c6b68', '#a3b3ae', '#4d6b5c', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function scopeBurst() {
+  const r = $('scopeWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- 汎用トゥイーン ----------
+function startTween(from, to, dur, setter, onDone) {
+  setter(from);
+  S.tween = { t: 0, dur, from, to, setter, onDone, fired: false };
+}
+
+// ---------- メインループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const t = now / 1000, dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.tween) {
+    const tw = S.tween;
+    tw.t = clamp(tw.t + dt / tw.dur, 0, 1);
+    tw.setter(lerp(tw.from, tw.to, easeInOut(tw.t)));
+    if (tw.t >= 1 && !tw.fired) {
+      tw.fired = true;
+      const cb = tw.onDone;
+      S.tween = null;
+      if (cb) cb();
+    }
+  }
+  drawStage(t, dt);
+  drawScope(t, dt);
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') {
+    const b = document.querySelector('#btnRow .btn:not(.sub)') || document.querySelector('#panelBody .btn:not(.sub)');
+    if (b) b.click();
+  }
+});
+
+// ---------- UIヘルパー ----------
+const bubbleEl = $('bubble'), wishEl = $('wishCard'), btnRow = $('btnRow');
+function say(html) {
+  bubbleEl.style.animation = 'none'; void bubbleEl.offsetWidth;
+  bubbleEl.style.animation = ''; bubbleEl.innerHTML = html;
+}
+function setWish(icon, html) {
+  wishEl.style.display = 'flex';
+  wishEl.querySelector('.icon').textContent = icon;
+  wishEl.querySelector('.wbody').innerHTML = html;
+}
+function hideWish() { wishEl.style.display = 'none'; }
+function setButtons(list) {
+  btnRow.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'btn' + (b.cls ? ' ' + b.cls : '');
+    el.innerHTML = b.label;
+    el.onclick = () => { sTap(); b.cb(el); };
+    btnRow.appendChild(el);
+  });
+}
+function award(id) {
+  if (S.badges.has(id)) return;
+  S.badges.add(id);
+  $('bd_' + id).classList.add('on');
+  if (typeof recordBadge === 'function') recordBadge(S.badges.size, document.querySelectorAll('#badges .badge').length);
+}
+const overlayEl = $('overlay'), panelEl = $('panelBody');
+function showOverlay(html) { panelEl.innerHTML = html; overlayEl.classList.add('show'); }
+function hideOverlay() { overlayEl.classList.remove('show'); }
+const controlsEl = $('controls');
+function setControls(list) {
+  controlsEl.innerHTML = '';
+  list.forEach(b => {
+    const el = document.createElement('button');
+    el.className = 'ctl' + (b.cls ? ' ' + b.cls : ''); el.innerHTML = b.label;
+    el.disabled = !!b.disabled;
+    el.onclick = () => { if (el.disabled) return; ac(); b.cb(el); };
+    controlsEl.appendChild(el);
+  });
+}
+function updateLoc() {
+  const titles = {
+    bunbetsu: '♻️ ごみの分別さがし',
+    shoukyaku: '🔥 清掃工場で燃やす',
+    kiken: '⚠️ 分別をまちがえると？',
+    saisei: '🔄 資源ごみの生まれ変わり',
+    hakase: '🔎 はかせチャレンジ',
+    done: '♻️ ワケルの清掃工場 ものがたり',
+  };
+  $('stageTitle').textContent = titles[S.scene] || 'ワケルの清掃工場';
+}
+
+function choiceRow(opts, cb) {
+  return opts.map((label, i) => ({ label, cls: 'choice', cb: el => cb(i, el) }));
+}
+function markPicked(el) {
+  btnRow.querySelectorAll('.choice').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ---------- ステップ ----------
+const FLOW = ['intro', 'vote', 'm_bunbetsu', 'm_shoukyaku', 'm_kiken', 'm_saisei', 'hakase', 'm_furikaeri', 'ending', 'free'];
+
+// ふりかえりタイム：4ミッションの場面を1つずつ見せ直すスライドショー（自作アニメーションで再現）
+const FURIKAERI_SLIDES = [
+  { scene: 'bunbetsu', icon: '♻️', title: 'ごみの分別さがし',
+    setup: () => { S.bunbetsuFound = new Set(BUNBETSU_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🍌', name: '生ごみ' }),
+    text: () => `もえるごみ・もえないごみ・${W.shigen}ごみ・粗大ごみ。ごみは 種類ごとに 分けて 出していたね。` },
+  { scene: 'shoukyaku', icon: '🔥', title: '清掃工場で燃やす',
+    setup: () => { Object.assign(S, { shoukyakuIdx: 2, shoukyakuIdxDisplay: 2 }); },
+    scope: () => ({ type: 'burn', level: 1, label: 'あとねんしょう' }),
+    text: () => `かんそう→ねんしょう→あとねんしょうの 3つの 段階で、しっかり もやしきっていたね。もえたあとの 灰は、${W.saishuushobun}へ うめられる。` },
+  { scene: 'kiken', icon: '⚠️', title: '分別をまちがえると？',
+    setup: () => { S.kikenFound = new Set(KIKEN_CASES.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🧯', name: 'スプレーかん' }),
+    text: () => `中身の 残った スプレーかんは、収集車の 中で 火事の 原因に なることが あったね。分別は 正しく しよう。` },
+  { scene: 'saisei', icon: '🔄', title: '資源ごみの生まれ変わり',
+    setup: () => { S.saiseiFound = new Set(SAISEI_CARDS.map(c => c.key)); },
+    scope: () => ({ type: 'point', icon: '🧴', name: 'ペットボトル' }),
+    text: () => `ペットボトルや かん、びん、紙は、洗って 出すと、新しい 製品に 生まれ変わっていたね。` },
+];
+
+function gotoStep(i) {
+  S.stepIndex = clamp(i, 0, FLOW.length - 1);
+  S.phase = ''; S.tween = null;
+  hideOverlay(); hideWish();
+  setControls([]); setButtons([]);
+  STEPS[FLOW[S.stepIndex]].enter();
+  updateLoc();
+}
+const nextStep = () => gotoStep(S.stepIndex + 1);
+
+const STEPS = {
+  intro: {
+    enter() {
+      Object.assign(S, { scene: 'bunbetsu', scope: { type: 'idle' } });
+      say('……');
+      setButtons([]);
+      showOverlay(`
+        <div class="phasesStrip">♻️🔥⚠️🔄</div>
+        <h1>ワケルの清掃工場</h1>
+        <div class="sub">〜 ごみの ゆくえと 再利用 〜</div>
+        <p class="talk">ようこそ！ わたしは ごみを「分ける」から 生まれた ${W.seirei}、<b>ワケル</b>。この ${W.seisou}で、ごみの ゆくえと 再利用の ひみつを、いっしょに たしかめよう。分けて 出した ごみは、そのあと どこへ 行くと 思う？<br>
+        今日は、ごみの 分け方から、${W.seisou}で もやす 様子、生まれ変わりまで、たしかめに 行こう！</p>
+        <button class="btn" id="startBtn">たいけんを はじめる！</button>
+        <div class="foot">先生へ：F11キーで全画面表示になります。操作はぜんぶ画面のボタンです。</div>
+      `);
+      $('startBtn').onclick = () => { ac(); sTap(); nextStep(); };
+    },
+  },
+
+  vote: {
+    enter() {
+      showOverlay(`
+        <h2>🤔 よそうタイム</h2>
+        <p class="talk">日本の ごみを うめ立てる 場所（${W.saishuushobun}）は、あと 何年くらいで いっぱいに なると 思う？</p>
+        <div class="voteCards">
+          <div class="vcard" data-v="0"><span class="vicon">🌳</span><b>ア</b> あと100年以上</div>
+          <div class="vcard" data-v="1"><span class="vicon">⏳</span><b>イ</b> あと約25年</div>
+          <div class="vcard" data-v="2"><span class="vicon">🚫</span><b>ウ</b> もう空きはない</div>
+        </div>
+        <div class="sub">思う ものに タッチ。きろくシートにも 〇を つけてね。</div>
+        <button class="btn" id="voteGo">よし、たしかめよう！</button>
+      `);
+      panelEl.querySelectorAll('.vcard').forEach(c => {
+        c.onclick = () => { sTap(); panelEl.querySelectorAll('.vcard').forEach(x => x.classList.remove('picked')); c.classList.add('picked');
+          S.votePicked = new Set([+c.dataset.v]);
+        };
+      });
+      $('voteGo').onclick = () => { sTap(); nextStep(); };
+    },
+  },
+
+  // --- M1：ごみの分別さがし（発見型） ---
+  m_bunbetsu: {
+    enter() {
+      Object.assign(S, { scene: 'bunbetsu', scope: { type: 'idle' }, bunbetsuFound: new Set() });
+      updateLoc();
+      setWish('♻️', `①〜④を タッチして、ごみの 分け方を 発見しよう。`);
+      say(`ごみは、種類ごとに 分けて 出すよね。どんな 分け方が あるかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(BUNBETSU_CARDS.map(c => ({
+        label: c.num + ' ' + (S.bunbetsuFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.bunbetsuFound.size >= BUNBETSU_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.bunbetsuFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`生ごみは、何ごみ？`);
+      setButtons(choiceRow(['もえるごみ', 'もえないごみ', '資源ごみ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_bunbetsu'); S.phase = 'done';
+        say(`せいかい！ 生ごみは もえる ごみ。水分が 多いので、${W.seisou}の 焼却炉で もやされるよ。`);
+        setButtons([{ label: 'つぎへ（清掃工場で燃やす）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['もえるごみ', 'もえないごみ', '資源ごみ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M2：清掃工場で燃やす（メイン操作・段階送り） ---
+  m_shoukyaku: {
+    enter() {
+      Object.assign(S, { scene: 'shoukyaku', shoukyakuIdx: -1, shoukyakuIdxDisplay: -1, scope: { type: 'burn', level: 0, label: 'はじまる前' } });
+      updateLoc();
+      setWish('🔥', `「つぎの段階へ」ボタンで、かんそう→ねんしょう→あとねんしょうの 3つの 段階を、じゅんばんに 見てみよう。`);
+      say(`もえる ごみは、${W.seisou}の 中で どうやって もやされるのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      if (S.shoukyakuIdx >= SHOUKYAKU_STEPS.length - 1) { this.finish(); return; }
+      const nextSt = SHOUKYAKU_STEPS[S.shoukyakuIdx + 1];
+      setControls([{ label: `${nextSt.icon} つぎの段階へ（${nextSt.name}）`, cb: () => this.advance() }]);
+    },
+    advance() {
+      if (S.shoukyakuIdx >= SHOUKYAKU_STEPS.length - 1) return;
+      setControls([]);
+      sZoom();
+      const fromV = S.shoukyakuIdx, toV = S.shoukyakuIdx + 1;
+      startTween(fromV, toV, 0.7, v => {
+        S.shoukyakuIdxDisplay = v;
+        const i = clamp(Math.round(v), 0, 2);
+        S.scope = { type: 'burn', level: lerpArr(SHOUKYAKU_STEPS.map(s => s.ash), v), label: SHOUKYAKU_STEPS[i].name };
+      }, () => {
+        S.shoukyakuIdx++; S.shoukyakuIdxDisplay = S.shoukyakuIdx;
+        const st = SHOUKYAKU_STEPS[S.shoukyakuIdx];
+        say(`${st.name}：${st.txt}`);
+        this.refreshCtl();
+      });
+    },
+    finish() {
+      setControls([]);
+      say(`かんそう→ねんしょう→あとねんしょうの 3つの 段階で、しっかり もやしきったね。もえたあとには「灰」が残るよ。その 灰は どこへ 行くと 思う？`);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`もえたあとの 灰を うめる 場所（${W.saishuushobun}）は、日本に あと どれくらいの 余裕が あると 思う？`);
+      setButtons(choiceRow(['あと100年以上', 'あと約25年', 'もう空きはない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_shoukyaku'); S.phase = 'done';
+        const votedRight = S.votePicked.has(1);
+        say(`せいかい！ もえたあとの 灰は ${W.saishuushobun}へ うめられる。日本全国の ${W.saishuushobun}は、このままだと あと 約25年ほどで いっぱいに なると 言われているんだ。${votedRight ? '（みんなの よそう、ばっちり！）' : ''}`);
+        setButtons([{ label: 'つぎへ（分別をまちがえると？）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['あと100年以上', 'あと約25年', 'もう空きはない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M3：分別をまちがえるとどうなる？（応用推理） ---
+  m_kiken: {
+    enter() {
+      Object.assign(S, { scene: 'kiken', scope: { type: 'idle' }, kikenFound: new Set() });
+      updateLoc();
+      setWish('⚠️', `①②を タッチして、2つの ケースを くらべ、分別を まちがえると どうなるか 考えよう。`);
+      say(`ごみの 分別を まちがえると、どんな ことが おきるのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(KIKEN_CASES.map(c => ({
+        label: c.num + ' ' + (S.kikenFound.has(c.key) ? plain(c.name) + ' ✓' : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.kikenFound.size >= KIKEN_CASES.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap();
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(c.txt);
+      setButtons([{ label: 'クイズに ちょうせん', cb: () => this.itemAsk(c) }]);
+    },
+    itemAsk(c) {
+      hideWish(); setButtons([]);
+      say(c.ask.q);
+      setButtons(choiceRow(c.ask.opts, (i, el) => this.judgeItem(c, i, el)));
+    },
+    judgeItem(c, i, el) {
+      markPicked(el);
+      if (i === c.ask.correct) {
+        sYes(); scopeBurst();
+        say(c.ask.explain);
+        S.kikenFound.add(c.key);
+        setWish('⚠️', `①②を タッチして、2つの ケースを くらべ、分別を まちがえると どうなるか 考えよう。`);
+        this.refreshCtl();
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど 考えてみよう。`);
+        setButtons(choiceRow(c.ask.opts, (i2, el2) => this.judgeItem(c, i2, el2)));
+      }
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`分別を まちがえると、どんな こまった ことが おきる？`);
+      setButtons(choiceRow(['事故やリサイクルできない原因になる', '何も困らない', 'もえるごみが増えるだけ'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 0) {
+        sYes(); scopeBurst(); award('m_kiken'); S.phase = 'done';
+        say(`せいかい！ 分別を まちがえると、火事などの 事故に つながったり、${W.shigen}として 生まれ変われなく なったり する。正しい 分別が、みんなの 安全と ${W.shigen}を 守る 一歩なんだ。`);
+        setButtons([{ label: 'つぎへ（資源ごみの生まれ変わり）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['事故やリサイクルできない原因になる', '何も困らない', 'もえるごみが増えるだけ'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- M4：資源ごみの生まれ変わり（発見型） ---
+  m_saisei: {
+    enter() {
+      Object.assign(S, { scene: 'saisei', scope: { type: 'idle' }, saiseiFound: new Set() });
+      updateLoc();
+      setWish('🔄', `①〜④を タッチして、資源ごみの 生まれ変わりを 発見しよう。`);
+      say(`きれいに 分けた 資源ごみは、そのあと どんな 物に 生まれ変わるのかな？`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(SAISEI_CARDS.map(c => ({
+        label: c.num + ' ' + (S.saiseiFound.has(c.key) ? plain(c.name) : '？？？'),
+        cb: () => this.reveal(c),
+      })));
+      if (S.saiseiFound.size >= SAISEI_CARDS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(c) {
+      sTap(); S.saiseiFound.add(c.key);
+      S.scope = { type: 'point', icon: c.icon, name: plain(c.name) };
+      scopeBurst();
+      say(`${c.num} <b>${plain(c.name)}</b>：${c.txt}`);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish(); setButtons([]);
+      say(`ペットボトルは、何に 生まれ変わる？`);
+      setButtons(choiceRow(['もえるごみになるだけ', '服や新しいペットボトルなどに生まれ変わる', '何にもならない'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('m_saisei'); S.phase = 'done';
+        say(`せいかい！ ペットボトルは、あらって 出すと、服の 生地や 卵パック、新しい ペットボトルなどに 生まれ変わる。分けて 出すからこそ、${W.shigen}が 生かせるんだ。`);
+        setButtons([{ label: 'つぎへ（はかせチャレンジ）', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['もえるごみになるだけ', '服や新しいペットボトルなどに生まれ変わる', '何にもならない'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- はかせチャレンジ：清掃工場の余熱利用と3R ---
+  hakase: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'idle' }, hakaseFound: new Set() });
+      updateLoc();
+      say(`さいごは <b>はかせチャレンジ</b>！ ${W.seisou}の 熱の 使いみちを 見てみよう。`);
+      this.refreshCtl();
+    },
+    refreshCtl() {
+      setButtons(HAKASE_POINTS.map(p => ({
+        label: p.letter + ' ' + plain(p.name) + (S.hakaseFound.has(p.key) ? ' ✓' : ''),
+        cb: () => this.reveal(p),
+      })));
+      if (S.hakaseFound.size >= HAKASE_POINTS.length) {
+        setButtons([{ label: 'クイズに ちょうせん', cb: () => this.ask() }]);
+      }
+    },
+    reveal(p) {
+      sTap(); S.hakaseFound.add(p.key);
+      S.scope = { type: 'point', name: plain(p.name), icon: p.icon };
+      scopeBurst();
+      say(p.txt);
+      this.refreshCtl();
+    },
+    ask() {
+      hideWish();
+      say(`ごみを へらすために 大切な 3つの 合言葉は？`);
+      setButtons(choiceRow(['もやす・うめる・すてる', 'リデュース・リユース・リサイクル', 'あつめる・はこぶ・すてる'], (i, el) => this.judge(i, el)));
+    },
+    judge(i, el) {
+      markPicked(el);
+      if (i === 1) {
+        sYes(); scopeBurst(); award('hakase'); S.phase = 'done';
+        say(`せいかい！ リデュース(へらす)・リユース(くり返し使う)・リサイクル(再利用する)、この 3Rが ごみを 減らす 合言葉。ひとりひとりの 小さな 心がけが、${W.saishuushobun}を 守る ことに つながるよ。`);
+        setButtons([{ label: 'ふりかえりタイムへ', cb: nextStep }]);
+      } else {
+        sHmm();
+        say(`ちがうよ。もういちど かんがえてみよう。`);
+        setButtons(choiceRow(['もやす・うめる・すてる', 'リデュース・リユース・リサイクル', 'あつめる・はこぶ・すてる'], (i2, el2) => this.judge(i2, el2)));
+      }
+    },
+  },
+
+  // --- ふりかえりタイム：4ミッションの場面を1つずつ見せ直す ---
+  m_furikaeri: {
+    enter() {
+      S.furikaeriIdx = 0;
+      this.show();
+    },
+    show() {
+      const slide = FURIKAERI_SLIDES[S.furikaeriIdx];
+      const n = S.furikaeriIdx + 1, total = FURIKAERI_SLIDES.length;
+      const isLast = S.furikaeriIdx >= total - 1;
+      slide.setup();
+      Object.assign(S, { scene: slide.scene, scope: slide.scope() });
+      updateLoc();
+      const goNext = () => {
+        sTap();
+        if (isLast) { hideOverlay(); nextStep(); } else { S.furikaeriIdx++; this.show(); }
+      };
+      hideOverlay();
+      scopeBurst();
+      say(`<b>ふりかえりタイム（${n}/${total}）${slide.icon} ${slide.title}</b><br>${slide.text()}`);
+      setButtons([{ label: isLast ? 'まとめへ すすむ' : 'つぎへ', cb: goNext }]);
+    },
+  },
+
+  ending: {
+    enter() {
+      Object.assign(S, { scene: 'done', scope: { type: 'glow' } });
+      updateLoc();
+      const votedRight = S.votePicked.has(1);
+      showOverlay(`
+        <h2>⭐ ワケルの清掃工場 みならい にんてい！ ⭐</h2>
+        <div class="phasesStrip">${'★'.repeat(S.badges.size)}${'☆'.repeat(Math.max(0, 5 - S.badges.size))}</div>
+        <p class="talk" id="blankArea">きょうの <b>4つの ひみつ</b>、いえるかな？（タッチで こたえ）<br>
+        ① 生ごみは（<span class="blankWord" data-a="もえるごみ">？？？</span>）として 出す。<br>
+        ② ごみを もやしたあとに 残るのは（<span class="blankWord" data-a="灰(はい)">？？？</span>）で、最終処分場へ うめられる。<br>
+        ③ 中身の 残った スプレーかんを 出すと（<span class="blankWord" data-a="火事や爆発">？？？</span>）の 原因に なる。<br>
+        ④ ペットボトルは（<span class="blankWord" data-a="服や新しいペットボトル">？？？</span>）などに 生まれ変わる。</p>
+        <p class="talk">さいしょの よそうタイム、こたえは <b>イ あと約25年</b>でした！${votedRight ? '（みんなの よそう、ばっちり！）' : ''}</p>
+        <p class="talk">🏠 <b>おうちミッション</b><br>①家で 出た ごみを、なに ごみに 分けるか おうちの 人と いっしょに 調べてみよう。②ペットボトルや かんを 出す前に、中を きれいに あらう ことを ためしてみよう。</p>
+        <div style="display:flex;gap:1vw;justify-content:center;flex-wrap:wrap;margin-top:1.5vh">
+          <button class="btn" id="freeBtn">じゆうモードで あそぶ</button>
+          <button class="btn sub" id="againBtn">はじめから もういちど</button>
+        </div>
+      `);
+      sFanfare();
+      setTimeout(scopeBurst, 200);
+      panelEl.querySelectorAll('.blankWord').forEach(sp => {
+        sp.onclick = function () {
+          this.textContent = this.dataset.a;
+          this.style.color = '#5c6b68'; sYes(); scopeBurst();
+        };
+      });
+      $('freeBtn').onclick = () => { sTap(); gotoStep(FLOW.indexOf('free')); };
+      $('againBtn').onclick = () => { location.reload(); };
+    },
+  },
+
+  free: {
+    enter() {
+      Object.assign(S, { scene: 'hakase', scope: { type: 'glow' } });
+      updateLoc();
+      say(`<b>じゆうモード</b>だよ！ ${ruby('友', 'とも')}だちと クイズを 出しあおう。<br>れい：「生ごみは何ごみ?」「もやしたあとの灰はどこへ行く?」「スプレーかんはそのまま出していい?」「ペットボトルは何に生まれ変わる?」`);
+      setButtons([
+        { label: '♻️ 分別の図', cls: 'sub', cb: () => this.show('bunbetsu') },
+        { label: '🔥 清掃工場の図', cls: 'sub', cb: () => this.show('shoukyaku') },
+        { label: '⚠️ 分別まちがいの図', cls: 'sub', cb: () => this.show('kiken') },
+        { label: '🔄 生まれ変わりの図', cls: 'sub', cb: () => this.show('saisei') },
+        { label: '🔎 はかせチャレンジの図', cls: 'sub', cb: () => this.show('hakase') },
+        { label: 'まとめに もどる', cls: 'sub', cb: () => gotoStep(FLOW.indexOf('ending')) },
+      ]);
+    },
+    show(scene) { S.scene = scene; updateLoc(); sTap(); },
+  },
+};
+
+// ---------- 先生バー ----------
+$('tbPrev').onclick = () => gotoStep(S.stepIndex - 1);
+$('tbNext').onclick = () => gotoStep(S.stepIndex + 1);
+$('tbReset').onclick = () => { if (confirm('さいしょから やりなおしますか？')) location.reload(); };
+$('tbSound').onclick = function () { S.sound = !S.sound; this.textContent = S.sound ? '🔊' : '🔇'; };
+
+// ---------- 開始 ----------
+// （URLの後ろに ?step=m_pos などで途中から始められます）
+const qsStep = new URLSearchParams(location.search).get('step');
+gotoStep(Math.max(0, FLOW.indexOf(qsStep)));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

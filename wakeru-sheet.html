@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<title>ワケルの清掃工場 きろくノート（A4印刷用）</title>
+<style>
+  .backHomeSheet{
+    color:#fff; text-decoration:none; font-weight:700;
+    background:rgba(255,255,255,.25); padding:8px 16px; border-radius:8px;
+  }
+  .backHomeSheet:hover{ background:rgba(255,255,255,.4); }
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: #222; margin: 0; background: #888;
+  }
+  rt { font-size: 0.45em; }
+  .page {
+    width: 210mm; min-height: 296mm; margin: 8px auto; padding: 10mm;
+    background: #fff; page-break-after: always;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; width: auto; min-height: auto; padding: 0; }
+    #printBar { display: none; }
+  }
+  #printBar {
+    position: sticky; top: 0; z-index: 10; background: #5c6b68; color: #fff;
+    padding: 10px 16px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  #printBar button {
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    background: #a3b3ae; border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+  }
+  #printBar small { opacity: .9; }
+
+  /* ---------- 子ども用シート ---------- */
+  .sheetHead {
+    display: flex; align-items: center; gap: 4mm;
+    border-bottom: 1.2mm solid #222; padding-bottom: 2mm; margin-bottom: 2.5mm;
+  }
+  .sheetHead h1 { font-size: 13pt; margin: 0; white-space: nowrap; }
+  .sheetHead .stars { font-size: 9pt; letter-spacing: .15em; }
+  .nameBox { margin-left: auto; font-size: 9.5pt; white-space: nowrap; }
+  .nameBox .line { display: inline-block; width: 26mm; border-bottom: .4mm solid #222; }
+  .nameBox .line.short { width: 16mm; }
+
+  .sec { margin-bottom: 0.8mm; }
+  .secTitle {
+    display: inline-block; background: #222; color: #fff;
+    font-size: 10pt; font-weight: 700;
+    padding: .6mm 3.5mm; border-radius: 4mm; margin-bottom: .8mm;
+  }
+  .secBody { font-size: 9pt; line-height: 1.28; }
+
+  .voteRow { display: flex; gap: 2mm; margin-top: 1mm; flex-wrap: wrap; }
+  .voteOpt {
+    flex: 1; min-width: 28mm; border: .5mm solid #222; border-radius: 3mm;
+    padding: 1.1mm 2mm; font-size: 8.4pt; text-align: center; line-height: 1.35;
+  }
+  .voteOpt .vnum { font-weight: 700; }
+
+  .levelTable { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin-top: 1mm; text-align: center; }
+  .levelTable th, .levelTable td { border: .4mm solid #222; padding: 1.3mm 1mm; }
+  .levelTable th { background: #eef2f0; }
+  .levelTable td.res { height: 6mm; }
+
+  .roundTable { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 1mm; }
+  .roundTable th, .roundTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: center; }
+  .roundTable th { background: #eef2f0; }
+
+  .fillLine { display: inline-block; width: 20mm; border-bottom: .5mm solid #222; height: 5mm; }
+  .fillLine.sm { width: 12mm; }
+
+  .homeBox { display: flex; gap: 4mm; align-items: center; border: .5mm dashed #222; border-radius: 3mm; padding: 2mm 3mm; }
+  .homeBox .icon { font-size: 22pt; }
+
+  .footNote { text-align: center; font-size: 9pt; margin-top: .6mm; letter-spacing: .2em; }
+
+  /* ---------- 先生用ページ ---------- */
+  .tHead { border-bottom: 1mm solid #222; padding-bottom: 1.2mm; margin-bottom: 2.2mm; }
+  .tHead h1 { font-size: 13.5pt; margin: 0; }
+  .tHead .sub { font-size: 9pt; color: #555; }
+  .tSec { margin-bottom: 1.8mm; }
+  .tSec h2 {
+    font-size: 10pt; margin: 0 0 1mm;
+    border-left: 2.5mm solid #222; padding-left: 2mm;
+  }
+  .tSec, .tSec p, .tSec li, .tSec td, .tSec th { font-size: 8.5pt; line-height: 1.3; }
+  .tSec ul { margin: 0; padding-left: 5mm; }
+  .flowTable { width: 100%; border-collapse: collapse; }
+  .flowTable th, .flowTable td { border: .4mm solid #222; padding: 1mm 1.6mm; text-align: left; }
+  .flowTable th { background: #eee; white-space: nowrap; }
+  .flowTable .min { white-space: nowrap; font-weight: 700; text-align: center; }
+  .ansBox { border: .5mm solid #222; border-radius: 2mm; padding: 2mm 3mm; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="printBar">
+  <a href="wakeru.html" class="backHomeSheet">↩ じゅぎょうに もどる</a>
+  <a href="index.html" class="backHomeSheet">🏠 一覧へ</a>
+  <button onclick="window.print()">🖨 いんさつする</button>
+  <small>1ページ目＝子ども用（人数分）／ 2ページ目＝先生用（1枚）。印刷画面で「ページ指定」をすると分けて刷れます。</small>
+</div>
+
+<!-- ========== 1ページ目：子ども用きろくノート ========== -->
+<div class="page">
+  <div class="sheetHead">
+    <h1>♻️ ワケルの清掃工場 きろくノート</h1>
+    <span class="stars">☆☆☆☆☆</span>
+    <span class="nameBox">なまえ <span class="line"></span>　<ruby>日<rt>ひ</rt></ruby>づけ <span class="line short"></span></span>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">１．よそうタイム</span>
+    <div class="secBody">
+      日本のごみをうめ立てる場所（最終処分場）は、あと何年くらいでいっぱいになると思う？（１つに 〇）
+      <div class="voteRow">
+        <div class="voteOpt"><span class="vnum">ア</span> あと100年以上</div>
+        <div class="voteOpt"><span class="vnum">イ</span> あと約25年</div>
+        <div class="voteOpt"><span class="vnum">ウ</span> もう空きはない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">２．ごみの分別さがし</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①生ごみ</th><th>②われた食器・小さな金属</th><th>③ペットボトル・かん・びん・紙</th><th>④こわれたいす・ふとん</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      生ごみは、何ごみ、（もえるごみ ／ もえないごみ ／ 資源ごみ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">３．清掃工場で燃やす</span>
+    <div class="secBody">
+      ①〜③の段階を見て、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①かんそう</th><th>②ねんしょう</th><th>③あとねんしょう</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      もえたあとの灰をうめる場所（最終処分場）は、日本にあとどれくらいの余裕がある、（あと100年以上 ／ あと約25年 ／ もう空きはない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">４．分別をまちがえるとどうなる？</span>
+    <div class="secBody">
+      ①スプレーかんは、（そのまま出してだいじょうぶ ／ 中身を使い切ってから出す）。<br>
+      ②よごれた資源ごみは、（そのまま出してだいじょうぶ ／ よごれを落としてから出す）。<br>
+      分別をまちがえると、どんなこまったことがおきる、（事故やリサイクルできない原因になる ／ 何も困らない ／ もえるごみが増えるだけ）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">５．資源ごみの生まれ変わり</span>
+    <div class="secBody">
+      ①〜④を見つけて、〇をつけよう。
+      <table class="roundTable">
+        <tr><th>①ペットボトル</th><th>②かん</th><th>③びん</th><th>④紙</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      ペットボトルは、何に生まれ変わる、（もえるごみになるだけ ／ 服や新しいペットボトルなどに生まれ変わる ／ 何にもならない）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">６．はかせチャレンジ（清掃工場の余熱利用と3R）</span>
+    <div class="secBody">
+      見つけたものに 〇を つけよう。
+      <table class="roundTable">
+        <tr><th>あ もやした熱で発電</th><th>い 温水プールを温める</th><th>う 3R</th><th>え わたしたちの心がけ</th></tr>
+        <tr><td>☐</td><td>☐</td><td>☐</td><td>☐</td></tr>
+      </table>
+      ごみをへらすために大切な3つの合言葉は、（もやす・うめる・すてる ／ リデュース・リユース・リサイクル ／ あつめる・はこぶ・すてる）
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">７．きょうの ひみつ（まとめ）</span>
+    <div class="secBody">
+      ① 生ごみは（<span class="fillLine sm"></span>）として 出す。<br>
+      ② もやしたあとに 残るのは（<span class="fillLine sm"></span>）で、最終処分場へ うめられる。<br>
+      ③ 中身の 残った スプレーかんを 出すと（<span class="fillLine"></span>）の 原因に なる。<br>
+      ④ ペットボトルは（<span class="fillLine"></span>）などに 生まれ変わる。
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="secTitle">８．おうちミッション</span>
+    <div class="secBody">
+      <div class="homeBox">
+        <span class="icon">♻️</span>
+        <div>
+          ①家で出たごみを、なにごみに分けるかおうちの人といっしょに調べてみよう。<br>
+          ②ペットボトルやかんを出す前に、中をきれいにあらうことをためしてみよう。<br>
+          ☐ たしかめた　☐ たしかめた
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footNote">✦ ✦ ✦　ワケルの清掃工場 見習い、きょうも おつかれさま！　✦ ✦ ✦</div>
+</div>
+
+<!-- ========== 2ページ目：先生用 進行メモ ========== -->
+<div class="page">
+  <div class="tHead">
+    <h1>【先生用】ワケルの清掃工場 — 授業進行メモ（45分）</h1>
+    <div class="sub">対象：小4社会「ごみのゆくえと再利用」・学力幅あり・協力型／ 使うもの：「wakeru.html」・プロジェクタ・このノート（1ページ目を人数分）。社会・地理分野の15作目です。</div>
+  </div>
+
+  <div class="tSec">
+    <h2>前日までの準備チェック</h2>
+    <ul>
+      <li>☐ 授業で使うPCでHTMLを開き、各ミッションを一通り操作して確認（ネット接続不要）</li>
+      <li>☐ プロジェクタ接続・<b>F11で全画面</b>／音の確認（出なくても成立。右下「せんせい用」🔊で消音可）</li>
+      <li>☐ シート1ページ目を人数分印刷。中断時は URL の後ろに <b>?step=m_kiken</b> などで途中再開（m_bunbetsu／m_shoukyaku／m_kiken／m_saisei／hakase／ending）</li>
+      <li>☐ 可能であれば、家庭ごみの分別表やペットボトル・かんなどの実物をいくつか見せてから始めると導入がスムーズです</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>45分の流れ（画面が進行役になります）</h2>
+    <table class="flowTable">
+      <tr><th>時間</th><th>画面</th><th>子どもの動き・声かけ</th></tr>
+      <tr><td class="min">0〜4分</td><td>オープニング → よそうタイム</td><td>シート１に〇。<b>答えは言わない</b>（まとめで判明します）</td></tr>
+      <tr><td class="min">4〜11分</td><td>♻️ ごみの分別さがし</td><td>①〜④を発見し、もえる・もえない・資源・粗大の4分類を確認。シート２に記録</td></tr>
+      <tr><td class="min">11〜19分</td><td>🔥 清掃工場で燃やす（<b>今日の見せ場</b>）</td><td>「つぎの段階へ」ボタンでかんそう→ねんしょう→あとねんしょうを進め、灰ゲージが上がる様子を確認。よそうタイムをここで回収。シート３に記録</td></tr>
+      <tr><td class="min">19〜28分</td><td>⚠️ 分別をまちがえると？</td><td>①②のスプレーかん・生ごみのケースを比較し、事故やリサイクル不可の原因を確認。シート４に記録</td></tr>
+      <tr><td class="min">28〜36分</td><td>🔄 資源ごみの生まれ変わり</td><td>①〜④を発見し、ペットボトル・かん・びん・紙の再生先を確認。シート５に記録</td></tr>
+      <tr><td class="min">36〜43分</td><td>🔎 はかせチャレンジ</td><td>清掃工場の余熱利用と3Rを発見してクイズ。シート６に記録</td></tr>
+      <tr><td class="min">43〜45分</td><td>まとめ → おうちミッション予告</td><td>「？？？」タッチで穴埋め→シート７。「家のごみを分けてみよう」（シート８）を予告</td></tr>
+    </table>
+    <p style="margin:1mm 0 0">⏱ 足りない時は「分別をまちがえると？」を右下「つぎ▶」でスキップ可（<b>清掃工場で燃やす／資源ごみの生まれ変わり／まとめは削らない</b>）。</p>
+  </div>
+
+  <div class="tSec">
+    <h2>答え</h2>
+    <div class="ansBox">
+      よそうタイム＝<b>イ あと約25年</b>／ごみの分別さがし＝<b>もえるごみ</b>／清掃工場で燃やす＝<b>あと約25年</b>／分別をまちがえると＝<b>事故やリサイクルできない原因になる</b>／資源ごみの生まれ変わり＝<b>服や新しいペットボトルなどに生まれ変わる</b>／はかせ＝<b>リデュース・リユース・リサイクル</b>／
+      まとめ＝①<b>もえるごみ</b>　②<b>灰(はい)</b>　③<b>火事や爆発</b>　④<b>服や新しいペットボトル</b>
+    </div>
+  </div>
+
+  <div class="tSec">
+    <h2>中身のたね明かし（本物の社会科です）</h2>
+    <ul>
+      <li>ごみ総排出量（2024年度）は3811万トン、リサイクル率19.3%（環境省調査）。最終処分場は全国1,554施設、残余年数は全国平均で約24.8年（2023年度、環境省）</li>
+      <li>焼却炉は3段階構造（乾燥→燃焼→後燃焼）で完全に燃やしきる。清掃工場の余熱は発電・売電や、隣接する温水プール等への熱供給に利用される</li>
+      <li>ペットボトルは約33.7%がペットボトルに再生、他は卵パック・食品トレー・衣類繊維に。びんは繰り返し使う「リターナブルびん」やガラス原料として新しいびんに再生される</li>
+      <li>スプレー缶・カセットボンベを中身が残ったまま出すと、ごみ収集車内で押しつぶされ漏れたガスに引火し火災・爆発事故につながる例が全国の自治体で多発している</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>声かけのヒント</h2>
+    <ul>
+      <li>「清掃工場で燃やす」が今日いちばんの見せ場。「もやしたあと、ごみはどこにも残らないと思う？」と問いかけ、灰が残り最終処分場へ運ばれることに気づかせる</li>
+      <li>「分別をまちがえると？」は正解を急がせず、①②それぞれの理由を考えさせてから、正しい出し方を確認する</li>
+      <li>子どもたちが家で出しているごみを思い出してもらい、「それは何ごみに分けているかな？」とその場で問いかけると盛り上がります</li>
+    </ul>
+  </div>
+
+  <div class="tSec">
+    <h2>発展・次回への布石</h2>
+    <ul>
+      <li>じゆうモードのクイズ例：「生ごみは何ごみ？」「もやしたあとの灰はどこへ行く？」「スプレーかんはそのまま出していい？」「ペットボトルは何に生まれ変わる？」</li>
+      <li>おうちミッションでは、家庭ごみの分別を家族と確認する活動と、資源ごみを洗ってから出す活動で、画面の学びと日常の暮らしを結びつける狙い</li>
+      <li>社会・地理分野は本作でひだまり探偵社（地図）・みずの旅（水）・ミズヤの里〜リュウヒョウの岸（土地のくらし）・ネンリンの杜（森林）・ホシゾラの街（公害）・みのりの村（お米）・しおさいの湊（水産業）・ボルトの町工場（自動車工業）・トモシの浜（防災）・ツタエの放送局（情報産業）・ハコブの港（貿易）に続く15作目です</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

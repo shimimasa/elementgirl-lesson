@@ -1902,4 +1902,41 @@ const MASCOTS = {
             <circle cx="30" cy="70" r="5" fill="#ffce9e" opacity=".5"/>
             <circle cx="90" cy="70" r="5" fill="#ffce9e" opacity=".5"/>
           </svg>`,
+  wakeru: `<svg class="mascot" viewBox="0 0 120 130" aria-hidden="true">
+            <g stroke="#a3b3ae" stroke-width="4" stroke-linecap="round" opacity=".85">
+              <path d="M14 40 Q26 36 30 46" fill="none"/>
+              <path d="M8 58 L34 56" fill="none"/>
+              <path d="M16 78 Q26 82 32 74" fill="none"/>
+              <path d="M106 40 Q94 36 90 46" fill="none"/>
+              <path d="M112 58 L86 56" fill="none"/>
+              <path d="M104 78 Q94 82 88 74" fill="none"/>
+            </g>
+            <circle cx="60" cy="66" r="42" fill="url(#wakeruGrad)" stroke="#1f4a30" stroke-width="2.5"/>
+            <defs>
+              <radialGradient id="wakeruGrad" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#eafbf2"/>
+                <stop offset="55%" stop-color="#8fd4ab"/>
+                <stop offset="100%" stop-color="#3fae6f"/>
+              </radialGradient>
+            </defs>
+            <g stroke="#1f4a30" stroke-width="4" fill="none" stroke-linecap="round" opacity=".5">
+              <path d="M60 44 a22 22 0 0 1 19 11" transform="rotate(0 60 66)"/>
+              <path d="M60 44 a22 22 0 0 1 19 11" transform="rotate(120 60 66)"/>
+              <path d="M60 44 a22 22 0 0 1 19 11" transform="rotate(240 60 66)"/>
+            </g>
+            <g stroke="#33403c" stroke-width="2.4" fill="#8a9994">
+              <rect x="52" y="8" width="13" height="17" rx="2"/>
+            </g>
+            <circle cx="58" cy="5" r="3.4" fill="#d3ddd8" opacity=".7"/>
+            <circle cx="62" cy="0" r="4.4" fill="#d3ddd8" opacity=".5"/>
+            <g class="eyes">
+              <circle cx="48" cy="66" r="6" fill="#fff"/>
+              <circle cx="72" cy="66" r="6" fill="#fff"/>
+              <circle cx="48.7" cy="66.8" r="3.2" fill="#33403c"/>
+              <circle cx="72.7" cy="66.8" r="3.2" fill="#33403c"/>
+            </g>
+            <path d="M48 82 Q60 90 72 82" fill="none" stroke="#33403c" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="42" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+            <circle cx="78" cy="76" r="5" fill="#ffce9e" opacity=".5"/>
+          </svg>`,
 };
