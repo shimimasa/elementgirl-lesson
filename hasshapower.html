@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>はっしゃ！ジャストパワーチャレンジ — ゴムの力タイムアタック</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef9ec 0%, #d8f0d0 45%, #b8e0a8 100%);
+    color: #2d4a1f;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #4a9d3f; text-shadow: 0 0 14px rgba(74, 157, 63, .25);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4a7a35; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #roundChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #roundChip { background: #dcf0d0; color: #2d5016; border: 1.5px solid #a8d888; }
+  #timeChip { background: #4a9d3f; color: #f5fff2; box-shadow: 0 0 14px rgba(74,157,63,.35); }
+  #bestChip { background: #dcf0d0; color: #2d5016; border: 1.5px solid #a8d888; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 20%, #fbfff5 0%, #e6f5da 55%, #c9e6a0 100%);
+    border: 3px solid #7fb85f;
+    box-shadow: inset 0 0 40px rgba(30, 70, 15, .12), 0 4px 18px rgba(30, 70, 15, .2);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%);
+    color: #2d4a1f; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 19px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .6vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(120, 180, 90, .45) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(16px, 2.2vw, 28px); font-weight: 700;
+    padding: .5em 1.4em; border-radius: 16px; border: 2px solid #a8d888; cursor: pointer;
+    background: linear-gradient(180deg, #ff8a3d, #e0662a); color: #fff;
+    box-shadow: 0 3px 0 #8a3d12; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 44px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+  .ctl:disabled { opacity: .3; cursor: default; transform: none; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(20, 50, 10, .74);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #fdfff9, #dcf0d0);
+    border: 3px solid #7fb85f; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 70, 15, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #4a9d3f; margin: 0 0 .3em; text-shadow: 0 2px 0 #fff; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2d4a1f; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #4a9d3f; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fc95f, #4a9d3f); color: #f5fff2;
+    box-shadow: 0 3px 0 #2d5016, 0 5px 12px rgba(30,70,15,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dcf0d0; color: #2d5016; box-shadow: 0 3px 0 #a8d888; border: 1.5px solid #a8d888; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: #dcf0d0; border: 1px solid #a8d888;
+    color: #2d5016; font-size: clamp(11px, 1.2vw, 14px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🎯 はっしゃ！ジャストパワーチャレンジ <small>ゴムの力タイムアタック</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="roundChip">ラウンド 0/3</div>
+    <div id="timeChip">00:00.0</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この はっしゃ！ジャストパワーチャレンジは、<b>ビュンの原っぱ</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ビュンの原っぱを クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="byun.html">ビュンの原っぱへ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 はっしゃ！ジャストパワーチャレンジ</h1>
+    <p>ビュンの原っぱで見た、ゴムの力を おもいだそう！<br>
+    「めざせ：やく〇〇m」を見たら、左右に うごく ゲージを よく見て、<br>
+    ちょうど よい 長さの ところで「🎯 はっしゃ！」を おそう。<br>
+    まちがえても タイムは 止まらないよ。ぜんぶで 3ラウンド、はやさを きそおう！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🏆 3ラウンド ぜんぶ クリア！</h1>
+    <p>ゴムの力で、ジャストなタイミングを つかめたね！</p>
+    <div class="big" id="resultTime">00:00.0</div>
+    <p id="resultBestMsg"></p>
+    <p id="resultMisses"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'byun';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベストタイム ----------
+const BEST_KEY = 'hasshapower_best_ms';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(ms){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(ms)); } catch(e){}
+}
+function fmtTime(ms){
+  const s = ms / 1000;
+  const m = Math.floor(s / 60);
+  const r = (s - m * 60).toFixed(1).padStart(4, '0');
+  return `${String(m).padStart(2,'0')}:${r}`;
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sLaunch = () => { tone(300, 0, 0.1, 'square', 0.08); tone(500, 0.05, 0.12, 'square', 0.07); };
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- ゴムの実測データ（byun.html本編 GOMU_STRETCH/GOMU_DIST を継承） ----------
+const GOMU_STRETCH = [5, 6, 7, 8, 9, 10, 11, 12];
+const GOMU_DIST = GOMU_STRETCH.map(x => Math.round((0.03125 * x * x + 0.375 * x + 0.5) * 10) / 10); // [3.2,3.9,4.7,5.5,6.4,7.4,8.4,9.5]
+function distFromStretch(cm){
+  if (cm <= GOMU_STRETCH[0]) return GOMU_DIST[0];
+  if (cm >= GOMU_STRETCH[7]) return GOMU_DIST[7];
+  for (let i = 0; i < 7; i++) {
+    if (cm >= GOMU_STRETCH[i] && cm <= GOMU_STRETCH[i + 1]) {
+      const t = (cm - GOMU_STRETCH[i]) / (GOMU_STRETCH[i + 1] - GOMU_STRETCH[i]);
+      return GOMU_DIST[i] + (GOMU_DIST[i + 1] - GOMU_DIST[i]) * t;
+    }
+  }
+  return GOMU_DIST[7];
+}
+const QUESTION_POOL = GOMU_STRETCH.map(cm => ({ stretch: cm, dist: distFromStretch(cm) }));
+
+// ---------- れべる構成（3ラウンド×4問、ラウンドが進むほどゲージが速く往復） ----------
+const ROUNDS = 3;
+const PERIODS = [6, 5, 4]; // 秒、ラウンドごとの往復周期（事前にNode.jsシミュレーションで検証済み）
+const TOLERANCE_M = 1.0;
+const WRONG_SHOW_MS = 1400;
+const QUESTIONS_PER_ROUND = 4;
+
+function shuffleArray(a) {
+  const b = a.slice();
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+
+// ---------- ゲージ（引っぱりゲージ、5cm〜12cmを往復） ----------
+const GAUGE_MIN = 5, GAUGE_MAX = 12;
+function gaugeCmAt(now, startTime, period){
+  const elapsed = ((now - startTime) / 1000) % period;
+  const phase = elapsed / period;
+  const tri = phase < 0.5 ? phase * 2 : 2 - phase * 2;
+  return GAUGE_MIN + tri * (GAUGE_MAX - GAUGE_MIN);
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title',   // title | lock | playing | result
+  roundIdx: 0,
+  roundQuestions: [],
+  qIdx: 0,
+  aiming: false,
+  gaugeStartTime: 0,
+  gaugeCm: GAUGE_MIN,
+  launchResult: null, // { stretch, dist, ok }
+  misses: 0,
+  startTime: 0,
+};
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 20, PAD_B = 20, PAD_X = 20;
+const MAPW = 1000, MAPH = 680;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- コース描画（byun.html本編の drawCourseBase/drawCar を移植） ----------
+const COURSE_L = 120, COURSE_R = 900, COURSE_Y = 560, MAX_M = 10;
+function drawCourseBase(X, Y, sc){
+  gctx.fillStyle = '#c9e6a0';
+  gctx.fillRect(X(0), Y(COURSE_Y + 8), 1000 * sc, 120 * sc);
+  gctx.strokeStyle = '#2d5016'; gctx.lineWidth = 3 * sc;
+  gctx.beginPath(); gctx.moveTo(X(COURSE_L), Y(COURSE_Y)); gctx.lineTo(X(COURSE_R), Y(COURSE_Y)); gctx.stroke();
+  gctx.fillStyle = '#2d5016'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('スタート', X(COURSE_L), Y(COURSE_Y + 34));
+  gctx.beginPath(); gctx.moveTo(X(COURSE_L), Y(COURSE_Y - 46)); gctx.lineTo(X(COURSE_L), Y(COURSE_Y + 6)); gctx.stroke();
+  gctx.fillStyle = '#4a7a35'; gctx.font = `${11 * sc}px sans-serif`;
+  for (let m = 0; m <= MAX_M; m += 2) {
+    const tx = COURSE_L + (COURSE_R - COURSE_L) * (m / MAX_M);
+    gctx.strokeStyle = '#8bbf6a'; gctx.lineWidth = 1.6 * sc;
+    gctx.beginPath(); gctx.moveTo(X(tx), Y(COURSE_Y - 6)); gctx.lineTo(X(tx), Y(COURSE_Y + 6)); gctx.stroke();
+    gctx.fillText(m + 'm', X(tx), Y(COURSE_Y + 34));
+  }
+}
+function drawCar(X, Y, sc, mapX){
+  gctx.font = `${40 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🚗', X(mapX), Y(COURSE_Y - 24));
+}
+function drawGoalLine(X, Y, sc, targetDist){
+  const goalX = COURSE_L + (COURSE_R - COURSE_L) * clamp(targetDist / MAX_M, 0, 1);
+  gctx.strokeStyle = '#ff8a3d'; gctx.lineWidth = 3.4 * sc;
+  gctx.beginPath(); gctx.moveTo(X(goalX), Y(COURSE_Y - 80)); gctx.lineTo(X(goalX), Y(COURSE_Y + 6)); gctx.stroke();
+  gctx.font = `${26 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('🚩', X(goalX), Y(COURSE_Y - 96));
+}
+
+// ---------- 引っぱりゲージの描画 ----------
+const GAUGE_X0 = 240, GAUGE_X1 = 760, GAUGE_Y = 190;
+function cmToGaugeX(cm){ return GAUGE_X0 + (cm - GAUGE_MIN) / (GAUGE_MAX - GAUGE_MIN) * (GAUGE_X1 - GAUGE_X0); }
+function drawGauge(X, Y, sc){
+  gctx.fillStyle = '#eef9ec';
+  gctx.beginPath(); gctx.roundRect(X(GAUGE_X0), Y(GAUGE_Y - 20), (GAUGE_X1 - GAUGE_X0) * sc, 40 * sc, 12 * sc); gctx.fill();
+  gctx.strokeStyle = '#7fb85f'; gctx.lineWidth = 3 * sc; gctx.stroke();
+  gctx.fillStyle = '#4a7a35'; gctx.font = `700 ${13 * sc}px sans-serif`; gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  GOMU_STRETCH.forEach(cm => {
+    const tx = cmToGaugeX(cm);
+    gctx.fillText(String(cm), X(tx), Y(GAUGE_Y + 36));
+  });
+  const markerX = cmToGaugeX(S.gaugeCm);
+  gctx.beginPath(); gctx.arc(X(markerX), Y(GAUGE_Y), 16 * sc, 0, TAU);
+  gctx.fillStyle = '#ff8a3d'; gctx.fill();
+  gctx.strokeStyle = '#8a3d12'; gctx.lineWidth = 2.6 * sc; gctx.stroke();
+  gctx.font = `${18 * sc}px sans-serif`;
+  gctx.fillStyle = '#fff';
+  gctx.fillText('✊', X(markerX), Y(GAUGE_Y));
+}
+
+function drawScene(X, Y, sc){
+  const q = S.roundQuestions[S.qIdx];
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillStyle = '#2d5016';
+  gctx.font = `700 ${22 * sc}px sans-serif`;
+  gctx.fillText(`めざせ：やく${q.dist}m`, X(500), Y(50));
+
+  gctx.font = `700 ${15 * sc}px sans-serif`;
+  gctx.fillStyle = '#4a7a35';
+  gctx.fillText('📏 ゲージが ちょうどいい 長さの ところで はっしゃしよう', X(500), Y(90));
+
+  drawGauge(X, Y, sc);
+  drawCourseBase(X, Y, sc);
+  drawGoalLine(X, Y, sc, q.dist);
+
+  if (S.launchResult) {
+    const mapX = COURSE_L + (COURSE_R - COURSE_L) * clamp(S.launchResult.dist / MAX_M, 0, 1);
+    drawCar(X, Y, sc, mapX);
+    gctx.font = `700 ${16 * sc}px sans-serif`;
+    gctx.fillStyle = '#2d4a1f';
+    gctx.fillText(`のばした長さ ${S.launchResult.stretch}cm　やく${S.launchResult.dist}m`, X(500), Y(COURSE_Y + 60));
+  } else {
+    drawCar(X, Y, sc, COURSE_L);
+  }
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawScene(X, Y, sc);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#4a9d3f', '#7fc95f', '#ff8a3d', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('roundChip').textContent = `ラウンド ${S.roundIdx + 1}/${ROUNDS}`;
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${fmtTime(b)}` : 'ベスト —';
+}
+function setResultMsg(html) { $('resultMsg').innerHTML = html; }
+function setControls(list) {
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+
+// ---------- ラウンド進行 ----------
+function startRound(){
+  S.roundQuestions = shuffleArray(QUESTION_POOL).slice(0, QUESTIONS_PER_ROUND);
+  S.qIdx = 0;
+  updateHud();
+  startQuestion();
+}
+function startQuestion(){
+  S.launchResult = null;
+  S.aiming = true;
+  S.gaugeStartTime = performance.now();
+  setResultMsg('ゲージを 見て、ちょうどいい ところで はっしゃしよう！');
+  setControls([{ label: '🎯 はっしゃ！', cb: onLaunch }]);
+}
+function onLaunch(){
+  if (S.phase !== 'playing' || !S.aiming) return;
+  S.aiming = false;
+  sLaunch();
+  const q = S.roundQuestions[S.qIdx];
+  const stretch = Math.round(S.gaugeCm * 10) / 10;
+  const dist = Math.round(distFromStretch(stretch) * 10) / 10;
+  const diff = Math.abs(dist - q.dist);
+  const ok = diff <= TOLERANCE_M;
+  S.launchResult = { stretch, dist, ok };
+  setControls([]);
+  if (ok) {
+    sYes(); stageBurst();
+    setResultMsg('ぴったり！ せいかい！');
+    setTimeout(() => {
+      if (S.phase !== 'playing') return;
+      S.qIdx++;
+      if (S.qIdx >= S.roundQuestions.length) onRoundClear();
+      else startQuestion();
+    }, 1000);
+  } else {
+    S.misses++;
+    sHmm();
+    setResultMsg(`めざせは やく${q.dist}m、とんだのは やく${dist}mだよ。もういちど ためそう！`);
+    setTimeout(() => {
+      if (S.phase !== 'playing') return;
+      startQuestion();
+    }, WRONG_SHOW_MS);
+  }
+}
+function onRoundClear(){
+  setControls([]);
+  if (S.roundIdx >= ROUNDS - 1) { onAllClear(); return; }
+  setResultMsg(`🎉 ラウンド${S.roundIdx + 1} クリア！ つぎのラウンドへ…`);
+  setTimeout(() => {
+    if (S.phase !== 'playing') return;
+    S.roundIdx++;
+    startRound();
+  }, 1300);
+}
+function startGame(){
+  S.roundIdx = 0; S.misses = 0;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  startRound();
+}
+function onAllClear(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare(); stageBurst();
+  const elapsed = performance.now() - S.startTime;
+  const best = getBest();
+  const isNewBest = (best === null) || (elapsed < best);
+  if (isNewBest) setBest(Math.round(elapsed));
+  $('resultTime').textContent = fmtTime(elapsed);
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストタイム こうしん！'
+    : `ベストタイム：${fmtTime(best)}`;
+  $('resultMisses').textContent = `まちがえた かいすう：${S.misses}かい`;
+  $('starListEl').innerHTML = Array.from({ length: ROUNDS }, (_, i) => `<span class="starChip">ラウンド${i + 1}（4もん）</span>`).join('');
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストタイム：<b>${fmtTime(best)}</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.phase === 'playing' && S.aiming) {
+    const period = PERIODS[S.roundIdx];
+    S.gaugeCm = gaugeCmAt(now, S.gaugeStartTime, period);
+  }
+  drawStage();
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    $('timeChip').textContent = fmtTime(now - S.startTime);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
