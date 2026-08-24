@@ -333,6 +333,54 @@
   .bonus-goto:active{ transform: scale(.96); }
   .bonus-card.locked:hover{ transform:none; box-shadow: 0 2px 12px rgba(0,0,0,.18); }
 
+  /* ---- brain training corner ---- */
+  .brain-section{ margin-bottom: 14px; }
+  .brain-label{
+    font-size:13px; font-weight:bold; color:#3f4f9c;
+    margin-bottom:6px;
+    cursor:pointer;
+    list-style:none;
+    user-select:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 2px;
+  }
+  .brain-label::-webkit-details-marker{ display:none; }
+  .brain-label::before{
+    content:"▶";
+    font-size:10px;
+    color:#3f4f9c;
+    transition: transform .15s ease;
+    display:inline-block;
+  }
+  details[open] > .brain-label::before{ transform: rotate(90deg); }
+  .brain-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .brain-card{
+    background: linear-gradient(160deg, #eef4ff, #e2f7ee);
+    border-radius: 16px;
+    padding: 16px 14px;
+    border: 2px solid #6ec7a6;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    position: relative;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    color: #2b3a63;
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .brain-card:hover{ transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.14); }
+  .brain-card .brain-icon{ font-size: 34px; margin-bottom: 6px; }
+  .brain-card h3{ margin: 0 0 4px; font-size: 16px; color: #2b3a63; }
+  .brain-card .brain-meta{ font-size: 12px; color: #4d6a8c; line-height: 1.5; margin: 0; }
+  .brain-card .brain-tag{
+    margin-top: 8px; font-size: 12px; font-weight: bold;
+    background: #6ec7a6; color: #fff; padding: 3px 12px; border-radius: 999px;
+  }
+
   /* ---- controls ---- */
   .controls{
     background: rgba(255,255,255,.6);
@@ -786,6 +834,7 @@
   <div class="stats" id="statsRow"></div>
   <div id="nextUpCard" class="nextup"></div>
   <div id="bonusGamesWrap"></div>
+  <div id="brainGamesWrap"></div>
 
   <button type="button" id="pickRandomBtn" class="pick-random-btn">🎲 どれであそぶ？ おまかせ！</button>
 
@@ -995,6 +1044,12 @@ const BONUS_GAMES = [
   { t:"めざせ みのりチャレンジ", u:"日光と受粉タイムアタック", icon:"🌻", slug:"mezaseminori", requireSlug:"minori", requireTitle:"ミノリの花ばたけ" },
 ];
 
+// ---- あたまのたいそう（脳トレコーナー。教科・進捗と無関係、アンロック無しで常時プレイ可） ----
+let brainOpen = false;
+const BRAIN_GAMES = [
+  { t:"ピカッとじゅんばんメモリー", u:"光る順番おぼえチャレンジ", icon:"💡", slug:"hikarijun" },
+];
+
 const SUBJECT_LABEL = {science:"理科", society:"社会"};
 
 const FIELD_INFO = {
@@ -1196,6 +1251,7 @@ function refreshAll(){
   renderProgress();
   renderNextUp();
   renderBonusGames();
+  renderBrainGames();
   renderProfileBar();
   render();
 }
@@ -1247,6 +1303,26 @@ function renderBonusGames(){
       <div class="bonus-grid">${cards}</div>
     </details>`;
   wrap.querySelector("details").addEventListener("toggle", (e)=>{ bonusOpen = e.target.open; });
+}
+
+function renderBrainGames(){
+  const wrap = document.getElementById("brainGamesWrap");
+  if(!wrap || BRAIN_GAMES.length === 0){ if(wrap) wrap.innerHTML = ""; return; }
+  const cards = BRAIN_GAMES.map(g=>{
+    return `
+      <a class="brain-card" href="${g.slug}.html">
+        <div class="brain-icon">${g.icon}</div>
+        <h3>${g.t}</h3>
+        <div class="brain-meta">${g.u}</div>
+        <div class="brain-tag">▶ あそぶ</div>
+      </a>`;
+  }).join("");
+  wrap.innerHTML = `
+    <details class="brain-section"${brainOpen ? " open" : ""}>
+      <summary class="brain-label">🧠 あたまのたいそう（${BRAIN_GAMES.length}）</summary>
+      <div class="brain-grid">${cards}</div>
+    </details>`;
+  wrap.querySelector("details").addEventListener("toggle", (e)=>{ brainOpen = e.target.open; });
 }
 
 function playedBadgeHTML(it, playedSet, badgeProgress){
@@ -1723,6 +1799,7 @@ initStats();
 renderProgress();
 renderNextUp();
 renderBonusGames();
+renderBrainGames();
 renderProfileBar();
 initSubjectTabs();
 initViewTabs();
@@ -1734,6 +1811,7 @@ window.addEventListener("pageshow", ()=>{
   renderProgress();
   renderNextUp();
   renderBonusGames();
+  renderBrainGames();
   renderProfileBar();
   render();
 });
