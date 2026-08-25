@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>はやわざ きごうへんかん — きごうと すうじの ひょうを みて すばやく こたえよう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4ff 0%, #e6f7f0 100%);
+    color: #2b3a63;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #3f4f9c; text-shadow: 0 0 14px rgba(63, 79, 156, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c76b0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #progressChip, #bestChip, #scoreChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+  #progressChip.urgent { background: #ffdcd4; color: #a8341f; border-color: #e6483c; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef4ff 55%, #dbe6fb 100%);
+    border: 3px solid #6ec7a6;
+    box-shadow: inset 0 0 40px rgba(63, 79, 156, .08), 0 4px 18px rgba(63, 79, 156, .15);
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1.4vh 2vw; gap: 1.6vh;
+    transition: box-shadow .15s;
+  }
+  #stageWrap.flash-ok { box-shadow: inset 0 0 0 10px rgba(63,174,106,.55); }
+  #stageWrap.flash-ng { box-shadow: inset 0 0 0 10px rgba(230,72,60,.55); }
+  #resultMsg {
+    position: relative; z-index: 1;
+    color: #2b3a63; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 18px); min-height: 1.3em;
+    max-width: 90%;
+  }
+  #legendRow {
+    position: relative; z-index: 1;
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    background: #fff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: 8px 12px;
+  }
+  .legendCell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .legendCell canvas { width: 34px; height: 34px; }
+  .legendCell .legendNum { font-weight: 800; color: #3f4f9c; font-size: 15px; }
+  #playArea {
+    position: relative; z-index: 1;
+    flex: 1; width: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2vh;
+  }
+  #symCanvas { width: min(20vh, 140px); height: min(20vh, 140px); }
+  #keypad {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .numBtn {
+    font-family: inherit; font-weight: 800; cursor: pointer;
+    font-size: clamp(20px, 2.6vw, 28px); padding: .4em .9em; border-radius: 16px;
+    border: 2px solid #b9c6f2; background: #fff; color: #3f4f9c;
+    min-width: 56px; box-shadow: 0 3px 0 #b9c6f2;
+    transition: transform .1s;
+  }
+  .numBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b9c6f2; }
+
+  .demoRow { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; margin: .8em 0; }
+  .demoCard {
+    background: #f4f7ff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: .8em 1.2em; text-align: center;
+  }
+  .demoArrow { font-size: clamp(12px, 1.5vw, 15px); color: #4d6a8c; font-weight: 700; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 40, 80, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    border: 3px solid #3f4f9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 40, 80, .3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #3f4f9c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3a63; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3f4f9c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e, 0 5px 12px rgba(39,107,78,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dfe8ff; color: #3f4f9c; box-shadow: 0 3px 0 #b9c6f2; border: 1.5px solid #b9c6f2; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🔣 はやわざ きごうへんかん <small>きごうを すうじに すばやく へんかん</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="scoreChip">せいかい 0</div>
+    <div id="progressChip">のこり 45びょう</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <div id="resultMsg">きごうを みて、ひょうと おなじ すうじを タップ！</div>
+    <div id="legendRow"></div>
+    <div id="playArea">
+      <canvas id="symCanvas" width="200" height="200"></canvas>
+      <div id="keypad">
+        <button type="button" class="numBtn" data-n="1">1</button>
+        <button type="button" class="numBtn" data-n="2">2</button>
+        <button type="button" class="numBtn" data-n="3">3</button>
+        <button type="button" class="numBtn" data-n="4">4</button>
+        <button type="button" class="numBtn" data-n="5">5</button>
+        <button type="button" class="numBtn" data-n="6">6</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔣 はやわざ きごうへんかん</h1>
+    <p>うえに きごうと すうじの ひょう（はんい）が でるよ。<br>
+    まんなかに でてくる きごうを みて、ひょうと おなじ すうじを したの ボタンから すばやく タップしよう。<br>
+    せいげんじかんの なかで、できるだけ おおく せいかいしよう！</p>
+    <div class="demoRow">
+      <div class="demoCard">
+        <div class="demoArrow">ひょうを みながら<br>きごう→すうじに<br>すばやく へんかん</div>
+      </div>
+    </div>
+    <p style="font-size:.85em;color:#4d6a8c;">これは、きごうと すうじの たいおうを おぼえながら、すばやく へんかんする ちからを しらべる けんきゅうで つかわれる あそびかたを もとに つくったよ。さいしょは ひょうを みながらでも、なんども やるうちに おぼえて はやく なるかもよ。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>45びょうで せいかいできた かず</p>
+    <div class="big" id="resultCorrect">0 かい</div>
+    <p id="resultDetail"></p>
+    <p id="resultBestMsg"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+// ---------- ベストきろく ----------
+const BEST_KEY = 'hayakigou_best';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v === null ? null : parseInt(v, 10);
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(740, 0, 0.08, 'triangle', 0.07);
+const sNg = () => tone(220, 0, 0.16, 'sawtooth', 0.06);
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- 記号（きごうと すうじの対応表を毎回ランダムに割り当てる） ----------
+const SYMBOLS = ['circle', 'square', 'triangle', 'star', 'plus', 'diamond'];
+const SYM_COLOR = '#3f4f9c';
+function drawSymbol(canvas, sym) {
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth, cssH = canvas.clientHeight;
+  const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+  const cx = cssW / 2, cy = cssH / 2, size = Math.min(cssW, cssH) * 0.7;
+  ctx.fillStyle = SYM_COLOR;
+  ctx.strokeStyle = SYM_COLOR;
+  ctx.beginPath();
+  if (sym === 'circle') {
+    ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (sym === 'square') {
+    ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+  } else if (sym === 'triangle') {
+    ctx.moveTo(cx, cy - size / 2);
+    ctx.lineTo(cx + size / 2, cy + size / 2);
+    ctx.lineTo(cx - size / 2, cy + size / 2);
+    ctx.closePath();
+    ctx.fill();
+  } else if (sym === 'star') {
+    const outerR = size / 2, innerR = size / 2 * 0.42;
+    for (let i = 0; i < 10; i++) {
+      const r = i % 2 === 0 ? outerR : innerR;
+      const a = -Math.PI / 2 + i * Math.PI / 5;
+      const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+  } else if (sym === 'plus') {
+    const w2 = size * 0.28;
+    ctx.fillRect(cx - w2 / 2, cy - size / 2, w2, size);
+    ctx.fillRect(cx - size / 2, cy - w2 / 2, size, w2);
+  } else if (sym === 'diamond') {
+    ctx.moveTo(cx, cy - size / 2);
+    ctx.lineTo(cx + size / 2, cy);
+    ctx.lineTo(cx, cy + size / 2);
+    ctx.lineTo(cx - size / 2, cy);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+// ---------- 難易度（記号-数字変換課題を土台に。45秒のタイムアタックで正解数を競う） ----------
+const ROUND_MS = 45000;
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function buildLegend() {
+  return shuffle(SYMBOLS).map((sym, i) => ({ num: i + 1, sym }));
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | play | result
+  legend: [],
+  currentSym: null,
+  lastSym: null,
+  correct: 0,
+  wrong: 0,
+  endAt: 0,
+};
+
+// ---------- HUD ----------
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = (b === null) ? 'ベスト —' : `ベスト ${b} かい`;
+}
+function updateBestInfo() {
+  const b = getBest();
+  const el = $('bestInfo');
+  if (b !== null) {
+    el.style.display = 'block';
+    el.innerHTML = `<p>いまの ベストきろく：<b>${b} かい</b></p>`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+function updateScoreChip() { $('scoreChip').textContent = `せいかい ${S.correct}`; }
+function updateProgressChip(remainMs) {
+  const s = Math.max(0, Math.ceil(remainMs / 1000));
+  $('progressChip').textContent = `のこり ${s}びょう`;
+  $('progressChip').classList.toggle('urgent', s <= 10);
+}
+
+// ---------- 凡例（対応表）の描画 ----------
+function renderLegend() {
+  const row = $('legendRow');
+  row.innerHTML = '';
+  S.legend.forEach(entry => {
+    const cell = document.createElement('div');
+    cell.className = 'legendCell';
+    const cv = document.createElement('canvas');
+    cv.width = 68; cv.height = 68;
+    cell.appendChild(cv);
+    const numEl = document.createElement('div');
+    numEl.className = 'legendNum';
+    numEl.textContent = entry.num;
+    cell.appendChild(numEl);
+    row.appendChild(cell);
+    drawSymbol(cv, entry.sym);
+  });
+}
+
+// ---------- ゲーム進行 ----------
+function nextSymbol() {
+  let sym;
+  do { sym = pick(SYMBOLS); } while (sym === S.lastSym);
+  S.lastSym = sym;
+  S.currentSym = sym;
+  drawSymbol($('symCanvas'), sym);
+}
+function flashStage(ok) {
+  const cls = ok ? 'flash-ok' : 'flash-ng';
+  const wrap = $('stageWrap');
+  wrap.classList.add(cls);
+  setTimeout(() => wrap.classList.remove(cls), 180);
+}
+function onNumTap(num) {
+  if (S.phase !== 'play') return;
+  ac();
+  const correctEntry = S.legend.find(e => e.sym === S.currentSym);
+  if (num === correctEntry.num) {
+    S.correct++; sTap(); flashStage(true);
+  } else {
+    S.wrong++; sNg(); flashStage(false);
+  }
+  updateScoreChip();
+  nextSymbol();
+}
+function finishRound() {
+  S.phase = 'result';
+  const best = getBest();
+  let isNewBest = false;
+  if (S.correct > 0 && (best === null || S.correct > best)) {
+    setBest(S.correct);
+    isNewBest = true;
+  }
+  if (isNewBest) { sFanfare(); }
+  const attempts = S.correct + S.wrong;
+  const acc = attempts > 0 ? Math.round((S.correct / attempts) * 100) : 0;
+  $('resultCorrect').textContent = `${S.correct} かい`;
+  $('resultDetail').textContent = attempts > 0 ? `せいどうりつ：${acc}%（${attempts}もんちゅう）` : '';
+  $('resultBestMsg').textContent = S.correct === 0
+    ? 'つぎは がんばろう！'
+    : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} かい`);
+  showOverlay('resultOverlay');
+}
+function startGame() {
+  S.phase = 'play';
+  S.legend = buildLegend();
+  S.correct = 0; S.wrong = 0;
+  S.lastSym = null;
+  updateScoreChip();
+  renderLegend();
+  S.endAt = performance.now() + ROUND_MS;
+  updateProgressChip(ROUND_MS);
+  nextSymbol();
+}
+
+// ---------- テンキー ----------
+document.querySelectorAll('.numBtn').forEach(btn => {
+  const n = parseInt(btn.dataset.n, 10);
+  btn.addEventListener('click', () => onNumTap(n));
+});
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+}
+
+// ---------- ループ（タイマーのみ、キラキラ演出は本作では不使用） ----------
+function loop(now) {
+  if (S.phase === 'play') {
+    const remain = S.endAt - now;
+    updateProgressChip(remain);
+    if (remain <= 0) finishRound();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
