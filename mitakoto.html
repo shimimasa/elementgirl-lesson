@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>あれ？みたことある — さいしょに おぼえた ものを あとから みつけよう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4ff 0%, #e6f7f0 100%);
+    color: #2b3a63;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #3f4f9c; text-shadow: 0 0 14px rgba(63, 79, 156, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c76b0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #roundChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef4ff 55%, #dbe6fb 100%);
+    border: 3px solid #6ec7a6;
+    box-shadow: inset 0 0 40px rgba(63, 79, 156, .08), 0 4px 18px rgba(63, 79, 156, .15);
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 1.6vh 2vw; gap: 2.4vh;
+    transition: box-shadow .15s;
+  }
+  #stageWrap.flash-ok { box-shadow: inset 0 0 0 10px rgba(63,174,106,.55); }
+  #stageWrap.flash-ng { box-shadow: inset 0 0 0 10px rgba(230,72,60,.55); }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.4vh; left: 50%; transform: translateX(-50%);
+    color: #2b3a63; font-weight: 700; text-align: center;
+    font-size: clamp(14px, 1.8vw, 21px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #stimCanvas {
+    position: relative; z-index: 1;
+    width: min(30vh, 200px); height: min(30vh, 200px);
+    background: #fff; border: 3px solid #3f4f9c; border-radius: 20px;
+    box-shadow: 0 6px 18px rgba(63,79,156,.18);
+  }
+  #answerRow {
+    position: relative; z-index: 1;
+    display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+  }
+  .ansBtn {
+    font-family: inherit; font-weight: 800; cursor: pointer;
+    font-size: clamp(17px, 2.1vw, 23px); padding: .7em 1.5em; border-radius: 999px;
+    border: none; box-shadow: 0 4px 0 rgba(0,0,0,.2);
+    transition: transform .1s;
+  }
+  .ansBtn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.2); }
+  .ansBtn.old { background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff; }
+  .ansBtn.new { background: #dfe8ff; color: #3f4f9c; border: 2px solid #b9c6f2; }
+
+  .demoRow { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; margin: .8em 0; }
+  .demoCard {
+    background: #f4f7ff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: .8em 1em; text-align: center; min-width: 140px;
+  }
+  .demoArrow { font-size: clamp(12px, 1.5vw, 15px); color: #4d6a8c; font-weight: 700; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 40, 80, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    border: 3px solid #3f4f9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 40, 80, .3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #3f4f9c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3a63; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3f4f9c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e, 0 5px 12px rgba(39,107,78,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dfe8ff; color: #3f4f9c; box-shadow: 0 3px 0 #b9c6f2; border: 1.5px solid #b9c6f2; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">👁️ あれ？みたことある <small>さいしょに おぼえた ものを あとから みつけよう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="roundChip">れべる —</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <canvas id="stimCanvas" width="240" height="240"></canvas>
+    <div id="answerRow">
+      <button type="button" class="ansBtn old" id="btnOld">みたことある！</button>
+      <button type="button" class="ansBtn new" id="btnNew">はじめて！</button>
+    </div>
+  </div>
+</main>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>👁️ あれ？みたことある</h1>
+    <p>さいしょに、いくつかの マークが じゅんばんに でてくるよ。よく みて おぼえてね。<br>
+    そのあと、おぼえた マークと はじめて みる マークが まざって 1つずつ でてくるよ。<br>
+    「みたことある！」か「はじめて！」を こたえよう。<br>
+    まちがえたら そこで おしまい。おぼえる かずが ふえていくよ、どこまで すすめるかな？</p>
+    <div class="demoRow">
+      <div class="demoCard">
+        <div class="demoArrow">① さいしょに<br>いくつか おぼえる</div>
+      </div>
+      <div class="demoCard">
+        <div class="demoArrow">② あとから 1つずつ<br>「みたことある？」<br>こたえる</div>
+      </div>
+    </div>
+    <p style="font-size:.85em;color:#4d6a8c;">これは、まえに みた ものを おぼえていて、あとから みわける ちから（さいにん きおく）を しらべる けんきゅうで つかわれる あそびかたを もとに つくったよ。じかんせいげんは ないから、じっくり かんがえて こたえて いいよ。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>とどいた れべる</p>
+    <div class="big" id="resultLevel">0 れべる</div>
+    <p id="resultBestMsg"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+
+// ---------- ベストきろく ----------
+const BEST_KEY = 'mitakoto_best';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v === null ? null : parseInt(v, 10);
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sBlip = () => tone(660, 0, 0.16, 'sine', 0.09);
+const sTap = () => tone(740, 0, 0.08, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- 難易度（再認記憶課題を土台に。れべるごとに おぼえる かずが ふえる） ----------
+const SHAPES = ['circle', 'square', 'triangle', 'star'];
+const COLOR_KEYS = ['aka', 'kiiro', 'midori', 'ao'];
+const COLOR_HEX = { aka: '#e6483c', kiiro: '#e8b400', midori: '#3fae6a', ao: '#3b6fd6' };
+const POOL = [];
+SHAPES.forEach(s => COLOR_KEYS.forEach(c => POOL.push({ shape: s, color: c })));
+const STUDY_MS = 1100, STUDY_GAP = 300;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function studySizeFor(level) { return Math.min(4 + level, 8); }
+function buildRound(level) {
+  const n = studySizeFor(level);
+  const shuffled = shuffle(POOL);
+  const studyItems = shuffled.slice(0, n);
+  const newItems = shuffled.slice(n, n * 2);
+  const studyKeys = new Set(studyItems.map(it => it.shape + '|' + it.color));
+  const testItems = shuffle(
+    studyItems.map(it => ({ ...it, isOld: true }))
+      .concat(newItems.map(it => ({ ...it, isOld: false })))
+  );
+  return { n, studyItems, testItems, studyKeys };
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | studying | test | clear | wrong | result
+  levelsCleared: 0,
+  round: null,
+  studyIdx: 0,
+  testIdx: 0,
+  studyTimer: null,
+};
+
+// ---------- 図形の描画（circle/square/triangle/star） ----------
+function drawShape(ctx, cx, cy, size, shape, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  if (shape === 'circle') {
+    ctx.arc(cx, cy, size / 2, 0, TAU);
+  } else if (shape === 'square') {
+    ctx.save();
+    ctx.translate(cx, cy);
+    const r = size * 0.15;
+    ctx.moveTo(-size / 2 + r, -size / 2);
+    ctx.arcTo(size / 2, -size / 2, size / 2, size / 2, r);
+    ctx.arcTo(size / 2, size / 2, -size / 2, size / 2, r);
+    ctx.arcTo(-size / 2, size / 2, -size / 2, -size / 2, r);
+    ctx.arcTo(-size / 2, -size / 2, size / 2, -size / 2, r);
+    ctx.restore();
+  } else if (shape === 'triangle') {
+    const h = size;
+    ctx.moveTo(cx, cy - h / 2);
+    ctx.lineTo(cx + h / 2, cy + h / 2);
+    ctx.lineTo(cx - h / 2, cy + h / 2);
+    ctx.closePath();
+  } else if (shape === 'star') {
+    const outerR = size / 2, innerR = size / 2 * 0.42;
+    for (let i = 0; i < 10; i++) {
+      const r = i % 2 === 0 ? outerR : innerR;
+      const a = -Math.PI / 2 + i * Math.PI / 5;
+      const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+  }
+  ctx.fill();
+}
+function drawStim(item) {
+  const cv = $('stimCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = cv.clientWidth, cssH = cv.clientHeight;
+  const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+  if (!item) return;
+  const size = Math.min(cssW, cssH) * 0.55;
+  drawShape(ctx, cssW / 2, cssH / 2, size, item.shape, COLOR_HEX[item.color]);
+}
+
+// ---------- キラキラ ----------
+const fxCv = $('fx');
+const fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3f4f9c', '#6ec7a6', '#ffd66b', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('roundChip').textContent = S.round ? `れべる ${S.levelsCleared + 1}` : 'れべる —';
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = (b === null) ? 'ベスト —' : `ベスト ${b} れべる`;
+}
+function updateBestInfo() {
+  const b = getBest();
+  const el = $('bestInfo');
+  if (b !== null) {
+    el.style.display = 'block';
+    el.innerHTML = `<p>いまの ベストきろく：<b>${b} れべる</b></p>`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+function setResultMsg(text) { $('resultMsg').textContent = text; }
+function showAnswerRow(show) { $('answerRow').style.display = show ? 'flex' : 'none'; }
+
+// ---------- ゲーム進行 ----------
+function runLevel(level) {
+  S.round = buildRound(level);
+  S.studyIdx = 0;
+  S.testIdx = 0;
+  updateHud();
+  startStudyPhase();
+}
+function startStudyPhase() {
+  S.phase = 'studying';
+  showAnswerRow(false);
+  setResultMsg(`おぼえてね…（${S.round.n}こ）`);
+  studyTick();
+}
+function studyTick() {
+  if (S.phase !== 'studying') return;
+  if (S.studyIdx >= S.round.studyItems.length) {
+    drawStim(null);
+    startTestPhase();
+    return;
+  }
+  drawStim(S.round.studyItems[S.studyIdx]);
+  sBlip();
+  S.studyTimer = setTimeout(() => {
+    if (S.phase !== 'studying') return;
+    drawStim(null);
+    S.studyIdx++;
+    S.studyTimer = setTimeout(studyTick, STUDY_GAP);
+  }, STUDY_MS);
+}
+function startTestPhase() {
+  S.phase = 'test';
+  showAnswerRow(true);
+  showTestItem();
+}
+function showTestItem() {
+  if (S.testIdx >= S.round.testItems.length) {
+    S.phase = 'clear';
+    S.levelsCleared++;
+    sYes(); stageBurst();
+    setResultMsg(`🎉 れべる${S.levelsCleared} クリア！`);
+    showAnswerRow(false);
+    drawStim(null);
+    setTimeout(() => {
+      if (S.phase !== 'clear') return;
+      runLevel(S.levelsCleared + 1);
+    }, 900);
+    return;
+  }
+  const item = S.round.testItems[S.testIdx];
+  drawStim(item);
+  setResultMsg(`これは みたことある？（${S.testIdx + 1}／${S.round.testItems.length}）`);
+}
+function onAnswer(saysOld) {
+  if (S.phase !== 'test') return;
+  ac();
+  const item = S.round.testItems[S.testIdx];
+  const correct = saysOld === item.isOld;
+  if (correct) {
+    sTap(); flashStage(true);
+    S.testIdx++;
+    showTestItem();
+  } else {
+    flashStage(false);
+    onFail();
+  }
+}
+function flashStage(ok) {
+  const cls = ok ? 'flash-ok' : 'flash-ng';
+  const wrap = $('stageWrap');
+  wrap.classList.add(cls);
+  setTimeout(() => wrap.classList.remove(cls), 220);
+}
+function onFail() {
+  S.phase = 'wrong';
+  sHmm();
+  setResultMsg('ちがったよ…');
+  showAnswerRow(false);
+  setTimeout(finishGame, 900);
+}
+function finishGame() {
+  S.phase = 'result';
+  const best = getBest();
+  let isNewBest = false;
+  if (S.levelsCleared > 0 && (best === null || S.levelsCleared > best)) {
+    setBest(S.levelsCleared);
+    isNewBest = true;
+  }
+  if (isNewBest) { sFanfare(); stageBurst(); }
+  $('resultLevel').textContent = `${S.levelsCleared} れべる`;
+  $('resultBestMsg').textContent = S.levelsCleared === 0
+    ? 'つぎは がんばろう！'
+    : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} れべる`);
+  showOverlay('resultOverlay');
+}
+function startGame() {
+  S.levelsCleared = 0;
+  runLevel(1);
+}
+
+// ---------- こたえボタン ----------
+$('btnOld').addEventListener('click', () => onAnswer(true));
+$('btnNew').addEventListener('click', () => onAnswer(false));
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  showAnswerRow(false);
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+}
+
+// ---------- ループ（キラキラ演出のみ） ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
