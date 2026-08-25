@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ピタッと しんごうタッチ — みどりでタップ、あかでがまん</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4ff 0%, #e6f7f0 100%);
+    color: #2b3a63;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #3f4f9c; text-shadow: 0 0 14px rgba(63, 79, 156, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c76b0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #progressChip, #bestChip, #scoreChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0; cursor: default;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef4ff 55%, #dbe6fb 100%);
+    border: 3px solid #6ec7a6;
+    box-shadow: inset 0 0 40px rgba(63, 79, 156, .08), 0 4px 18px rgba(63, 79, 156, .15);
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2vh 2vw; gap: 1.2vh;
+    transition: box-shadow .15s;
+  }
+  #stageWrap.flash-ok { box-shadow: inset 0 0 0 10px rgba(63,174,106,.55); }
+  #stageWrap.flash-ng { box-shadow: inset 0 0 0 10px rgba(230,72,60,.55); }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #resultMsg {
+    position: relative; z-index: 1;
+    color: #2b3a63; font-weight: 700; text-align: center;
+    font-size: clamp(14px, 1.8vw, 21px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #playArea {
+    position: relative; z-index: 1;
+    flex: 1; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #stimulus {
+    width: min(40vh, 260px); height: min(40vh, 260px); border-radius: 50%;
+    opacity: 0; transform: scale(.7);
+    transition: opacity .12s ease-out, transform .12s ease-out;
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  }
+  #stimulus.show { opacity: 1; transform: scale(1); }
+  #stimulus.go { background: radial-gradient(circle at 35% 30%, #7fe0aa, #3fae6a); }
+  #stimulus.nogo { background: radial-gradient(circle at 35% 30%, #f4a294, #e6483c); }
+
+  .demoRow { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; margin: .8em 0; }
+  .demoCard {
+    background: #f4f7ff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: .8em 1.2em; text-align: center; min-width: 130px;
+  }
+  .demoCircle { width: 44px; height: 44px; border-radius: 50%; margin: 0 auto .5em; }
+  .demoCircle.go { background: #3fae6a; }
+  .demoCircle.nogo { background: #e6483c; }
+  .demoArrow { font-size: clamp(12px, 1.5vw, 15px); color: #4d6a8c; font-weight: 700; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 40, 80, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    border: 3px solid #3f4f9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 40, 80, .3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #3f4f9c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3a63; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3f4f9c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e, 0 5px 12px rgba(39,107,78,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dfe8ff; color: #3f4f9c; box-shadow: 0 3px 0 #b9c6f2; border: 1.5px solid #b9c6f2; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🚦 ピタッと しんごうタッチ <small>みどりでタップ、あかでがまん</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="scoreChip">せいかい 0</div>
+    <div id="progressChip">0／20かい</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="fx"></canvas>
+    <div id="resultMsg">まるが みどりに なったら タップ！あかは がまん！</div>
+    <div id="playArea">
+      <div id="stimulus"></div>
+    </div>
+  </div>
+</main>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🚦 ピタッと しんごうタッチ</h1>
+    <p>まんなかの まるが <b>みどり</b> に なったら、はやく タップ！<br>
+    <b>あか</b> に なったら、タップを ぐっと がまんしてね。<br>
+    ぜんぶで 20かい。とちゅうで まちがえても さいごまで つづくよ。なんかい せいかいできるかな？</p>
+    <div class="demoRow">
+      <div class="demoCard">
+        <div class="demoCircle go"></div>
+        <div class="demoArrow">みどり→ タップ！</div>
+      </div>
+      <div class="demoCard">
+        <div class="demoCircle nogo"></div>
+        <div class="demoArrow">あか→ がまん！<br>おさない</div>
+      </div>
+    </div>
+    <p style="font-size:.85em;color:#4d6a8c;">これは、じぶんの したい きもちを ぐっと おさえる ちからを しらべる けんきゅうで つかわれる「ゴー・ノーゴーかだい」という あそびかたを もとに つくったよ。おおくの ばめんで タップして、ときどき でてくる あかだけ がまんするのは、いがいと むずかしいよ。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>20かい中 できた かず</p>
+    <div class="big" id="resultCorrect">0 かい</div>
+    <p id="resultDetail"></p>
+    <p id="resultBestMsg"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+
+// ---------- ベストきろく ----------
+const BEST_KEY = 'shingou_best';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v === null ? null : parseInt(v, 10);
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(740, 0, 0.08, 'triangle', 0.07);
+const sNg = () => tone(220, 0, 0.16, 'sawtooth', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- 難易度（ゴー/ノーゴー課題を土台に。固定20試行＝GO15・NOGO5、順番はシャッフル） ----------
+const GO_COUNT = 15, NOGO_COUNT = 5, TOTAL = GO_COUNT + NOGO_COUNT;
+const STIM_MS = 650;
+const GAP_MIN = 350, GAP_MAX = 650;
+const TAP_RESOLVE_DELAY = 150;
+
+function buildTrials() {
+  const arr = [];
+  for (let i = 0; i < GO_COUNT; i++) arr.push('go');
+  for (let i = 0; i < NOGO_COUNT; i++) arr.push('nogo');
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | play | result
+  trials: [],
+  trialIndex: -1,
+  currentType: null, // 'go' | 'nogo' | null(あいまいなすきま)
+  tapped: false,
+  correct: 0,
+  goMiss: 0,
+  falseAlarm: 0,
+  gapTimer: null,
+  resolveTimer: null,
+};
+
+// ---------- キラキラ（#fxキャンバスのみ、演出専用） ----------
+const fxCv = $('fx');
+const fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3f4f9c', '#6ec7a6', '#ffd66b', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = (b === null) ? 'ベスト —' : `ベスト ${b} かい`;
+}
+function updateBestInfo(){
+  const b = getBest();
+  const el = $('bestInfo');
+  if (b !== null){
+    el.style.display = 'block';
+    el.innerHTML = `<p>いまの ベストきろく：<b>${b} かい</b></p>`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+function updateScoreChip(){
+  $('scoreChip').textContent = `せいかい ${S.correct}`;
+}
+function updateProgressChip(){
+  const done = Math.max(0, S.trialIndex);
+  $('progressChip').textContent = `${Math.min(done, TOTAL)}／${TOTAL}かい`;
+}
+
+// ---------- ゲーム進行 ----------
+function showStimulus(type){
+  const el = $('stimulus');
+  el.className = 'stimulus show ' + type;
+}
+function hideStimulus(){
+  $('stimulus').className = 'stimulus';
+}
+function flashStage(ok){
+  const cls = ok ? 'flash-ok' : 'flash-ng';
+  const wrap = $('stageWrap');
+  wrap.classList.add(cls);
+  setTimeout(() => wrap.classList.remove(cls), 220);
+}
+function nextTrial(){
+  S.trialIndex++;
+  updateProgressChip();
+  if (S.trialIndex >= S.trials.length){
+    finishRound();
+    return;
+  }
+  S.currentType = null;
+  S.tapped = false;
+  hideStimulus();
+  const gap = GAP_MIN + Math.random() * (GAP_MAX - GAP_MIN);
+  S.gapTimer = setTimeout(() => {
+    if (S.phase !== 'play') return;
+    S.currentType = S.trials[S.trialIndex];
+    S.tapped = false;
+    showStimulus(S.currentType);
+    S.resolveTimer = setTimeout(() => resolveTrial(), STIM_MS);
+  }, gap);
+}
+function resolveTrial(){
+  if (S.currentType === 'go' && !S.tapped) S.goMiss++;
+  if (S.currentType === 'nogo' && !S.tapped) S.correct++;
+  updateScoreChip();
+  S.currentType = null;
+  hideStimulus();
+  nextTrial();
+}
+function onStimulusTap(){
+  if (S.phase !== 'play' || S.currentType === null || S.tapped) return;
+  ac();
+  S.tapped = true;
+  clearTimeout(S.resolveTimer);
+  if (S.currentType === 'go'){
+    S.correct++; sTap(); flashStage(true);
+  } else {
+    S.falseAlarm++; sNg(); flashStage(false);
+  }
+  updateScoreChip();
+  S.resolveTimer = setTimeout(() => resolveTrial(), TAP_RESOLVE_DELAY);
+}
+function finishRound(){
+  S.phase = 'result';
+  const best = getBest();
+  let isNewBest = false;
+  if (S.correct > 0 && (best === null || S.correct > best)){
+    setBest(S.correct);
+    isNewBest = true;
+  }
+  if (isNewBest){ sFanfare(); stageBurst(); }
+  $('resultCorrect').textContent = `${S.correct} かい`;
+  $('resultDetail').textContent = `みのがし：${S.goMiss}かい／おしすぎ：${S.falseAlarm}かい`;
+  $('resultBestMsg').textContent = S.correct === 0
+    ? 'つぎは がんばろう！'
+    : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} かい`);
+  showOverlay('resultOverlay');
+}
+function startGame(){
+  S.phase = 'play';
+  S.trials = buildTrials();
+  S.trialIndex = -1;
+  S.correct = 0; S.goMiss = 0; S.falseAlarm = 0;
+  updateScoreChip();
+  nextTrial();
+}
+
+// ---------- ステージのタップ判定（大きめの当たり判定にするためstageWrap全体で受ける） ----------
+$('stageWrap').addEventListener('click', onStimulusTap);
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', (e) => {
+  e.stopPropagation();
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', (e) => {
+  e.stopPropagation();
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+  updateProgressChip();
+}
+
+// ---------- ループ（キラキラ演出のみ） ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
