@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>キラッと かたちさがし — 1つだけ ちがう かたちを さがすゲーム</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4ff 0%, #e6f7f0 100%);
+    color: #2b3a63;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #3f4f9c; text-shadow: 0 0 14px rgba(63, 79, 156, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c76b0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #roundChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef4ff 55%, #dbe6fb 100%);
+    border: 3px solid #6ec7a6;
+    box-shadow: inset 0 0 40px rgba(63, 79, 156, .08), 0 4px 18px rgba(63, 79, 156, .15);
+    overflow: hidden;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1.4vh; left: 50%; transform: translateX(-50%);
+    color: #2b3a63; font-weight: 700; text-align: center;
+    font-size: clamp(14px, 1.8vw, 21px); min-height: 1.4em;
+    max-width: 90%;
+  }
+
+  .demoRow { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; margin: .8em 0; }
+  .demoCard {
+    background: #f4f7ff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: .8em 1em; text-align: center; min-width: 150px;
+  }
+  .demoGrid { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 140px; margin: 0 auto .5em; }
+  .dshape { width: 26px; height: 26px; }
+  .dshape.circle { border-radius: 50%; }
+  .dshape.square { border-radius: 5px; }
+  .demoArrow { font-size: clamp(12px, 1.5vw, 15px); color: #4d6a8c; font-weight: 700; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 40, 80, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    border: 3px solid #3f4f9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 40, 80, .3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #3f4f9c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3a63; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3f4f9c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e, 0 5px 12px rgba(39,107,78,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dfe8ff; color: #3f4f9c; box-shadow: 0 3px 0 #b9c6f2; border: 1.5px solid #b9c6f2; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🔍 キラッと かたちさがし <small>1つだけ ちがう かたちを さがそう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="roundChip">れべる —</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+  </div>
+</main>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔍 キラッと かたちさがし</h1>
+    <p>たくさん ならんだ かたちの なかから、1つだけ ちがう かたちを さがして タップしよう。<br>
+    みつけたら つぎの れべるへ。れべるが すすむと かたちの かずが ふえて、むずかしくなるよ。<br>
+    まちがえたら そこで おしまい。どこまで すすめるかな？</p>
+    <div class="demoRow">
+      <div class="demoCard">
+        <div class="demoGrid">
+          <div class="dshape circle" style="background:#3b6fd6"></div>
+          <div class="dshape circle" style="background:#3b6fd6"></div>
+          <div class="dshape circle" style="background:#e6483c"></div>
+          <div class="dshape circle" style="background:#3b6fd6"></div>
+          <div class="dshape circle" style="background:#3b6fd6"></div>
+        </div>
+        <div class="demoArrow">いろが 1つだけ ちがう<br>→ すぐ みつかる！</div>
+      </div>
+      <div class="demoCard">
+        <div class="demoGrid">
+          <div class="dshape circle" style="background:#e6483c"></div>
+          <div class="dshape square" style="background:#3b6fd6"></div>
+          <div class="dshape circle" style="background:#e6483c"></div>
+          <div class="dshape square" style="background:#3b6fd6"></div>
+          <div class="dshape circle" style="background:#3b6fd6"></div>
+          <div class="dshape square" style="background:#e6483c"></div>
+        </div>
+        <div class="demoArrow">いろと かたちの くみあわせが<br>1つだけ ちがう→ よく さがそう</div>
+      </div>
+    </div>
+    <p style="font-size:.85em;color:#4d6a8c;">これは、たくさんの なかから めあてを みつける「しかくたんさく」という、ちゅういの けんきゅうで つかわれる あそびかたを もとに つくったよ。いろや かたちが 1つだけ ちがうと すぐ みつかるけど、くみあわせだけが ちがうと みつけるのに じかんが かかることが わかっているよ。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>とどいた れべる</p>
+    <div class="big" id="resultLevel">0 れべる</div>
+    <p id="resultBestMsg"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+
+// ---------- ベストきろく ----------
+const BEST_KEY = 'kirasagashi_best';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v === null ? null : parseInt(v, 10);
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(740, 0, 0.08, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- 難易度（視覚探索課題を土台に。特徴探索→結合探索へ段階的に、れべるごとに図形数が増える） ----------
+const SHAPES = ['circle', 'square', 'triangle'];
+const COLOR_KEYS = ['aka', 'kiiro', 'midori', 'ao'];
+const COLOR_HEX = { aka: '#e6483c', kiiro: '#e8b400', midori: '#3fae6a', ao: '#3b6fd6' };
+const CONJ_START = 4;
+const FEATURE_BASE = 5, FEATURE_STEP = 2;
+const CONJ_BASE = 10, CONJ_STEP = 3;
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function pickExcept(arr, except) { return pick(arr.filter(v => v !== except)); }
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function buildLevelItems(level) {
+  let n, items = [], targetItem;
+  if (level < CONJ_START) {
+    n = FEATURE_BASE + FEATURE_STEP * (level - 1);
+    const dim = Math.random() < 0.5 ? 'color' : 'shape';
+    const baseShape = pick(SHAPES), baseColor = pick(COLOR_KEYS);
+    let targetShape = baseShape, targetColor = baseColor;
+    if (dim === 'color') targetColor = pickExcept(COLOR_KEYS, baseColor);
+    else targetShape = pickExcept(SHAPES, baseShape);
+    for (let i = 0; i < n - 1; i++) items.push({ shape: baseShape, color: baseColor });
+    targetItem = { shape: targetShape, color: targetColor };
+    items.push(targetItem);
+  } else {
+    n = CONJ_BASE + CONJ_STEP * (level - CONJ_START);
+    const [shapeA, shapeB] = shuffle(SHAPES.slice()).slice(0, 2);
+    const [colorA, colorB] = shuffle(COLOR_KEYS.slice()).slice(0, 2);
+    const distractorCount = n - 1;
+    const countA = Math.ceil(distractorCount / 2), countB = distractorCount - countA;
+    for (let i = 0; i < countA; i++) items.push({ shape: shapeA, color: colorA });
+    for (let i = 0; i < countB; i++) items.push({ shape: shapeB, color: colorB });
+    targetItem = { shape: shapeA, color: colorB };
+    items.push(targetItem);
+  }
+  shuffle(items);
+  return { n, items, targetIndex: items.indexOf(targetItem) };
+}
+function computeGridDims(n) {
+  const cols = Math.ceil(Math.sqrt(n));
+  const rows = Math.ceil(n / cols);
+  return { cols, rows };
+}
+
+// ---------- グリッド設定 ----------
+const CELL = 140, GAP = 18;
+const TOP_BAND = 90; // #resultMsg（案内文）とグリッドが重ならないよう上部に確保する帯
+const PAD_T = 20, PAD_B = 20, PAD_X = 20;
+function cellRect(i) {
+  const row = Math.floor(i / S.cols), col = i % S.cols;
+  return { x: col * (CELL + GAP), y: TOP_BAND + row * (CELL + GAP), w: CELL, h: CELL };
+}
+function mapDims() {
+  return {
+    MAPW: S.cols * (CELL + GAP) - GAP,
+    MAPH: TOP_BAND + S.rows * (CELL + GAP) - GAP,
+  };
+}
+function mapTransform(w, h, mapw, maph) {
+  const sc = Math.min((w - PAD_X * 2) / mapw, (h - PAD_T - PAD_B) / maph);
+  const ox = PAD_X + (w - PAD_X * 2 - mapw * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - maph * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | play | clear | wrong | result
+  n: 0, items: [], targetIndex: -1,
+  cols: 1, rows: 1,
+  levelsCleared: 0,
+  wrongIndex: null,
+  correctIndex: null,
+};
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+
+function drawShape(x, y, size, shape, color) {
+  gctx.fillStyle = color;
+  gctx.beginPath();
+  if (shape === 'circle') {
+    gctx.arc(x, y, size / 2, 0, TAU);
+  } else if (shape === 'square') {
+    gctx.roundRect(x - size / 2, y - size / 2, size, size, size * 0.15);
+  } else if (shape === 'triangle') {
+    const h = size;
+    gctx.moveTo(x, y - h / 2);
+    gctx.lineTo(x + h / 2, y + h / 2);
+    gctx.lineTo(x - h / 2, y + h / 2);
+    gctx.closePath();
+  }
+  gctx.fill();
+}
+
+function drawScene(X, Y, sc) {
+  for (let i = 0; i < S.n; i++) {
+    const r = cellRect(i);
+    const cx = X(r.x + r.w / 2), cy = Y(r.y + r.h / 2);
+    const size = r.w * sc * 0.55;
+    if (S.wrongIndex === i) {
+      gctx.save();
+      gctx.beginPath();
+      gctx.arc(cx, cy, size * 0.72, 0, TAU);
+      gctx.fillStyle = 'rgba(230,72,60,.25)';
+      gctx.fill();
+      gctx.restore();
+    }
+    if (S.correctIndex === i) {
+      gctx.save();
+      gctx.shadowColor = 'rgba(255,214,107,.9)';
+      gctx.shadowBlur = 30 * sc;
+    }
+    const it = S.items[i];
+    if (it) drawShape(cx, cy, size, it.shape, COLOR_HEX[it.color]);
+    if (S.correctIndex === i) gctx.restore();
+    if (S.wrongIndex === i) {
+      gctx.save();
+      gctx.strokeStyle = '#a83428';
+      gctx.lineWidth = 4 * sc;
+      gctx.beginPath();
+      gctx.arc(cx, cy, size * 0.72, 0, TAU);
+      gctx.stroke();
+      gctx.restore();
+    }
+  }
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (!S.n) return;
+  const { MAPW, MAPH } = mapDims();
+  const { sc, ox, oy } = mapTransform(w, h, MAPW, MAPH);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawScene(X, Y, sc);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3f4f9c', '#6ec7a6', '#ffd66b', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('roundChip').textContent = S.n ? `れべる ${S.levelsCleared + 1}` : 'れべる —';
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = (b === null) ? 'ベスト —' : `ベスト ${b} れべる`;
+}
+function updateBestInfo() {
+  const b = getBest();
+  const el = $('bestInfo');
+  if (b !== null) {
+    el.style.display = 'block';
+    el.innerHTML = `<p>いまの ベストきろく：<b>${b} れべる</b></p>`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+function setResultMsg(text) { $('resultMsg').textContent = text; }
+
+// ---------- ゲーム進行 ----------
+function runLevel(level) {
+  const { n, items, targetIndex } = buildLevelItems(level);
+  S.n = n; S.items = items; S.targetIndex = targetIndex;
+  const { cols, rows } = computeGridDims(n);
+  S.cols = cols; S.rows = rows;
+  S.wrongIndex = null; S.correctIndex = null;
+  S.phase = 'play';
+  updateHud();
+  setResultMsg(`ちがう 1つを みつけよう！（${n}こ）`);
+}
+function onCellTap(idx) {
+  if (S.phase !== 'play') return;
+  ac();
+  if (idx === S.targetIndex) {
+    S.phase = 'clear';
+    S.correctIndex = idx;
+    S.levelsCleared++;
+    sYes(); stageBurst();
+    setResultMsg(`🎉 れべる${S.levelsCleared} クリア！`);
+    setTimeout(() => {
+      if (S.phase !== 'clear') return;
+      runLevel(S.levelsCleared + 1);
+    }, 900);
+  } else {
+    onFail(idx);
+  }
+}
+function onFail(idx) {
+  S.phase = 'wrong';
+  S.wrongIndex = idx;
+  sHmm();
+  setResultMsg('ちがう かたちを タップしちゃったね…');
+  setTimeout(finishGame, 900);
+}
+function finishGame() {
+  S.phase = 'result';
+  const best = getBest();
+  let isNewBest = false;
+  if (S.levelsCleared > 0 && (best === null || S.levelsCleared > best)) {
+    setBest(S.levelsCleared);
+    isNewBest = true;
+  }
+  if (isNewBest) { sFanfare(); stageBurst(); }
+  $('resultLevel').textContent = `${S.levelsCleared} れべる`;
+  $('resultBestMsg').textContent = S.levelsCleared === 0
+    ? 'つぎは がんばろう！'
+    : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} れべる`);
+  showOverlay('resultOverlay');
+}
+function startGame() {
+  S.levelsCleared = 0;
+  runLevel(1);
+}
+
+// ---------- ステージのタップ判定 ----------
+function cellAt(mx, my) {
+  for (let i = 0; i < S.n; i++) {
+    const r = cellRect(i);
+    if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i;
+  }
+  return null;
+}
+function onStageTap(clientX, clientY) {
+  if (S.phase !== 'play') return;
+  const rect = stageCv.getBoundingClientRect();
+  const { MAPW, MAPH } = mapDims();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height, MAPW, MAPH);
+  const mx = (clientX - rect.left - ox) / sc, my = (clientY - rect.top - oy) / sc;
+  const idx = cellAt(mx, my);
+  if (idx === null) return;
+  onCellTap(idx);
+}
+stageCv.addEventListener('pointerdown', e => { ac(); onStageTap(e.clientX, e.clientY); });
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawStage();
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
