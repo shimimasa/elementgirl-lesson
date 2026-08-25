@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>まよわず いろタッチ — いろとことばの ちゅういトレーニング</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4ff 0%, #e6f7f0 100%);
+    color: #2b3a63;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #3f4f9c; text-shadow: 0 0 14px rgba(63, 79, 156, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c76b0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #timerChip, #bestChip, #scoreChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+  #timerChip.urgent { background: #ffdcd4; color: #a8341f; border-color: #e6483c; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef4ff 55%, #dbe6fb 100%);
+    border: 3px solid #6ec7a6;
+    box-shadow: inset 0 0 40px rgba(63, 79, 156, .08), 0 4px 18px rgba(63, 79, 156, .15);
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2vh 2vw; gap: 1.2vh;
+    transition: box-shadow .15s;
+  }
+  #stageWrap.flash-ok { box-shadow: inset 0 0 0 10px rgba(63,174,106,.55); }
+  #stageWrap.flash-ng { box-shadow: inset 0 0 0 10px rgba(230,72,60,.55); }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #resultMsg {
+    position: relative; z-index: 1;
+    color: #2b3a63; font-weight: 700; text-align: center;
+    font-size: clamp(14px, 1.8vw, 21px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #playArea {
+    position: relative; z-index: 1;
+    flex: 1; width: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3vh;
+  }
+  #wordDisplay {
+    font-size: clamp(60px, 11vw, 130px); font-weight: 800; line-height: 1;
+    min-height: 1.2em;
+  }
+  #colorButtons {
+    display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+    width: min(560px, 92vw);
+  }
+  .cbtn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(18px, 2.4vw, 26px); white-space: nowrap;
+    padding: .7em 1.1em; border-radius: 16px; border: none;
+    min-width: 110px; min-height: 64px; flex: 1 1 110px;
+    box-shadow: 0 4px 0 rgba(0,0,0,.2);
+    transition: transform .1s;
+  }
+  .cbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.2); }
+
+  .demoRow { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; margin: .8em 0; }
+  .demoCard {
+    background: #f4f7ff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: .8em 1.2em; text-align: center; min-width: 130px;
+  }
+  .demoWord { font-size: clamp(26px, 3.4vw, 36px); font-weight: 800; margin-bottom: .2em; }
+  .demoArrow { font-size: clamp(12px, 1.5vw, 15px); color: #4d6a8c; font-weight: 700; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 40, 80, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    border: 3px solid #3f4f9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 40, 80, .3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #3f4f9c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3a63; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3f4f9c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e, 0 5px 12px rgba(39,107,78,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dfe8ff; color: #3f4f9c; box-shadow: 0 3px 0 #b9c6f2; border: 1.5px solid #b9c6f2; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🌈 まよわず いろタッチ <small>いろとことばの ちゅういトレーニング</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="scoreChip">せいかい 0</div>
+    <div id="timerChip">のこり 30びょう</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="fx"></canvas>
+    <div id="resultMsg">もじの「いろ」を こたえてね！</div>
+    <div id="playArea">
+      <div id="wordDisplay"></div>
+      <div id="colorButtons">
+        <button type="button" class="cbtn" data-key="aka">あか</button>
+        <button type="button" class="cbtn" data-key="kiiro">きいろ</button>
+        <button type="button" class="cbtn" data-key="midori">みどり</button>
+        <button type="button" class="cbtn" data-key="ao">あお</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🌈 まよわず いろタッチ</h1>
+    <p>まん中に でる もじの「いろ」を、下の 4つの ボタンから えらんで タップしよう。<br>
+    もじが あらわす「いみ」に つられないように、ちゅういしてね！</p>
+    <div class="demoRow">
+      <div class="demoCard">
+        <div class="demoWord" style="color:#3b6fd6">あか</div>
+        <div class="demoArrow">もじの いろは あお<br>→ こたえは「あお」</div>
+      </div>
+      <div class="demoCard">
+        <div class="demoWord" style="color:#3fae6a">みどり</div>
+        <div class="demoArrow">もじの いろも みどり<br>→ こたえは「みどり」</div>
+      </div>
+    </div>
+    <p>せいげん時間は 30びょう。時間の中で、できるだけ 多く せいかいしよう！</p>
+    <p style="font-size:.85em;color:#4d6a8c;">これは、のうの ちゅうい力を しらべる けんきゅうで じっさいに つかわれている「ストループ課題」という あそびかたを もとに つくったよ。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>30びょうで せいかいできた かず</p>
+    <div class="big" id="resultCorrect">0 かい</div>
+    <p id="resultAccuracy"></p>
+    <p id="resultBestMsg"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+
+// ---------- ベストきろく ----------
+const BEST_KEY = 'mayoiro_best';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v === null ? null : parseInt(v, 10);
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(740, 0, 0.08, 'triangle', 0.07);
+const sNg = () => tone(220, 0, 0.16, 'sawtooth', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- 難易度（ストループ課題を土台に。もじの いみと インク色を 独立に ランダム抽選） ----------
+const ROUND_MS = 30000;
+const GAP_MS = 200;
+const COLORS = [
+  { key: 'aka',    label: 'あか',   hex: '#e6483c', text: '#fff' },
+  { key: 'kiiro',  label: 'きいろ', hex: '#e8b400', text: '#3a2900' },
+  { key: 'midori', label: 'みどり', hex: '#3fae6a', text: '#fff' },
+  { key: 'ao',     label: 'あお',   hex: '#3b6fd6', text: '#fff' },
+];
+const COLOR_BY_KEY = {};
+COLORS.forEach(c => COLOR_BY_KEY[c.key] = c);
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | play | result
+  correct: 0,
+  wrong: 0,
+  endAt: 0,
+  answerKey: null,
+  lastWordKey: null,
+  lastInkKey: null,
+  locked: false,
+};
+
+// ---------- キラキラ（#fxキャンバスのみ、演出専用） ----------
+const fxCv = $('fx');
+const fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3f4f9c', '#6ec7a6', '#ffd66b', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = (b === null) ? 'ベスト —' : `ベスト ${b} かい`;
+}
+function updateBestInfo(){
+  const b = getBest();
+  const el = $('bestInfo');
+  if (b !== null){
+    el.style.display = 'block';
+    el.innerHTML = `<p>いまの ベストきろく：<b>${b} かい</b></p>`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+function updateScoreChip(){
+  $('scoreChip').textContent = `せいかい ${S.correct}`;
+}
+function updateTimerChip(remainMs){
+  const s = Math.max(0, Math.ceil(remainMs / 1000));
+  $('timerChip').textContent = `のこり ${s}びょう`;
+  $('timerChip').classList.toggle('urgent', s <= 10);
+}
+
+// ---------- ゲーム進行 ----------
+function nextTrial(){
+  let word, ink;
+  do {
+    word = COLORS[Math.floor(Math.random() * COLORS.length)];
+    ink = COLORS[Math.floor(Math.random() * COLORS.length)];
+  } while (word.key === S.lastWordKey && ink.key === S.lastInkKey);
+  S.lastWordKey = word.key; S.lastInkKey = ink.key;
+  S.answerKey = ink.key;
+  S.locked = false;
+  const el = $('wordDisplay');
+  el.textContent = word.label;
+  el.style.color = ink.hex;
+}
+function flashStage(ok){
+  const cls = ok ? 'flash-ok' : 'flash-ng';
+  const wrap = $('stageWrap');
+  wrap.classList.add(cls);
+  setTimeout(() => wrap.classList.remove(cls), 220);
+}
+function onColorTap(key){
+  if (S.phase !== 'play' || S.locked) return;
+  S.locked = true;
+  ac();
+  const ok = key === S.answerKey;
+  if (ok){ S.correct++; sTap(); flashStage(true); }
+  else { S.wrong++; sNg(); flashStage(false); }
+  updateScoreChip();
+  setTimeout(() => {
+    if (S.phase === 'play') nextTrial();
+  }, GAP_MS);
+}
+function finishRound(){
+  S.phase = 'result';
+  $('wordDisplay').textContent = '';
+  const best = getBest();
+  let isNewBest = false;
+  if (S.correct > 0 && (best === null || S.correct > best)){
+    setBest(S.correct);
+    isNewBest = true;
+  }
+  if (isNewBest){ sFanfare(); stageBurst(); }
+  const attempts = S.correct + S.wrong;
+  const acc = attempts > 0 ? Math.round((S.correct / attempts) * 100) : 0;
+  $('resultCorrect').textContent = `${S.correct} かい`;
+  $('resultAccuracy').textContent = attempts > 0 ? `せいどう率：${acc}%（${attempts}もん中）` : '';
+  $('resultBestMsg').textContent = S.correct === 0
+    ? 'つぎは がんばろう！'
+    : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} かい`);
+  showOverlay('resultOverlay');
+}
+function startGame(){
+  S.phase = 'play';
+  S.correct = 0; S.wrong = 0;
+  S.lastWordKey = null; S.lastInkKey = null;
+  S.endAt = performance.now() + ROUND_MS;
+  updateScoreChip();
+  updateTimerChip(ROUND_MS);
+  nextTrial();
+}
+
+// ---------- 色ボタン ----------
+document.querySelectorAll('.cbtn').forEach(btn => {
+  const c = COLOR_BY_KEY[btn.dataset.key];
+  btn.style.background = c.hex;
+  btn.style.color = c.text;
+  btn.addEventListener('click', () => onColorTap(c.key));
+});
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+}
+
+// ---------- ループ（タイマー＋キラキラ演出） ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.phase === 'play'){
+    const remain = S.endAt - now;
+    updateTimerChip(remain);
+    if (remain <= 0) finishRound();
+  }
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
