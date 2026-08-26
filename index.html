@@ -1108,6 +1108,7 @@ const BRAIN_GAMES = [
   { t:"トントン リズムあわせ", u:"リズムに あわせて タップしよう", icon:"🥁", slug:"tonton", group:"kankaku", target:80 },
   { t:"どんな きもちかな", u:"かおの ひょうじょうから きもちを あてよう", icon:"🎭", slug:"kimochi", group:"kankaku", target:8 },
   { t:"おなじ かんけいを みつけよう", u:"ことばの かんけいを みぬく ちからチャレンジ", icon:"🔗", slug:"onajikankei", group:"kangae", target:8 },
+  { t:"しらずしらず じょうずになる", u:"くりかえすうちに はやくタッチできるように なるかな？", icon:"🔁", slug:"shirazushirazu", group:"kankaku", target:400, lowerIsBetter:true },
 ];
 
 const BRAIN_GROUP_INFO = {
@@ -1132,7 +1133,14 @@ function computeBrainGroupScores(){
   BRAIN_GROUP_ORDER.forEach(g=>{ sums[g]=0; cnts[g]=0; });
   BRAIN_GAMES.forEach(g=>{
     const best = getBrainBest(g.slug);
-    const achievement = (best == null || !isFinite(best)) ? 0 : Math.min(1, Math.max(0, best / g.target));
+    let achievement;
+    if (best == null || !isFinite(best)) {
+      achievement = 0;
+    } else if (g.lowerIsBetter) {
+      achievement = Math.min(1, Math.max(0, g.target / best));
+    } else {
+      achievement = Math.min(1, Math.max(0, best / g.target));
+    }
     sums[g.group] += achievement;
     cnts[g.group] += 1;
   });
