@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>かくれんぼ シルエット — かくれた ぶぶんから かたちを あてよう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4ff 0%, #e6f7f0 100%);
+    color: #2b3a63;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #3f4f9c; text-shadow: 0 0 14px rgba(63, 79, 156, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c76b0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #roundChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef4ff 55%, #dbe6fb 100%);
+    border: 3px solid #6ec7a6;
+    box-shadow: inset 0 0 40px rgba(63, 79, 156, .08), 0 4px 18px rgba(63, 79, 156, .15);
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1.6vh 2vw; gap: 1.4vh;
+    transition: box-shadow .15s;
+  }
+  #stageWrap.flash-ok { box-shadow: inset 0 0 0 10px rgba(63,174,106,.55); }
+  #stageWrap.flash-ng { box-shadow: inset 0 0 0 10px rgba(230,72,60,.55); }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #resultMsg {
+    position: relative; z-index: 1;
+    color: #2b3a63; font-weight: 700; text-align: center;
+    font-size: clamp(14px, 1.8vw, 21px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #silhouetteWrap {
+    position: relative; z-index: 1;
+    flex: 1; min-height: 70px; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #silCanvas {
+    height: 100%; width: auto; max-width: 280px; max-height: 280px;
+    aspect-ratio: 1 / 1;
+    background: #fff; border-radius: 20px; border: 3px solid #b9c6f2;
+  }
+  #choiceButtons {
+    position: relative; z-index: 1;
+    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+    width: min(560px, 92vw);
+  }
+  .cbtn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(16px, 2vw, 22px); white-space: nowrap;
+    padding: .6em 1em; border-radius: 16px; border: none;
+    min-width: 100px; min-height: 56px; flex: 1 1 140px;
+    background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 4px 0 #276b4e;
+    transition: transform .1s;
+  }
+  .cbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #276b4e; }
+
+  .demoRow { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; margin: .8em 0; }
+  .demoCard {
+    background: #f4f7ff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: .8em 1em; text-align: center; max-width: 220px;
+  }
+  #titleDemoCanvas { width: 140px; height: 140px; background: #fff; border-radius: 12px; }
+  .demoArrow { font-size: clamp(12px, 1.5vw, 15px); color: #4d6a8c; font-weight: 700; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 40, 80, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    border: 3px solid #3f4f9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 40, 80, .3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #3f4f9c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3a63; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3f4f9c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e, 0 5px 12px rgba(39,107,78,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dfe8ff; color: #3f4f9c; box-shadow: 0 3px 0 #b9c6f2; border: 1.5px solid #b9c6f2; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🕵️ かくれんぼ シルエット <small>かくれた ぶぶんから かたちを あてよう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="roundChip">れべる —</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="silhouetteWrap"><canvas id="silCanvas"></canvas></div>
+    <div id="choiceButtons"></div>
+  </div>
+</main>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🕵️ かくれんぼ シルエット</h1>
+    <p>かたちの いちぶが かくれて でてくるよ。<br>
+    なんの かたちか、したの せんたくしから えらんでね。</p>
+    <div class="demoRow">
+      <div class="demoCard">
+        <canvas id="titleDemoCanvas"></canvas>
+        <div class="demoArrow">かくれている ぶぶんも あるけど、<br>ぜんたいの かたちを そうぞうしてみよう</div>
+      </div>
+    </div>
+    <p>まちがえたら そこで おしまい。どこまで すすめるかな？</p>
+    <p style="font-size:.85em;color:#4d6a8c;">これは、いちぶが かくれた かたちから もとの すがたを みつける「ちかくてき かんけつ」という ちからを しらべる けんきゅうで つかわれる もんだいを もとに つくったよ。</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>とどいた れべる</p>
+    <div class="big" id="resultLevel">0 れべる</div>
+    <p id="resultBestMsg"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+
+// ---------- ベストきろく ----------
+const BEST_KEY = 'kakurenbo_best';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v === null ? null : parseInt(v, 10);
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(740, 0, 0.08, 'triangle', 0.07);
+const sNg = () => tone(220, 0, 0.16, 'sawtooth', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- シルエット定義(200×200論理座標系。円・楕円・三角形・矩形の組み合わせ) ----------
+const SHAPES = {
+  neko: { label: 'ねこ', parts: [
+    { type: 'circle', cx: 100, cy: 90, r: 32 },
+    { type: 'tri', pts: [[75,65],[85,35],[92,68]] },
+    { type: 'tri', pts: [[125,65],[115,35],[108,68]] },
+    { type: 'ellipse', cx: 100, cy: 150, rx: 42, ry: 48 },
+  ]},
+  inu: { label: 'いぬ', parts: [
+    { type: 'circle', cx: 100, cy: 90, r: 32 },
+    { type: 'ellipse', cx: 68, cy: 95, rx: 14, ry: 28 },
+    { type: 'ellipse', cx: 132, cy: 95, rx: 14, ry: 28 },
+    { type: 'ellipse', cx: 100, cy: 150, rx: 42, ry: 48 },
+  ]},
+  usagi: { label: 'うさぎ', parts: [
+    { type: 'circle', cx: 100, cy: 100, r: 30 },
+    { type: 'ellipse', cx: 85, cy: 55, rx: 10, ry: 32 },
+    { type: 'ellipse', cx: 115, cy: 55, rx: 10, ry: 32 },
+    { type: 'ellipse', cx: 100, cy: 155, rx: 40, ry: 45 },
+  ]},
+  tori: { label: 'とり', parts: [
+    { type: 'ellipse', cx: 100, cy: 120, rx: 45, ry: 35 },
+    { type: 'circle', cx: 100, cy: 75, r: 25 },
+    { type: 'tri', pts: [[120,75],[145,80],[120,88]] },
+  ]},
+  sakana: { label: 'さかな', parts: [
+    { type: 'ellipse', cx: 100, cy: 100, rx: 50, ry: 30 },
+    { type: 'tri', pts: [[150,100],[175,80],[175,120]] },
+  ]},
+  kuruma: { label: 'くるま', parts: [
+    { type: 'rect', x: 50, y: 80, w: 100, h: 45 },
+    { type: 'circle', cx: 75, cy: 128, r: 16 },
+    { type: 'circle', cx: 125, cy: 128, r: 16 },
+  ]},
+};
+const SHAPE_KEYS = Object.keys(SHAPES);
+
+function pointInCircle(x, y, c) { return Math.hypot(x - c.cx, y - c.cy) <= c.r; }
+function pointInEllipse(x, y, e) { return ((x - e.cx) / e.rx) ** 2 + ((y - e.cy) / e.ry) ** 2 <= 1; }
+function pointInTriangle(px, py, tri) {
+  const [a, b, c] = tri.pts;
+  const sign = (p1, p2, p3) => (p1[0]-p3[0])*(p2[1]-p3[1]) - (p2[0]-p3[0])*(p1[1]-p3[1]);
+  const d1 = sign([px,py], a, b), d2 = sign([px,py], b, c), d3 = sign([px,py], c, a);
+  const hasNeg = (d1<0)||(d2<0)||(d3<0), hasPos = (d1>0)||(d2>0)||(d3>0);
+  return !(hasNeg && hasPos);
+}
+function pointInRect(x, y, r) { return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; }
+function pointInShape(x, y, parts) {
+  return parts.some(p => {
+    if (p.type === 'circle') return pointInCircle(x, y, p);
+    if (p.type === 'ellipse') return pointInEllipse(x, y, p);
+    if (p.type === 'tri') return pointInTriangle(x, y, p);
+    if (p.type === 'rect') return pointInRect(x, y, p);
+    return false;
+  });
+}
+function sampleInsideShape(parts, n) {
+  const pts = [];
+  let attempts = 0;
+  while (pts.length < n && attempts < n * 60) {
+    attempts++;
+    const x = Math.random() * 200, y = Math.random() * 200;
+    if (pointInShape(x, y, parts)) pts.push([x, y]);
+  }
+  return pts;
+}
+
+const MASK_R = 12;
+function maskCountForLevel(level) {
+  return Math.min(20, Math.round(3 + (level - 1) * 1.7));
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function buildChoices(correctKey) {
+  const others = SHAPE_KEYS.filter(k => k !== correctKey);
+  const dummies = shuffle(others).slice(0, 3);
+  return shuffle([correctKey, ...dummies]);
+}
+function buildTrial(level) {
+  const key = SHAPE_KEYS[Math.floor(Math.random() * SHAPE_KEYS.length)];
+  const parts = SHAPES[key].parts;
+  const maskCount = maskCountForLevel(level);
+  const samplePts = sampleInsideShape(parts, 200);
+  const maskCenters = [];
+  for (let i = 0; i < maskCount; i++) {
+    maskCenters.push(samplePts[Math.floor(Math.random() * samplePts.length)]);
+  }
+  return { key, choices: buildChoices(key) };
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | play | clear | fail | result
+  levelsCleared: 0,
+  currentKey: null,
+  choices: null,
+};
+
+// ---------- シルエット描画 ----------
+function drawSilhouetteOn(canvasEl, key, maskCount) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvasEl.getBoundingClientRect();
+  const w = Math.max(1, Math.round(rect.width * dpr)), h = Math.max(1, Math.round(rect.height * dpr));
+  if (canvasEl.width !== w || canvasEl.height !== h) { canvasEl.width = w; canvasEl.height = h; }
+  const ctx = canvasEl.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, rect.width, rect.height);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, rect.width, rect.height);
+
+  const scale = Math.min(rect.width, rect.height) / 200;
+  const offX = (rect.width - 200 * scale) / 2, offY = (rect.height - 200 * scale) / 2;
+  ctx.save();
+  ctx.translate(offX, offY);
+  ctx.scale(scale, scale);
+
+  const parts = SHAPES[key].parts;
+  ctx.fillStyle = '#3f4f9c';
+  parts.forEach(p => {
+    ctx.beginPath();
+    if (p.type === 'circle') ctx.arc(p.cx, p.cy, p.r, 0, TAU);
+    else if (p.type === 'ellipse') ctx.ellipse(p.cx, p.cy, p.rx, p.ry, 0, 0, TAU);
+    else if (p.type === 'tri') { ctx.moveTo(p.pts[0][0], p.pts[0][1]); ctx.lineTo(p.pts[1][0], p.pts[1][1]); ctx.lineTo(p.pts[2][0], p.pts[2][1]); ctx.closePath(); }
+    else if (p.type === 'rect') ctx.rect(p.x, p.y, p.w, p.h);
+    ctx.fill();
+  });
+
+  const samplePts = sampleInsideShape(parts, 200);
+  ctx.fillStyle = '#ffffff';
+  for (let i = 0; i < maskCount; i++) {
+    const c = samplePts[Math.floor(Math.random() * samplePts.length)];
+    ctx.beginPath();
+    ctx.arc(c[0], c[1], MASK_R, 0, TAU);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ---------- キラキラ ----------
+const fxCv = $('fx');
+const fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3f4f9c', '#6ec7a6', '#ffd66b', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('roundChip').textContent = S.phase === 'title' ? 'れべる —' : `れべる ${S.levelsCleared + 1}`;
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = (b === null) ? 'ベスト —' : `ベスト ${b} れべる`;
+}
+function updateBestInfo() {
+  const b = getBest();
+  const el = $('bestInfo');
+  if (b !== null) {
+    el.style.display = 'block';
+    el.innerHTML = `<p>いまの ベストきろく：<b>${b} れべる</b></p>`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+function setResultMsg(text) { $('resultMsg').textContent = text; }
+
+// ---------- 描画 ----------
+function renderChoices() {
+  const row = $('choiceButtons');
+  row.innerHTML = '';
+  S.choices.forEach(key => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cbtn';
+    btn.textContent = SHAPES[key].label;
+    btn.addEventListener('click', () => onChoiceTap(key));
+    row.appendChild(btn);
+  });
+}
+
+// ---------- ゲーム進行 ----------
+function runLevel(level) {
+  const trial = buildTrial(level);
+  S.currentKey = trial.key;
+  S.choices = trial.choices;
+  S.phase = 'play';
+  updateHud();
+  setResultMsg('なんの かたちかな？');
+  drawSilhouetteOn($('silCanvas'), S.currentKey, maskCountForLevel(level));
+  renderChoices();
+}
+function flashStage(cls) {
+  const wrap = $('stageWrap');
+  wrap.classList.add(cls);
+  setTimeout(() => wrap.classList.remove(cls), 220);
+}
+function onChoiceTap(key) {
+  if (S.phase !== 'play') return;
+  ac();
+  if (key === S.currentKey) {
+    S.phase = 'clear';
+    S.levelsCleared++;
+    sTap(); sYes(); stageBurst();
+    setResultMsg(`🎉 せいかい！ れべる${S.levelsCleared} クリア！（こたえ：${SHAPES[key].label}）`);
+    setTimeout(() => {
+      if (S.phase !== 'clear') return;
+      runLevel(S.levelsCleared + 1);
+    }, 1100);
+  } else {
+    S.phase = 'fail';
+    sNg();
+    flashStage('flash-ng');
+    setResultMsg(`ちがったね…（こたえは「${SHAPES[S.currentKey].label}」だったよ）`);
+    setTimeout(finishGame, 1300);
+  }
+}
+function finishGame() {
+  S.phase = 'result';
+  const best = getBest();
+  let isNewBest = false;
+  if (S.levelsCleared > 0 && (best === null || S.levelsCleared > best)) {
+    setBest(S.levelsCleared);
+    isNewBest = true;
+  }
+  if (isNewBest) { sFanfare(); stageBurst(); }
+  $('resultLevel').textContent = `${S.levelsCleared} れべる`;
+  $('resultBestMsg').textContent = S.levelsCleared === 0
+    ? 'つぎは がんばろう！'
+    : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} れべる`);
+  showOverlay('resultOverlay');
+}
+function startGame() {
+  S.levelsCleared = 0;
+  runLevel(1);
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  showOverlay('titleOverlay');
+  drawSilhouetteOn($('titleDemoCanvas'), 'neko', 5);
+  updateHud();
+  updateBestChip();
+  updateBestInfo();
+}
+
+// ---------- ループ（キラキラ演出のみ） ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawFx(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
