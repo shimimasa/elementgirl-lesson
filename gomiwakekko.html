@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ごみステーション わけっこ タイムアタック — なにごみか あてよう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef2f0 0%, #dbe4e0 45%, #b0c0ba 100%);
+    color: #33403c;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #5c6b68; text-shadow: 0 0 14px rgba(92, 107, 104, .25);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a7d78; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #scoreChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #scoreChip { background: #dbe4e0; color: #2a4438; border: 1.5px solid #a8c0b6; }
+  #timeChip { background: #2a4438; color: #fff; box-shadow: 0 0 14px rgba(42,68,56,.35); }
+  #bestChip { background: #dbe4e0; color: #2a4438; border: 1.5px solid #a8c0b6; }
+  #timeChip.urgent { background: #a01818; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 22%, #f7faf8 0%, #dbe4e0 55%, #b0c0ba 100%);
+    border: 3px solid #5c6b68;
+    box-shadow: inset 0 0 40px rgba(40, 55, 50, .12), 0 4px 18px rgba(40, 55, 50, .2);
+    overflow: hidden;
+    padding: 2vh 2vw;
+  }
+  #itemCard {
+    background: #fff; border: 3px solid #a8c0b6; border-radius: 20px;
+    padding: 2.4vh 4vw; margin-bottom: 1.6vh;
+    text-align: center; min-width: min(360px, 80vw);
+    box-shadow: 0 4px 16px rgba(40,55,50,.15);
+  }
+  #itemIcon { font-size: clamp(44px, 6.5vw, 68px); margin-bottom: .2em; }
+  #itemName { font-size: clamp(16px, 2.1vw, 24px); font-weight: 700; color: #33403c; }
+  #feedbackMsg {
+    color: #a01818; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 18px); min-height: 1.6em;
+    max-width: 90%; margin-bottom: .6vh;
+  }
+  #binGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1vh 1.4vw;
+    width: min(520px, 90vw);
+  }
+  .binBtn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(14px, 1.8vw, 19px); padding: .7em .8em; border-radius: 18px;
+    border: 3px solid #a8c0b6; background: #ffffff; color: #33403c;
+    box-shadow: 0 4px 0 #a8c0b6;
+    min-height: 68px; display: flex; flex-direction: column; align-items: center; gap: .15em;
+    transition: transform .1s;
+  }
+  .binBtn .binIcon { font-size: clamp(22px, 3vw, 30px); }
+  .binBtn:active { transform: scale(.96); }
+  .binBtn.ok { background: #d8f0e4; border-color: #1a5f4f; box-shadow: 0 4px 0 #1a5f4f; }
+  .binBtn.ng { background: #ffe0e0; border-color: #a01818; box-shadow: 0 4px 0 #a01818; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(25, 35, 32, .74);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #f7faf8, #dbe4e0);
+    border: 3px solid #5c6b68; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(25, 35, 32, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #5c6b68; margin: 0 0 .3em; text-shadow: 0 2px 0 #fff; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #33403c; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #5c6b68; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #4a6a5c, #3a5648); color: #fff;
+    box-shadow: 0 3px 0 #21362b, 0 5px 12px rgba(33,54,43,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dbe4e0; color: #2a4438; box-shadow: 0 3px 0 #a8c0b6; border: 1.5px solid #a8c0b6; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: #dbe4e0; border: 1px solid #a8c0b6;
+    color: #2a4438; font-size: clamp(11px, 1.2vw, 14px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🚮 ごみステーション わけっこ タイムアタック <small>なにごみか あてよう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="scoreChip">スコア 0もん</div>
+    <div id="timeChip">00.0びょう</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <div id="itemCard">
+      <div id="itemIcon"></div>
+      <div id="itemName"></div>
+    </div>
+    <div id="feedbackMsg"></div>
+    <div id="binGrid"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この ごみステーション わけっこ タイムアタックは、<b>ワケルの清掃工場</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ワケルの清掃工場を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="wakeru.html">ワケルの清掃工場へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🚮 ごみステーション わけっこ タイムアタック</h1>
+    <p>ごみは、しゅるいごとに 分けて 出すよね。<br>
+    出てくる ごみが「もえるごみ」「もえないごみ」「資源ごみ」「粗大ごみ」の どれか、すばやく えらぼう。<br>
+    まちがえても タイムは 止まらないよ。おなじ もんだいで もういちど えらべるよ。<br>
+    せいげんじかんは 30びょう。できるだけ たくさん こたえよう！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>30びょうで こたえられた かず</p>
+    <div class="big" id="resultScore">0もん</div>
+    <p id="resultBestMsg"></p>
+    <p id="resultMisses"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'wakeru';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベスト記録（正解数） ----------
+const BEST_KEY = 'gomiwakekko_best';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(700, 0, 0.08, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- ごみデータ（本編wakeru.html m_bunbetsu：4分類をそのまま核概念に採用） ----------
+const ITEMS = [
+  { key: 'namagomi', icon: '🍌', name: '生ごみ',           bin: 'moeru' },
+  { key: 'wareta',    icon: '🥫', name: 'われた食器・金属', bin: 'moenai' },
+  { key: 'pet',       icon: '♻️', name: 'ペット・かん・びん', bin: 'shigen' },
+  { key: 'sodai',     icon: '🪑', name: 'こわれたいす・ふとん', bin: 'sodai' },
+];
+const BINS = [
+  { key: 'moeru',  icon: '🔥', label: 'もえるごみ' },
+  { key: 'moenai', icon: '🔩', label: 'もえないごみ' },
+  { key: 'shigen', icon: '♻️', label: '資源ごみ' },
+  { key: 'sodai',  icon: '🪑', label: '粗大ごみ' },
+];
+
+// ---------- タイムアタック定数 ----------
+const TIME_LIMIT_MS = 30000;
+const WRONG_SHOW_MS = 900;
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | lock | playing | result
+  score: 0,
+  misses: 0,
+  current: null,
+  lastKey: null,
+  locked: false,
+  startTime: 0,
+};
+
+function pickItem(){
+  let item;
+  do { item = ITEMS[Math.floor(Math.random() * ITEMS.length)]; } while (item.key === S.lastKey);
+  S.lastKey = item.key;
+  return item;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('scoreChip').textContent = `スコア ${S.score}もん`;
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${b}もん` : 'ベスト —';
+}
+
+// ---------- 出題・ボタン ----------
+const binButtons = {};
+function buildBinGrid(){
+  const grid = $('binGrid');
+  grid.innerHTML = '';
+  BINS.forEach(b => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'binBtn';
+    btn.innerHTML = `<div class="binIcon">${b.icon}</div><div>${b.label}</div>`;
+    btn.addEventListener('click', () => onBinTap(b, btn));
+    grid.appendChild(btn);
+    binButtons[b.key] = btn;
+  });
+}
+function clearBinFlash(){
+  Object.values(binButtons).forEach(b => b.classList.remove('ok', 'ng'));
+}
+function nextItem(){
+  clearBinFlash();
+  S.current = pickItem();
+  S.locked = false;
+  $('itemIcon').textContent = S.current.icon;
+  $('itemName').textContent = S.current.name;
+  $('feedbackMsg').textContent = '';
+}
+function onBinTap(bin, btn){
+  if (S.phase !== 'playing' || S.locked) return;
+  ac();
+  if (bin.key === S.current.bin) {
+    S.locked = true;
+    S.score++;
+    sTap(); sYes();
+    btn.classList.add('ok');
+    updateHud();
+    setTimeout(() => {
+      if (S.phase !== 'playing') return;
+      nextItem();
+    }, 260);
+  } else {
+    S.misses++;
+    sHmm();
+    btn.classList.add('ng');
+    const correctBin = BINS.find(b => b.key === S.current.bin);
+    $('feedbackMsg').textContent = `ちがうよ。これは ${correctBin.label}だよ。もういちど えらんでみよう！`;
+    setTimeout(() => {
+      if (S.phase !== 'playing') return;
+      btn.classList.remove('ng');
+      $('feedbackMsg').textContent = '';
+    }, WRONG_SHOW_MS);
+  }
+}
+
+function startGame(){
+  S.score = 0;
+  S.misses = 0;
+  S.lastKey = null;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  updateHud();
+  nextItem();
+}
+function onTimeUp(){
+  S.phase = 'result';
+  sFanfare();
+  const score = S.score;
+  const best = getBest();
+  const isNewBest = (best === null) || (score > best);
+  if (isNewBest) setBest(score);
+  updateBestChip();
+  $('resultScore').textContent = `${score}もん`;
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストきろく こうしん！'
+    : `ベストきろく：${best}もん`;
+  $('resultMisses').textContent = `まちがえた かいすう：${S.misses}かい`;
+  $('starListEl').innerHTML = `<span class="starChip">${score}もん こたえた</span>`;
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  buildBinGrid();
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストきろく：<b>${best}もん</b></p>`;
+  }
+}
+
+// ---------- ループ（タイマー表示のみ） ----------
+function loop(now) {
+  if (S.phase === 'playing') {
+    const elapsed = now - S.startTime;
+    const remainMs = Math.max(0, TIME_LIMIT_MS - elapsed);
+    $('timeChip').textContent = (remainMs / 1000).toFixed(1) + 'びょう';
+    $('timeChip').classList.toggle('urgent', remainMs <= 8000);
+    if (remainMs <= 0) onTimeUp();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
