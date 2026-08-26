@@ -378,8 +378,38 @@
   .brain-card .brain-meta{ font-size: 12px; color: #4d6a8c; line-height: 1.5; margin: 0; }
   .brain-card .brain-tag{
     margin-top: 8px; font-size: 12px; font-weight: bold;
-    background: #6ec7a6; color: #fff; padding: 3px 12px; border-radius: 999px;
+    background: #278058; color: #fff; padding: 3px 12px; border-radius: 999px;
   }
+
+  /* ---- brain dashboard（のうトレプロフィール/今日のおすすめ/れんぞくプレイ記録） ---- */
+  .brain-dashboard{ display:flex; flex-direction:column; gap:8px; margin-bottom: 10px; }
+  .brain-streak{
+    font-size: 13px; font-weight: bold; color: #3f4f9c;
+    background: #eef4ff; border: 1.5px solid #b9c6f2; border-radius: 12px;
+    padding: 8px 14px;
+  }
+  .brain-streak-zero{ color: #4d6a8c; }
+  .brain-pick{
+    display:flex; align-items:center; gap:12px;
+    background: linear-gradient(160deg, #eef4ff, #e2f7ee);
+    border: 2px solid #6ec7a6; border-radius: 16px;
+    padding: 10px 14px;
+    text-decoration:none; color:#2b3a63;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .brain-pick:hover{ transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.14); }
+  .brain-pick-icon{ font-size: 30px; flex: 0 0 auto; }
+  .brain-pick-text{ flex:1; min-width:120px; }
+  .brain-pick-label{ font-size: 11px; font-weight:bold; color:#3f4f9c; margin-bottom:2px; }
+  .brain-pick-title{ font-size: 15px; font-weight:bold; }
+  .brain-pick-tag{
+    flex: 0 0 auto; font-size: 12px; font-weight: bold;
+    background: #278058; color: #fff; padding: 5px 14px; border-radius: 999px;
+  }
+  .brain-profile-wrap{ margin: 4px 0 16px; text-align:center; }
+  .brain-profile-label{ font-size: 13px; font-weight:bold; color:#3f4f9c; margin-bottom:6px; }
+  .brain-radar{ width: 100%; max-width: 360px; height: 300px; }
 
   /* ---- controls ---- */
   .controls{
@@ -1047,30 +1077,102 @@ const BONUS_GAMES = [
 // ---- あたまのたいそう（脳トレコーナー。教科・進捗と無関係、アンロック無しで常時プレイ可） ----
 let brainOpen = false;
 const BRAIN_GAMES = [
-  { t:"ピカッとじゅんばんメモリー", u:"ひかる じゅんばん おぼえチャレンジ", icon:"💡", slug:"hikarijun" },
-  { t:"パッとすうじメモリー", u:"すうじじゅんばん おぼえチャレンジ", icon:"🔢", slug:"patosuji" },
-  { t:"まよわず いろタッチ", u:"いろとことばの ちゅういトレーニング", icon:"🌈", slug:"mayoiro" },
-  { t:"キラッと かたちさがし", u:"1つだけ ちがう かたちを さがそう", icon:"🔍", slug:"kirasagashi" },
-  { t:"ピタッと しんごうタッチ", u:"みどりでタップ、あかでがまん", icon:"🚦", slug:"shingou" },
-  { t:"スイスイ せんつなぎ", u:"じゅんばんに たどって せんで つなごう", icon:"✏️", slug:"suisen" },
-  { t:"クルクル おなじかたち", u:"まわしても おなじ かたちは どれ？", icon:"🔄", slug:"kurukuru" },
-  { t:"ピンと いろのきまり", u:"たてよこ おなじいろが かさならないように", icon:"🧩", slug:"irokimari" },
-  { t:"1つまえと おなじかな", u:"ひかった ばしょを おぼえて くらべよう", icon:"📍", slug:"onajikana" },
-  { t:"あれ？みたことある", u:"さいしょに おぼえた ものを あとから みつけよう", icon:"👁️", slug:"mitakoto" },
-  { t:"けいさん ジャッジ", u:"しきが あっているか まちがっているか みやぶろう", icon:"🧮", slug:"keisanjajji" },
-  { t:"みみで きいて じゅんばんメモリー", u:"おとの じゅんばんを おぼえよう", icon:"👂", slug:"mimijun" },
-  { t:"はやわざ きごうへんかん", u:"きごうを すうじに すばやく へんかん", icon:"🔣", slug:"hayakigou" },
-  { t:"さきよみ タワーひっこし", u:"さいしょうの てすうで タワーを うつそう", icon:"🗼", slug:"sakiyomi" },
-  { t:"そろりと きまりがえ", u:"わけかたを みつけて あてよう", icon:"🃏", slug:"kimarigae" },
-  { t:"ながら たいそう", u:"めと みみを どうじに つかおう", icon:"🤹", slug:"nagara" },
-  { t:"さくさく なかまわけ", u:"なんの なかまか すばやく わけよう", icon:"🗂️", slug:"nakamawake" },
-  { t:"わすれずに とくべつタッチ", u:"とくべつな かずを おぼえておこう", icon:"🔔", slug:"wasurezu" },
-  { t:"ぴったりで とめよう", u:"じぶんの かんかくで じかんを はかろう", icon:"⏱️", slug:"pittari" },
-  { t:"どっちが おおいかな", u:"かぞえずに かんじで こたえよう", icon:"🫧", slug:"docchiga" },
-  { t:"かくれんぼ シルエット", u:"かくれた ぶぶんから かたちを あてよう", icon:"🕵️", slug:"kakurenbo" },
-  { t:"トントン リズムあわせ", u:"リズムに あわせて タップしよう", icon:"🥁", slug:"tonton" },
-  { t:"どんな きもちかな", u:"かおの ひょうじょうから きもちを あてよう", icon:"🎭", slug:"kimochi" },
+  { t:"ピカッとじゅんばんメモリー", u:"ひかる じゅんばん おぼえチャレンジ", icon:"💡", slug:"hikarijun", group:"kioku", target:10 },
+  { t:"パッとすうじメモリー", u:"すうじじゅんばん おぼえチャレンジ", icon:"🔢", slug:"patosuji", group:"kioku", target:8 },
+  { t:"まよわず いろタッチ", u:"いろとことばの ちゅういトレーニング", icon:"🌈", slug:"mayoiro", group:"chuui", target:15 },
+  { t:"キラッと かたちさがし", u:"1つだけ ちがう かたちを さがそう", icon:"🔍", slug:"kirasagashi", group:"kukan", target:10 },
+  { t:"ピタッと しんごうタッチ", u:"みどりでタップ、あかでがまん", icon:"🚦", slug:"shingou", group:"chuui", target:16 },
+  { t:"スイスイ せんつなぎ", u:"じゅんばんに たどって せんで つなごう", icon:"✏️", slug:"suisen", group:"hayasa", target:10 },
+  { t:"クルクル おなじかたち", u:"まわしても おなじ かたちは どれ？", icon:"🔄", slug:"kurukuru", group:"kukan", target:10 },
+  { t:"ピンと いろのきまり", u:"たてよこ おなじいろが かさならないように", icon:"🧩", slug:"irokimari", group:"kangae", target:8 },
+  { t:"1つまえと おなじかな", u:"ひかった ばしょを おぼえて くらべよう", icon:"📍", slug:"onajikana", group:"kioku", target:15 },
+  { t:"あれ？みたことある", u:"さいしょに おぼえた ものを あとから みつけよう", icon:"👁️", slug:"mitakoto", group:"kioku", target:8 },
+  { t:"けいさん ジャッジ", u:"しきが あっているか まちがっているか みやぶろう", icon:"🧮", slug:"keisanjajji", group:"kangae", target:10 },
+  { t:"みみで きいて じゅんばんメモリー", u:"おとの じゅんばんを おぼえよう", icon:"👂", slug:"mimijun", group:"kioku", target:8 },
+  { t:"はやわざ きごうへんかん", u:"きごうを すうじに すばやく へんかん", icon:"🔣", slug:"hayakigou", group:"hayasa", target:20 },
+  { t:"さきよみ タワーひっこし", u:"さいしょうの てすうで タワーを うつそう", icon:"🗼", slug:"sakiyomi", group:"kangae", target:10 },
+  { t:"そろりと きまりがえ", u:"わけかたを みつけて あてよう", icon:"🃏", slug:"kimarigae", group:"kangae", target:5 },
+  { t:"ながら たいそう", u:"めと みみを どうじに つかおう", icon:"🤹", slug:"nagara", group:"chuui", target:25 },
+  { t:"さくさく なかまわけ", u:"なんの なかまか すばやく わけよう", icon:"🗂️", slug:"nakamawake", group:"hayasa", target:25 },
+  { t:"わすれずに とくべつタッチ", u:"とくべつな かずを おぼえておこう", icon:"🔔", slug:"wasurezu", group:"kioku", target:35 },
+  { t:"ぴったりで とめよう", u:"じぶんの かんかくで じかんを はかろう", icon:"⏱️", slug:"pittari", group:"kankaku", target:20 },
+  { t:"どっちが おおいかな", u:"かぞえずに かんじで こたえよう", icon:"🫧", slug:"docchiga", group:"kukan", target:10 },
+  { t:"かくれんぼ シルエット", u:"かくれた ぶぶんから かたちを あてよう", icon:"🕵️", slug:"kakurenbo", group:"kukan", target:8 },
+  { t:"トントン リズムあわせ", u:"リズムに あわせて タップしよう", icon:"🥁", slug:"tonton", group:"kankaku", target:80 },
+  { t:"どんな きもちかな", u:"かおの ひょうじょうから きもちを あてよう", icon:"🎭", slug:"kimochi", group:"kankaku", target:8 },
 ];
+
+const BRAIN_GROUP_INFO = {
+  kioku:   { label:"きおく",     icon:"🧠" },
+  chuui:   { label:"ちゅうい",   icon:"👀" },
+  hayasa:  { label:"はやさ",     icon:"⚡" },
+  kangae:  { label:"かんがえる", icon:"💡" },
+  kukan:   { label:"くうかん",   icon:"🔍" },
+  kankaku: { label:"かんかく",   icon:"⏱️" },
+};
+const BRAIN_GROUP_ORDER = ["kioku","chuui","hayasa","kangae","kukan","kankaku"];
+
+function getBrainBest(slug){
+  try {
+    const v = localStorage.getItem(profileNamespacedKey(slug + "_best"));
+    return v === null ? null : Number(v);
+  } catch(e) { return null; }
+}
+
+function computeBrainGroupScores(){
+  const sums = {}, cnts = {};
+  BRAIN_GROUP_ORDER.forEach(g=>{ sums[g]=0; cnts[g]=0; });
+  BRAIN_GAMES.forEach(g=>{
+    const best = getBrainBest(g.slug);
+    const achievement = (best == null || !isFinite(best)) ? 0 : Math.min(1, Math.max(0, best / g.target));
+    sums[g.group] += achievement;
+    cnts[g.group] += 1;
+  });
+  const result = {};
+  BRAIN_GROUP_ORDER.forEach(g=> result[g] = cnts[g] ? sums[g]/cnts[g] : 0);
+  return result;
+}
+
+// ---- れんぞくプレイ記録（ストリーク） ----
+const BRAIN_STREAK_KEY = "elementgirl_brain_streak";
+
+function brainTodayStr(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function brainAddDays(dateStr, n){
+  const d = new Date(dateStr + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function getBrainStreak(){
+  try {
+    return JSON.parse(localStorage.getItem(profileNamespacedKey(BRAIN_STREAK_KEY)) || "null") || { lastDate:null, streak:0, longest:0 };
+  } catch(e) { return { lastDate:null, streak:0, longest:0 }; }
+}
+function recordBrainPlay(){
+  const data = getBrainStreak();
+  const today = brainTodayStr();
+  if (data.lastDate === today) return data;
+  const yesterday = data.lastDate ? brainAddDays(data.lastDate, 1) : null;
+  data.streak = (yesterday === today) ? data.streak + 1 : 1;
+  data.lastDate = today;
+  data.longest = Math.max(data.longest || 0, data.streak);
+  try { localStorage.setItem(profileNamespacedKey(BRAIN_STREAK_KEY), JSON.stringify(data)); } catch(e) {}
+  return data;
+}
+
+// ---- 今日のおすすめ（日付シードで決定的に1本選ぶ） ----
+function brainDateSeed(dateStr){
+  let hash = 0;
+  for (let i=0;i<dateStr.length;i++){ hash = (hash*31 + dateStr.charCodeAt(i)) >>> 0; }
+  return hash;
+}
+function todaysBrainPick(){
+  if (BRAIN_GAMES.length === 0) return null;
+  const idx = brainDateSeed(brainTodayStr()) % BRAIN_GAMES.length;
+  return BRAIN_GAMES[idx];
+}
 
 const SUBJECT_LABEL = {science:"理科", society:"社会"};
 
@@ -1327,25 +1429,139 @@ function renderBonusGames(){
   wrap.querySelector("details").addEventListener("toggle", (e)=>{ bonusOpen = e.target.open; });
 }
 
+function drawBrainRadar(canvas, scores){
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return;
+  const w = Math.max(1, Math.round(rect.width * dpr)), h = Math.max(1, Math.round(rect.height * dpr));
+  if (canvas.width !== w || canvas.height !== h){ canvas.width = w; canvas.height = h; }
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W/2, cy = H/2;
+  const R = Math.min(W, H)/2 - 34;
+  const N = BRAIN_GROUP_ORDER.length;
+  const angleFor = i => -Math.PI/2 + i*(2*Math.PI/N);
+
+  ctx.strokeStyle = "#c3cdf0";
+  ctx.lineWidth = 1;
+  for (let ring=1; ring<=4; ring++){
+    const r = R*ring/4;
+    ctx.beginPath();
+    for (let i=0;i<=N;i++){
+      const a = angleFor(i % N);
+      const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  ctx.strokeStyle = "#b9c6f2";
+  for (let i=0;i<N;i++){
+    const a = angleFor(i);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(a)*R, cy + Math.sin(a)*R);
+    ctx.stroke();
+  }
+
+  ctx.beginPath();
+  BRAIN_GROUP_ORDER.forEach((g,i)=>{
+    const val = scores[g] || 0;
+    const a = angleFor(i);
+    const r = R*val;
+    const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = "rgba(63,156,120,.35)";
+  ctx.fill();
+  ctx.strokeStyle = "#3f9c78";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  BRAIN_GROUP_ORDER.forEach((g,i)=>{
+    const val = scores[g] || 0;
+    const a = angleFor(i);
+    const r = R*val;
+    const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI*2);
+    ctx.fillStyle = "#1a5f3f";
+    ctx.fill();
+  });
+
+  ctx.fillStyle = "#2b3a63";
+  ctx.font = "700 12px 'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  BRAIN_GROUP_ORDER.forEach((g,i)=>{
+    const a = angleFor(i);
+    const lx = cx + Math.cos(a)*(R+24), ly = cy + Math.sin(a)*(R+24);
+    const info = BRAIN_GROUP_INFO[g];
+    ctx.fillText(info.icon + " " + info.label, lx, ly);
+  });
+}
+
 function renderBrainGames(){
   const wrap = document.getElementById("brainGamesWrap");
   if(!wrap || BRAIN_GAMES.length === 0){ if(wrap) wrap.innerHTML = ""; return; }
   const cards = BRAIN_GAMES.map(g=>{
     return `
-      <a class="brain-card" href="${g.slug}.html">
+      <a class="brain-card" href="${g.slug}.html" data-brain-slug="${g.slug}">
         <div class="brain-icon">${g.icon}</div>
         <h3>${g.t}</h3>
         <div class="brain-meta">${g.u}</div>
         <div class="brain-tag">▶ あそぶ</div>
       </a>`;
   }).join("");
+
+  const streak = getBrainStreak();
+  const streakHTML = streak.streak > 0
+    ? `<div class="brain-streak">🔥 ${streak.streak}にち れんぞく！${streak.longest > streak.streak ? `（さいこう ${streak.longest}にち）` : ""}</div>`
+    : `<div class="brain-streak brain-streak-zero">🧠 きょうも あたまのたいそう、してみる？</div>`;
+
+  const pick = todaysBrainPick();
+  const pickHTML = pick ? `
+    <a class="brain-pick" href="${pick.slug}.html" data-brain-slug="${pick.slug}">
+      <div class="brain-pick-icon">${pick.icon}</div>
+      <div class="brain-pick-text">
+        <div class="brain-pick-label">✨ きょうの おすすめ</div>
+        <div class="brain-pick-title">${pick.t}</div>
+      </div>
+      <div class="brain-pick-tag">▶ あそぶ</div>
+    </a>` : "";
+
   wrap.innerHTML = `
+    <div class="brain-dashboard">
+      ${streakHTML}
+      ${pickHTML}
+    </div>
     <details class="brain-section"${brainOpen ? " open" : ""}>
       <summary class="brain-label">🧠 あたまのたいそう（${BRAIN_GAMES.length}）</summary>
+      <div class="brain-profile-wrap">
+        <div class="brain-profile-label">📊 のうトレプロフィール</div>
+        <canvas id="brainRadarCanvas" class="brain-radar"></canvas>
+      </div>
       <div class="brain-grid">${cards}</div>
     </details>`;
-  wrap.querySelector("details").addEventListener("toggle", (e)=>{ brainOpen = e.target.open; });
+
+  const detailsEl = wrap.querySelector("details");
+  detailsEl.addEventListener("toggle", (e)=>{
+    brainOpen = e.target.open;
+    if (e.target.open) drawBrainRadar(document.getElementById("brainRadarCanvas"), computeBrainGroupScores());
+  });
+  if (brainOpen) drawBrainRadar(document.getElementById("brainRadarCanvas"), computeBrainGroupScores());
 }
+
+document.addEventListener("click", (e)=>{
+  const brainLink = e.target.closest("a[data-brain-slug]");
+  if (brainLink) recordBrainPlay();
+});
+window.addEventListener("resize", ()=>{
+  if (brainOpen) drawBrainRadar(document.getElementById("brainRadarCanvas"), computeBrainGroupScores());
+});
 
 function playedBadgeHTML(it, playedSet, badgeProgress){
   if(isCleared(it.slug, badgeProgress)) return `<span class="played-badge cleared">🏆 クリア！</span>`;
