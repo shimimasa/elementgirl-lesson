@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>はじけるしゅんかん キャッチチャレンジ — みが じゅくす しゅんかんを ねらおう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f4fbea 0%, #e4f4d0 45%, #bfe3a6 100%);
+    color: #2b3d22;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #4f9d52; text-shadow: 0 0 14px rgba(79, 157, 82, .25);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #6a8a4a; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #scoreChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #scoreChip { background: #e4f4d0; color: #2d5e2f; border: 1.5px solid #a8d488; }
+  #timeChip { background: #1a5f3f; color: #fff; box-shadow: 0 0 14px rgba(26,95,63,.35); }
+  #bestChip { background: #e4f4d0; color: #2d5e2f; border: 1.5px solid #a8d488; }
+  #timeChip.urgent { background: #a01818; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 22%, #fbfff2 0%, #e4f4d0 55%, #bfe3a6 100%);
+    border: 3px solid #4f9d52;
+    box-shadow: inset 0 0 40px rgba(40, 90, 20, .12), 0 4px 18px rgba(40, 90, 20, .2);
+    overflow: hidden;
+    touch-action: none;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%);
+    color: #2b3d22; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 19px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .6vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(79, 157, 82, .35) 40%);
+  }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(20, 45, 15, .74);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #fbfff2, #e4f4d0);
+    border: 3px solid #4f9d52; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(20, 45, 15, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #4f9d52; margin: 0 0 .3em; text-shadow: 0 2px 0 #fff; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3d22; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #4f9d52; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #2f9862, #1a5f3f); color: #fff;
+    box-shadow: 0 3px 0 #123f29, 0 5px 12px rgba(18,63,41,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #e4f4d0; color: #2d5e2f; box-shadow: 0 3px 0 #a8d488; border: 1.5px solid #a8d488; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: #e4f4d0; border: 1px solid #a8d488;
+    color: #2d5e2f; font-size: clamp(11px, 1.2vw, 14px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">💥 はじけるしゅんかん キャッチチャレンジ <small>みが じゅくす しゅんかんを ねらおう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="scoreChip">スコア 0こ</div>
+    <div id="timeChip">00.0びょう</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この はじけるしゅんかん キャッチチャレンジは、<b>ソダチの学級園</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ソダチの学級園を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="sodachi.html">ソダチの学級園へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>💥 はじけるしゅんかん キャッチチャレンジ</h1>
+    <p>ホウセンカの 実は、みどり色の うちは まだ じゅくしていないよ。<br>
+    だんだん 黄色く なっていって、じゅくした しゅんかんに タッチすると、パチンと はじけて たねが 飛び出すよ！<br>
+    はやすぎる タッチは なにも 起きないよ。おそすぎると、ひとりでに はじけて しまうよ。<br>
+    せいげんじかんは 45びょう。ちょうど いい タイミングを ねらって、できるだけ たくさん キャッチしよう！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>45びょうで キャッチできた かず</p>
+    <div class="big" id="resultScore">0こ</div>
+    <p id="resultBestMsg"></p>
+    <p id="resultMisses"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'sodachi';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベスト記録（キャッチ数） ----------
+const BEST_KEY = 'hajikeshunkan_best';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(700, 0, 0.08, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sPop = () => { tone(220, 0, 0.06, 'square', 0.08); tone(880, 0.02, 0.12, 'triangle', 0.09); };
+
+// ---------- 実のデータ（本編sodachi.html m_hajike：緑=未熟／黄色=じゅくした瞬間にはじける、をそのまま核概念に採用） ----------
+const TIME_LIMIT_MS = 45000;
+const RIPEN_MIN_MS = 2000, RIPEN_MAX_MS = 4000;
+const JUDGE_WINDOW_MS = 700;
+const FRUIT_COLOR_UNRIPE = [63, 156, 82];   // #3f9c52
+const FRUIT_COLOR_RIPE = [232, 180, 0];     // #e8b400
+function newFruit(){
+  return { bornAt: performance.now(), ripenMs: RIPEN_MIN_MS + Math.random() * (RIPEN_MAX_MS - RIPEN_MIN_MS), resolved: false };
+}
+function fruitProgress(f, now){
+  return clamp((now - f.bornAt) / f.ripenMs, 0, 1);
+}
+function fruitOverMs(f, now){
+  return now - (f.bornAt + f.ripenMs);
+}
+
+// ---------- レイアウト定数（論理座標系 MAPW×MAPH） ----------
+const FRUIT_X = 500, FRUIT_Y = 300;
+const FRUIT_R = 110;
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | lock | playing | result
+  fruit: null,
+  score: 0,
+  misses: 0,
+  startTime: 0,
+  flashAt: 0, flashOk: false,
+};
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 20, PAD_B = 20, PAD_X = 20;
+const MAPW = 1000, MAPH = 680;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 描画 ----------
+function drawScene(X, Y, sc){
+  const now = performance.now();
+  const f = S.fruit;
+  if (!f) return;
+  const p = fruitProgress(f, now);
+  const col = [
+    Math.round(FRUIT_COLOR_UNRIPE[0] + (FRUIT_COLOR_RIPE[0] - FRUIT_COLOR_UNRIPE[0]) * p),
+    Math.round(FRUIT_COLOR_UNRIPE[1] + (FRUIT_COLOR_RIPE[1] - FRUIT_COLOR_UNRIPE[1]) * p),
+    Math.round(FRUIT_COLOR_UNRIPE[2] + (FRUIT_COLOR_RIPE[2] - FRUIT_COLOR_UNRIPE[2]) * p),
+  ];
+  const inWindow = p >= 1 && fruitOverMs(f, now) <= JUDGE_WINDOW_MS;
+
+  gctx.fillStyle = '#2b3d22'; gctx.font = `700 ${18*sc}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('じゅくしたら タッチ！', X(FRUIT_X), Y(FRUIT_Y - 160));
+
+  // 判定ウィンドウ中は光る演出
+  if (inWindow) {
+    const pulse = 1 + 0.12 * Math.sin(now / 60);
+    gctx.beginPath();
+    gctx.arc(X(FRUIT_X), Y(FRUIT_Y), FRUIT_R * 1.25 * pulse * sc, 0, TAU);
+    gctx.fillStyle = 'rgba(232,180,0,.35)';
+    gctx.fill();
+  }
+
+  // へた
+  gctx.fillStyle = '#5a4a2e';
+  gctx.beginPath();
+  gctx.ellipse(X(FRUIT_X), Y(FRUIT_Y - FRUIT_R * 0.85), 16*sc, 10*sc, 0, 0, TAU);
+  gctx.fill();
+
+  // 実本体
+  gctx.beginPath();
+  gctx.ellipse(X(FRUIT_X), Y(FRUIT_Y), FRUIT_R*sc, FRUIT_R*1.15*sc, 0, 0, TAU);
+  gctx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
+  gctx.fill();
+  gctx.lineWidth = 3*sc; gctx.strokeStyle = '#2b3d22';
+  gctx.stroke();
+
+  // ハイライト
+  gctx.beginPath();
+  gctx.ellipse(X(FRUIT_X - FRUIT_R*0.35), Y(FRUIT_Y - FRUIT_R*0.4), FRUIT_R*0.25*sc, FRUIT_R*0.35*sc, 0, 0, TAU);
+  gctx.fillStyle = 'rgba(255,255,255,.35)';
+  gctx.fill();
+
+  // フラッシュ演出
+  if (S.flashAt > 0){
+    const t = (now - S.flashAt) / 300;
+    if (t < 1){
+      gctx.globalAlpha = (1 - t) * 0.5;
+      gctx.fillStyle = S.flashOk ? '#3f9c78' : '#a01818';
+      gctx.beginPath(); gctx.arc(X(FRUIT_X), Y(FRUIT_Y), (FRUIT_R + 20*t*3)*sc, 0, TAU); gctx.fill();
+      gctx.globalAlpha = 1;
+    } else {
+      S.flashAt = 0;
+    }
+  }
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawScene(X, Y, sc);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n, cols) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: (cols || ['#4f9d52', '#e8b400', '#8a6438', '#fff'])[Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height * 0.4);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('scoreChip').textContent = `スコア ${S.score}こ`;
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${b}こ` : 'ベスト —';
+}
+function setResultMsg(html) { $('resultMsg').innerHTML = html; }
+
+// ---------- タップ判定 ----------
+function screenToLogic(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  return { x: (clientX - rect.left - ox) / sc, y: (clientY - rect.top - oy) / sc };
+}
+function onFruitTap(clientX, clientY){
+  if (S.phase !== 'playing' || !S.fruit || S.fruit.resolved) return;
+  const { x, y } = screenToLogic(clientX, clientY);
+  const dx = x - FRUIT_X, dy = y - FRUIT_Y;
+  if (Math.hypot(dx, dy) > FRUIT_R * 1.3) return;
+  ac();
+  const now = performance.now();
+  const p = fruitProgress(S.fruit, now);
+  if (p < 1) {
+    // まだ じゅくしていない -> なにも起きない
+    return;
+  }
+  const overMs = fruitOverMs(S.fruit, now);
+  if (overMs <= JUDGE_WINDOW_MS) {
+    S.fruit.resolved = true;
+    S.score++;
+    sPop(); sYes(); stageBurst();
+    S.flashAt = now; S.flashOk = true;
+    updateHud();
+    S.fruit = newFruit();
+  }
+}
+stageCv.addEventListener('pointerdown', e => onFruitTap(e.clientX, e.clientY));
+
+// ---------- 見逃し判定（毎フレーム） ----------
+function updateFruit(now){
+  if (S.phase !== 'playing' || !S.fruit || S.fruit.resolved) return;
+  if (fruitOverMs(S.fruit, now) > JUDGE_WINDOW_MS) {
+    S.fruit.resolved = true;
+    S.misses++;
+    sHmm();
+    S.flashAt = now; S.flashOk = false;
+    S.fruit = newFruit();
+  }
+}
+
+function startGame(){
+  S.fruit = newFruit();
+  S.score = 0;
+  S.misses = 0;
+  S.flashAt = 0;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  updateHud();
+  setResultMsg('みどり色の うちは まだ じゅくしていないよ！');
+}
+function onTimeUp(){
+  S.phase = 'result';
+  sFanfare(); stageBurst();
+  const score = S.score;
+  const best = getBest();
+  const isNewBest = (best === null) || (score > best);
+  if (isNewBest) setBest(score);
+  updateBestChip();
+  $('resultScore').textContent = `${score}こ`;
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストきろく こうしん！'
+    : `ベストきろく：${best}こ`;
+  $('resultMisses').textContent = `みのがした かいすう：${S.misses}かい`;
+  $('starListEl').innerHTML = `<span class="starChip">${score}こ キャッチした</span>`;
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストきろく：<b>${best}こ</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  if (S.phase === 'playing') updateFruit(now);
+  drawStage();
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    const elapsed = now - S.startTime;
+    const remainMs = Math.max(0, TIME_LIMIT_MS - elapsed);
+    $('timeChip').textContent = (remainMs / 1000).toFixed(1) + 'びょう';
+    $('timeChip').classList.toggle('urgent', remainMs <= 8000);
+    if (remainMs <= 0) onTimeUp();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
