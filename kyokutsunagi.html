@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>きょくつなぎ チェインチャレンジ — じしゃくの きょくを あわせて つなごう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4fb 0%, #dce8f5 45%, #b8d0e8 100%);
+    color: #1f3550;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #2e6da8; text-shadow: 0 0 14px rgba(46, 109, 168, .25);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #4a7ca8; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #chainChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #chainChip { background: #dce8f5; color: #1f4a6e; border: 1.5px solid #a8c4e0; }
+  #timeChip { background: #1f4a6e; color: #fff; box-shadow: 0 0 14px rgba(31,74,110,.35); }
+  #bestChip { background: #dce8f5; color: #1f4a6e; border: 1.5px solid #a8c4e0; }
+  #timeChip.urgent { background: #a01818; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 22%, #f4f8fc 0%, #dce8f5 55%, #b8d0e8 100%);
+    border: 3px solid #2e6da8;
+    box-shadow: inset 0 0 40px rgba(20, 50, 90, .12), 0 4px 18px rgba(20, 50, 90, .2);
+    overflow: hidden;
+    touch-action: none;
+  }
+  #stage, #fx { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #fx { pointer-events: none; }
+  #resultMsg {
+    position: absolute; top: 1vh; left: 50%; transform: translateX(-50%);
+    color: #1f3550; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 19px); min-height: 1.4em;
+    max-width: 90%;
+  }
+  #controls {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .6vw; justify-content: center; align-items: center;
+    padding: 1vh .5vw; background: linear-gradient(180deg, transparent, rgba(46, 109, 168, .35) 40%);
+  }
+  .ctl {
+    font-family: inherit; font-size: clamp(14px, 1.7vw, 21px); font-weight: 700;
+    padding: .55em 1.1em; border-radius: 16px; border: 2px solid #a8c4e0; cursor: pointer;
+    background: linear-gradient(180deg, #2a5f8a, #1f4a6e); color: #fff;
+    box-shadow: 0 3px 0 #12314a; transition: transform .1s, opacity .2s;
+    white-space: nowrap; min-height: 44px;
+  }
+  .ctl:hover { transform: translateY(-2px); }
+  .ctl:active { transform: translateY(1px); }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(10, 30, 55, .74);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #fbfdff, #dce8f5);
+    border: 3px solid #2e6da8; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(10, 30, 55, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #2e6da8; margin: 0 0 .3em; text-shadow: 0 2px 0 #fff; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #1f3550; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #2e6da8; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #2a5f8a, #1f4a6e); color: #fff;
+    box-shadow: 0 3px 0 #12314a, 0 5px 12px rgba(18,49,74,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dce8f5; color: #1f4a6e; box-shadow: 0 3px 0 #a8c4e0; border: 1.5px solid #a8c4e0; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: #dce8f5; border: 1px solid #a8c4e0;
+    color: #1f4a6e; font-size: clamp(11px, 1.2vw, 14px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+  try {
+    var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+    if (P && !P.roundRect) {
+      P.roundRect = function (x, y, w, h, r) {
+        var a;
+        if (typeof r === 'number') { a = [r, r, r, r]; }
+        else if (r && r.length) {
+          if (r.length === 1) { a = [r[0], r[0], r[0], r[0]]; }
+          else if (r.length === 2) { a = [r[0], r[1], r[0], r[1]]; }
+          else if (r.length === 3) { a = [r[0], r[1], r[2], r[1]]; }
+          else { a = [r[0], r[1], r[2], r[3]]; }
+        } else { a = [0, 0, 0, 0]; }
+        var m = Math.min(Math.abs(w), Math.abs(h)) / 2;
+        var tl = Math.min(a[0], m), tr = Math.min(a[1], m), br = Math.min(a[2], m), bl = Math.min(a[3], m);
+        this.moveTo(x + tl, y);
+        this.arcTo(x + w, y, x + w, y + h, tr);
+        this.arcTo(x + w, y + h, x, y + h, br);
+        this.arcTo(x, y + h, x, y, bl);
+        this.arcTo(x, y, x + w, y, tl);
+        this.closePath();
+        return this;
+      };
+    }
+  } catch (e) {}
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🧲 きょくつなぎ チェインチャレンジ <small>じしゃくの きょくを あわせて つなごう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="chainChip">くさり 1こ</div>
+    <div id="timeChip">00.0びょう</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="stage"></canvas>
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="controls"></div>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この きょくつなぎ チェインチャレンジは、<b>キョクの洞窟</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは キョクの洞窟を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="kyoku.html">キョクの洞窟へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🧲 きょくつなぎ チェインチャレンジ</h1>
+    <p>じしゃくには N極と S極が あるよ。<br>
+    ちがう 極どうしは 引き合って くっつくけど、同じ 極どうしは しりぞけ合って くっつかないんだったね。<br>
+    下の じしゃくを つまんで、くさりの さきまで ドラッグして つなげよう。<br>
+    むきが 逆だと つながらないよ。「🔄 むきをかえる」で むきを かえられるよ。<br>
+    せいげんじかんは 45びょう。できるだけ 長い くさりを つくろう！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>45びょうで つながった くさりの ながさ</p>
+    <div class="big" id="resultChain">1こ</div>
+    <p id="resultBestMsg"></p>
+    <p id="resultMisses"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'kyoku';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベスト記録（くさりの長さ） ----------
+const BEST_KEY = 'kyokutsunagi_best';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(700, 0, 0.08, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- 磁石データ（本編kyoku.html m_kyoku：同極=しりぞけ合う／異極=引き合う、をそのまま核概念に採用） ----------
+const TIME_LIMIT_MS = 45000;
+const PENALTY_MS = 1000;
+function opposite(p){ return p === 'N' ? 'S' : 'N'; }
+function randPole(){ return Math.random() < 0.5 ? 'N' : 'S'; }
+function makeCandidate(){
+  const l = randPole();
+  return { left: l, right: opposite(l) };
+}
+
+// ---------- レイアウト定数（論理座標系 MAPW×MAPH） ----------
+const MAG_W = 150, MAG_H = 60;
+const END_X = 500, END_Y = 230;
+const TRAY_X = 500, TRAY_Y = 500;
+const DROP_R = 130;
+const PREVIEW_Y = 350;
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | lock | playing | result
+  chain: [],
+  candidate: null,
+  dragging: false,
+  dragX: TRAY_X, dragY: TRAY_Y,
+  misses: 0,
+  startTime: 0,
+  flashAt: 0, flashOk: false,
+};
+
+// ---------- キャンバス ----------
+const stageCv = $('stage'), fxCv = $('fx');
+const gctx = stageCv.getContext('2d'), fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+const PAD_T = 20, PAD_B = 20, PAD_X = 20;
+const MAPW = 1000, MAPH = 680;
+function mapTransform(w, h) {
+  const sc = Math.min((w - PAD_X * 2) / MAPW, (h - PAD_T - PAD_B) / MAPH);
+  const ox = PAD_X + (w - PAD_X * 2 - MAPW * sc) / 2;
+  const oy = PAD_T + (h - PAD_T - PAD_B - MAPH * sc) / 2;
+  return { sc, ox, oy };
+}
+
+// ---------- 磁石棒の描画 ----------
+const POLE_COLOR = { N: '#d13c30', S: '#2f6fa8' };
+function drawMagnetBar(X, Y, sc, cx, cy, w, h, mag, opts){
+  opts = opts || {};
+  const alpha = opts.alpha != null ? opts.alpha : 1;
+  gctx.save();
+  gctx.globalAlpha = alpha;
+  const x0 = cx - w/2, y0 = cy - h/2;
+  gctx.beginPath();
+  gctx.roundRect(X(x0), Y(y0), w*sc, h*sc, 8*sc);
+  gctx.save(); gctx.clip();
+  gctx.fillStyle = POLE_COLOR[mag.left];
+  gctx.fillRect(X(x0), Y(y0), w/2*sc, h*sc);
+  gctx.fillStyle = POLE_COLOR[mag.right];
+  gctx.fillRect(X(cx), Y(y0), w/2*sc, h*sc);
+  gctx.restore();
+  gctx.lineWidth = 3*sc; gctx.strokeStyle = '#1f3550';
+  gctx.stroke();
+  gctx.fillStyle = '#fff'; gctx.font = `700 ${Math.round(h*0.5*sc)}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText(mag.left, X(cx - w/4), Y(cy));
+  gctx.fillText(mag.right, X(cx + w/4), Y(cy));
+  gctx.restore();
+}
+
+function drawScene(X, Y, sc){
+  // 接続ポイント（末端）
+  const endMag = S.chain[S.chain.length - 1];
+  gctx.fillStyle = '#1f3550'; gctx.font = `700 ${18*sc}px sans-serif`;
+  gctx.textAlign = 'center'; gctx.textBaseline = 'middle';
+  gctx.fillText('くさりの さき', X(END_X), Y(END_Y - 70));
+
+  // ドロップ判定の範囲を薄く表示
+  gctx.beginPath();
+  gctx.arc(X(END_X), Y(END_Y), DROP_R*sc, 0, TAU);
+  gctx.strokeStyle = 'rgba(46,109,168,.35)';
+  gctx.lineWidth = 2*sc;
+  gctx.setLineDash([6*sc, 6*sc]);
+  gctx.stroke();
+  gctx.setLineDash([]);
+
+  drawMagnetBar(X, Y, sc, END_X, END_Y, MAG_W, MAG_H, endMag);
+
+  // 鎖のプレビュー（直近8個）
+  const recent = S.chain.slice(-8);
+  const pw = 46, gap = 6;
+  const totalW = recent.length * pw + (recent.length - 1) * gap;
+  let px = END_X - totalW/2 + pw/2;
+  gctx.font = `700 ${13*sc}px sans-serif`;
+  for (const m of recent){
+    drawMagnetBar(X, Y, sc, px, PREVIEW_Y, pw, pw*0.4, m, {});
+    px += pw + gap;
+  }
+  gctx.fillStyle = '#4a7ca8'; gctx.font = `700 ${14*sc}px sans-serif`;
+  gctx.fillText(S.chain.length > 8 ? `…つづく全${S.chain.length}こ` : `くさり ${S.chain.length}こ`, X(END_X), Y(PREVIEW_Y + 40));
+
+  // トレイ＋候補磁石（ドラッグ中でなければトレイ位置、ドラッグ中はドラッグ位置）
+  if (S.candidate){
+    gctx.fillStyle = '#1f3550'; gctx.font = `700 ${16*sc}px sans-serif`;
+    if (!S.dragging){
+      gctx.fillText('この じしゃくを ドラッグして つなごう', X(TRAY_X), Y(TRAY_Y - 55));
+    }
+    const cx = S.dragging ? S.dragX : TRAY_X;
+    const cy = S.dragging ? S.dragY : TRAY_Y;
+    drawMagnetBar(X, Y, sc, cx, cy, MAG_W, MAG_H, S.candidate, { alpha: S.dragging ? 0.92 : 1 });
+  }
+
+  // フラッシュ演出
+  if (S.flashAt > 0){
+    const t = (performance.now() - S.flashAt) / 300;
+    if (t < 1){
+      gctx.globalAlpha = (1 - t) * 0.5;
+      gctx.fillStyle = S.flashOk ? '#3f9c78' : '#a01818';
+      gctx.beginPath(); gctx.arc(X(END_X), Y(END_Y), (DROP_R + 20*t*3)*sc, 0, TAU); gctx.fill();
+      gctx.globalAlpha = 1;
+    } else {
+      S.flashAt = 0;
+    }
+  }
+}
+
+function drawStage() {
+  const { w, h, dpr } = fitCanvas(stageCv);
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gctx.clearRect(0, 0, w, h);
+  if (S.phase !== 'playing') return;
+  const { sc, ox, oy } = mapTransform(w, h);
+  const X = x => ox + x * sc, Y = y => oy + y * sc;
+  drawScene(X, Y, sc);
+}
+
+// ---------- キラキラ ----------
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#2e6da8', '#d13c30', '#2f6fa8', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height * 0.35);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('chainChip').textContent = `くさり ${S.chain.length}こ`;
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${b}こ` : 'ベスト —';
+}
+function setResultMsg(html) { $('resultMsg').innerHTML = html; }
+function setControls(list) {
+  const el = $('controls');
+  el.innerHTML = '';
+  list.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'ctl' + (b.cls ? ' ' + b.cls : '');
+    btn.innerHTML = b.label;
+    btn.disabled = !!b.dis;
+    btn.onclick = () => { ac(); b.cb(); };
+    el.appendChild(btn);
+  });
+}
+function renderControls(){
+  setControls([
+    { label: '🔄 むきをかえる', cb: onFlip },
+  ]);
+}
+
+// ---------- ゲーム進行 ----------
+function onFlip(){
+  if (S.phase !== 'playing' || S.dragging || !S.candidate) return;
+  S.candidate = { left: S.candidate.right, right: S.candidate.left };
+  sTap();
+}
+function tryConnect(){
+  const dx = S.dragX - END_X, dy = S.dragY - END_Y;
+  const dist = Math.hypot(dx, dy);
+  if (dist > DROP_R) return;
+  const endMag = S.chain[S.chain.length - 1];
+  if (S.candidate.left === opposite(endMag.right)) {
+    S.chain.push(S.candidate);
+    S.candidate = makeCandidate();
+    sYes(); stageBurst();
+    S.flashAt = performance.now(); S.flashOk = true;
+    updateHud();
+  } else {
+    S.misses++;
+    S.candidate = makeCandidate();
+    sHmm();
+    S.startTime -= PENALTY_MS;
+    S.flashAt = performance.now(); S.flashOk = false;
+  }
+}
+function screenToLogic(clientX, clientY){
+  const rect = stageCv.getBoundingClientRect();
+  const { sc, ox, oy } = mapTransform(rect.width, rect.height);
+  return { x: (clientX - rect.left - ox) / sc, y: (clientY - rect.top - oy) / sc };
+}
+function inCandidateArea(x, y){
+  return x >= TRAY_X - MAG_W/2 - 24 && x <= TRAY_X + MAG_W/2 + 24 &&
+         y >= TRAY_Y - MAG_H/2 - 24 && y <= TRAY_Y + MAG_H/2 + 24;
+}
+function onPointerDown(e){
+  if (S.phase !== 'playing' || !S.candidate) return;
+  const { x, y } = screenToLogic(e.clientX, e.clientY);
+  if (inCandidateArea(x, y)) {
+    S.dragging = true;
+    S.dragX = x; S.dragY = y;
+    ac();
+  }
+}
+function onPointerMove(e){
+  if (!S.dragging) return;
+  const { x, y } = screenToLogic(e.clientX, e.clientY);
+  S.dragX = x; S.dragY = y;
+}
+function onPointerUp(e){
+  if (!S.dragging) return;
+  S.dragging = false;
+  tryConnect();
+}
+stageCv.addEventListener('pointerdown', onPointerDown);
+window.addEventListener('pointermove', onPointerMove);
+window.addEventListener('pointerup', onPointerUp);
+
+function startGame(){
+  S.chain = [{ left: 'N', right: 'S' }];
+  S.candidate = makeCandidate();
+  S.misses = 0;
+  S.dragging = false;
+  S.flashAt = 0;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  updateHud();
+  renderControls();
+  setResultMsg('じしゃくを ドラッグして、くさりの さきに つなげよう！');
+}
+function onTimeUp(){
+  S.phase = 'result';
+  setControls([]);
+  sFanfare(); stageBurst();
+  const len = S.chain.length;
+  const best = getBest();
+  const isNewBest = (best === null) || (len > best);
+  if (isNewBest) setBest(len);
+  updateBestChip();
+  $('resultChain').textContent = `${len}こ`;
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストきろく こうしん！'
+    : `ベストきろく：${best}こ`;
+  $('resultMisses').textContent = `つながらなかった かいすう：${S.misses}かい`;
+  $('starListEl').innerHTML = `<span class="starChip">さいだいで ${len}こ つながった</span>`;
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストきろく：<b>${best}こ</b></p>`;
+  }
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawStage();
+  drawFx(dt);
+  if (S.phase === 'playing') {
+    const elapsed = now - S.startTime;
+    const remainMs = Math.max(0, TIME_LIMIT_MS - elapsed);
+    $('timeChip').textContent = (remainMs / 1000).toFixed(1) + 'びょう';
+    $('timeChip').classList.toggle('urgent', remainMs <= 8000);
+    if (remainMs <= 0) onTimeUp();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
