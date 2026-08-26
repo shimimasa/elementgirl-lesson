@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ながら たいそう — めと みみを どうじに つかおう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #eef4ff 0%, #e6f7f0 100%);
+    color: #2b3a63;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #3f4f9c; text-shadow: 0 0 14px rgba(63, 79, 156, .2);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #5c76b0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 28%, #ffffff 0%, #eef4ff 55%, #dbe6fb 100%);
+    border: 3px solid #6ec7a6;
+    box-shadow: inset 0 0 40px rgba(63, 79, 156, .08), 0 4px 18px rgba(63, 79, 156, .15);
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1.2vh 2vw 1.6vh; gap: .6vh;
+  }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #resultMsg {
+    position: relative; z-index: 1;
+    color: #2b3a63; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 19px); min-height: 1.4em;
+    max-width: 92%;
+  }
+  #scoreInfo {
+    position: relative; z-index: 1;
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  }
+  .scoreChip {
+    font-weight: 700; font-size: clamp(11px, 1.3vw, 15px);
+    padding: .25em .9em; border-radius: 999px; white-space: nowrap;
+    background: #dfe8ff; color: #3f4f9c; border: 1.5px solid #b9c6f2;
+  }
+  #dualArea {
+    position: relative; z-index: 1;
+    flex: 1; width: 100%; max-width: 640px;
+    display: flex; flex-direction: column; gap: 2vh;
+    min-height: 0; justify-content: center;
+  }
+  .taskPane {
+    background: #fff; border: 3px solid #b9c6f2; border-radius: 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .5em; padding: 1.2vh 1em; flex: 1; min-height: 0;
+    transition: background .1s;
+  }
+  #taskACircle {
+    width: clamp(64px, 12vh, 110px); height: clamp(64px, 12vh, 110px);
+    border-radius: 50%; background: #dfe8ff; border: 4px solid #b9c6f2;
+    transition: background .08s, border-color .08s, transform .08s;
+    cursor: pointer;
+  }
+  #taskACircle.active {
+    background: #ffe08a; border-color: #e8b400;
+    transform: scale(1.08);
+    box-shadow: 0 0 24px rgba(232,180,0,.6);
+  }
+  .taskLabel { font-weight: 700; font-size: clamp(11px, 1.4vw, 15px); color: #4d6a8c; text-align: center; }
+  #taskBPulse {
+    font-size: clamp(24px, 4vh, 38px); opacity: .25; transition: opacity .1s, transform .1s;
+  }
+  #taskBPulse.active { opacity: 1; transform: scale(1.15); }
+  #taskBBtn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(13px, 1.6vw, 17px); padding: .6em 1.4em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e; min-height: 40px;
+  }
+  #taskBBtn:active { transform: scale(.96); }
+
+  .demoRow { display: flex; flex-wrap: wrap; gap: 1em; justify-content: center; margin: .8em 0; }
+  .demoCard {
+    background: #f4f7ff; border: 2px solid #b9c6f2; border-radius: 16px;
+    padding: .7em 1em; text-align: center; max-width: 240px;
+  }
+  .demoArrow { font-size: clamp(11px, 1.4vw, 14px); color: #4d6a8c; font-weight: 700; line-height: 1.6; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(30, 40, 80, .55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    border: 3px solid #3f4f9c; border-radius: 26px;
+    max-width: 640px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(30, 40, 80, .3);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #3f4f9c; margin: 0 0 .3em; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2b3a63; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #3f4f9c; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #7fd6b0, #3f9c78); color: #fff;
+    box-shadow: 0 3px 0 #276b4e, 0 5px 12px rgba(39,107,78,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #dfe8ff; color: #3f4f9c; box-shadow: 0 3px 0 #b9c6f2; border: 1.5px solid #b9c6f2; }
+  #btnSoundCheck { background: linear-gradient(180deg, #ffd66b, #e8b400); box-shadow: 0 3px 0 #a97e00; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🤹 ながら たいそう <small>めと みみを どうじに つかおう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="timeChip">じかん —</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <canvas id="fx"></canvas>
+    <div id="resultMsg"></div>
+    <div id="scoreInfo">
+      <div class="scoreChip" id="chipA">👁️ —</div>
+      <div class="scoreChip" id="chipB">👂 —</div>
+    </div>
+    <div id="dualArea">
+      <div class="taskPane">
+        <div id="taskACircle"></div>
+        <div class="taskLabel">まるが ひかったら、まるを タップ！</div>
+      </div>
+      <div class="taskPane">
+        <div id="taskBPulse">👂</div>
+        <button id="taskBBtn" type="button">たかい おとの とき おす</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🤹 ながら たいそう</h1>
+    <p>この ゲームは <b>2つの みはりを どうじに</b> やるよ。<br>
+    うえの まるが <b>ひかったら、まるを タップ</b>。<br>
+    したから <b>たかい おとが きこえたら、ボタンを おす</b>。<br>
+    ひくい おとの ときは なにも しないで がまん！</p>
+    <div class="demoRow">
+      <div class="demoCard">
+        <div class="demoArrow">👁️ うえは め<br>まるが ひかったら タップ</div>
+      </div>
+      <div class="demoCard">
+        <div class="demoArrow">👂 したは みみ<br>たかい おとだけ ボタンを おす</div>
+      </div>
+    </div>
+    <p style="font-size:.85em;color:#4d6a8c;">これは「デュアルタスク」という、2つの ことを どうじに ちゅういする ちからを しらべる けんきゅうで つかわれる もんだいを もとに つくったよ。40びょうかん、りょうほうを みはりつづけよう！</p>
+    <div class="btnRow">
+      <button class="btn" id="btnSoundCheck">🔊 おとを かくにんする</button>
+    </div>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>あわせた せいかいすう</p>
+    <div class="big" id="resultTotal">0 こ</div>
+    <p id="resultDetail"></p>
+    <p id="resultBestMsg"></p>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = Math.PI * 2;
+
+// ---------- ベストきろく ----------
+const BEST_KEY = 'nagara_best';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v === null ? null : parseInt(v, 10);
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(740, 0, 0.08, 'triangle', 0.07);
+const sNg = () => tone(220, 0, 0.16, 'sawtooth', 0.06);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+const sHigh = () => tone(880, 0, 0.35, 'sine', 0.13);
+const sLow = () => tone(330, 0, 0.35, 'sine', 0.13);
+
+// ---------- タスクのスケジュール生成 ----------
+const DURATION_MS = 40000;
+const A_SHOW_MS = 900;
+const B_WINDOW_MS = 1100;
+
+function buildTaskASchedule() {
+  const events = [];
+  let t = 800 + Math.random() * 800;
+  while (t < DURATION_MS - A_SHOW_MS) {
+    events.push({ time: t, resolved: false, hit: false });
+    t += 1300 + Math.random() * 1400;
+  }
+  return events;
+}
+function buildTaskBSchedule() {
+  const events = [];
+  let t = 1000 + Math.random() * 1000;
+  while (t < DURATION_MS - B_WINDOW_MS) {
+    events.push({ time: t, high: Math.random() < 0.5, resolved: false, hit: false });
+    t += 1600 + Math.random() * 1600;
+  }
+  return events;
+}
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | play | result
+  startTime: 0,
+  aEvents: null,
+  bEvents: null,
+  aActive: -1,
+  bActive: -1,
+  scoreA: { hit: 0, miss: 0 },
+  scoreB: { hit: 0, miss: 0, falseAlarm: 0, correctReject: 0 },
+};
+
+// ---------- キラキラ ----------
+const fxCv = $('fx');
+const fctx = fxCv.getContext('2d');
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+let particles = [];
+function burst(x, y, n) {
+  for (let i = 0; i < (n || 60); i++) {
+    const a = Math.random() * TAU, sp = 60 + Math.random() * 240;
+    particles.push({
+      x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 1, size: 2 + Math.random() * 4,
+      col: ['#3f4f9c', '#6ec7a6', '#ffd66b', '#fff'][Math.floor(Math.random() * 4)],
+    });
+  }
+}
+function stageBurst() {
+  const r = $('stageWrap').getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+}
+function drawFx(dt) {
+  const { w, h, dpr } = fitCanvas(fxCv);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, w, h);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt;
+    fctx.globalAlpha = Math.max(0, p.life);
+    fctx.fillStyle = p.col;
+    fctx.save();
+    fctx.translate(p.x, p.y); fctx.rotate(p.life * 5);
+    const s = p.size;
+    fctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a1 = i * TAU / 5 - Math.PI / 2;
+      fctx.lineTo(Math.cos(a1) * s, Math.sin(a1) * s);
+      const a2 = a1 + TAU / 10;
+      fctx.lineTo(Math.cos(a2) * s * 0.45, Math.sin(a2) * s * 0.45);
+    }
+    fctx.closePath(); fctx.fill();
+    fctx.restore();
+  });
+  fctx.globalAlpha = 1;
+}
+
+// ---------- HUD ----------
+function updateTimeChip(remainMs) {
+  const sec = Math.max(0, Math.ceil(remainMs / 1000));
+  $('timeChip').textContent = S.phase === 'play' ? `じかん ${sec}びょう` : 'じかん —';
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = (b === null) ? 'ベスト —' : `ベスト ${b} こ`;
+}
+function updateBestInfo() {
+  const b = getBest();
+  const el = $('bestInfo');
+  if (b !== null) {
+    el.style.display = 'block';
+    el.innerHTML = `<p>いまの ベストきろく：<b>${b} こ</b></p>`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+function setResultMsg(text) { $('resultMsg').textContent = text; }
+function updateScoreChips() {
+  $('chipA').textContent = `👁️ せいかい${S.scoreA.hit} みのがし${S.scoreA.miss}`;
+  $('chipB').textContent = `👂 せいかい${S.scoreB.hit + S.scoreB.correctReject} おしすぎ${S.scoreB.falseAlarm}`;
+}
+
+// ---------- ゲーム進行 ----------
+function startGame() {
+  S.aEvents = buildTaskASchedule();
+  S.bEvents = buildTaskBSchedule();
+  S.aActive = -1;
+  S.bActive = -1;
+  S.scoreA = { hit: 0, miss: 0 };
+  S.scoreB = { hit: 0, miss: 0, falseAlarm: 0, correctReject: 0 };
+  S.startTime = performance.now();
+  S.phase = 'play';
+  setResultMsg('40びょうかん、りょうほうを みはろう！');
+  updateScoreChips();
+  $('taskACircle').classList.remove('active');
+  $('taskBPulse').classList.remove('active');
+}
+function onTaskATap() {
+  if (S.phase !== 'play' || S.aActive === -1) return;
+  const e = S.aEvents[S.aActive];
+  e.resolved = true; e.hit = true;
+  S.scoreA.hit++;
+  S.aActive = -1;
+  $('taskACircle').classList.remove('active');
+  sTap();
+  updateScoreChips();
+}
+function onTaskBTap() {
+  if (S.phase !== 'play' || S.bActive === -1) return;
+  const e = S.bEvents[S.bActive];
+  e.resolved = true;
+  if (e.high) {
+    e.hit = true;
+    S.scoreB.hit++;
+    sTap();
+  } else {
+    S.scoreB.falseAlarm++;
+    sNg();
+  }
+  S.bActive = -1;
+  $('taskBPulse').classList.remove('active');
+  updateScoreChips();
+}
+function gameTick(elapsed) {
+  // タスクA
+  if (S.aActive === -1) {
+    const idx = S.aEvents.findIndex(e => !e.resolved && e.time <= elapsed);
+    if (idx !== -1) {
+      S.aActive = idx;
+      $('taskACircle').classList.add('active');
+    }
+  } else {
+    const e = S.aEvents[S.aActive];
+    if (elapsed - e.time > A_SHOW_MS) {
+      e.resolved = true;
+      S.scoreA.miss++;
+      S.aActive = -1;
+      $('taskACircle').classList.remove('active');
+      updateScoreChips();
+    }
+  }
+  // タスクB
+  if (S.bActive === -1) {
+    const idx = S.bEvents.findIndex(e => !e.resolved && e.time <= elapsed);
+    if (idx !== -1) {
+      S.bActive = idx;
+      $('taskBPulse').classList.add('active');
+      if (S.bEvents[idx].high) sHigh(); else sLow();
+    }
+  } else {
+    const e = S.bEvents[S.bActive];
+    if (elapsed - e.time > B_WINDOW_MS) {
+      e.resolved = true;
+      if (e.high) { S.scoreB.miss++; } else { S.scoreB.correctReject++; }
+      S.bActive = -1;
+      $('taskBPulse').classList.remove('active');
+      updateScoreChips();
+    }
+  }
+  updateTimeChip(DURATION_MS - elapsed);
+  if (elapsed >= DURATION_MS) finishGame();
+}
+function finishGame() {
+  S.phase = 'result';
+  $('taskACircle').classList.remove('active');
+  $('taskBPulse').classList.remove('active');
+  const total = S.scoreA.hit + S.scoreB.hit + S.scoreB.correctReject;
+  const best = getBest();
+  let isNewBest = false;
+  if (total > 0 && (best === null || total > best)) {
+    setBest(total);
+    isNewBest = true;
+  }
+  if (isNewBest) { sFanfare(); stageBurst(); } else { sYes(); }
+  $('resultTotal').textContent = `${total} こ`;
+  $('resultDetail').textContent = `👁️ せいかい${S.scoreA.hit}・みのがし${S.scoreA.miss}　👂 せいかい${S.scoreB.hit + S.scoreB.correctReject}・おしすぎ${S.scoreB.falseAlarm}`;
+  $('resultBestMsg').textContent = total === 0
+    ? 'つぎは がんばろう！'
+    : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} こ`);
+  updateTimeChip(0);
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('taskACircle').addEventListener('click', onTaskATap);
+$('taskBBtn').addEventListener('click', onTaskBTap);
+$('btnSoundCheck').addEventListener('click', () => { ac(); sHigh(); setTimeout(sLow, 500); });
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  showOverlay('titleOverlay');
+  updateBestChip();
+  updateBestInfo();
+}
+
+// ---------- ループ ----------
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  drawFx(dt);
+  if (S.phase === 'play') gameTick(now - S.startTime);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
