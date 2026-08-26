@@ -188,7 +188,7 @@
 <div id="titleOverlay" class="overlay hide">
   <div class="panel">
     <h1>🌈 まよわず いろタッチ</h1>
-    <p>まん中に でる もじの「いろ」を、下の 4つの ボタンから えらんで タップしよう。<br>
+    <p>まんなかに でる もじの「いろ」を、したの 4つの ボタンから えらんで タップしよう。<br>
     もじが あらわす「いみ」に つられないように、ちゅういしてね！</p>
     <div class="demoRow">
       <div class="demoCard">
@@ -200,8 +200,8 @@
         <div class="demoArrow">もじの いろも みどり<br>→ こたえは「みどり」</div>
       </div>
     </div>
-    <p>せいげん時間は 30びょう。時間の中で、できるだけ 多く せいかいしよう！</p>
-    <p style="font-size:.85em;color:#4d6a8c;">これは、のうの ちゅうい力を しらべる けんきゅうで じっさいに つかわれている「ストループ課題」という あそびかたを もとに つくったよ。</p>
+    <p>せいげん じかんは 30びょう。じかんの なかで、できるだけ おおく せいかいしよう！</p>
+    <p style="font-size:.85em;color:#4d6a8c;">これは、のうの ちゅういする ちからを しらべる けんきゅうで じっさいに つかわれている「ストループもんだい」という あそびかたを もとに つくったよ。</p>
     <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
     <div class="btnRow">
       <button class="btn" id="btnStart">スタート ▶</button>
@@ -407,7 +407,7 @@ function finishRound(){
   const attempts = S.correct + S.wrong;
   const acc = attempts > 0 ? Math.round((S.correct / attempts) * 100) : 0;
   $('resultCorrect').textContent = `${S.correct} かい`;
-  $('resultAccuracy').textContent = attempts > 0 ? `せいどう率：${acc}%（${attempts}もん中）` : '';
+  $('resultAccuracy').textContent = attempts > 0 ? `せいどうりつ：${acc}%（${attempts}もんちゅう）` : '';
   $('resultBestMsg').textContent = S.correct === 0
     ? 'つぎは がんばろう！'
     : (isNewBest ? '🎉 じぶんの ベストきろく こうしん！' : `ベストきろく：${best} かい`);

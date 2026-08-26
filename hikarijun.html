@@ -7,7 +7,7 @@
 <script src="profile.js"></script>
 <script src="progress.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ピカッとじゅんばんメモリー — 光る順番おぼえチャレンジ</title>
+<title>ピカッとじゅんばんメモリー — ひかる じゅんばん おぼえチャレンジ</title>
 <style>
   .backHome{
     position:fixed; top:8px; left:8px; z-index:9000;
@@ -150,7 +150,7 @@
 <a class="backHome" href="index.html">🏠 もどる</a>
 
 <header>
-  <div id="logo">💡 ピカッとじゅんばんメモリー <small>光る順番おぼえチャレンジ</small></div>
+  <div id="logo">💡 ピカッとじゅんばんメモリー <small>ひかる じゅんばん おぼえチャレンジ</small></div>
   <div id="hudRight">
     <div id="bestChip">ベスト —</div>
     <div id="roundChip">れべる —</div>
@@ -169,7 +169,7 @@
   <div class="panel">
     <h1>💡 ピカッとじゅんばんメモリー</h1>
     <p>マスが じゅんばんに ピカッと ひかるよ。<br>
-    よく見て おぼえたら、同じ じゅんばんで タップしよう！<br>
+    よく みて おぼえたら、おなじ じゅんばんで タップしよう！<br>
     せいかいすると じゅんばんが 1つずつ ながくなるよ。<br>
     まちがえたら そこで おしまい。どこまで のばせるかな？</p>
     <p style="font-size:.85em;color:#4d6a8c;">これは、きおくりょくを しらべる けんきゅうで じっさいに つかわれている「コルシブロック」という あそびかたを もとに つくったよ。</p>
@@ -387,7 +387,7 @@ function playSequence(){
   S.activeCell = null;
   S.wrongCell = null;
   S.tappedOrder = [];
-  setResultMsg(`見てね…（${S.sequence.length}こ）`);
+  setResultMsg(`みてね…（${S.sequence.length}こ）`);
   let i = 0;
   function tick(){
     if (S.phase !== 'showing') return;
