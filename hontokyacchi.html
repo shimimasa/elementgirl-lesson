@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="auth.js"></script>
+<script src="orientation-guard.js"></script>
+<script src="profile.js"></script>
+<script src="progress.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ほんとの じょうほう キャッチタイムアタック — でどころを たしかめよう</title>
+<style>
+  .backHome{
+    position:fixed; top:8px; left:8px; z-index:9000;
+    display:inline-flex; align-items:center; gap:.3em;
+    color:#222; text-decoration:none; font-weight:700;
+    font-size:13px; white-space:nowrap;
+    padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .2s;
+  }
+  .backHome:hover{ background:#fff; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: linear-gradient(180deg, #f2f0fb 0%, #e6e0f5 45%, #cdc0ea 100%);
+    color: #2e1f4a;
+    font-family: "BIZ UDPGothic", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex; flex-direction: column;
+  }
+  rt { font-size: 0.45em; letter-spacing: 0; }
+
+  header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.2vw;
+    padding: 1vh 1.6vw;
+  }
+  #logo {
+    font-size: clamp(15px, 1.9vw, 25px); font-weight: 700;
+    color: #7b4fb0; text-shadow: 0 0 14px rgba(123, 79, 176, .25);
+    margin-left: 84px; white-space: nowrap;
+  }
+  #logo small { font-size: .55em; color: #8a6ab0; font-weight: 400; margin-left: .6em; }
+  #hudRight { margin-left: auto; margin-right: 130px; display: flex; align-items: center; gap: .8vw; }
+  #scoreChip, #timeChip, #bestChip {
+    font-weight: 700; font-size: clamp(12px, 1.4vw, 18px);
+    padding: .3em .9em; border-radius: 999px; white-space: nowrap;
+  }
+  #scoreChip { background: #e6e0f5; color: #4a1f8a; border: 1.5px solid #c4b0e0; }
+  #timeChip { background: #4a1f8a; color: #fff; box-shadow: 0 0 14px rgba(74,31,138,.35); }
+  #bestChip { background: #e6e0f5; color: #4a1f8a; border: 1.5px solid #c4b0e0; }
+  #timeChip.urgent { background: #a01818; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; padding: .3vh 1.6vw 1.6vh; min-height: 0;
+  }
+  #stageWrap {
+    flex: 1; position: relative; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 22%, #fbfaff 0%, #e6e0f5 55%, #cdc0ea 100%);
+    border: 3px solid #7b4fb0;
+    box-shadow: inset 0 0 40px rgba(70, 30, 130, .12), 0 4px 18px rgba(70, 30, 130, .2);
+    overflow: hidden;
+    padding: 2vh 2vw;
+  }
+  #introMsg {
+    color: #2e1f4a; font-weight: 700; text-align: center;
+    font-size: clamp(13px, 1.6vw, 17px); min-height: 1.4em;
+    max-width: 90%; margin-bottom: 1vh;
+  }
+  #cardWrap {
+    background: #fff; border: 3px solid #c4b0e0; border-radius: 20px;
+    padding: 3vh 4vw; margin-bottom: 2vh;
+    text-align: center; min-width: min(420px, 80vw);
+    box-shadow: 0 4px 16px rgba(70,30,130,.15);
+    transition: border-color .15s, background .15s;
+  }
+  #cardWrap.ok { border-color: #2f9862; background: #e4f6ec; }
+  #cardWrap.ng { border-color: #a01818; background: #fde4e4; }
+  #cardIcon { font-size: clamp(40px, 6vw, 64px); margin-bottom: .3em; }
+  #cardLabel { font-size: clamp(15px, 2vw, 22px); font-weight: 700; color: #2e1f4a; }
+  #catchBtn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(18px, 2.4vw, 26px); padding: .7em 2em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #6a3fae, #4a1f8a); color: #fff;
+    box-shadow: 0 4px 0 #2e1360; min-height: 60px;
+    transition: transform .1s;
+  }
+  #catchBtn:active { transform: scale(.95); }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(40, 15, 70, .74);
+    display: flex; align-items: center; justify-content: center;
+    padding: 3vh 4vw;
+  }
+  .overlay.hide { display: none; }
+  .panel {
+    background: linear-gradient(180deg, #fbfaff, #e6e0f5);
+    border: 3px solid #7b4fb0; border-radius: 26px;
+    max-width: 620px; width: 100%;
+    padding: clamp(20px, 4vh, 40px) clamp(20px, 4vw, 40px);
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(40, 15, 70, .35);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .panel h1 { font-size: clamp(20px, 3vw, 32px); color: #7b4fb0; margin: 0 0 .3em; text-shadow: 0 2px 0 #fff; }
+  .panel p { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.8; color: #2e1f4a; margin: .6em 0; }
+  .panel .big { font-size: clamp(28px, 5vw, 52px); font-weight: 700; color: #7b4fb0; margin: .3em 0; }
+  .btnRow { display: flex; flex-wrap: wrap; gap: .8em; justify-content: center; margin-top: 1.2em; }
+  .btn {
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    font-size: clamp(15px, 1.9vw, 20px); padding: .7em 1.6em; border-radius: 999px;
+    border: none; background: linear-gradient(180deg, #6a3fae, #4a1f8a); color: #fff;
+    box-shadow: 0 3px 0 #2e1360, 0 5px 12px rgba(46,19,96,.3);
+    min-height: 44px; text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.ghost { background: #e6e0f5; color: #4a1f8a; box-shadow: 0 3px 0 #c4b0e0; border: 1.5px solid #c4b0e0; }
+  .starList { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; margin: 1em 0; }
+  .starChip {
+    background: #e6e0f5; border: 1px solid #c4b0e0;
+    color: #4a1f8a; font-size: clamp(11px, 1.2vw, 14px); font-weight: 700;
+    padding: .35em .8em; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  function showErr(msg) {
+    try {
+      var d = document.getElementById('__err');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = '__err';
+        d.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#101426;color:#ffdada;font:14px/1.7 monospace;padding:18px;overflow:auto;white-space:pre-wrap';
+        (document.body || document.documentElement).appendChild(d);
+      }
+      d.appendChild(document.createTextNode('⚠ ' + msg + '\n'));
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    showErr((e && e.message ? e.message : 'error') + '  @line ' + (e && e.lineno ? e.lineno : '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise: ' + (e && e.reason ? e.reason : ''));
+  });
+})();
+</script>
+<a class="backHome" href="index.html">🏠 もどる</a>
+
+<header>
+  <div id="logo">🔍 ほんとの じょうほう キャッチタイムアタック <small>でどころを たしかめよう</small></div>
+  <div id="hudRight">
+    <div id="bestChip">ベスト —</div>
+    <div id="scoreChip">スコア 0てん</div>
+    <div id="timeChip">00.0びょう</div>
+  </div>
+</header>
+
+<main>
+  <div id="stageWrap">
+    <div id="introMsg"></div>
+    <div id="cardWrap">
+      <div id="cardIcon"></div>
+      <div id="cardLabel"></div>
+    </div>
+    <button type="button" id="catchBtn">👍 これは ほんと！</button>
+  </div>
+</main>
+
+<div id="lockOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔒 まだ あそべません</h1>
+    <p>この ほんとの じょうほう キャッチタイムアタックは、<b>ツタエの放送局</b>を <ruby>全部<rt>ぜんぶ</rt></ruby>クリアした人だけの ごほうびゲームです。</p>
+    <p>まずは ツタエの放送局を クリアしてきてね！</p>
+    <div class="btnRow">
+      <a class="btn" href="tsutae.html">ツタエの放送局へ ▶</a>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<div id="titleOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🔍 ほんとの じょうほう キャッチタイムアタック</h1>
+    <p>いろいろな「じょうほう」が つぎつぎに でてくるよ。<br>
+    だれが つたえたか はっきりしている、しんらいできる じょうほうだけ、「👍 これは ほんと！」ボタンで キャッチしよう。<br>
+    だれが 言ったか わからない、あやしい じょうほうは、なにも しないで やりすごそう。まちがえて キャッチすると すこし タイムを うしなうよ。<br>
+    せいげんじかんは 35びょう。できるだけ たかい スコアを ねらおう！</p>
+    <div id="bestInfo" class="panel" style="display:none;padding:.8em;margin-top:1em;"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnStart">スタート ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="resultOverlay" class="overlay hide">
+  <div class="panel">
+    <h1>🎯 けっか</h1>
+    <p>35びょうの スコア</p>
+    <div class="big" id="resultScore">0てん</div>
+    <p id="resultBestMsg"></p>
+    <p id="resultMisses"></p>
+    <div class="starList" id="starListEl"></div>
+    <div class="btnRow">
+      <button class="btn" id="btnRetry">もういちど ▶</button>
+      <a class="btn ghost" href="index.html">もどる</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+// ---------- アンロック判定 ----------
+const REQUIRE_SLUG = 'tsutae';
+const BADGE_KEY = 'elementgirl_badge_progress';
+function nsKey(base){
+  try { return (typeof profileNamespacedKey === 'function') ? profileNamespacedKey(base) : base; }
+  catch(e){ return base; }
+}
+function getBadgeProgress(){
+  try { return JSON.parse(localStorage.getItem(nsKey(BADGE_KEY)) || '{}'); }
+  catch(e){ return {}; }
+}
+function isUnlocked(){
+  const p = getBadgeProgress()[REQUIRE_SLUG];
+  return !!(p && p.total > 0 && p.count >= p.total);
+}
+
+// ---------- ベスト記録（スコア） ----------
+const BEST_KEY = 'hontokyacchi_best';
+function getBest(){
+  const v = localStorage.getItem(nsKey(BEST_KEY));
+  return v ? parseInt(v, 10) : null;
+}
+function setBest(n){
+  try { localStorage.setItem(nsKey(BEST_KEY), String(n)); } catch(e){}
+}
+
+// ---------- 音 ----------
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, delay, dur, type, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sTap = () => tone(700, 0, 0.08, 'triangle', 0.07);
+const sYes = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.5, 'triangle', 0.11));
+const sHmm = () => { tone(392, 0, 0.18, 'sine', 0.07); tone(349, 0.16, 0.3, 'sine', 0.07); };
+const sFanfare = () => [523, 587, 659, 784, 880, 1046, 1318, 1568].forEach((f, i) => tone(f, i * 0.08, 0.45, 'triangle', 0.1));
+
+// ---------- 情報カードのデータ（本編tsutae.html m_hantei：出どころが明記／不明で信頼度が変わる、をそのまま核概念に採用） ----------
+const CARDS = [
+  { key: 'city',    icon: '🏛️', label: '〇〇市やくばの はっぴょう',            reliable: true },
+  { key: 'school',  icon: '🏫', label: '学校からの おしらせ',                  reliable: true },
+  { key: 'tv',      icon: '📺', label: 'テレビの ニュース',                    reliable: true },
+  { key: 'paper',   icon: '📰', label: '新聞の きじ（きしゃの名前入り）',      reliable: true },
+  { key: 'sns',     icon: '💬', label: '名前の わからない 人の SNS',           reliable: false },
+  { key: 'uwasa',   icon: '🗣️', label: '「だれかが 言っていた」といううわさ',  reliable: false },
+  { key: 'matagiki',icon: '👂', label: '友だちからの また聞き',                reliable: false },
+  { key: 'fumei',   icon: '📩', label: '送り主 不明の メッセージ',             reliable: false },
+];
+
+// ---------- タイムアタック定数 ----------
+const TIME_LIMIT_MS = 35000;
+const CARD_MS = 1800;
+const PENALTY_MS = 800;
+
+// ---------- ゲーム状態 ----------
+const S = {
+  phase: 'title', // title | lock | playing | result
+  score: 0,
+  mistakes: 0,
+  current: null,
+  lastKey: null,
+  cardStartAt: 0,
+  resolved: false,
+  startTime: 0,
+};
+
+function pickCard(){
+  let card;
+  do { card = CARDS[Math.floor(Math.random() * CARDS.length)]; } while (card.key === S.lastKey);
+  S.lastKey = card.key;
+  return card;
+}
+
+// ---------- HUD ----------
+function updateHud() {
+  $('scoreChip').textContent = `スコア ${S.score}てん`;
+}
+function updateBestChip() {
+  const b = getBest();
+  $('bestChip').textContent = b ? `ベスト ${b}てん` : 'ベスト —';
+}
+
+// ---------- カード進行 ----------
+function nextCard(){
+  $('cardWrap').classList.remove('ok', 'ng');
+  S.current = pickCard();
+  S.cardStartAt = performance.now();
+  S.resolved = false;
+  $('cardIcon').textContent = S.current.icon;
+  $('cardLabel').textContent = S.current.label;
+}
+function resolveCard(caught){
+  if (S.resolved) return;
+  S.resolved = true;
+  const wrap = $('cardWrap');
+  if (S.current.reliable) {
+    if (caught) {
+      S.score++;
+      sYes();
+      wrap.classList.add('ok');
+    }
+    // 見逃し(caught=false)はペナルティなし・加点なし
+  } else {
+    if (caught) {
+      S.mistakes++;
+      sHmm();
+      wrap.classList.add('ng');
+      S.startTime -= PENALTY_MS;
+    } else {
+      S.score++;
+      wrap.classList.add('ok');
+    }
+  }
+  updateHud();
+}
+function onCatchTap(){
+  if (S.phase !== 'playing' || S.resolved) return;
+  ac();
+  sTap();
+  resolveCard(true);
+}
+$('catchBtn').addEventListener('click', onCatchTap);
+
+function startGame(){
+  S.score = 0;
+  S.mistakes = 0;
+  S.lastKey = null;
+  S.phase = 'playing';
+  S.startTime = performance.now();
+  updateHud();
+  $('introMsg').textContent = 'しんらいできる じょうほうだけ キャッチしよう！';
+  nextCard();
+}
+function onTimeUp(){
+  S.phase = 'result';
+  sFanfare();
+  const score = S.score;
+  const best = getBest();
+  const isNewBest = (best === null) || (score > best);
+  if (isNewBest) setBest(score);
+  updateBestChip();
+  $('resultScore').textContent = `${score}てん`;
+  $('resultBestMsg').textContent = isNewBest
+    ? '🎉 じぶんの ベストきろく こうしん！'
+    : `ベストきろく：${best}てん`;
+  $('resultMisses').textContent = `まちがえて キャッチした かいすう：${S.mistakes}かい`;
+  $('starListEl').innerHTML = `<span class="starChip">${score}てん とった</span>`;
+  showOverlay('resultOverlay');
+}
+
+// ---------- オーバーレイ ----------
+function showOverlay(id) { $(id).classList.remove('hide'); }
+function hideOverlay(id) { $(id).classList.add('hide'); }
+
+$('btnStart').addEventListener('click', () => {
+  ac();
+  hideOverlay('titleOverlay');
+  startGame();
+  updateBestChip();
+});
+$('btnRetry').addEventListener('click', () => {
+  hideOverlay('resultOverlay');
+  showOverlay('titleOverlay');
+  updateBestChip();
+});
+
+// ---------- 起動 ----------
+function boot() {
+  if (!isUnlocked()) {
+    S.phase = 'lock';
+    showOverlay('lockOverlay');
+    return;
+  }
+  showOverlay('titleOverlay');
+  updateBestChip();
+  const best = getBest();
+  if (best) {
+    $('bestInfo').style.display = 'block';
+    $('bestInfo').innerHTML = `<p>いまの ベストきろく：<b>${best}てん</b></p>`;
+  }
+}
+
+// ---------- カードの自動遷移（毎フレームチェック） ----------
+function updateCard(now){
+  if (S.phase !== 'playing' || !S.current || S.resolved) return;
+  if (now - S.cardStartAt > CARD_MS) {
+    resolveCard(false);
+    nextCard();
+  }
+}
+
+// ---------- ループ ----------
+function loop(now) {
+  if (S.phase === 'playing') {
+    updateCard(now);
+    const elapsed = now - S.startTime;
+    const remainMs = Math.max(0, TIME_LIMIT_MS - elapsed);
+    $('timeChip').textContent = (remainMs / 1000).toFixed(1) + 'びょう';
+    $('timeChip').classList.toggle('urgent', remainMs <= 8000);
+    if (remainMs <= 0) onTimeUp();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
